@@ -1,0 +1,6 @@
+{
+  "name": "Apex",
+  "description": "Plataforma premium de alquileres vacacionales con diseño minimalista, editorial y elegante.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
