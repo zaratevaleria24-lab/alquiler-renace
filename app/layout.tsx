@@ -1,30 +1,30 @@
 import type {Metadata} from 'next';
-import { Playfair_Display, Inter } from 'next/font/google';
+import { Fraunces, Jost } from 'next/font/google';
 import './globals.css'; // Global styles
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ['latin'],
   variable: '--font-serif',
   weight: ['500', '600', '700'],
   display: 'swap',
 });
 
-const inter = Inter({
+const jost = Jost({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['400', '500', '600'],
+  weight: ['300', '400', '500', '600'],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Apex | Premium Vacation Rentals',
-  description: 'Descubre los alquileres vacacionales más exclusivos con diseño minimalista y editorial.',
+  title: 'Margarita Renace | Alquiler de Apartamentos y Autos',
+  description: 'Alquila apartamentos y autos en Isla de Margarita. Reservas fáciles, propiedades verificadas y la mejor experiencia caribeña.',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="es" className={`${playfair.variable} ${inter.variable}`}>
-      <body className="bg-white text-[#1A1A1A] font-sans antialiased" suppressHydrationWarning>
+    <html lang="es" className={`${fraunces.variable} ${jost.variable}`}>
+      <body className="bg-white text-[#1A1A1A] font-sans font-light antialiased" suppressHydrationWarning>
         {children}
       </body>
     </html>

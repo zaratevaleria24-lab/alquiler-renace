@@ -1,6 +1,6 @@
 {
-  "name": "Apex",
-  "description": "Plataforma premium de alquileres vacacionales con diseño minimalista, editorial y elegante.",
+  "name": "Margarita Renace",
+  "description": "Plataforma de alquiler de apartamentos y autos en Isla de Margarita, Venezuela.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

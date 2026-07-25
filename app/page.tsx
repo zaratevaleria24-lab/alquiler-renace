@@ -29,7 +29,8 @@ import {
   Calendar,
   Users,
   MapPin,
-  Smile
+  Smile,
+  ShieldCheck
 } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,6 +42,7 @@ interface Property {
   location: string;
   priceText: string;
   pricePerNight: number;
+  priceOnRequest?: boolean;
   nightsCount: number;
   rating: number;
   categories: string[];
@@ -56,340 +58,350 @@ interface Property {
   guestsAllowed: { adults: number; children: number };
 }
 
-const AMENITIES_POOL = [
-  { icon: Waves, name: 'Infinite Pool' },
+const AMENITIES_LUJO = [
+  { icon: Waves, name: 'Piscina Infinita' },
   { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
-  { icon: Coffee, name: 'Desayuno de Autor' },
-  { icon: Flame, name: 'Chimenea / Calefacción' },
-  { icon: Wind, name: 'Aire Acondicionado' }
+  { icon: Wind, name: 'Aire Acondicionado' },
+  { icon: Sparkles, name: 'Jacuzzi Privado' },
+  { icon: Palmtree, name: 'Vista Panorámica al Mar' }
 ];
 
-const AMENITIES_CABIN = [
-  { icon: Flame, name: 'Chimenea de Leña' },
-  { icon: Wifi, name: 'Starlink Premium Wi-Fi' },
-  { icon: Trees, name: 'Vistas al Bosque' },
-  { icon: Coffee, name: 'Cafetera Espresso' },
-  { icon: Wind, name: 'Jacuzzi Exterior' }
+const AMENITIES_CENTRO = [
+  { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
+  { icon: Wind, name: 'Aire Acondicionado' },
+  { icon: Coffee, name: 'Cocina Equipada' },
+  { icon: Box, name: 'Estacionamiento Privado' },
+  { icon: Sparkles, name: 'TV Smart' }
 ];
 
-const AMENITIES_BEACH = [
-  { icon: Umbrella, name: 'Acceso Privado Playa' },
+const AMENITIES_LOS_GERANIOS = [
+  { icon: Wifi, name: 'Wi-Fi Constante' },
+  { icon: Wind, name: 'Aire Acondicionado' },
+  { icon: ShieldCheck, name: 'Seguridad 24/7' },
+  { icon: Waves, name: 'Piscina y Cancha Deportiva' },
+  { icon: Flame, name: 'Zona de Parrilla' },
+  { icon: Smile, name: 'Parque Infantil' },
+  { icon: Box, name: 'Estacionamiento Asignado' },
+  { icon: Coffee, name: 'Cocina Totalmente Equipada' }
+];
+
+const AMENITIES_PLAYA = [
+  { icon: Umbrella, name: 'Acceso Directo a Playa' },
   { icon: Wifi, name: 'Wi-Fi' },
   { icon: Wind, name: 'Aire Acondicionado' },
-  { icon: Coffee, name: 'Chef Privado (Opcional)' },
-  { icon: Sparkles, name: 'Terraza Panorámica' }
+  { icon: Waves, name: 'Piscina Compartida' },
+  { icon: Palmtree, name: 'Terraza Vista al Mar' }
 ];
 
 const PROPERTIES: Property[] = [
   {
     id: '1',
-    name: 'Flat in Benaulim',
-    location: 'Goa, India',
-    priceText: '₹4,800 for 2 nights',
-    pricePerNight: 2400,
+    name: 'Los Geranios A',
+    location: 'Urb. Maneiro, Pampatar, Margarita',
+    priceText: 'Consultar precio',
+    pricePerNight: 0,
+    priceOnRequest: true,
     nightsCount: 2,
-    rating: 4.8,
-    categories: ['Beach', 'Amazing Pools'],
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&h=600&q=80',
+    rating: 4.9,
+    categories: ['Centro', 'Familiar', 'Piscina'],
+    image: '/properties/los-geranios-a/habitacion-principal.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80'
+      '/properties/los-geranios-a/habitacion-principal.jpg'
     ],
-    description: 'Un refugio elegante a solo pasos de las arenas doradas de la playa de Benaulim, Goa. Este apartamento cuenta con un diseño arquitectónico con toques coloniales e indios, ideal para parejas y viajeros solitarios que buscan una estancia premium.',
+    description: 'Apartamento totalmente equipado en zona céntrica de Pampatar, a solo 5 minutos del C.C. Sambil. Cuenta con seguridad 24/7, piscina, cancha deportiva, zona de parrilla y parque infantil dentro de la urbanización. Ideal para familias: habitación principal con cama queen y baño privado, habitación secundaria con cama queen y gaveta adicional. Todo lo que necesitas cerca, en una de las zonas más cómodas de la isla.',
     host: {
-      name: 'Aditi Sharma',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Superhost apasionada por el arte indio'
+      name: 'Margarita Renace',
+      avatar: '/logo.png',
+      tagline: 'Anfitrión verificado · Los Geranios'
     },
-    amenities: AMENITIES_BEACH,
-    guestsAllowed: { adults: 2, children: 1 }
+    amenities: AMENITIES_LOS_GERANIOS,
+    guestsAllowed: { adults: 6, children: 0 }
   },
   {
     id: '2',
-    name: 'The Glass Cabin',
-    location: 'Kodaikanal, India',
-    priceText: '₹12,500 for 1 night',
-    pricePerNight: 12500,
+    name: 'Suite Frente al Mar Pampatar',
+    location: 'Pampatar, Margarita',
+    priceText: 'US$78 / noche',
+    pricePerNight: 78,
     nightsCount: 1,
     rating: 4.9,
-    categories: ['Cabins', 'National Parks'],
+    categories: ['Frente al Mar', 'Vista al Mar'],
     image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Disfruta de la niebla matutina de la montaña desde este santuario de madera y vidrio templado. Totalmente autosustentable, sumergido en un bosque de pinos centenarios en Kodaikanal. Una vista de 360 grados de la naturaleza.',
+    description: 'Suite moderna con balcón frente a la bahía de Pampatar y su histórico castillo San Carlos de Borromeo. Vistas espectaculares al atardecer, a pasos del malecón, tiendas y la mejor gastronomía de la isla.',
     host: {
-      name: 'Vikram Iyer',
+      name: 'José Rodríguez',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Arquitecto y promotor del ecoturismo'
+      tagline: 'Especialista en turismo en Margarita'
     },
-    amenities: AMENITIES_CABIN,
+    amenities: AMENITIES_LUJO,
     guestsAllowed: { adults: 4, children: 2 }
   },
   {
     id: '3',
-    name: 'Amarta Cliffside Suite',
-    location: 'Uluwatu, Bali',
-    priceText: '₹24,000 for 3 nights',
-    pricePerNight: 8000,
+    name: 'Penthouse Porlamar Centro',
+    location: 'Porlamar, Margarita',
+    priceText: 'US$95 / noche',
+    pricePerNight: 95,
     nightsCount: 3,
     rating: 4.95,
-    categories: ['Amazing Pools', 'Islands', 'Beach'],
+    categories: ['Centro', 'Lujo'],
     image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Colgada literalmente de los acantilados de Uluwatu, esta villa ofrece una piscina infinity infinita con vistas de ensueño al Océano Índico. Un lujo descalzo y minimalista para reconectar con el mar.',
+    description: 'Amplio penthouse de lujo en el corazón de Porlamar, cerca de los centros comerciales y las zonas comerciales libres de impuestos. Piscina en la azotea con vista de 360° a la ciudad y al mar Caribe.',
     host: {
-      name: 'Ketut Wijaya',
+      name: 'María Fernández',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Bailarín y anfitrión balinés tradicional'
+      tagline: 'Anfitriona premium en Porlamar'
     },
-    amenities: AMENITIES_POOL,
-    guestsAllowed: { adults: 2, children: 0 }
+    amenities: AMENITIES_LUJO,
+    guestsAllowed: { adults: 4, children: 2 }
   },
   {
     id: '4',
-    name: 'Villa di Vetro, Como',
-    location: 'Lake Como, Italy',
-    priceText: '₹36,000 for 2 nights',
-    pricePerNight: 18000,
+    name: 'Apartamento Costa Azul',
+    location: 'Costa Azul, Margarita',
+    priceText: 'US$62 / noche',
+    pricePerNight: 62,
     nightsCount: 2,
-    rating: 4.92,
-    categories: ['Lakefront', 'Amazing Pools'],
+    rating: 4.85,
+    categories: ['Piscina', 'Familiar'],
     image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Fusión de la elegancia neoclásica italiana con el minimalismo moderno. Villa di Vetro cuenta con paredes de yeso pulido y amplios ventanales orientados al lago de Como, muelle privado y una piscina de diseño excepcional.',
+    description: 'Apartamento familiar en el exclusivo sector Costa Azul, con conjunto cerrado, piscina y áreas verdes. A minutos de los mejores hoteles, restaurantes y de la playa. Perfecto para vacaciones en familia con total tranquilidad.',
     host: {
-      name: 'Francesca Rossi',
+      name: 'Luis González',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Diseñadora de modas y apasionada del lago Como'
+      tagline: 'Atención personalizada para familias'
     },
-    amenities: AMENITIES_POOL,
+    amenities: AMENITIES_PLAYA,
     guestsAllowed: { adults: 6, children: 3 }
   },
   {
     id: '5',
-    name: 'Luxury Wadi Rum Dome',
-    location: 'Wadi Rum, Jordan',
-    priceText: '₹18,200 for 1 night',
-    pricePerNight: 18200,
+    name: 'Studio Playa Parguito',
+    location: 'Playa Parguito, Margarita',
+    priceText: 'US$38 / noche',
+    pricePerNight: 38,
     nightsCount: 1,
-    rating: 4.88,
-    categories: ['Camping', 'National Parks'],
+    rating: 4.7,
+    categories: ['Playa', 'Económico'],
     image: 'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Una experiencia de glamping de lujo en el majestuoso desierto de Wadi Rum. Estructuras geodésicas totalmente climatizadas con ventanales de cristal panorámicos para observar las constelaciones. Servicio de té tradicional beduino incluido.',
+    description: 'Estudio acogedor y económico cerca de Playa Parguito, la favorita de los surfistas por su oleaje. Ideal para viajeros jóvenes y parejas que buscan sol, olas y buen ambiente sin gastar de más.',
     host: {
-      name: 'Sami Al-Bedouin',
+      name: 'Andrea Salazar',
       avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Guía beduino certificado y astrónomo'
+      tagline: 'Anfitriona surfer y amante del mar'
     },
-    amenities: AMENITIES_CABIN,
-    guestsAllowed: { adults: 2, children: 2 }
+    amenities: AMENITIES_PLAYA,
+    guestsAllowed: { adults: 2, children: 0 }
   },
   {
     id: '6',
-    name: 'Cabin in Lofoten Islands',
-    location: 'Lofoten, Norway',
-    priceText: '₹14,500 for 2 nights',
-    pricePerNight: 7250,
+    name: 'Villa Playa Caribe',
+    location: 'Playa Caribe, Margarita',
+    priceText: 'US$155 / noche',
+    pricePerNight: 155,
     nightsCount: 2,
-    rating: 4.86,
-    categories: ['Tiny Homes', 'Islands', 'Lakefront'],
+    rating: 4.92,
+    categories: ['Frente al Mar', 'Piscina', 'Lujo'],
     image: 'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Refugio de pescadores reconvertido en santuario minimalista de madera de abeto. Situado a orillas de los fiordos árticos en Lofoten. Ideal para avistar la Aurora Boreal a través de su claraboya de cristal.',
+    description: 'Villa de lujo con piscina privada frente a Playa Caribe, en el norte de la isla. Amplios espacios, terraza con parrillera y acceso directo a una de las playas más limpias de Margarita. Perfecta para grupos grandes.',
     host: {
-      name: 'Lars Thoresen',
+      name: 'Roberto Villarroel',
       avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Pescador local e historiador'
+      tagline: 'Villas exclusivas frente al mar'
     },
-    amenities: AMENITIES_CABIN,
-    guestsAllowed: { adults: 2, children: 1 }
+    amenities: AMENITIES_LUJO,
+    guestsAllowed: { adults: 8, children: 4 }
   },
   {
     id: '7',
-    name: 'Bamboo Sanctuary Ubud',
-    location: 'Ubud, Bali',
-    priceText: '₹9,800 for 2 nights',
-    pricePerNight: 4900,
+    name: 'Apartamento Juan Griego',
+    location: 'Juan Griego, Margarita',
+    priceText: 'US$52 / noche',
+    pricePerNight: 52,
     nightsCount: 2,
-    rating: 4.79,
-    categories: ['Cabins', 'Islands'],
+    rating: 4.8,
+    categories: ['Vista al Mar', 'Familiar'],
     image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Increíble obra maestra de bambú levantada a mano sobre la selva tropical de Ubud. Vive una inmersión natural total sintiendo la suave brisa del monzón. Duchas exteriores de piedra de río.',
+    description: 'Apartamento con vista a la bahía de Juan Griego, famosa por tener los atardeceres más hermosos de Margarita. Ambiente tranquilo de pueblo pesquero, cerca del Fortín La Galera y ricos restaurantes de mariscos.',
     host: {
-      name: 'Wayan Sastra',
+      name: 'Gabriela Rojas',
       avatar: 'https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Artesano de bambú sustentable'
+      tagline: 'Enamorada de los atardeceres de Juan Griego'
     },
-    amenities: AMENITIES_BEACH,
-    guestsAllowed: { adults: 2, children: 0 }
+    amenities: AMENITIES_CENTRO,
+    guestsAllowed: { adults: 4, children: 2 }
   },
   {
     id: '8',
-    name: 'Malibu Beachfront Studio',
-    location: 'Malibu, USA',
-    priceText: '₹45,000 for 3 nights',
-    pricePerNight: 15000,
+    name: 'Loft Playa El Yaque',
+    location: 'Playa El Yaque, Margarita',
+    priceText: 'US$42 / noche',
+    pricePerNight: 42,
     nightsCount: 3,
-    rating: 4.97,
-    categories: ['Beach', 'Tiny Homes'],
+    rating: 4.75,
+    categories: ['Playa', 'Económico'],
     image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Un estudio de acero y cristal templado sobre la misma arena de la playa privada de Malibú. Diseñado por un famoso arquitecto minimalista californiano, destaca por su luminosidad infinita y vistas exclusivas.',
+    description: 'Loft ideal para amantes del kitesurf y windsurf, a pasos de Playa El Yaque, reconocida a nivel mundial por sus vientos. Ambiente internacional, relajado y con la mejor energía de la isla.',
     host: {
-      name: 'Sarah Jenkins',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Curadora de galerías de arte en Los Ángeles'
+      name: 'Daniel Millán',
+      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80',
+      tagline: 'Instructor de kitesurf y anfitrión'
     },
-    amenities: AMENITIES_BEACH,
+    amenities: AMENITIES_PLAYA,
     guestsAllowed: { adults: 2, children: 1 }
   },
   {
     id: '9',
-    name: 'Mirage Cabin Joshua Tree',
-    location: 'Joshua Tree, USA',
-    priceText: '₹22,000 for 1 night',
-    pricePerNight: 22000,
+    name: 'Apartamento Playa Guacuco',
+    location: 'Playa Guacuco, Margarita',
+    priceText: 'US$66 / noche',
+    pricePerNight: 66,
     nightsCount: 1,
-    rating: 4.91,
-    categories: ['National Parks', 'Tiny Homes'],
+    rating: 4.88,
+    categories: ['Playa', 'Familiar'],
     image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Un milagro visual revestido con espejos que reflejan el desierto eterno de Joshua Tree. Se funde perfectamente con el entorno de rocas rojas y cactus sagrados.',
+    description: 'Apartamento cómodo y familiar cerca de Playa Guacuco, una amplia playa de aguas tranquilas ideal para niños. Rodeado de naturaleza, con fácil acceso en carro y a minutos de La Asunción, la capital de la isla.',
     host: {
-      name: 'David Carter',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Fotógrafo documental de paisajes'
+      name: 'Patricia Guerra',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
+      tagline: 'Anfitriona familiar y atenta'
     },
-    amenities: AMENITIES_CABIN,
-    guestsAllowed: { adults: 2, children: 0 }
+    amenities: AMENITIES_PLAYA,
+    guestsAllowed: { adults: 5, children: 2 }
   },
   {
     id: '10',
-    name: 'Zermatt Peak Loft',
-    location: 'Zermatt, Switzerland',
-    priceText: '₹52,000 for 2 nights',
-    pricePerNight: 26000,
+    name: 'Suite Manzanillo',
+    location: 'Manzanillo, Margarita',
+    priceText: 'US$120 / noche',
+    pricePerNight: 120,
     nightsCount: 2,
-    rating: 4.98,
-    categories: ['Cabins', 'National Parks'],
-    image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
-    gallery: [
-      'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80'
-    ],
-    description: 'Ubicado a las faldas del monte Cervino (Matterhorn), este lujoso ático fusiona la madera rústica alpina con los acabados más modernos del diseño contemporáneo suizo.',
-    host: {
-      name: 'Beatrix Gruber',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Ex-esquiadora profesional alpina'
-    },
-    amenities: AMENITIES_CABIN,
-    guestsAllowed: { adults: 4, children: 2 }
-  },
-  {
-    id: '11',
-    name: 'Oia Plaster Cave Suite',
-    location: 'Santorini, Greece',
-    priceText: '₹29,500 for 2 nights',
-    pricePerNight: 14750,
-    nightsCount: 2,
-    rating: 4.94,
-    categories: ['Islands', 'Amazing Pools'],
+    rating: 4.97,
+    categories: ['Vista al Mar', 'Lujo'],
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'Esculpida directamente sobre el imponente acantilado volcánico de Oia, esta cueva tradicional griega es hoy un lujoso apartamento que cuenta con piscina privada templada y vistas absolutas al Mar Egeo.',
+    description: 'Suite de lujo en el tranquilo pueblo de Manzanillo, al norte de la isla, con vistas de postal al mar Caribe. Terraza privada, acabados premium y la paz de una de las zonas más auténticas de Margarita.',
     host: {
-      name: 'Helena Sgouris',
+      name: 'Alejandra Marín',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Chef especializada en cocina tradicional griega'
+      tagline: 'Anfitriona de estadías premium'
     },
-    amenities: AMENITIES_POOL,
-    guestsAllowed: { adults: 2, children: 1 }
+    amenities: AMENITIES_LUJO,
+    guestsAllowed: { adults: 4, children: 2 }
+  },
+  {
+    id: '11',
+    name: 'Apartamento Marina Pampatar',
+    location: 'Pampatar, Margarita',
+    priceText: 'US$84 / noche',
+    pricePerNight: 84,
+    nightsCount: 2,
+    rating: 4.9,
+    categories: ['Frente al Mar', 'Piscina'],
+    image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80'
+    ],
+    description: 'Moderno apartamento en la zona de la marina de Pampatar, con piscina y vista a los yates. Excelente ubicación para disfrutar de la vida nocturna, restaurantes frente al mar y paseos en bote.',
+    host: {
+      name: 'Héctor Bermúdez',
+      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
+      tagline: 'Anfitrión cerca de la marina'
+    },
+    amenities: AMENITIES_LUJO,
+    guestsAllowed: { adults: 4, children: 1 }
   },
   {
     id: '12',
-    name: 'Eco-Glamp Patagonia',
-    location: 'Patagonia, Chile',
-    priceText: '₹16,800 for 2 nights',
-    pricePerNight: 8400,
+    name: 'Studio Centro Porlamar',
+    location: 'Porlamar, Margarita',
+    priceText: 'US$32 / noche',
+    pricePerNight: 32,
     nightsCount: 2,
-    rating: 4.87,
-    categories: ['Camping', 'National Parks'],
+    rating: 4.6,
+    categories: ['Centro', 'Económico'],
     image: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
     gallery: [
       'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
       'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
     ],
-    description: 'En el corazón de Torres del Paine se ubica este domo ecológico premium de alta montaña. Ofrece protección contra el viento extremo patagónico mientras descansas bajo las estrellas australes en un lujo absoluto.',
+    description: 'Estudio funcional y económico en pleno centro de Porlamar, ideal para viajes de compras o negocios. A pasos de tiendas, bancos y transporte. La opción más práctica para conocer la isla con un presupuesto ajustado.',
     host: {
-      name: 'Manuel Oyarzo',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
-      tagline: 'Guía de senderismo experto en glaciares'
+      name: 'Yolanda Ortega',
+      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
+      tagline: 'Anfitriona práctica en el centro'
     },
-    amenities: AMENITIES_CABIN,
+    amenities: AMENITIES_CENTRO,
     guestsAllowed: { adults: 2, children: 0 }
   }
 ];
 
 // === CATEGORIES METADATA ===
 const CATEGORIES = [
-  { id: 'All', label: 'All', icon: Compass },
-  { id: 'Lakefront', label: 'Lakefront', icon: Waves },
-  { id: 'National Parks', label: 'National Parks', icon: Trees },
-  { id: 'Cabins', label: 'Cabins', icon: HomeIcon },
-  { id: 'Islands', label: 'Islands', icon: Palmtree },
-  { id: 'Beach', label: 'Beach', icon: Umbrella },
-  { id: 'Tiny Homes', label: 'Tiny Homes', icon: Box },
-  { id: 'Camping', label: 'Camping', icon: Tent },
-  { id: 'Amazing Pools', label: 'Amazing Pools', icon: Sparkles }
+  { id: 'Todos', label: 'Todos', icon: Compass },
+  { id: 'Frente al Mar', label: 'Frente al Mar', icon: Waves },
+  { id: 'Playa', label: 'Playa', icon: Umbrella },
+  { id: 'Piscina', label: 'Piscina', icon: Sparkles },
+  { id: 'Vista al Mar', label: 'Vista al Mar', icon: Palmtree },
+  { id: 'Centro', label: 'Centro', icon: HomeIcon },
+  { id: 'Familiar', label: 'Familiar', icon: Users },
+  { id: 'Lujo', label: 'Lujo', icon: Star },
+  { id: 'Económico', label: 'Económico', icon: Box }
 ];
 
 export default function Home() {
   // Navigation active links
-  const [activeNavLink, setActiveNavLink] = useState('Home');
+  const [activeNavLink, setActiveNavLink] = useState('Inicio');
 
   // Interactive categories navigation state
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
 
   // Search Engine States
@@ -404,7 +416,7 @@ export default function Home() {
 
   // Filter sidebar states
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterMaxPrice, setFilterMaxPrice] = useState(60000);
+  const [filterMaxPrice, setFilterMaxPrice] = useState(200);
   const [filterMinRating, setFilterMinRating] = useState(4.5);
 
   // Selected property for detail view (Sidebar Drawer)
@@ -439,7 +451,7 @@ export default function Home() {
     let result = PROPERTIES;
 
     // Filter by Category
-    if (selectedCategory !== 'All') {
+    if (selectedCategory !== 'Todos') {
       result = result.filter(p => p.categories.includes(selectedCategory));
     }
 
@@ -456,7 +468,7 @@ export default function Home() {
     }
 
     // Filter by Sidebar filters (Price & Rating)
-    result = result.filter(p => p.pricePerNight <= filterMaxPrice && p.rating >= filterMinRating);
+    result = result.filter(p => (p.priceOnRequest || p.pricePerNight <= filterMaxPrice) && p.rating >= filterMinRating);
 
     return result;
   };
@@ -485,38 +497,35 @@ export default function Home() {
     setSearchCheckIn('');
     setSearchCheckOut('');
     setGuestCount({ adults: 1, children: 0, infants: 0 });
-    setSelectedCategory('All');
-    setFilterMaxPrice(60000);
+    setSelectedCategory('Todos');
+    setFilterMaxPrice(200);
     setFilterMinRating(4.5);
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#1A1A1A] pb-24 relative overflow-x-hidden">
-      
+    <div className="min-h-screen bg-white text-[#1A1A1A] pb-24 relative overflow-x-hidden">
+
       {/* 1. NAVBAR (Fija Arriba) */}
       <nav id="navbar-floating" className="fixed top-0 left-0 right-0 z-40 px-4 pt-4 md:px-8 md:pt-6">
-        <div className="bg-[#1A1A1A] text-white rounded-[20px] px-5 py-3 md:px-8 md:py-3.5 shadow-lg max-w-7xl mx-auto flex items-center justify-between border border-white/10 backdrop-blur-md">
-          
+        <div className="bg-[#007380] text-white rounded-[20px] px-5 py-3 md:px-8 md:py-3.5 shadow-[0_8px_32px_rgba(0,115,128,0.25)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
+
           {/* Izquierda: Logo + Nombre */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={handleResetSearch}>
-            <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center p-1.5 shadow-sm">
-              {/* Geometic Mountain Logo */}
-              <svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2.5" className="w-full h-full">
-                <path d="M3 20L10 6L14 13L17 9L21 20H3Z" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-white/90 flex items-center justify-center p-1.5 shadow-[0_2px_10px_rgba(89,204,204,0.4)]">
+              <img src="/logo.png" alt="Margarita Renace" className="w-full h-full object-contain" />
             </div>
-            <span className="font-serif text-lg md:text-xl font-semibold tracking-wide text-white">Apex</span>
+            <span className="font-serif text-base md:text-lg font-semibold tracking-wide text-white leading-none">Margarita<span className="text-[#59CCCC]"> Renace</span></span>
           </div>
 
           {/* Centro: Links de Navegación */}
-          <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/5">
-            {['Home', 'Experiences', 'Services'].map((link) => (
+          <div className="hidden md:flex items-center gap-1 bg-white/10 rounded-full p-1 border border-white/10">
+            {['Inicio', 'Apartamentos', 'Autos'].map((link) => (
               <button
                 key={link}
                 onClick={() => setActiveNavLink(link)}
                 className={`px-5 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all ${
-                  activeNavLink === link 
-                    ? 'bg-[#333333] text-white shadow-sm' 
+                  activeNavLink === link
+                    ? 'bg-white text-[#007380] shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
                     : 'text-gray-300 hover:text-white hover:bg-white/5'
                 }`}
               >
@@ -528,17 +537,17 @@ export default function Home() {
           {/* Derecha: Become a Host + Íconos */}
           <div className="flex items-center gap-2 md:gap-4">
             <span className="hidden lg:inline text-xs font-medium text-gray-200 tracking-wide hover:text-white transition-colors cursor-pointer">
-              Become a Host
+              Publica tu Propiedad
             </span>
-            
-            <button 
+
+            <button
               aria-label="Seleccionar idioma"
               className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer"
             >
               <Globe className="w-4 h-4" />
             </button>
 
-            <button 
+            <button
               aria-label="Menú de navegación"
               className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer"
             >
@@ -550,36 +559,48 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
         
-        {/* 2. HERO (Framed inside an elegant editorial passe-partout block) */}
-        <div id="hero-frame" className="bg-white border border-[#E2DDD5] p-3 md:p-4 rounded-[32px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] mb-12 relative">
-          <section id="hero-banner" className="relative w-full rounded-[20px] overflow-hidden" style={{ height: '420px' }}>
-            {/* Hero background image */}
-            <img 
-              src="https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?auto=format&fit=crop&w=1600&h=900&q=80" 
-              alt="Interior premium con arco arquitectónico" 
+        {/* 2. HERO a pantalla completa, de borde a borde */}
+        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-20">
+          <section id="hero-banner" className="relative w-full overflow-hidden" style={{ height: '580px' }}>
+            {/* Hero background image: playa de Margarita */}
+            <img
+              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&h=900&q=80"
+              alt="Playa paradisíaca del Caribe en Isla de Margarita"
               className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-[1.03]"
               referrerPolicy="no-referrer"
             />
-            {/* Overlay oscuro con 45% de opacidad */}
-            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center px-4">
-              <motion.p 
+            {/* Overlay con degradado color Caribe */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#007380]/50 via-[#21BBBB]/30 to-[#007380]/60 flex flex-col items-center justify-center text-center px-4">
+              <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="text-xs md:text-sm font-medium tracking-[0.25em] uppercase text-white/95 mb-3"
               >
-                Find Your Dream Place
+                Isla de Margarita · Venezuela
               </motion.p>
-              <motion.h1 
+              <motion.h1
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-serif text-4xl md:text-[56px] text-white font-light leading-tight max-w-2xl mb-4 tracking-tight"
+                className="font-serif text-4xl md:text-[56px] text-white font-light leading-tight max-w-2xl mb-4 tracking-tight drop-shadow-lg"
               >
-                For Better Experience
+                Vive la Isla como en Casa
               </motion.h1>
-              <div className="w-12 h-[1px] bg-white/35 my-2"></div>
+              <p className="text-white/90 text-sm md:text-base font-light max-w-md mb-2">Apartamentos y autos para tus vacaciones en el Caribe</p>
+              <div className="w-12 h-[2px] bg-[#59CCCC] my-2 rounded-full"></div>
             </div>
+
+            {/* Curva blanca de transición hacia el contenido */}
+            <svg
+              className="absolute bottom-0 left-0 w-full h-[90px] md:h-[130px]"
+              viewBox="0 0 1440 130"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <path d="M0,85 C480,20 960,20 1440,95 L1440,130 L0,130 Z" fill="white" fillOpacity="0.45" />
+              <path d="M0,105 C480,45 960,45 1440,115 L1440,130 L0,130 Z" fill="white" />
+            </svg>
           </section>
 
           {/* SEARCH BAR Flotante sobre el borde inferior */}
@@ -588,80 +609,80 @@ export default function Home() {
               
               {/* Dropdown "All" a la izquierda en tab blanco separado */}
               <div className="self-start">
-                <button 
+                <button
                   onClick={() => handleResetSearch()}
-                  className="bg-white text-[#1A1A1A] text-xs font-semibold px-5 py-2 rounded-full shadow-md flex items-center gap-1.5 border border-[#E8E8E8] hover:bg-[#FAFAF8] transition-all"
+                  className="bg-white text-[#007380] text-xs font-semibold px-5 py-2 rounded-full shadow-md flex items-center gap-1.5 border border-[#E6D7C2] hover:bg-[#FFF7EC] transition-all"
                 >
                   <Compass className="w-3.5 h-3.5" />
-                  <span>All Places</span>
+                  <span>Ver Todo</span>
                 </button>
               </div>
 
-              {/* Barra blanca píldora */}
-              <div className="bg-white rounded-full p-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-[#E2DDD5] flex flex-wrap md:flex-nowrap items-center justify-between w-full">
-                
+              {/* Barra vidrio esmerilado píldora */}
+              <div className="bg-white rounded-full p-2.5 shadow-[0_8px_32px_rgba(0,115,128,0.14)] border border-[#E6D7C2] flex flex-wrap md:flex-nowrap items-center justify-between w-full">
+
                 {/* 1. Where */}
-                <div 
+                <div
                   onClick={() => setActivePopover(activePopover === 'where' ? null : 'where')}
                   className={`flex-1 min-w-[120px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'where' ? 'bg-[#FAF8F5]' : 'hover:bg-[#FAF8F5]'
+                    activePopover === 'where' ? 'bg-white/70' : 'hover:bg-white/50'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Where</label>
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={searchWhere || 'Search destinations'}
+                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Dónde</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={searchWhere || 'Buscar destino'}
                     className={`bg-transparent text-xs text-[#6B6B6B] border-none outline-none w-full cursor-pointer font-medium p-0 leading-tight ${
                       searchWhere ? 'text-[#1A1A1A]' : 'text-[#6B6B6B]'
                     }`}
                   />
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E2DDD5]" />
+                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
 
                 {/* 2. Check In */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
                   className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'dates' ? 'bg-[#FAF8F5]' : 'hover:bg-[#FAF8F5]'
+                    activePopover === 'dates' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
                   }`}
                 >
                   <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Check In</label>
                   <span className="text-xs text-[#6B6B6B] font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
-                    {searchCheckIn || 'Add date'}
+                    {searchCheckIn || 'Agregar fecha'}
                   </span>
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E2DDD5]" />
+                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
 
                 {/* 3. Check Out */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
                   className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'dates' ? 'bg-[#FAF8F5]' : 'hover:bg-[#FAF8F5]'
+                    activePopover === 'dates' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
                   }`}
                 >
                   <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Check Out</label>
                   <span className="text-xs text-[#6B6B6B] font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
-                    {searchCheckOut || 'Add date'}
+                    {searchCheckOut || 'Agregar fecha'}
                   </span>
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E2DDD5]" />
+                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
 
                 {/* 4. Who */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'guests' ? null : 'guests')}
                   className={`flex-1 min-w-[120px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'guests' ? 'bg-[#FAF8F5]' : 'hover:bg-[#FAF8F5]'
+                    activePopover === 'guests' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Who</label>
+                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Quién</label>
                   <span className="text-xs text-[#1A1A1A] font-semibold block leading-tight">
-                    {guestCount.adults + guestCount.children + guestCount.infants > 0 
-                      ? `${guestCount.adults + guestCount.children} guests` 
-                      : 'Add guests'}
+                    {guestCount.adults + guestCount.children + guestCount.infants > 0
+                      ? `${guestCount.adults + guestCount.children} huéspedes`
+                      : 'Agregar huéspedes'}
                   </span>
                 </div>
 
@@ -669,7 +690,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleSearch()}
                   aria-label="Buscar propiedades"
-                  className="w-11 h-11 rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center transition-all shadow-md ml-2 cursor-pointer shrink-0"
+                  className="w-11 h-11 rounded-full bg-[#007380] hover:bg-[#005c66] text-white flex items-center justify-center transition-all shadow-md ml-2 cursor-pointer shrink-0"
                 >
                   <Search className="w-5 h-5" />
                 </button>
@@ -682,7 +703,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 md:left-4 md:right-auto md:w-96 mt-2 bg-white rounded-2xl border border-[#E2DDD5] shadow-2xl p-5 z-50 text-[#1A1A1A]"
+                    className="absolute top-full left-0 right-0 md:left-4 md:right-auto md:w-96 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50 text-[#1A1A1A]"
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Destinos Exclusivos</h4>
@@ -696,7 +717,7 @@ export default function Home() {
                             setSearchWhere(dest);
                             setActivePopover('dates'); // auto transition
                           }}
-                          className="flex items-center gap-2 p-2.5 rounded-xl border border-[#E2DDD5]/40 hover:border-[#1A1A1A] hover:bg-[#FAF8F5] text-left transition-all text-xs font-medium text-gray-700 hover:text-black"
+                          className="flex items-center gap-2 p-2.5 rounded-xl border border-[#E6D7C2]/40 hover:border-[#1A1A1A] hover:bg-[#FFF7EC] text-left transition-all text-xs font-medium text-gray-700 hover:text-black"
                         >
                           <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
                           <span className="truncate">{dest}</span>
@@ -711,7 +732,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 md:left-48 md:right-auto md:w-80 mt-2 bg-white rounded-2xl border border-[#E2DDD5] shadow-2xl p-5 z-50"
+                    className="absolute top-full left-0 right-0 md:left-48 md:right-auto md:w-80 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50"
                   >
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Fechas de Estadía</h4>
@@ -733,7 +754,7 @@ export default function Home() {
                               className={`py-1 px-2 text-xs rounded-lg border text-center font-medium transition-all ${
                                 searchCheckIn.startsWith(d)
                                   ? 'bg-[#1A1A1A] text-white border-black'
-                                  : 'border-[#E2DDD5]/40 text-gray-600 hover:border-gray-400'
+                                  : 'border-[#E6D7C2]/40 text-gray-600 hover:border-gray-400'
                               }`}
                             >
                               {d}
@@ -756,7 +777,7 @@ export default function Home() {
                               className={`py-1 px-2 text-xs rounded-lg border text-center font-medium transition-all ${
                                 searchCheckOut.startsWith(d)
                                   ? 'bg-[#1A1A1A] text-white border-black'
-                                  : 'border-[#E2DDD5]/40 text-gray-600 hover:border-gray-400'
+                                  : 'border-[#E6D7C2]/40 text-gray-600 hover:border-gray-400'
                               }`}
                             >
                               {d}
@@ -773,7 +794,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full right-0 left-0 md:left-auto md:right-4 md:w-80 mt-2 bg-white rounded-2xl border border-[#E2DDD5] shadow-2xl p-5 z-50 text-[#1A1A1A]"
+                    className="absolute top-full right-0 left-0 md:left-auto md:right-4 md:w-80 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50 text-[#1A1A1A]"
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Número de Huéspedes</h4>
@@ -790,14 +811,14 @@ export default function Home() {
                           <button 
                             disabled={guestCount.adults <= 1}
                             onClick={() => setGuestCount({ ...guestCount, adults: guestCount.adults - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
                           >
                             -
                           </button>
                           <span className="text-xs font-bold w-4 text-center">{guestCount.adults}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, adults: guestCount.adults + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
                           >
                             +
                           </button>
@@ -814,14 +835,14 @@ export default function Home() {
                           <button 
                             disabled={guestCount.children <= 0}
                             onClick={() => setGuestCount({ ...guestCount, children: guestCount.children - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
                           >
                             -
                           </button>
                           <span className="text-xs font-bold w-4 text-center">{guestCount.children}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, children: guestCount.children + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
                           >
                             +
                           </button>
@@ -838,14 +859,14 @@ export default function Home() {
                           <button 
                             disabled={guestCount.infants <= 0}
                             onClick={() => setGuestCount({ ...guestCount, infants: guestCount.infants - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
                           >
                             -
                           </button>
                           <span className="text-xs font-bold w-4 text-center">{guestCount.infants}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, infants: guestCount.infants + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E2DDD5] flex items-center justify-center text-xs font-bold hover:bg-[#FAF8F5]"
+                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
                           >
                             +
                           </button>
@@ -854,7 +875,7 @@ export default function Home() {
 
                       <button
                         onClick={() => handleSearch()}
-                        className="w-full bg-[#1A1A1A] hover:bg-black text-white py-2 rounded-full text-xs font-medium tracking-wide mt-2"
+                        className="w-full bg-[#007380] hover:bg-[#005c66] text-white py-2 rounded-full text-xs font-medium tracking-wide mt-2"
                       >
                         Confirmar Huéspedes
                       </button>
@@ -868,7 +889,7 @@ export default function Home() {
         </div>
 
         {/* 3. BARRA DE CATEGORÍAS */}
-        <section id="categories-navigation" className="mt-16 mb-12 flex items-center justify-between gap-4 border-b border-[#E2DDD5] pb-4">
+        <section id="categories-navigation" className="mt-16 mb-12 flex items-center justify-between gap-4 border-b border-[#E6D7C2] pb-4">
           <div className="flex items-center gap-2 flex-1 overflow-hidden">
             
             {/* Scrollable Container */}
@@ -888,9 +909,9 @@ export default function Home() {
                       setSearchWhere('');
                     }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all shrink-0 focus:outline-none border text-xs font-semibold tracking-wide ${
-                      isActive 
-                        ? 'text-white bg-[#1A1A1A] border-transparent shadow-[0_2px_8px_rgba(0,0,0,0.08)]' 
-                        : 'text-[#6B6B6B] hover:text-[#1A1A1A] border-[#E2DDD5]/60 hover:border-[#1A1A1A] bg-white/60'
+                      isActive
+                        ? 'text-white bg-[#007380] border-transparent shadow-[0_2px_8px_rgba(0,115,128,0.25)]'
+                        : 'text-[#6B6B6B] hover:text-[#1A1A1A] border-[#E6D7C2]/60 hover:border-[#007380] bg-white/60'
                     }`}
                   >
                     <IconComponent className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'stroke-[1.6]'}`} />
@@ -906,18 +927,18 @@ export default function Home() {
             <button 
               onClick={scrollCategories}
               aria-label="Siguiente categoría"
-              className="w-9 h-9 rounded-full border border-[#E2DDD5] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FAF8F5] transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
 
-            {/* Botón "Filters" píldora negra con ícono */}
-            <button 
+            {/* Botón "Filters" píldora con gradiente turquesa */}
+            <button
               onClick={() => setIsFilterOpen(true)}
-              className="bg-[#1A1A1A] hover:bg-black text-white text-xs font-semibold px-5 py-2.5 rounded-full flex items-center gap-2 shadow-sm transition-all cursor-pointer border border-transparent"
+              className="bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold px-5 py-2.5 rounded-full flex items-center gap-2 shadow-[0_4px_16px_rgba(33,187,187,0.3)] transition-all cursor-pointer border border-transparent"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Filters</span>
+              <span>Filtros</span>
             </button>
           </div>
         </section>
@@ -927,9 +948,9 @@ export default function Home() {
           {selectedCategory === 'All' && !searchWhere.trim() ? (
             // DISPLAY ALL 3 CURATED SECTIONS
             <>
-              {/* Section 1: Trending Getaways */}
-              <CarouselSection 
-                title="Trending Getaways" 
+              {/* Section 1: Destacados en Margarita */}
+              <CarouselSection
+                title="Destacados en Margarita"
                 properties={getCuratedSection1()} 
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
@@ -938,9 +959,9 @@ export default function Home() {
                 }}
               />
 
-              {/* Section 2: Editor's Architectural Picks */}
-              <CarouselSection 
-                title="Editor's Architectural Picks" 
+              {/* Section 2: Selección Premium */}
+              <CarouselSection
+                title="Selección Premium"
                 properties={getCuratedSection2()} 
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
@@ -949,9 +970,9 @@ export default function Home() {
                 }}
               />
 
-              {/* Section 3: Secluded Nature Escapes */}
-              <CarouselSection 
-                title="Secluded Nature Escapes" 
+              {/* Section 3: Escapadas Frente al Mar */}
+              <CarouselSection
+                title="Escapadas Frente al Mar"
                 properties={getCuratedSection3()} 
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
@@ -963,10 +984,10 @@ export default function Home() {
           ) : (
             // DISPLAY SINGLE FILTERED LIST SECTION WITH GRID
             <div>
-              <div className="flex justify-between items-end mb-8 border-b border-[#E8E8E8] pb-4">
+              <div className="flex justify-between items-end mb-8 border-b border-[#E6D7C2] pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl md:text-3xl text-[#2B2B2B] font-semibold">
-                    {selectedCategory !== 'All' ? `${selectedCategory} Collection` : 'Explora Apex'}
+                  <h2 className="font-serif text-2xl md:text-3xl text-[#007380] font-semibold">
+                    {selectedCategory !== 'Todos' ? `Colección ${selectedCategory}` : 'Explora Margarita Renace'}
                   </h2>
                   <p className="text-xs text-[#6B6B6B] mt-1 font-medium">
                     {filteredProperties.length} propiedades exclusivas encontradas
@@ -999,11 +1020,11 @@ export default function Home() {
               ) : (
                 <div className="py-20 text-center max-w-md mx-auto">
                   <Smile className="w-12 h-12 text-gray-300 mx-auto mb-4 stroke-[1.2]" />
-                  <h3 className="font-serif text-lg text-[#2B2B2B] font-semibold mb-1">Sin resultados exactos</h3>
+                  <h3 className="font-serif text-lg text-[#007380] font-semibold mb-1">Sin resultados exactos</h3>
                   <p className="text-xs text-[#6B6B6B] mb-6">No encontramos alojamientos disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
                   <button 
                     onClick={handleResetSearch}
-                    className="bg-[#1A1A1A] hover:bg-black text-white text-xs font-semibold px-6 py-2.5 rounded-full transition-all"
+                    className="bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold px-6 py-2.5 rounded-full transition-all"
                   >
                     Restablecer Búsqueda
                   </button>
@@ -1036,17 +1057,17 @@ export default function Home() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-[#1A1A1A]"
             >
-              
+
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2DDD5]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E6D7C2]">
                 <div>
-                  <h3 className="font-serif text-lg font-semibold text-[#2B2B2B]">Detalles de la Reserva</h3>
+                  <h3 className="font-serif text-lg font-semibold text-[#007380]">Detalles de la Reserva</h3>
                   <p className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{selectedProperty.location}</p>
                 </div>
                 <button 
                   onClick={() => setIsDetailOpen(false)}
                   aria-label="Cerrar detalles"
-                  className="w-8 h-8 rounded-full hover:bg-[#FAF8F5] flex items-center justify-center text-gray-500 hover:text-black transition-colors"
+                  className="w-8 h-8 rounded-full hover:bg-[#FFF7EC] flex items-center justify-center text-gray-500 hover:text-black transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1067,7 +1088,7 @@ export default function Home() {
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {selectedProperty.gallery.map((imgUrl, idx) => (
-                      <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-[#E2DDD5]/40 shadow-xs">
+                      <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-[#E6D7C2]/40 shadow-xs">
                         <img 
                           src={imgUrl} 
                           alt={`Gallery image ${idx}`} 
@@ -1083,10 +1104,10 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h2 className="font-serif text-2xl font-medium text-[#2B2B2B] tracking-tight">{selectedProperty.name}</h2>
+                      <h2 className="font-serif text-2xl font-medium text-[#007380] tracking-tight">{selectedProperty.name}</h2>
                       <p className="text-xs text-[#6B6B6B] mt-0.5 font-medium">{selectedProperty.location}</p>
                     </div>
-                    <div className="flex items-center gap-1 bg-[#FAF8F5] text-amber-800 border border-[#E2DDD5]/60 rounded-full px-3 py-1 text-xs font-bold">
+                    <div className="flex items-center gap-1 bg-[#FFF7EC] text-amber-800 border border-[#E6D7C2]/60 rounded-full px-3 py-1 text-xs font-bold">
                       <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
                       <span>{selectedProperty.rating}</span>
                     </div>
@@ -1095,11 +1116,11 @@ export default function Home() {
                 </div>
 
                 {/* Host Info */}
-                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#E2DDD5] flex items-center gap-4">
+                <div className="p-4 bg-[#FFF7EC] rounded-2xl border border-[#E6D7C2] flex items-center gap-4">
                   <img 
                     src={selectedProperty.host.avatar} 
                     alt={selectedProperty.host.name} 
-                    className="w-12 h-12 rounded-full object-cover shadow-xs border border-[#E2DDD5]"
+                    className="w-12 h-12 rounded-full object-cover shadow-xs border border-[#E6D7C2]"
                     referrerPolicy="no-referrer"
                   />
                   <div>
@@ -1116,7 +1137,7 @@ export default function Home() {
                       const Icon = amenity.icon;
                       return (
                         <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
-                          <div className="w-7 h-7 rounded-lg bg-[#FAF8F5] border border-[#E2DDD5]/30 flex items-center justify-center text-gray-500">
+                          <div className="w-7 h-7 rounded-lg bg-[#FFF7EC] border border-[#E6D7C2]/30 flex items-center justify-center text-gray-500">
                             <Icon className="w-4 h-4 stroke-[1.8]" />
                           </div>
                           <span className="font-medium">{amenity.name}</span>
@@ -1127,11 +1148,28 @@ export default function Home() {
                 </div>
 
                 {/* Interactive Booking Calculator */}
-                {!bookingConfirmed ? (
-                  <div className="p-5 bg-white rounded-2xl border border-[#E2DDD5] shadow-sm space-y-4">
-                    <div className="flex justify-between items-baseline border-b border-[#E2DDD5] pb-3">
+                {selectedProperty.priceOnRequest ? (
+                  <div className="p-5 bg-white rounded-2xl border border-[#E6D7C2] shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-[#E6D7C2] pb-3">
+                      <span className="text-base font-bold text-[#21BBBB]">Precio según temporada</span>
+                      <span className="text-xs text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      El precio de esta propiedad varía según la temporada. Contáctanos y te confirmamos disponibilidad y tarifa para tus fechas.
+                    </p>
+                    <button
+                      onClick={() => setBookingConfirmed(true)}
+                      className="w-full bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold tracking-wide py-3.5 rounded-full transition-all mt-2 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                    >
+                      <span>Consultar disponibilidad</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : !bookingConfirmed ? (
+                  <div className="p-5 bg-white rounded-2xl border border-[#E6D7C2] shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-[#E6D7C2] pb-3">
                       <div>
-                        <span className="text-lg font-bold text-black">₹{selectedProperty.pricePerNight.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-[#21BBBB]">US${selectedProperty.pricePerNight.toLocaleString()}</span>
                         <span className="text-xs text-gray-500 font-medium"> / noche</span>
                       </div>
                       <span className="text-xs text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
@@ -1143,7 +1181,7 @@ export default function Home() {
                         <select 
                           value={bookingNights} 
                           onChange={(e) => setBookingNights(Number(e.target.value))}
-                          className="w-full bg-[#FAF8F5] border border-[#E2DDD5] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
+                          className="w-full bg-[#FFF7EC] border border-[#E6D7C2] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
                         >
                           {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => (
                             <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
@@ -1155,7 +1193,7 @@ export default function Home() {
                         <select 
                           value={bookingGuests} 
                           onChange={(e) => setBookingGuests(Number(e.target.value))}
-                          className="w-full bg-[#FAF8F5] border border-[#E2DDD5] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
+                          className="w-full bg-[#FFF7EC] border border-[#E6D7C2] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
                         >
                           {Array.from({ length: selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children }, (_, i) => i + 1).map(g => (
                             <option key={g} value={g}>{g} {g === 1 ? 'huésped' : 'huéspedes'}</option>
@@ -1168,27 +1206,27 @@ export default function Home() {
                     <div className="space-y-2 text-xs text-gray-600 pt-2">
                       <div className="flex justify-between">
                         <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
-                        <span>₹{(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tarifa de limpieza Apex</span>
-                        <span>₹1,500</span>
+                        <span>Tarifa de limpieza</span>
+                        <span>US$10</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Tarifa de servicio exclusivo</span>
-                        <span>₹2,800</span>
+                        <span>Tarifa de servicio</span>
+                        <span>US$8</span>
                       </div>
-                      <div className="flex justify-between font-bold text-black border-t border-[#E2DDD5] pt-3 text-sm">
+                      <div className="flex justify-between font-bold text-[#007380] border-t border-[#E6D7C2] pt-3 text-sm">
                         <span>Total estimado</span>
-                        <span>₹{(selectedProperty.pricePerNight * bookingNights + 1500 + 2800).toLocaleString()}</span>
+                        <span>US${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}</span>
                       </div>
                     </div>
 
                     <button 
                       onClick={() => setBookingConfirmed(true)}
-                      className="w-full bg-[#1A1A1A] hover:bg-black text-white text-xs font-semibold tracking-wide py-3.5 rounded-full transition-all mt-4 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="w-full bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold tracking-wide py-3.5 rounded-full transition-all mt-4 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
-                      <span>Reservar ahora con Apex</span>
+                      <span>Reservar ahora</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                     <p className="text-[10px] text-center text-gray-400 mt-2 font-medium">Aún no se te cobrará ningún importe oficial</p>
@@ -1212,7 +1250,9 @@ export default function Home() {
                       <p><strong>Noches:</strong> {bookingNights} noches</p>
                       <p><strong>Huéspedes:</strong> {bookingGuests} {bookingGuests === 1 ? 'persona' : 'personas'}</p>
                       <p className="pt-2 border-t border-gray-100 font-bold text-black">
-                        Total: ₹{(selectedProperty.pricePerNight * bookingNights + 1500 + 2800).toLocaleString()}
+                        {selectedProperty.priceOnRequest
+                          ? 'Te confirmaremos el precio según temporada'
+                          : `Total: US$${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}`}
                       </p>
                     </div>
                     <button 
@@ -1252,12 +1292,12 @@ export default function Home() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 text-[#1A1A1A]"
             >
-              
+
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E8E8]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E6D7C2]">
                 <div>
-                  <h3 className="font-serif text-lg font-semibold text-[#2B2B2B]">Filtros de Búsqueda</h3>
-                  <p className="text-[11px] text-gray-400 font-medium tracking-wide">Refina tu selección en Apex</p>
+                  <h3 className="font-serif text-lg font-semibold text-[#007380]">Filtros de Búsqueda</h3>
+                  <p className="text-[11px] text-gray-400 font-medium tracking-wide">Refina tu selección en Margarita Renace</p>
                 </div>
                 <button 
                   onClick={() => setIsFilterOpen(false)}
@@ -1274,24 +1314,24 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-baseline">
                     <h4 className="text-xs uppercase tracking-wider font-bold text-gray-400">Precio Máximo por noche</h4>
-                    <span className="text-xs font-bold text-black">₹{filterMaxPrice.toLocaleString()}</span>
+                    <span className="text-xs font-bold text-[#21BBBB]">US${filterMaxPrice.toLocaleString()}</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min={2000} 
-                    max={60000} 
-                    step={1000}
-                    value={filterMaxPrice} 
+                  <input
+                    type="range"
+                    min={20}
+                    max={200}
+                    step={5}
+                    value={filterMaxPrice}
                     onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
-                    className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#1A1A1A]"
+                    className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#21BBBB]"
                   />
                   <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
-                    <span>₹2,000 / noche</span>
-                    <span>₹60,000 / noche</span>
+                    <span>US$20 / noche</span>
+                    <span>US$200 / noche</span>
                   </div>
                 </div>
 
-                <hr className="border-[#E8E8E8]" />
+                <hr className="border-[#E6D7C2]" />
 
                 {/* Minimum Rating */}
                 <div className="space-y-4">
@@ -1313,32 +1353,32 @@ export default function Home() {
                   </div>
                 </div>
 
-                <hr className="border-[#E8E8E8]" />
+                <hr className="border-[#E6D7C2]" />
 
                 {/* Popular Amenities Filter Info */}
-                <div className="p-4 bg-[#FAFAF8] rounded-xl border border-[#E8E8E8] text-xs space-y-1">
-                  <p className="font-bold text-[#1A1A1A]">Lujo Apex Incluido</p>
+                <div className="p-4 bg-[#FFF7EC] rounded-xl border border-[#E6D7C2] text-xs space-y-1">
+                  <p className="font-bold text-[#007380]">Calidad Margarita Renace</p>
                   <p className="text-gray-500 font-medium leading-relaxed">
-                    Todas las propiedades listadas en Apex cumplen con estándares rigurosos de alta gama, incluyendo internet premium de alta velocidad, servicio al huésped 24/7 y limpieza profesional impecable.
+                    Todas las propiedades listadas cumplen con estándares de calidad verificados: Wi-Fi de alta velocidad, atención al huésped y limpieza profesional impecable.
                   </p>
                 </div>
 
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-[#E8E8E8] flex gap-3 bg-white">
+              <div className="px-6 py-4 border-t border-[#E6D7C2] flex gap-3 bg-white">
                 <button
                   onClick={() => {
                     setFilterMaxPrice(60000);
                     setFilterMinRating(4.5);
                   }}
-                  className="flex-1 py-3 border border-[#E8E8E8] hover:bg-gray-50 text-[#1A1A1A] rounded-full text-xs font-semibold transition-all cursor-pointer"
+                  className="flex-1 py-3 border border-[#E6D7C2] hover:bg-gray-50 text-[#1A1A1A] rounded-full text-xs font-semibold transition-all cursor-pointer"
                 >
                   Limpiar Filtros
                 </button>
                 <button
                   onClick={() => setIsFilterOpen(false)}
-                  className="flex-1 py-3 bg-[#1A1A1A] hover:bg-black text-white rounded-full text-xs font-semibold transition-all cursor-pointer"
+                  className="flex-1 py-3 bg-[#007380] hover:bg-[#005c66] text-white rounded-full text-xs font-semibold transition-all cursor-pointer"
                 >
                   Ver {filteredProperties.length} Propiedades
                 </button>
@@ -1382,21 +1422,21 @@ function CarouselSection({ title, properties, onSelectProperty }: CarouselSectio
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         {/* Título serif a la izquierda */}
-        <h3 className="font-serif text-2xl md:text-[28px] text-[#2B2B2B] font-medium tracking-tight">{title}</h3>
+        <h3 className="font-serif text-2xl md:text-[28px] text-[#007380] font-medium tracking-tight">{title}</h3>
         
         {/* 2 flechas circulares outline a la derecha */}
         <div className="flex items-center gap-2">
           <button 
             onClick={scrollPrev}
             aria-label="Anterior slide"
-            className="w-9 h-9 rounded-full border border-[#E2DDD5] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FAF8F5] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button 
             onClick={scrollNext}
             aria-label="Siguiente slide"
-            className="w-9 h-9 rounded-full border border-[#E2DDD5] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FAF8F5] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -1432,7 +1472,7 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
   return (
     <div 
       onClick={onSelect}
-      className="group bg-white border border-[#E2DDD5]/80 rounded-[16px] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.02)] cursor-pointer flex flex-col justify-between h-full transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)] hover:border-[#1A1A1A]/30"
+      className="group bg-white border border-[#E6D7C2] rounded-[16px] overflow-hidden shadow-[0_4px_16px_rgba(0,115,128,0.08)] cursor-pointer flex flex-col justify-between h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-[#007380]/40 hover:-translate-y-0.5"
     >
       
       {/* Imagen arriba con border-radius 16px y ratio 4:3 */}
@@ -1451,23 +1491,23 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
             setIsLiked(!isLiked);
           }}
           aria-label={isLiked ? "Quitar de favoritos" : "Guardar en favoritos"}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center hover:bg-white transition-all shadow-sm z-10 cursor-pointer border border-[#E2DDD5]/20"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#FFF7EC] transition-all shadow-sm z-10 cursor-pointer border border-[#E6D7C2]"
         >
-          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-[#FF644F] text-[#FF644F]' : 'text-gray-600'}`} />
         </button>
 
         {/* Category Tag Overlay */}
         <div className="absolute bottom-3 left-3 flex gap-1">
           {property.categories.slice(0, 1).map((cat) => (
-            <span key={cat} className="text-[10px] uppercase font-bold bg-black/60 text-white px-2.5 py-1 rounded-full backdrop-blur-xs tracking-wider">
+            <span key={cat} className="text-[10px] uppercase font-bold bg-black/70 text-white px-2.5 py-1 rounded-full tracking-wider">
               {cat}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Franja inferior fondo #FAFAF8 */}
-      <div className="p-4 bg-[#FAFAF8] flex items-center justify-between gap-2 relative border-t border-[#E2DDD5]/30">
+      {/* Franja inferior con vidrio esmerilado */}
+      <div className="p-4 bg-white flex items-center justify-between gap-2 relative border-t border-[#E6D7C2]">
         <div className="flex-1 min-w-0">
           {/* Nombre: 15px serif elegante negro */}
           <h4 className="font-serif text-[15px] font-medium text-[#1A1A1A] tracking-tight truncate group-hover:text-black transition-colors">{property.name}</h4>
@@ -1485,7 +1525,7 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
             onSelect();
           }}
           aria-label={`Ver detalles de ${property.name}`}
-          className="w-9 h-9 rounded-full bg-[#1A1A1A] group-hover:bg-black text-white flex items-center justify-center shadow-md transition-all shrink-0 cursor-pointer hover:scale-105"
+          className="w-9 h-9 rounded-full bg-[#007380] hover:bg-[#005c66] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(0,115,128,0.3)] transition-all shrink-0 cursor-pointer hover:scale-105"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
