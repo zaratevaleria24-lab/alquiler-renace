@@ -511,8 +511,8 @@ export default function Home() {
 
           {/* Izquierda: Logo + Nombre */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={handleResetSearch}>
-            <div className="w-9 h-9 rounded-xl bg-white/90 flex items-center justify-center p-1.5 shadow-[0_2px_10px_rgba(89,204,204,0.4)]">
-              <img src="/logo.png" alt="Margarita Renace" className="w-full h-full object-contain" />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img src="/logo-mark-white.svg" alt="Margarita Renace" className="w-full h-full object-contain" />
             </div>
             <span className="font-serif text-base md:text-lg font-semibold tracking-wide text-white leading-none">Margarita<span className="text-[#59CCCC]"> Renace</span></span>
           </div>
