@@ -161,30 +161,37 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-[#1A1A1A] pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-white text-ink pb-24 relative overflow-x-hidden">
 
       {/* 1. NAVBAR (Fija Arriba) */}
       <nav id="navbar-floating" className="fixed top-0 left-0 right-0 z-40 px-4 pt-4 md:px-8 md:pt-6">
-        <div className="bg-[#007380] text-white rounded-[20px] px-5 py-3 md:px-8 md:py-3.5 shadow-[0_8px_32px_rgba(0,115,128,0.25)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
+        {/* La navbar usa la escala de INTERFAZ (text-ui), no la de contenido.
+            En la primera pasada de rediseño se le aplicó tipografía de cuerpo y
+            objetivos táctiles de 46px, y creció de ~62px a ~82px: quedó
+            gruesa. Una barra fija compite con el contenido por espacio
+            vertical, así que acá manda la densidad. Los 44px táctiles siguen
+            valiendo para las acciones del contenido, no para el chrome de
+            escritorio. */}
+        <div className="bg-brand text-white rounded-panel px-5 py-3 md:px-7 md:py-3 shadow-[0_6px_24px_-6px_rgba(22,33,31,0.28)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
 
           {/* Izquierda: Logo + Nombre */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={handleResetSearch}>
-            <div className="w-10 h-10 flex items-center justify-center">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={handleResetSearch}>
+            <div className="w-9 h-9 flex items-center justify-center shrink-0">
               <img src="/logo-mark-white.svg" alt="Margarita Renace" className="w-full h-full object-contain" />
             </div>
-            <span className="font-serif text-base md:text-lg font-semibold tracking-wide text-white leading-none">Margarita<span className="text-[#59CCCC]"> Renace</span></span>
+            <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide text-white leading-none whitespace-nowrap">Margarita<span className="text-accent"> Renace</span></span>
           </div>
 
           {/* Centro: Links de Navegación */}
-          <div className="hidden md:flex items-center gap-1 bg-white/10 rounded-full p-1 border border-white/10">
+          <div className="hidden md:flex items-center gap-0.5 bg-white/10 rounded-control p-1 border border-white/10">
             {['Inicio', 'Apartamentos', 'Autos'].map((link) => (
               <button
                 key={link}
                 onClick={() => setActiveNavLink(link)}
-                className={`px-5 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all ${
+                className={`px-4 py-2 rounded-chip text-ui font-medium tracking-wide transition-all ${
                   activeNavLink === link
-                    ? 'bg-white text-[#007380] shadow-[0_2px_8px_rgba(0,0,0,0.15)]'
-                    : 'text-gray-300 hover:text-white hover:bg-white/5'
+                    ? 'bg-white text-brand'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
                 {link}
@@ -193,23 +200,23 @@ export default function Home() {
           </div>
 
           {/* Derecha: Become a Host + Íconos */}
-          <div className="flex items-center gap-2 md:gap-4">
-            <span className="hidden lg:inline text-xs font-medium text-gray-200 tracking-wide hover:text-white transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 md:gap-3">
+            <span className="hidden lg:inline text-ui font-medium text-white/75 tracking-wide hover:text-white transition-colors cursor-pointer">
               Publica tu Propiedad
             </span>
 
             <button
               aria-label="Seleccionar idioma"
-              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/35 transition-all cursor-pointer"
             >
-              <Globe className="w-4 h-4" />
+              <Globe className="w-[17px] h-[17px]" />
             </button>
 
             <button
               aria-label="Menú de navegación"
-              className="w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/30 transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/35 transition-all cursor-pointer"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-[17px] h-[17px]" />
             </button>
           </div>
         </div>
@@ -238,12 +245,12 @@ export default function Home() {
               referrerPolicy="no-referrer"
             />
             {/* Overlay con degradado color Caribe */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#007380]/50 via-[#21BBBB]/30 to-[#007380]/60 flex flex-col items-center justify-center text-center px-4">
+            <div className="absolute inset-0 bg-gradient-to-b from-brand/50 via-accent/30 to-brand/60 flex flex-col items-center justify-center text-center px-4">
               <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-xs md:text-sm font-medium tracking-[0.25em] uppercase text-white/95 mb-3"
+                className="text-meta md:text-body font-medium tracking-[0.25em] uppercase text-white/95 mb-3"
               >
                 Isla de Margarita · Venezuela
               </motion.p>
@@ -251,7 +258,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-serif text-4xl md:text-[56px] text-white font-light leading-tight max-w-3xl mb-4 tracking-tight drop-shadow-lg"
+                className="font-serif text-display text-white font-light leading-tight max-w-3xl mb-4 tracking-tight drop-shadow-lg"
               >
                 Vive la Isla como en Casa
                 {/* La frase de marca no tiene ninguna palabra por la que
@@ -259,15 +266,15 @@ export default function Home() {
                     página, así que la keyword real va DENTRO del mismo h1, en
                     una segunda línea de menor jerarquía visual: el diseño no
                     cambia y el encabezado deja de estar vacío para búsquedas. */}
-                <span className="mt-3 block font-sans text-lg md:text-2xl font-light tracking-normal text-white/95">
+                <span className="mt-3 block font-sans text-title-sm md:text-title font-light tracking-normal text-white/95">
                   Alquiler de apartamentos y autos en Isla de Margarita
                 </span>
               </motion.h1>
-              <p className="text-white/90 text-sm md:text-base font-light max-w-lg mb-2">
+              <p className="text-white/90 text-body font-light max-w-lg mb-2">
                 Alojamientos en Pampatar, Porlamar, Costa Azul, El Yaque, Juan
                 Griego y más zonas de la isla · Precios en US$
               </p>
-              <div className="w-12 h-[2px] bg-[#59CCCC] my-2 rounded-full"></div>
+              <div className="w-12 h-[2px] bg-accent my-2 rounded-full"></div>
             </div>
 
             {/* Curva blanca de transición hacia el contenido */}
@@ -290,7 +297,7 @@ export default function Home() {
               <div className="self-start">
                 <button
                   onClick={() => handleResetSearch()}
-                  className="bg-white text-[#007380] text-xs font-semibold px-5 py-2 rounded-full shadow-md flex items-center gap-1.5 border border-[#E6D7C2] hover:bg-[#FFF7EC] transition-all"
+                  className="bg-white text-brand text-meta font-semibold px-5 py-2.5 rounded-chip shadow-lift flex items-center gap-2 border border-line hover:bg-paper transition-all"
                 >
                   <Compass className="w-3.5 h-3.5" />
                   <span>Ver Todo</span>
@@ -298,7 +305,7 @@ export default function Home() {
               </div>
 
               {/* Barra vidrio esmerilado píldora */}
-              <div className="bg-white rounded-full p-2.5 shadow-[0_8px_32px_rgba(0,115,128,0.14)] border border-[#E6D7C2] flex flex-wrap md:flex-nowrap items-center justify-between w-full">
+              <div className="bg-white rounded-full p-2.5 shadow-[0_8px_32px_rgba(0,115,128,0.14)] border border-line flex flex-wrap md:flex-nowrap items-center justify-between w-full">
 
                 {/* 1. Where */}
                 <div
@@ -307,58 +314,58 @@ export default function Home() {
                     activePopover === 'where' ? 'bg-white/70' : 'hover:bg-white/50'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Dónde</label>
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Dónde</label>
                   <input
                     type="text"
                     readOnly
                     value={searchWhere || 'Buscar destino'}
-                    className={`bg-transparent text-xs text-[#6B6B6B] border-none outline-none w-full cursor-pointer font-medium p-0 leading-tight ${
-                      searchWhere ? 'text-[#1A1A1A]' : 'text-[#6B6B6B]'
+                    className={`bg-transparent text-meta text-ink-muted border-none outline-none w-full cursor-pointer font-medium p-0 leading-tight ${
+                      searchWhere ? 'text-ink' : 'text-ink-muted'
                     }`}
                   />
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
+                <div className="hidden md:block h-8 w-[1px] bg-line" />
 
                 {/* 2. Check In */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
                   className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'dates' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
+                    activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Check In</label>
-                  <span className="text-xs text-[#6B6B6B] font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Check In</label>
+                  <span className="text-meta text-ink-muted font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
                     {searchCheckIn || 'Agregar fecha'}
                   </span>
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
+                <div className="hidden md:block h-8 w-[1px] bg-line" />
 
                 {/* 3. Check Out */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
                   className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'dates' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
+                    activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Check Out</label>
-                  <span className="text-xs text-[#6B6B6B] font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Check Out</label>
+                  <span className="text-meta text-ink-muted font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
                     {searchCheckOut || 'Agregar fecha'}
                   </span>
                 </div>
 
-                <div className="hidden md:block h-8 w-[1px] bg-[#E6D7C2]" />
+                <div className="hidden md:block h-8 w-[1px] bg-line" />
 
                 {/* 4. Who */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'guests' ? null : 'guests')}
                   className={`flex-1 min-w-[120px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
-                    activePopover === 'guests' ? 'bg-[#FFF7EC]' : 'hover:bg-[#FFF7EC]'
+                    activePopover === 'guests' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-[10px] uppercase font-semibold text-[#1A1A1A] tracking-wider mb-0.5">Quién</label>
-                  <span className="text-xs text-[#1A1A1A] font-semibold block leading-tight">
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Quién</label>
+                  <span className="text-meta text-ink font-semibold block leading-tight">
                     {guestCount.adults + guestCount.children + guestCount.infants > 0
                       ? `${guestCount.adults + guestCount.children} huéspedes`
                       : 'Agregar huéspedes'}
@@ -369,7 +376,7 @@ export default function Home() {
                 <button 
                   onClick={() => handleSearch()}
                   aria-label="Buscar propiedades"
-                  className="w-11 h-11 rounded-full bg-[#007380] hover:bg-[#005c66] text-white flex items-center justify-center transition-all shadow-md ml-2 cursor-pointer shrink-0"
+                  className="w-11 h-11 rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center transition-all shadow-md ml-2 cursor-pointer shrink-0"
                 >
                   <Search className="w-5 h-5" />
                 </button>
@@ -382,10 +389,10 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 md:left-4 md:right-auto md:w-96 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50 text-[#1A1A1A]"
+                    className="absolute top-full left-0 right-0 md:left-4 md:right-auto md:w-96 mt-2 bg-white rounded-2xl border border-line shadow-2xl p-5 z-50 text-ink"
                   >
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Destinos Exclusivos</h4>
+                      <h4 className="text-meta uppercase tracking-[0.15em] font-semibold text-gray-400">Destinos Exclusivos</h4>
                       <X className="w-4 h-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setActivePopover(null)} />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -396,7 +403,7 @@ export default function Home() {
                             setSearchWhere(dest);
                             setActivePopover('dates'); // auto transition
                           }}
-                          className="flex items-center gap-2 p-2.5 rounded-xl border border-[#E6D7C2]/40 hover:border-[#1A1A1A] hover:bg-[#FFF7EC] text-left transition-all text-xs font-medium text-gray-700 hover:text-black"
+                          className="flex items-center gap-2 p-2.5 rounded-xl border border-line/40 hover:border-ink hover:bg-paper text-left transition-all text-meta font-medium text-gray-700 hover:text-black"
                         >
                           <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
                           <span className="truncate">{dest}</span>
@@ -411,17 +418,17 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 right-0 md:left-48 md:right-auto md:w-80 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50"
+                    className="absolute top-full left-0 right-0 md:left-48 md:right-auto md:w-80 mt-2 bg-white rounded-2xl border border-line shadow-2xl p-5 z-50"
                   >
                     <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Fechas de Estadía</h4>
+                      <h4 className="text-meta uppercase tracking-[0.15em] font-semibold text-gray-400">Fechas de Estadía</h4>
                       <X className="w-4 h-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setActivePopover(null)} />
                     </div>
                     
                     {/* Simulated Predefined Dates */}
                     <div className="space-y-4">
                       <div>
-                        <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-1">Check-in</span>
+                        <span className="text-micro text-gray-400 uppercase font-semibold block mb-1">Check-in</span>
                         <div className="grid grid-cols-3 gap-1.5">
                           {['22 Jul', '24 Jul', '28 Jul', '02 Ago', '10 Ago', 'Omitir'].map((d) => (
                             <button
@@ -430,10 +437,10 @@ export default function Home() {
                                   if (d !== 'Omitir') setSearchCheckIn(d + ' 2026');
                                   else setSearchCheckIn('');
                               }}
-                              className={`py-1 px-2 text-xs rounded-lg border text-center font-medium transition-all ${
+                              className={`py-1 px-2 text-meta rounded-lg border text-center font-medium transition-all ${
                                 searchCheckIn.startsWith(d)
-                                  ? 'bg-[#1A1A1A] text-white border-black'
-                                  : 'border-[#E6D7C2]/40 text-gray-600 hover:border-gray-400'
+                                  ? 'bg-ink text-white border-black'
+                                  : 'border-line/40 text-gray-600 hover:border-gray-400'
                               }`}
                             >
                               {d}
@@ -443,7 +450,7 @@ export default function Home() {
                       </div>
 
                       <div>
-                        <span className="text-[10px] text-gray-400 uppercase font-semibold block mb-1">Check-out</span>
+                        <span className="text-micro text-gray-400 uppercase font-semibold block mb-1">Check-out</span>
                         <div className="grid grid-cols-3 gap-1.5">
                           {['25 Jul', '28 Jul', '02 Ago', '05 Ago', '15 Ago', 'Omitir'].map((d) => (
                             <button
@@ -453,10 +460,10 @@ export default function Home() {
                                 else setSearchCheckOut('');
                                 if (searchCheckIn) setActivePopover('guests'); // auto step
                               }}
-                              className={`py-1 px-2 text-xs rounded-lg border text-center font-medium transition-all ${
+                              className={`py-1 px-2 text-meta rounded-lg border text-center font-medium transition-all ${
                                 searchCheckOut.startsWith(d)
-                                  ? 'bg-[#1A1A1A] text-white border-black'
-                                  : 'border-[#E6D7C2]/40 text-gray-600 hover:border-gray-400'
+                                  ? 'bg-ink text-white border-black'
+                                  : 'border-line/40 text-gray-600 hover:border-gray-400'
                               }`}
                             >
                               {d}
@@ -473,31 +480,31 @@ export default function Home() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full right-0 left-0 md:left-auto md:right-4 md:w-80 mt-2 bg-white rounded-2xl border border-[#E6D7C2] shadow-2xl p-5 z-50 text-[#1A1A1A]"
+                    className="absolute top-full right-0 left-0 md:left-auto md:right-4 md:w-80 mt-2 bg-white rounded-2xl border border-line shadow-2xl p-5 z-50 text-ink"
                   >
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-xs uppercase tracking-[0.15em] font-bold text-gray-400">Número de Huéspedes</h4>
+                      <h4 className="text-meta uppercase tracking-[0.15em] font-semibold text-gray-400">Número de Huéspedes</h4>
                       <X className="w-4 h-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setActivePopover(null)} />
                     </div>
                     <div className="space-y-4">
                       {/* Adultos */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-semibold">Adultos</p>
-                          <p className="text-[10px] text-gray-400 font-medium">Desde 13 años</p>
+                          <p className="text-meta font-semibold">Adultos</p>
+                          <p className="text-micro text-gray-400 font-medium">Desde 13 años</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <button 
                             disabled={guestCount.adults <= 1}
                             onClick={() => setGuestCount({ ...guestCount, adults: guestCount.adults - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-paper"
                           >
                             -
                           </button>
-                          <span className="text-xs font-bold w-4 text-center">{guestCount.adults}</span>
+                          <span className="text-meta font-semibold w-4 text-center">{guestCount.adults}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, adults: guestCount.adults + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold hover:bg-paper"
                           >
                             +
                           </button>
@@ -507,21 +514,21 @@ export default function Home() {
                       {/* Niños */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-semibold">Niños</p>
-                          <p className="text-[10px] text-gray-400 font-medium">Edades 2 - 12</p>
+                          <p className="text-meta font-semibold">Niños</p>
+                          <p className="text-micro text-gray-400 font-medium">Edades 2 - 12</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <button 
                             disabled={guestCount.children <= 0}
                             onClick={() => setGuestCount({ ...guestCount, children: guestCount.children - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-paper"
                           >
                             -
                           </button>
-                          <span className="text-xs font-bold w-4 text-center">{guestCount.children}</span>
+                          <span className="text-meta font-semibold w-4 text-center">{guestCount.children}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, children: guestCount.children + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold hover:bg-paper"
                           >
                             +
                           </button>
@@ -531,21 +538,21 @@ export default function Home() {
                       {/* Bebés */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs font-semibold">Bebés</p>
-                          <p className="text-[10px] text-gray-400 font-medium">Menos de 2 años</p>
+                          <p className="text-meta font-semibold">Bebés</p>
+                          <p className="text-micro text-gray-400 font-medium">Menos de 2 años</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <button 
                             disabled={guestCount.infants <= 0}
                             onClick={() => setGuestCount({ ...guestCount, infants: guestCount.infants - 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold disabled:opacity-30 disabled:cursor-not-allowed hover:bg-paper"
                           >
                             -
                           </button>
-                          <span className="text-xs font-bold w-4 text-center">{guestCount.infants}</span>
+                          <span className="text-meta font-semibold w-4 text-center">{guestCount.infants}</span>
                           <button 
                             onClick={() => setGuestCount({ ...guestCount, infants: guestCount.infants + 1 })}
-                            className="w-8 h-8 rounded-full border border-[#E6D7C2] flex items-center justify-center text-xs font-bold hover:bg-[#FFF7EC]"
+                            className="w-8 h-8 rounded-full border border-line flex items-center justify-center text-meta font-semibold hover:bg-paper"
                           >
                             +
                           </button>
@@ -554,7 +561,7 @@ export default function Home() {
 
                       <button
                         onClick={() => handleSearch()}
-                        className="w-full bg-[#007380] hover:bg-[#005c66] text-white py-2 rounded-full text-xs font-medium tracking-wide mt-2"
+                        className="btn-solid w-full mt-3"
                       >
                         Confirmar Huéspedes
                       </button>
@@ -568,7 +575,7 @@ export default function Home() {
         </div>
 
         {/* 3. BARRA DE CATEGORÍAS */}
-        <section id="categories-navigation" className="mt-16 mb-12 flex items-center justify-between gap-4 border-b border-[#E6D7C2] pb-4">
+        <section id="categories-navigation" className="mt-16 mb-12 flex items-center justify-between gap-4 border-b border-line pb-4">
           <div className="flex items-center gap-2 flex-1 overflow-hidden">
             
             {/* Scrollable Container */}
@@ -587,13 +594,13 @@ export default function Home() {
                       // Clear search details to prioritize category
                       setSearchWhere('');
                     }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer transition-all shrink-0 focus:outline-none border text-xs font-semibold tracking-wide ${
+                    className={`flex items-center gap-2.5 px-4 py-2.5 rounded-chip cursor-pointer transition-all shrink-0 focus:outline-none border-[1.5px] text-meta font-semibold tracking-wide ${
                       isActive
-                        ? 'text-white bg-[#007380] border-transparent shadow-[0_2px_8px_rgba(0,115,128,0.25)]'
-                        : 'text-[#6B6B6B] hover:text-[#1A1A1A] border-[#E6D7C2]/60 hover:border-[#007380] bg-white/60'
+                        ? 'text-white bg-brand border-transparent shadow-[0_2px_8px_rgba(0,115,128,0.25)]'
+                        : 'text-ink-muted hover:text-ink border-line/60 hover:border-brand bg-white/60'
                     }`}
                   >
-                    <IconComponent className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white' : 'stroke-[1.6]'}`} />
+                    <IconComponent className={`w-[17px] h-[17px] shrink-0 ${isActive ? 'text-white' : 'stroke-[1.6]'}`} />
                     <span className="leading-none">{category.label}</span>
                   </button>
                 );
@@ -606,7 +613,7 @@ export default function Home() {
             <button 
               onClick={scrollCategories}
               aria-label="Siguiente categoría"
-              className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
+              className="w-9 h-9 rounded-full border border-line flex items-center justify-center text-gray-700 bg-white hover:bg-paper transition-all cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -614,7 +621,7 @@ export default function Home() {
             {/* Botón "Filters" píldora con gradiente turquesa */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold px-5 py-2.5 rounded-full flex items-center gap-2 shadow-[0_4px_16px_rgba(33,187,187,0.3)] transition-all cursor-pointer border border-transparent"
+              className="btn-solid cursor-pointer"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
               <span>Filtros</span>
@@ -663,19 +670,19 @@ export default function Home() {
           ) : (
             // DISPLAY SINGLE FILTERED LIST SECTION WITH GRID
             <div>
-              <div className="flex justify-between items-end mb-8 border-b border-[#E6D7C2] pb-4">
+              <div className="flex justify-between items-end mb-8 border-b border-line pb-4">
                 <div>
-                  <h2 className="font-serif text-2xl md:text-3xl text-[#007380] font-semibold">
+                  <h2 className="font-serif text-title md:text-headline text-brand font-medium">
                     {selectedCategory !== 'Todos' ? `Colección ${selectedCategory}` : 'Explora Margarita Renace'}
                   </h2>
-                  <p className="text-xs text-[#6B6B6B] mt-1 font-medium">
+                  <p className="text-meta text-ink-muted mt-1 font-medium">
                     {filteredProperties.length} propiedades exclusivas encontradas
                   </p>
                 </div>
                 {searchWhere.trim() && (
                   <button 
                     onClick={handleResetSearch}
-                    className="text-xs font-semibold border-b border-black text-black hover:opacity-70 transition-all"
+                    className="text-meta font-semibold border-b border-black text-black hover:opacity-70 transition-all"
                   >
                     Borrar Filtros
                   </button>
@@ -699,11 +706,11 @@ export default function Home() {
               ) : (
                 <div className="py-20 text-center max-w-md mx-auto">
                   <Smile className="w-12 h-12 text-gray-300 mx-auto mb-4 stroke-[1.2]" />
-                  <h3 className="font-serif text-lg text-[#007380] font-semibold mb-1">Sin resultados exactos</h3>
-                  <p className="text-xs text-[#6B6B6B] mb-6">No encontramos alojamientos disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
+                  <h3 className="font-serif text-title-sm text-brand font-semibold mb-1">Sin resultados exactos</h3>
+                  <p className="text-meta text-ink-muted mb-6">No encontramos alojamientos disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
                   <button 
                     onClick={handleResetSearch}
-                    className="bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold px-6 py-2.5 rounded-full transition-all"
+                    className="btn-solid"
                   >
                     Restablecer Búsqueda
                   </button>
@@ -741,19 +748,19 @@ export default function Home() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-[#1A1A1A]"
+              className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
             >
 
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E6D7C2]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-line">
                 <div>
-                  <h3 className="font-serif text-lg font-semibold text-[#007380]">Detalles de la Reserva</h3>
-                  <p className="text-[11px] text-gray-400 font-medium tracking-wide uppercase mt-0.5">{selectedProperty.location}</p>
+                  <h3 className="font-serif text-title-sm font-semibold text-brand">Detalles de la Reserva</h3>
+                  <p className="text-micro text-gray-400 font-medium tracking-wide uppercase mt-0.5">{selectedProperty.location}</p>
                 </div>
                 <button 
                   onClick={() => setIsDetailOpen(false)}
                   aria-label="Cerrar detalles"
-                  className="w-8 h-8 rounded-full hover:bg-[#FFF7EC] flex items-center justify-center text-gray-500 hover:text-black transition-colors"
+                  className="w-8 h-8 rounded-full hover:bg-paper flex items-center justify-center text-gray-500 hover:text-black transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -778,7 +785,7 @@ export default function Home() {
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {selectedProperty.gallery.map((imgUrl, idx) => (
-                      <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-[#E6D7C2]/40 shadow-xs">
+                      <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-line/40 shadow-xs">
                         {/* El alt decía "Gallery image 0": en inglés y sin
                             información. Inservible para lectores de pantalla y
                             desperdiciado para Google Imágenes. */}
@@ -801,40 +808,40 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h2 className="font-serif text-2xl font-medium text-[#007380] tracking-tight">{selectedProperty.name}</h2>
-                      <p className="text-xs text-[#6B6B6B] mt-0.5 font-medium">{selectedProperty.location}</p>
+                      <h2 className="font-serif text-title font-medium text-brand tracking-tight">{selectedProperty.name}</h2>
+                      <p className="text-meta text-ink-muted mt-0.5 font-medium">{selectedProperty.location}</p>
                     </div>
-                    <div className="flex items-center gap-1 bg-[#FFF7EC] text-amber-800 border border-[#E6D7C2]/60 rounded-full px-3 py-1 text-xs font-bold">
+                    <div className="flex items-center gap-1.5 bg-paper text-amber-800 border border-line rounded-chip px-3 py-1.5 text-meta font-semibold">
                       <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
                       <span>{selectedProperty.rating}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
+                  <p className="text-meta text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
                 </div>
 
                 {/* Host Info */}
-                <div className="p-4 bg-[#FFF7EC] rounded-2xl border border-[#E6D7C2] flex items-center gap-4">
+                <div className="p-4 bg-paper rounded-2xl border border-line flex items-center gap-4">
                   <img 
                     src={selectedProperty.host.avatar} 
                     alt={selectedProperty.host.name} 
-                    className="w-12 h-12 rounded-full object-cover shadow-xs border border-[#E6D7C2]"
+                    className="w-12 h-12 rounded-full object-cover shadow-xs border border-line"
                     referrerPolicy="no-referrer"
                   />
                   <div>
-                    <p className="text-xs font-bold text-[#1A1A1A]">Hospedado por {selectedProperty.host.name}</p>
-                    <p className="text-[11px] text-[#6B6B6B] font-medium mt-0.5">{selectedProperty.host.tagline}</p>
+                    <p className="text-meta font-semibold text-ink">Hospedado por {selectedProperty.host.name}</p>
+                    <p className="text-micro text-ink-muted font-medium mt-0.5">{selectedProperty.host.tagline}</p>
                   </div>
                 </div>
 
                 {/* Amenities */}
                 <div>
-                  <h4 className="text-xs uppercase tracking-wider font-bold text-gray-400 mb-3">Servicios Premium Incluidos</h4>
+                  <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400 mb-3">Servicios Premium Incluidos</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedProperty.amenities.map((amenity, idx) => {
                       const Icon = amenity.icon;
                       return (
-                        <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
-                          <div className="w-7 h-7 rounded-lg bg-[#FFF7EC] border border-[#E6D7C2]/30 flex items-center justify-center text-gray-500">
+                        <div key={idx} className="flex items-center gap-2 text-meta text-gray-700">
+                          <div className="w-7 h-7 rounded-lg bg-paper border border-line/30 flex items-center justify-center text-gray-500">
                             <Icon className="w-4 h-4 stroke-[1.8]" />
                           </div>
                           <span className="font-medium">{amenity.name}</span>
@@ -846,39 +853,39 @@ export default function Home() {
 
                 {/* Interactive Booking Calculator */}
                 {selectedProperty.priceOnRequest ? (
-                  <div className="p-5 bg-white rounded-2xl border border-[#E6D7C2] shadow-sm space-y-4">
-                    <div className="flex justify-between items-baseline border-b border-[#E6D7C2] pb-3">
-                      <span className="text-base font-bold text-[#21BBBB]">Precio según temporada</span>
-                      <span className="text-xs text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                  <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-line pb-3">
+                      <span className="text-body font-semibold text-accent">Precio según temporada</span>
+                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-meta text-gray-600">
                       El precio de esta propiedad varía según la temporada. Contáctanos y te confirmamos disponibilidad y tarifa para tus fechas.
                     </p>
                     <button
                       onClick={() => setBookingConfirmed(true)}
-                      className="w-full bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold tracking-wide py-3.5 rounded-full transition-all mt-2 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="btn-solid w-full mt-3 cursor-pointer"
                     >
                       <span>Consultar disponibilidad</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 ) : !bookingConfirmed ? (
-                  <div className="p-5 bg-white rounded-2xl border border-[#E6D7C2] shadow-sm space-y-4">
-                    <div className="flex justify-between items-baseline border-b border-[#E6D7C2] pb-3">
+                  <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-line pb-3">
                       <div>
-                        <span className="text-lg font-bold text-[#21BBBB]">US${selectedProperty.pricePerNight.toLocaleString()}</span>
-                        <span className="text-xs text-gray-500 font-medium"> / noche</span>
+                        <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
+                        <span className="text-meta text-gray-500 font-medium"> / noche</span>
                       </div>
-                      <span className="text-xs text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Noches</label>
+                        <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Noches</label>
                         <select 
                           value={bookingNights} 
                           onChange={(e) => setBookingNights(Number(e.target.value))}
-                          className="w-full bg-[#FFF7EC] border border-[#E6D7C2] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
+                          className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
                         >
                           {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => (
                             <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
@@ -886,11 +893,11 @@ export default function Home() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">Huéspedes</label>
+                        <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Huéspedes</label>
                         <select 
                           value={bookingGuests} 
                           onChange={(e) => setBookingGuests(Number(e.target.value))}
-                          className="w-full bg-[#FFF7EC] border border-[#E6D7C2] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:border-[#1A1A1A]"
+                          className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
                         >
                           {Array.from({ length: selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children }, (_, i) => i + 1).map(g => (
                             <option key={g} value={g}>{g} {g === 1 ? 'huésped' : 'huéspedes'}</option>
@@ -900,7 +907,7 @@ export default function Home() {
                     </div>
 
                     {/* Price Breakdown */}
-                    <div className="space-y-2 text-xs text-gray-600 pt-2">
+                    <div className="space-y-2 text-meta text-gray-600 pt-2">
                       <div className="flex justify-between">
                         <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
                         <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
@@ -913,7 +920,7 @@ export default function Home() {
                         <span>Tarifa de servicio</span>
                         <span>US$8</span>
                       </div>
-                      <div className="flex justify-between font-bold text-[#007380] border-t border-[#E6D7C2] pt-3 text-sm">
+                      <div className="flex justify-between font-semibold text-brand border-t border-line pt-3 text-body">
                         <span>Total estimado</span>
                         <span>US${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}</span>
                       </div>
@@ -921,12 +928,12 @@ export default function Home() {
 
                     <button 
                       onClick={() => setBookingConfirmed(true)}
-                      className="w-full bg-[#007380] hover:bg-[#005c66] text-white text-xs font-semibold tracking-wide py-3.5 rounded-full transition-all mt-4 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="btn-solid w-full mt-4 cursor-pointer"
                     >
                       <span>Reservar ahora</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
-                    <p className="text-[10px] text-center text-gray-400 mt-2 font-medium">Aún no se te cobrará ningún importe oficial</p>
+                    <p className="text-micro text-center text-gray-400 mt-2 font-medium">Aún no se te cobrará ningún importe oficial</p>
                   </div>
                 ) : (
                   // BOOKING SUCCESS STATE
@@ -937,16 +944,16 @@ export default function Home() {
                   >
                     <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto stroke-[1.5]" />
                     <div>
-                      <h3 className="font-serif text-lg font-bold text-green-900">¡Reserva Solicitada con Éxito!</h3>
-                      <p className="text-xs text-green-700 mt-1 max-w-xs mx-auto">
+                      <h3 className="font-serif text-title-sm font-semibold text-green-900">¡Reserva Solicitada con Éxito!</h3>
+                      <p className="text-meta text-green-700 mt-1 max-w-xs mx-auto">
                         Tu solicitud para <strong>{selectedProperty.name}</strong> ha sido pre-aprobada. El anfitrión te responderá en breve.
                       </p>
                     </div>
-                    <div className="bg-white rounded-xl p-4 border border-green-100/60 max-w-xs mx-auto text-left text-xs space-y-1 text-gray-700">
+                    <div className="bg-white rounded-xl p-4 border border-green-100/60 max-w-xs mx-auto text-left text-meta space-y-1 text-gray-700">
                       <p><strong>Ubicación:</strong> {selectedProperty.location}</p>
                       <p><strong>Noches:</strong> {bookingNights} noches</p>
                       <p><strong>Huéspedes:</strong> {bookingGuests} {bookingGuests === 1 ? 'persona' : 'personas'}</p>
-                      <p className="pt-2 border-t border-gray-100 font-bold text-black">
+                      <p className="pt-2 border-t border-gray-100 font-semibold text-black">
                         {selectedProperty.priceOnRequest
                           ? 'Te confirmaremos el precio según temporada'
                           : `Total: US$${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}`}
@@ -954,7 +961,7 @@ export default function Home() {
                     </div>
                     <button 
                       onClick={() => setIsDetailOpen(false)}
-                      className="bg-green-800 hover:bg-green-900 text-white text-xs font-semibold px-6 py-2.5 rounded-full transition-all"
+                      className="btn-solid"
                     >
                       Explorar otros destinos
                     </button>
@@ -987,14 +994,14 @@ export default function Home() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 text-[#1A1A1A]"
+              className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
             >
 
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-[#E6D7C2]">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-line">
                 <div>
-                  <h3 className="font-serif text-lg font-semibold text-[#007380]">Filtros de Búsqueda</h3>
-                  <p className="text-[11px] text-gray-400 font-medium tracking-wide">Refina tu selección en Margarita Renace</p>
+                  <h3 className="font-serif text-title-sm font-semibold text-brand">Filtros de Búsqueda</h3>
+                  <p className="text-micro text-gray-400 font-medium tracking-wide">Refina tu selección en Margarita Renace</p>
                 </div>
                 <button 
                   onClick={() => setIsFilterOpen(false)}
@@ -1010,8 +1017,8 @@ export default function Home() {
                 {/* Price Range */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-baseline">
-                    <h4 className="text-xs uppercase tracking-wider font-bold text-gray-400">Precio Máximo por noche</h4>
-                    <span className="text-xs font-bold text-[#21BBBB]">US${filterMaxPrice.toLocaleString()}</span>
+                    <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400">Precio Máximo por noche</h4>
+                    <span className="text-meta font-semibold text-accent">US${filterMaxPrice.toLocaleString()}</span>
                   </div>
                   <input
                     type="range"
@@ -1020,27 +1027,27 @@ export default function Home() {
                     step={5}
                     value={filterMaxPrice}
                     onChange={(e) => setFilterMaxPrice(Number(e.target.value))}
-                    className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#21BBBB]"
+                    className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-accent"
                   />
-                  <div className="flex justify-between text-[10px] text-gray-400 font-semibold">
+                  <div className="flex justify-between text-micro text-gray-400 font-semibold">
                     <span>US$20 / noche</span>
                     <span>US$200 / noche</span>
                   </div>
                 </div>
 
-                <hr className="border-[#E6D7C2]" />
+                <hr className="border-line" />
 
                 {/* Minimum Rating */}
                 <div className="space-y-4">
-                  <h4 className="text-xs uppercase tracking-wider font-bold text-gray-400">Calificación Mínima</h4>
+                  <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400">Calificación Mínima</h4>
                   <div className="grid grid-cols-5 gap-2">
                     {[4.5, 4.6, 4.7, 4.8, 4.9].map((val) => (
                       <button
                         key={val}
                         onClick={() => setFilterMinRating(val)}
-                        className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                        className={`py-2 rounded-xl text-meta font-semibold border transition-all ${
                           filterMinRating === val 
-                            ? 'bg-[#1A1A1A] text-white border-black' 
+                            ? 'bg-ink text-white border-black' 
                             : 'border-gray-100 hover:border-gray-300 text-gray-600'
                         }`}
                       >
@@ -1050,11 +1057,11 @@ export default function Home() {
                   </div>
                 </div>
 
-                <hr className="border-[#E6D7C2]" />
+                <hr className="border-line" />
 
                 {/* Popular Amenities Filter Info */}
-                <div className="p-4 bg-[#FFF7EC] rounded-xl border border-[#E6D7C2] text-xs space-y-1">
-                  <p className="font-bold text-[#007380]">Calidad Margarita Renace</p>
+                <div className="p-4 bg-paper rounded-xl border border-line text-meta space-y-1">
+                  <p className="font-semibold text-brand">Calidad Margarita Renace</p>
                   <p className="text-gray-500 font-medium leading-relaxed">
                     Todas las propiedades listadas cumplen con estándares de calidad verificados: Wi-Fi de alta velocidad, atención al huésped y limpieza profesional impecable.
                   </p>
@@ -1063,19 +1070,19 @@ export default function Home() {
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-[#E6D7C2] flex gap-3 bg-white">
+              <div className="px-6 py-4 border-t border-line flex gap-3 bg-white">
                 <button
                   onClick={() => {
                     setFilterMaxPrice(60000);
                     setFilterMinRating(4.5);
                   }}
-                  className="flex-1 py-3 border border-[#E6D7C2] hover:bg-gray-50 text-[#1A1A1A] rounded-full text-xs font-semibold transition-all cursor-pointer"
+                  className="flex-1 py-3 border border-line hover:bg-gray-50 text-ink rounded-full text-meta font-semibold transition-all cursor-pointer"
                 >
                   Limpiar Filtros
                 </button>
                 <button
                   onClick={() => setIsFilterOpen(false)}
-                  className="flex-1 py-3 bg-[#007380] hover:bg-[#005c66] text-white rounded-full text-xs font-semibold transition-all cursor-pointer"
+                  className="btn-solid flex-1 cursor-pointer"
                 >
                   Ver {filteredProperties.length} Propiedades
                 </button>
@@ -1119,21 +1126,21 @@ function CarouselSection({ title, properties, onSelectProperty }: CarouselSectio
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         {/* Título serif a la izquierda */}
-        <h3 className="font-serif text-2xl md:text-[28px] text-[#007380] font-medium tracking-tight">{title}</h3>
+        <h3 className="font-serif text-title md:text-headline text-brand font-medium tracking-tight">{title}</h3>
         
         {/* 2 flechas circulares outline a la derecha */}
         <div className="flex items-center gap-2">
           <button 
             onClick={scrollPrev}
             aria-label="Anterior slide"
-            className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full border border-line flex items-center justify-center text-gray-700 bg-white hover:bg-paper transition-all cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button 
             onClick={scrollNext}
             aria-label="Siguiente slide"
-            className="w-9 h-9 rounded-full border border-[#E6D7C2] flex items-center justify-center text-gray-700 bg-white hover:bg-[#FFF7EC] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-full border border-line flex items-center justify-center text-gray-700 bg-white hover:bg-paper transition-all cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -1169,7 +1176,7 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
   return (
     <div 
       onClick={onSelect}
-      className="group bg-white border border-[#E6D7C2] rounded-[16px] overflow-hidden shadow-[0_4px_16px_rgba(0,115,128,0.08)] cursor-pointer flex flex-col justify-between h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-[#007380]/40 hover:-translate-y-0.5"
+      className="group bg-white border border-line rounded-card overflow-hidden cursor-pointer flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:border-ink hover:shadow-hard h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-brand/40 hover:-translate-y-0.5"
     >
       
       {/* Imagen arriba con border-radius 16px y ratio 4:3 */}
@@ -1196,29 +1203,29 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
             setIsLiked(!isLiked);
           }}
           aria-label={isLiked ? "Quitar de favoritos" : "Guardar en favoritos"}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#FFF7EC] transition-all shadow-sm z-10 cursor-pointer border border-[#E6D7C2]"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-paper transition-all shadow-sm z-10 cursor-pointer border border-line"
         >
-          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-[#FF644F] text-[#FF644F]' : 'text-gray-600'}`} />
+          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-coral text-coral' : 'text-gray-600'}`} />
         </button>
 
         {/* Category Tag Overlay */}
         <div className="absolute bottom-3 left-3 flex gap-1">
           {property.categories.slice(0, 1).map((cat) => (
-            <span key={cat} className="text-[10px] uppercase font-bold bg-black/70 text-white px-2.5 py-1 rounded-full tracking-wider">
+            <span key={cat} className="label-eyebrow bg-ink/80 text-white px-2.5 py-1.5 rounded-chip">
               {cat}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Franja inferior con vidrio esmerilado */}
-      <div className="p-4 bg-white flex items-center justify-between gap-2 relative border-t border-[#E6D7C2]">
+      {/* Franja inferior con los datos del alojamiento */}
+      <div className="px-4 py-3.5 bg-white flex items-center justify-between gap-3 relative border-t border-line">
         <div className="flex-1 min-w-0">
           {/* Nombre: 15px serif elegante negro */}
-          <h4 className="font-serif text-[15px] font-medium text-[#1A1A1A] tracking-tight truncate group-hover:text-black transition-colors">{property.name}</h4>
+          <h4 className="font-serif text-body font-medium text-ink tracking-tight truncate group-hover:text-black transition-colors">{property.name}</h4>
           
           {/* Precio + estadía + rating en 12px gris */}
-          <p className="text-xs text-[#6B6B6B] mt-1 font-medium truncate">
+          <p className="text-meta text-ink-muted mt-1 font-medium truncate">
             {property.priceText} · ★ {property.rating}
           </p>
         </div>
@@ -1230,9 +1237,13 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
             onSelect();
           }}
           aria-label={`Ver detalles de ${property.name}`}
-          className="w-9 h-9 rounded-full bg-[#007380] hover:bg-[#005c66] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(0,115,128,0.3)] transition-all shrink-0 cursor-pointer hover:scale-105"
+          /* Sin anillo de tinta en reposo: son 12 tarjetas en pantalla y doce
+             círculos con borde oscuro dejan de ser un acento para volverse el
+             estilo. El borde aparece con el hover de la tarjeta, junto al resto
+             del tratamiento. */
+          className="w-10 h-10 rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center border border-transparent group-hover:border-ink transition-all shrink-0 cursor-pointer"
         >
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight className="w-[17px] h-[17px]" />
         </button>
       </div>
 

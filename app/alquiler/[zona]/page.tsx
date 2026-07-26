@@ -94,10 +94,15 @@ export default async function ZonaPage({
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
 
-      <div className="min-h-screen bg-[#F6F4EE]">
-        <header className="bg-gradient-to-br from-[#0C4A5A] via-[#0E7490] to-[#21BBBB] text-white">
+      <div className="min-h-screen bg-paper">
+        {/* Color plano en vez del degradado de tres paradas que había antes
+            (brand-deep → brand → accent). Un degradado ancho y saturado es una
+            de las firmas más reconocibles de plantilla generada; un plano
+            profundo con un filete de acento arriba se lee más editorial. */}
+        <header className="relative bg-brand-deep text-white">
+          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
           <div className="max-w-5xl mx-auto px-5 py-14 md:px-8 md:py-20">
-            <nav aria-label="Ruta de navegación" className="mb-8 text-sm">
+            <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li>
                   <Link href="/" className="underline hover:text-white">
@@ -109,39 +114,39 @@ export default async function ZonaPage({
               </ol>
             </nav>
 
-            <p className="mb-3 text-xs md:text-sm uppercase tracking-[0.25em] text-[#5EEAD4]">
+            <p className="label-eyebrow mb-4 text-accent">
               {SITE.region.island} · {SITE.region.state}
             </p>
-            <h1 className="font-serif text-3xl md:text-5xl font-semibold leading-tight max-w-3xl">
+            <h1 className="font-serif text-headline md:text-display font-medium leading-tight max-w-3xl">
               Alquiler de apartamentos en {zone.name}, Isla de Margarita
             </h1>
-            <p className="mt-5 max-w-2xl text-base md:text-lg text-white/90">
+            <p className="mt-6 max-w-2xl text-body-lg text-white/85">
               {copy.summary}
             </p>
 
-            <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-sm">
+            <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
               <div>
-                <dt className="text-[#5EEAD4] uppercase tracking-wider text-xs">
+                <dt className="label-eyebrow text-accent">
                   Alojamientos
                 </dt>
-                <dd className="mt-1 text-lg">
+                <dd className="mt-1 text-title-sm">
                   {zone.properties.length}{' '}
                   {zone.properties.length === 1 ? 'disponible' : 'disponibles'}
                 </dd>
               </div>
               {zone.minPrice !== null && (
                 <div>
-                  <dt className="text-[#5EEAD4] uppercase tracking-wider text-xs">
+                  <dt className="label-eyebrow text-accent">
                     Desde
                   </dt>
-                  <dd className="mt-1 text-lg">US${zone.minPrice} / noche</dd>
+                  <dd className="mt-1 text-title-sm">US${zone.minPrice} / noche</dd>
                 </div>
               )}
               <div>
-                <dt className="text-[#5EEAD4] uppercase tracking-wider text-xs">
+                <dt className="label-eyebrow text-accent">
                   Ubicación
                 </dt>
-                <dd className="mt-1 text-lg">{copy.coast}</dd>
+                <dd className="mt-1 text-title-sm">{copy.coast}</dd>
               </div>
             </dl>
           </div>
@@ -151,32 +156,32 @@ export default async function ZonaPage({
           <section aria-labelledby="sobre-la-zona">
             <h2
               id="sobre-la-zona"
-              className="font-serif text-2xl md:text-3xl text-[#0C4A5A] font-semibold"
+              className="font-serif text-title md:text-headline text-brand-deep font-medium"
             >
               Cómo es {zone.name}
             </h2>
-            <div className="mt-5 space-y-4 text-[#1A1A1A]/85 leading-relaxed">
+            <div className="mt-5 space-y-4 text-ink/85 leading-relaxed">
               {copy.body.map((paragraph) => (
                 <p key={paragraph.slice(0, 40)}>{paragraph}</p>
               ))}
             </div>
 
             {copy.nearby.length > 0 && (
-              <div className="mt-8 rounded-2xl border border-[#E6D7C2] bg-white/70 p-6 backdrop-blur-sm">
-                <h3 className="font-serif text-lg text-[#0C4A5A] font-semibold">
+              <div className="mt-10 rounded-card border border-line bg-white p-7">
+                <h3 className="font-serif text-title-sm text-brand-deep font-semibold">
                   Qué hay cerca
                 </h3>
-                <ul className="mt-3 grid gap-2 sm:grid-cols-2 text-sm text-[#1A1A1A]/80">
+                <ul className="mt-3 grid gap-2 sm:grid-cols-2 text-body text-ink/80">
                   {copy.nearby.map((item) => (
                     <li key={item} className="flex gap-2">
-                      <span aria-hidden="true" className="text-[#0E7490]">
+                      <span aria-hidden="true" className="text-brand">
                         ·
                       </span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 text-sm text-[#1A1A1A]/70">
+                <p className="mt-4 text-body text-ink/70">
                   Ideal para {copy.bestFor}.
                 </p>
               </div>
@@ -186,7 +191,7 @@ export default async function ZonaPage({
           <section aria-labelledby="alojamientos" className="mt-16">
             <h2
               id="alojamientos"
-              className="font-serif text-2xl md:text-3xl text-[#0C4A5A] font-semibold"
+              className="font-serif text-title md:text-headline text-brand-deep font-medium"
             >
               Alojamientos en {zone.name}
             </h2>
@@ -195,7 +200,7 @@ export default async function ZonaPage({
               {zone.properties.map((property) => (
                 <li
                   key={property.id}
-                  className="overflow-hidden rounded-2xl border border-[#E6D7C2] bg-white"
+                  className="group overflow-hidden rounded-card border border-line bg-white transition-all duration-200 hover:border-ink hover:shadow-hard-sm"
                 >
                   <img
                     src={property.image}
@@ -207,29 +212,29 @@ export default async function ZonaPage({
                     className="h-56 w-full object-cover"
                   />
                   <div className="p-5">
-                    <h3 className="font-serif text-xl text-[#0C4A5A] font-semibold">
+                    <h3 className="font-serif text-title-sm text-brand-deep font-semibold">
                       {property.name}
                     </h3>
-                    <p className="mt-1 text-sm text-[#1A1A1A]/60">
+                    <p className="mt-1 text-body text-ink/60">
                       {property.location}
                     </p>
-                    <p className="mt-3 text-sm text-[#1A1A1A]/80 leading-relaxed">
+                    <p className="mt-3 text-body text-ink/80 leading-relaxed">
                       {property.description}
                     </p>
                     <ul className="mt-4 flex flex-wrap gap-2">
                       {property.amenities.slice(0, 5).map((amenity) => (
                         <li
                           key={amenity.name}
-                          className="rounded-full bg-[#F6F4EE] px-3 py-1 text-xs text-[#0C4A5A]"
+                          className="rounded-chip bg-paper px-2.5 py-1 text-ui text-brand-deep"
                         >
                           {amenity.name}
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-4 font-medium text-[#0E7490]">
+                    <p className="mt-4 font-medium text-brand">
                       {property.priceText}
                     </p>
-                    <p className="mt-1 text-xs text-[#1A1A1A]/60">
+                    <p className="mt-1 text-meta text-ink/60">
                       Hasta {property.guestsAllowed.adults} adultos
                       {property.guestsAllowed.children > 0 &&
                         ` y ${property.guestsAllowed.children} niños`}
@@ -242,7 +247,7 @@ export default async function ZonaPage({
             <p className="mt-10">
               <Link
                 href="/"
-                className="inline-block rounded-full bg-gradient-to-r from-[#0E7490] to-[#0C4A5A] px-7 py-3 text-white"
+                className="btn-solid"
               >
                 Ver todos los alojamientos de la isla
               </Link>
@@ -254,7 +259,7 @@ export default async function ZonaPage({
           <nav aria-labelledby="otras-zonas" className="mt-16">
             <h2
               id="otras-zonas"
-              className="font-serif text-2xl md:text-3xl text-[#0C4A5A] font-semibold"
+              className="font-serif text-title md:text-headline text-brand-deep font-medium"
             >
               Otras zonas de la Isla de Margarita
             </h2>
@@ -263,10 +268,10 @@ export default async function ZonaPage({
                 <li key={other.slug}>
                   <Link
                     href={`/alquiler/${other.slug}`}
-                    className="inline-block rounded-full border border-[#0E7490]/30 bg-white px-4 py-2 text-sm text-[#0C4A5A] hover:border-[#0E7490]"
+                    className="inline-flex min-h-[44px] items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm"
                   >
                     {other.name}
-                    <span className="ml-2 text-[#1A1A1A]/50">
+                    <span className="ml-2 text-ink/50">
                       {other.properties.length}
                     </span>
                   </Link>

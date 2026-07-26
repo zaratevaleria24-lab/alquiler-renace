@@ -1,8 +1,133 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — Margarita Renace
+   Reescrito el 2026-07-26.
+
+   QUÉ ESTABA MAL Y POR QUÉ SE VEÍA "HECHO POR IA":
+
+   1. Tipografía diminuta. El cuerpo del sitio era `text-xs` (12px), con 59
+      usos, y había 14 elementos a 10px. Es el error más delator: se produce
+      cuando se diseña mirando un lienzo al 200% de zoom, y en pantalla real
+      obliga a acercarse. El estándar hoy es 16-17px de cuerpo.
+   2. Todo en pastilla. `rounded-full` 37 veces. La pastilla por defecto en
+      cada botón, chip y tarjeta es la firma visual de una plantilla.
+   3. Sin jerarquía de peso: 28 usos de `bold`, 28 de `semibold`, 28 de
+      `medium`. Cuando todo pesa, nada destaca.
+   4. Cianes de saturación alta (#21BBBB, #59CCCC) que leen como "teal
+      genérico". El fondo crema #FFF7EC tiraba a amarillo.
+   5. Sin escala de grises: solo #1A1A1A y #6B6B6B para todo el texto.
+
+   CÓMO SE ARREGLA ACÁ: tokens con nombre semántico en @theme, que Tailwind
+   convierte en utilidades (text-ink, bg-paper, text-body, rounded-card,
+   shadow-hard). Se usan esos nombres en vez de hex sueltos, así el sitio
+   entero se puede afinar desde este archivo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @theme {
-  --font-serif: var(--font-serif), serif;
-  --font-sans: var(--font-sans), sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+
+  /* ── Color ────────────────────────────────────────────────────────────────
+     Tinta con una pizca de verde en vez de negro puro: sobre fondo cálido, el
+     #000 se ve sucio y duro. Rampa completa de grises para que la jerarquía de
+     texto se construya con color y no solo con tamaño. */
+  --color-ink: #16211f;
+  --color-ink-soft: #3d4a47;
+  --color-ink-muted: #5f6d6a;
+  --color-ink-subtle: #8b9794;
+  --color-ink-faint: #b4bdba;
+
+  /* Teal de marca, profundizado y desaturado. El #007380 anterior se conserva
+     como referencia de identidad pero corrido hacia un verde-petróleo que lee
+     más caro y menos "cian de stock". */
+  --color-brand: #0a5c63;
+  --color-brand-deep: #073c41;
+  --color-brand-soft: #d9e7e7;
+  --color-brand-tint: #eef4f3;
+
+  /* Acento vivo, SOLO para detalles mínimos (subrayados, puntos, focus).
+     El anterior #21BBBB se usaba en superficies grandes y saturaba la página. */
+  --color-accent: #2f9d96;
+  --color-coral: #d1503c;
+
+  /* Superficies. El crema baja de amarillo y sube de neutralidad. */
+  --color-paper: #fbf9f5;
+  --color-paper-warm: #f4efe6;
+  --color-line: #e2dbd0;
+  --color-line-strong: #cbc2b4;
+
+  /* ── Tipografía ───────────────────────────────────────────────────────────
+     Cuerpo en 17px. Los títulos son fluidos con clamp() para que escalen con
+     el viewport sin cascada de breakpoints. */
+  /* ── Escala de INTERFAZ, distinta de la de contenido ──────────────────────
+     Error que se cometió en la primera pasada: aplicar la tipografía de
+     contenido (17px, interlineado 1.65) también al chrome —navbar, badges,
+     pastillas—. Un párrafo y una etiqueta de navbar no son lo mismo: la
+     etiqueta no se lee en bloque, se reconoce de un vistazo.
+     El interlineado importa más que el tamaño: una etiqueta de 15px con
+     interlineado 1.5 ocupa 22px de alto y engorda toda la barra. Acá va
+     ajustado a 1.15, que es lo que hace que la interfaz se sienta compacta
+     sin que el texto sea diminuto. */
+  --text-ui: 0.875rem;          /* 14px — chrome denso: navbar, badges */
+  --text-ui--line-height: 1.15;
+  --text-ui-lg: 0.9375rem;      /* 15px — controles algo más presentes */
+  --text-ui-lg--line-height: 1.2;
+
+  --text-micro: 0.8125rem;      /* 13px — SOLO etiquetas en versalitas */
+  --text-micro--line-height: 1.3;
+  --text-meta: 0.9375rem;       /* 15px — datos secundarios */
+  --text-meta--line-height: 1.5;
+  --text-body: 1.0625rem;       /* 17px — cuerpo por defecto */
+  --text-body--line-height: 1.65;
+  --text-body-lg: 1.1875rem;    /* 19px — entradillas */
+  --text-body-lg--line-height: 1.6;
+  --text-title-sm: 1.25rem;     /* 20px */
+  --text-title-sm--line-height: 1.35;
+  --text-title: 1.5rem;         /* 24px */
+  --text-title--line-height: 1.25;
+  --text-headline: clamp(1.75rem, 3.2vw, 2.125rem);
+  --text-headline--line-height: 1.2;
+  --text-display: clamp(2.5rem, 6vw, 4.25rem);
+  --text-display--line-height: 1.04;
+
+  --tracking-label: 0.16em;
+
+  /* ── Forma ────────────────────────────────────────────────────────────────
+     Radios contenidos. La pastilla completa queda reservada para avatares y
+     botones de icono circulares; todo lo demás usa esquinas definidas. */
+  --radius-chip: 9px;
+  --radius-control: 11px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+
+  /* ── Neo-brutalismo, dosis mínima ─────────────────────────────────────────
+     Sombra dura sin difuminado + borde nítido de tinta. Se aplica SOLO a la
+     acción principal y a un par de bordes de tarjeta, no a todo: la gracia del
+     recurso es que contrasta con superficies suaves. Si se usa en todas partes
+     deja de ser un acento y se vuelve el estilo. */
+  --shadow-hard: 3px 3px 0 0 var(--color-ink);
+  --shadow-hard-sm: 2px 2px 0 0 var(--color-ink);
+  --shadow-hard-brand: 3px 3px 0 0 var(--color-brand-deep);
+  --shadow-lift: 0 1px 2px rgba(22, 33, 31, 0.04), 0 8px 24px -8px rgba(22, 33, 31, 0.12);
+  --shadow-lift-lg: 0 2px 4px rgba(22, 33, 31, 0.04), 0 16px 40px -12px rgba(22, 33, 31, 0.16);
+}
+
+/* Cuerpo en 17px como base heredable, y suavizado de fuentes. */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--text-body);
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+}
+
+/* Los títulos en serif ganan bastante con ligaduras y números proporcionales. */
+.font-serif {
+  font-variant-ligatures: common-ligatures;
+  letter-spacing: -0.015em;
 }
 
 /* Hide scrollbars for categories navigation */
@@ -12,4 +137,98 @@
 .no-scrollbar {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+/* ── Componentes ───────────────────────────────────────────────────────────── */
+
+/* Botón principal con el acento neo-brutalista: relleno sólido, borde de tinta
+   y sombra dura que se hunde al pulsar. El desplazamiento de 2px hace que el
+   click se SIENTA, que es justo lo que le falta a una interfaz que parece
+   maqueta. Altura mínima 46px: por debajo de 44px el objetivo táctil incumple
+   las pautas de accesibilidad, y los botones de este sitio medían ~24px. */
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  padding: 0.75rem 1.5rem;
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  background: var(--color-brand);
+  color: #fff;
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  box-shadow: var(--shadow-hard);
+  transition: transform 140ms cubic-bezier(0.2, 0, 0.2, 1),
+              box-shadow 140ms cubic-bezier(0.2, 0, 0.2, 1),
+              background-color 140ms ease;
+}
+.btn-solid:hover {
+  background: var(--color-brand-deep);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--color-ink);
+}
+.btn-solid:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 var(--color-ink);
+}
+
+/* Variante secundaria: misma geometría, sin peso de color. */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  padding: 0.75rem 1.375rem;
+  border: 1.5px solid var(--color-ink);
+  border-radius: var(--radius-control);
+  background: #fff;
+  color: var(--color-ink);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  box-shadow: var(--shadow-hard-sm);
+  transition: transform 140ms cubic-bezier(0.2, 0, 0.2, 1),
+              box-shadow 140ms cubic-bezier(0.2, 0, 0.2, 1),
+              background-color 140ms ease;
+}
+.btn-outline:hover {
+  background: var(--color-brand-tint);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 0 var(--color-ink);
+}
+.btn-outline:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 0 var(--color-ink);
+}
+
+/* Etiqueta en versalitas. Es el único lugar donde se permite 13px, porque el
+   espaciado de letras y las mayúsculas compensan el tamaño. */
+.label-eyebrow {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* Foco visible y coherente en todo el sitio: sin esto, navegar con teclado es
+   adivinar dónde estás. */
+:where(a, button, summary, input, [tabindex]):focus-visible {
+  outline: 2.5px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respetar a quien pidió menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
