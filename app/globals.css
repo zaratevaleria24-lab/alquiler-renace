@@ -383,3 +383,25 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Apariciones del hero, en CSS ────────────────────────────────────────────
+   Sustituyen a framer-motion (motion.p / motion.h1). Motivo medido: la pagina
+   bloqueaba el hilo principal 526 ms en 3 tareas largas, y durante ese rato los
+   toques y clics no responden — es exactamente lo que se siente como "lagueo",
+   aunque el scroll vaya a 60fps.
+   El hero es lo primero que se ve, asi que animarlo con JavaScript obliga a
+   esperar la hidratacion. En CSS arranca con la primera pintura y corre en el
+   compositor, sin tocar el hilo principal. */
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise-in 700ms cubic-bezier(0.2, 0, 0.2, 1) both;
+  }
+  .rise-1 { animation-delay: 60ms; }
+  .rise-2 { animation-delay: 150ms; }
+  .rise-3 { animation-delay: 260ms; }
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+}

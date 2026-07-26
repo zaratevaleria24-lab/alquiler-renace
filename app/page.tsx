@@ -248,7 +248,7 @@ export default function Home() {
                 decide si la página se siente rápida o no. width/height fijan la
                 relación de aspecto y eliminan el salto de layout (CLS). */}
             <img
-              src="/images/photo-1507525428034.jpg"
+              src="/images/photo-1507525428034.webp"
               alt="Playa del Caribe en Isla de Margarita, Venezuela"
               width={1600}
               height={900}
@@ -265,22 +265,14 @@ export default function Home() {
                 tinta, más denso abajo, hace lo contrario: la foto conserva su
                 color y el texto se lee. */}
             <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/45 to-ink/60 flex flex-col items-center justify-center text-center px-5 pt-28 pb-44 md:pt-20 md:pb-24">
-              <motion.p
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="label-eyebrow text-white/90 mb-4 tracking-[0.2em]"
-              >
+              <p className="label-eyebrow rise rise-1 text-white/90 mb-4 tracking-[0.2em]">
                 Isla de Margarita · Venezuela
-              </motion.p>
-              <motion.h1
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
+              </p>
+              <h1
                 /* max-w-4xl en vez de 3xl: a 68px la frase se partía en dos
                    líneas gigantes y el título se comía el hero. Con más ancho
                    respira en una sola línea en escritorio. */
-                className="font-serif text-hero text-white font-normal leading-[1.03] max-w-4xl text-balance track-display drop-shadow-[0_2px_14px_rgba(35,38,36,0.55)]"
+                className="font-serif text-hero text-white font-normal leading-[1.03] max-w-4xl text-balance track-display rise rise-2 drop-shadow-[0_2px_14px_rgba(35,38,36,0.55)]"
               >
                 {/* Titular FUNCIONAL, no frase de marca. La versión anterior
                     decía "Vive la Isla como en Casa": bonita y sin una sola
@@ -290,7 +282,7 @@ export default function Home() {
                     baja a kicker. */}
                 Apartamentos y carros{' '}
                 <em className="headline-italic-light">en Isla de Margarita</em>
-              </motion.h1>
+              </h1>
 
               {/* Propuesta concreta. Sale de investigar el mercado: los dos
                   segmentos reales son la estadía corta y la MENSUAL (Airbnb
@@ -299,7 +291,7 @@ export default function Home() {
                   antelación en temporada alta. Resolver alojamiento y carro
                   junto es la diferencia frente a las plataformas de solo
                   alojamiento. */}
-              <p className="mt-7 max-w-[38rem] text-pretty text-body md:text-body-lg text-white [text-shadow:0_1px_10px_rgba(31,26,22,0.55)]">
+              <p className="rise rise-3 mt-7 max-w-[38rem] text-pretty text-body md:text-body-lg text-white [text-shadow:0_1px_10px_rgba(31,26,22,0.55)]">
                 Por noche o por mes, en dólares y hablando directo con quien te
                 recibe.
               </p>

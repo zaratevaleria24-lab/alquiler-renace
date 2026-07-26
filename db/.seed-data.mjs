@@ -1,56 +1,20 @@
-// Fuente de datos única de los listados. Se extrajo de app/page.tsx el
-// 2026-07-26 porque el sitemap y las páginas de zona necesitan los mismos
-// datos que el home, y no se pueden importar desde un componente 'use client'
-// sin arrastrar todo el árbol de React al build del servidor.
-//
-// Cada listado ahora lleva `zone` y `slug`, derivados de `location`, que es lo
-// que permite generar /alquiler/<zona> estáticamente.
 
-import {
-  Box,
-  Coffee,
-  Compass,
-  Flame,
-  Home as HomeIcon,
-  Palmtree,
-  Sparkles,
-  ShieldCheck,
-  Smile,
-  Star,
-  Umbrella,
-  Users,
-  Waves,
-  Wifi,
-  Wind,
-} from 'lucide-react';
-
-export interface Property {
-  id: string;
-  name: string;
-  location: string;
-  /** Zona de la isla, normalizada. Agrupa los listados en landings propias. */
-  zone: string;
-  /** Slug URL-safe del listado. */
-  slug: string;
-  priceText: string;
-  pricePerNight: number;
-  priceOnRequest?: boolean;
-  nightsCount: number;
-  rating: number;
-  categories: string[];
-  image: string;
-  gallery: string[];
-  description: string;
-  host: {
-    name: string;
-    avatar: string;
-    tagline: string;
-  };
-  amenities: { icon: any; name: string }[];
-  guestsAllowed: { adults: number; children: number };
-}
-
-export const AMENITIES_LUJO = [
+const Box = "Box";
+const Coffee = "Coffee";
+const Compass = "Compass";
+const Flame = "Flame";
+const HomeIcon = "HomeIcon";
+const Palmtree = "Palmtree";
+const Sparkles = "Sparkles";
+const ShieldCheck = "ShieldCheck";
+const Smile = "Smile";
+const Star = "Star";
+const Umbrella = "Umbrella";
+const Users = "Users";
+const Waves = "Waves";
+const Wifi = "Wifi";
+const Wind = "Wind";
+const AMENITIES_LUJO = [
   { icon: Waves, name: 'Piscina Infinita' },
   { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
   { icon: Wind, name: 'Aire Acondicionado' },
@@ -58,7 +22,7 @@ export const AMENITIES_LUJO = [
   { icon: Palmtree, name: 'Vista Panorámica al Mar' }
 ];
 
-export const AMENITIES_CENTRO = [
+const AMENITIES_CENTRO = [
   { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
   { icon: Wind, name: 'Aire Acondicionado' },
   { icon: Coffee, name: 'Cocina Equipada' },
@@ -66,7 +30,7 @@ export const AMENITIES_CENTRO = [
   { icon: Sparkles, name: 'TV Smart' }
 ];
 
-export const AMENITIES_LOS_GERANIOS = [
+const AMENITIES_LOS_GERANIOS = [
   { icon: Wifi, name: 'Wi-Fi Constante' },
   { icon: Wind, name: 'Aire Acondicionado' },
   { icon: ShieldCheck, name: 'Seguridad 24/7' },
@@ -77,7 +41,7 @@ export const AMENITIES_LOS_GERANIOS = [
   { icon: Coffee, name: 'Cocina Totalmente Equipada' }
 ];
 
-export const AMENITIES_PLAYA = [
+const AMENITIES_PLAYA = [
   { icon: Umbrella, name: 'Acceso Directo a Playa' },
   { icon: Wifi, name: 'Wi-Fi' },
   { icon: Wind, name: 'Aire Acondicionado' },
@@ -85,7 +49,7 @@ export const AMENITIES_PLAYA = [
   { icon: Palmtree, name: 'Terraza Vista al Mar' }
 ];
 
-const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
+const RAW_PROPERTIES= [
   {
     id: '1',
     name: 'Los Geranios A',
@@ -376,7 +340,7 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
 ];
 
 // === CATEGORIES METADATA ===
-export const CATEGORIES = [
+const CATEGORIES = [
   { id: 'Todos', label: 'Todos', icon: Compass },
   { id: 'Frente al Mar', label: 'Frente al Mar', icon: Waves },
   { id: 'Playa', label: 'Playa', icon: Umbrella },
@@ -391,60 +355,5 @@ export const CATEGORIES = [
 // === DERIVACIÓN DE ZONA Y SLUG ===
 
 /** Quita acentos y deja un slug apto para URL. */
-export function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
-/**
- * Saca la zona del campo `location`. Los valores vienen como
- * "Pampatar, Margarita" o "Urb. Maneiro, Pampatar, Margarita": se descarta el
- * sufijo "Margarita" y se toma el último segmento restante, que es la zona
- * reconocible de la isla (y no la urbanización concreta).
- */
-function zoneFromLocation(location: string): string {
-  const parts = location
-    .split(',')
-    .map((p) => p.trim())
-    .filter((p) => p && p.toLowerCase() !== 'margarita');
-  return parts[parts.length - 1] ?? 'Isla de Margarita';
-}
-
-export const PROPERTIES: Property[] = RAW_PROPERTIES.map((p) => ({
-  ...p,
-  zone: zoneFromLocation(p.location),
-  slug: slugify(p.name),
-}));
-
-export interface Zone {
-  name: string;
-  slug: string;
-  properties: Property[];
-  /** Precio más bajo con tarifa publicada; null si todas son "consultar". */
-  minPrice: number | null;
-}
-
-/** Zonas con al menos un listado, ordenadas por cantidad de listados. */
-export const ZONES: Zone[] = Object.values(
-  PROPERTIES.reduce<Record<string, Zone>>((acc, property) => {
-    const slug = slugify(property.zone);
-    acc[slug] ??= { name: property.zone, slug, properties: [], minPrice: null };
-    acc[slug].properties.push(property);
-    return acc;
-  }, {}),
-)
-  .map((zone) => {
-    const prices = zone.properties
-      .filter((p) => !p.priceOnRequest && p.pricePerNight > 0)
-      .map((p) => p.pricePerNight);
-    return { ...zone, minPrice: prices.length ? Math.min(...prices) : null };
-  })
-  .sort((a, b) => b.properties.length - a.properties.length || a.name.localeCompare(b.name));
-
-export function getZone(slug: string): Zone | undefined {
-  return ZONES.find((z) => z.slug === slug);
-}
+export { RAW_PROPERTIES, CATEGORIES, AMENITIES_LUJO, AMENITIES_CENTRO, AMENITIES_LOS_GERANIOS, AMENITIES_PLAYA };

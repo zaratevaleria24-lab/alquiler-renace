@@ -8,3 +8,7 @@ coverage/
 
 # Artefacto de tsc --noEmit (se regenera solo)
 *.tsbuildinfo
+
+# Fotos subidas desde el CMS: son datos, no codigo. Van al backup, no al repo.
+uploads/
+.env
