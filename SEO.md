@@ -6,42 +6,46 @@ en los diez resultados azules.
 
 ---
 
-## 🚨 Lo más importante: Cloudflare está bloqueando a los crawlers de IA
+## ✅ Resuelto: el bloqueo de crawlers de IA en Cloudflare
 
-**Esto hay que arreglarlo en el panel de Cloudflare. No se puede tocar desde el
-servidor, y mientras siga así el trabajo de GEO no rinde.**
+**Estado: corregido por la dueña el 2026-07-26. Verificado.**
 
-Cloudflare tiene activada su *Content Signals Policy* / AI Crawl Control, que
-**inyecta su propio contenido delante de la `robots.txt` del sitio**. Lo que
-sirve el dominio hoy son 116 líneas: las primeras 61 son de Cloudflare, y de la
-62 en adelante viene la que genera Next.
+Cloudflare tenía activada su *Content Signals Policy* / AI Crawl Control, que
+**inyectaba su propio contenido delante de la `robots.txt` del sitio**. El
+dominio servía 116 líneas: las primeras 61 de Cloudflare y de la 62 en adelante
+la que genera Next. En el bloque de Cloudflare había `Disallow: /` para
+Amazonbot, Applebot-Extended, Bytespider, CCBot, **ClaudeBot**, Google-Extended,
+**GPTBot** y meta-externalagent.
 
-En el bloque de Cloudflare hay `Disallow: /` para:
+O sea: ChatGPT, Claude y Gemini/AI Overviews estaban bloqueados. Nuestra
+`robots.txt` los permitía, pero quedaba en segundo lugar y con reglas
+contradictorias para el mismo user-agent, que cada crawler resuelve a su manera.
 
-```
-Amazonbot · Applebot-Extended · Bytespider · CCBot · ClaudeBot
-CloudflareBrowserRenderingCrawler · Google-Extended · GPTBot · meta-externalagent
-```
+Tras desactivarlo, el dominio sirve exactamente nuestras 55 líneas, con 17
+grupos de user-agent declarados y ningún `Disallow: /`. Se comprobó además que
+Cloudflare no les cierra la puerta por otra vía —protección de bots—: GPTBot,
+ClaudeBot, PerplexityBot, Googlebot y bingbot reciben los mismos 79.806 bytes
+que un navegador, con el FAQPage schema, los 8 pares pregunta/respuesta y los 9
+enlaces a zonas dentro del HTML.
 
-Es decir: **GPTBot (ChatGPT), ClaudeBot y Google-Extended (Gemini y AI
-Overviews) están bloqueados**. Nuestra `robots.txt` los permite explícitamente,
-pero queda en segundo lugar y con reglas contradictorias para el mismo
-user-agent: cada crawler resuelve el empate a su manera y varios se quedan con
-el primer grupo que encuentran, o sea el `Disallow`.
-
-Ojo con un matiz: `Google-Extended` **no** afecta al índice normal de Google
-—eso es `Googlebot`, que sí está permitido— solo a Gemini y los AI Overviews.
-El SEO clásico no está en riesgo; el GEO sí.
-
-**Cómo arreglarlo:** panel de Cloudflare → dominio `margaritarenace.com.ve` →
-sección **AI Crawl Control** (según el plan puede aparecer bajo *Security* →
-*Bots*) → desactivar la gestión automática de `robots.txt` / poner las señales
-de contenido `ai-train` y `search` en permitido. Al terminar, verificar con:
+**Si en algún momento el sitio deja de aparecer en respuestas de IA, revisar
+esto primero:**
 
 ```bash
-curl -s https://margaritarenace.com.ve/robots.txt | head -5
-# Debe empezar en "User-Agent: *", sin el preámbulo de Content Signals.
+curl -s "https://margaritarenace.com.ve/robots.txt?x=$RANDOM" | head -5
+# Debe empezar en "User-Agent: *". Si aparece un preámbulo sobre
+# "Content Signals", Cloudflare volvió a activar la inyección.
+
+# Y que no les sirva un desafío en vez de la página:
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -A "Mozilla/5.0 (compatible; GPTBot/1.2; +https://openai.com/gptbot)" \
+  https://margaritarenace.com.ve/
+# Debe ser 200.
 ```
+
+Matiz útil para el futuro: `Google-Extended` solo afecta a Gemini y a los AI
+Overviews, **no** al índice normal de Google (ese es `Googlebot`). Bloquearlo no
+hunde el SEO clásico, solo el GEO.
 
 ---
 
@@ -126,10 +130,7 @@ es solo client-side y no tiene URL propia, así que declararla sería falso.
 
 Ordenados por impacto.
 
-1. **Desbloquear los crawlers de IA en Cloudflare** (ver arriba). Sin esto no
-   hay GEO.
-
-2. **Los 11 listados de relleno son el mayor lastre de SEO.** Anfitriones
+1. **Los 11 listados de relleno son el mayor lastre de SEO.** Anfitriones
    inventados, fotos de stock y ratings falsos. El sistema de contenido útil de
    Google apunta justo a esto, y en GEO es peor: los motores que verifican datos
    descubren que esas propiedades no existen y dejan de citar el sitio. Lo
@@ -137,29 +138,29 @@ Ordenados por impacto.
    listados a medida que existan. Un sitio con una propiedad real posiciona
    mejor que uno con doce inventadas.
 
-3. **Datos de contacto reales** (`CONTACT` en `lib/site.ts`, hoy todo en
+2. **Datos de contacto reales** (`CONTACT` en `lib/site.ts`, hoy todo en
    `null`): teléfono, WhatsApp, correo y dirección. El SEO local depende de un
    NAP consistente entre el sitio, Google y los directorios. No se inventaron a
    propósito. Al llenarlos se propagan solos al JSON-LD.
 
-4. **Google Business Profile.** Es lo que mete un negocio local en el mapa y en
+3. **Google Business Profile.** Es lo que mete un negocio local en el mapa y en
    el paquete local, y no se puede hacer desde el código. Para un alquiler
    turístico en Margarita probablemente pesa más que cualquier otra acción de
    esta lista.
 
-5. **Google Search Console y Bing Webmaster Tools.** Verificar el dominio y
+4. **Google Search Console y Bing Webmaster Tools.** Verificar el dominio y
    enviar el sitemap. El hueco para los códigos está comentado en
    `app/layout.tsx`. Search Console además es la única forma de ver qué
    búsquedas traen tráfico de verdad.
 
-6. **Pasar Cloudflare a SSL "Full (strict)".** No es SEO, pero ya es seguro:
+5. **Pasar Cloudflare a SSL "Full (strict)".** No es SEO, pero ya es seguro:
    el origen tiene certificado válido de Let's Encrypt.
 
-7. **Fotos reales.** Dos imágenes son sustitutos de fotos que Unsplash borró
+6. **Fotos reales.** Dos imágenes son sustitutos de fotos que Unsplash borró
    (ver `DESPLIEGUE.md`), y las de stock no generan confianza en un alquiler.
    Las fotos propias también son las que pueden posicionar en Google Imágenes.
 
-8. **Búsqueda con URL propia** (`/?zona=...&huespedes=...`). Haría la búsqueda
+7. **Búsqueda con URL propia** (`/?zona=...&huespedes=...`). Haría la búsqueda
    enlazable y compartible, y habilitaría declarar `SearchAction` de forma
    honesta.
 
