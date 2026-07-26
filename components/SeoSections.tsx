@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ZONES } from '@/lib/listings';
+import type { Zone } from '@/lib/types';
 import { HOME_FAQ } from '@/lib/faq';
 import { faqSchema, graph } from '@/lib/schema';
 
@@ -15,7 +15,7 @@ import { faqSchema, graph } from '@/lib/schema';
 //     mueve la aguja en GEO: los motores generativos citan respuestas directas
 //     y autocontenidas, y esto se las sirve en bandeja.
 
-export function ZoneLinksSection() {
+export function ZoneLinksSection({ zones }: { zones: Zone[] }) {
   return (
     <section
       aria-labelledby="zonas-de-la-isla"
@@ -34,7 +34,7 @@ export function ZoneLinksSection() {
       </p>
 
       <ul className="block-gap grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {ZONES.map((zone) => (
+        {zones.map((zone) => (
           <li key={zone.slug}>
             <Link
               href={`/alquiler/${zone.slug}`}

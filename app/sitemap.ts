@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { ZONES } from '@/lib/listings';
+import { getZones } from '@/lib/queries';
 import { absoluteUrl } from '@/lib/site';
 
 // Genera /sitemap.xml en build, a partir de las mismas zonas que producen las
@@ -9,7 +9,8 @@ import { absoluteUrl } from '@/lib/site';
 // lastModified sale de la fecha de build, no de Date.now() en request: el sitio
 // es estático y todas las páginas se regeneran en el mismo build.
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const ZONES = await getZones();
   const buildDate = new Date();
 
   return [

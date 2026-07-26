@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ZONES, getZone } from '@/lib/listings';
+import { getZone, getZones } from '@/lib/queries';
 import { SITE, absoluteUrl } from '@/lib/site';
-import { getZoneCopy } from '@/lib/zones-content';
+
 import {
   breadcrumbSchema,
   graph,
@@ -26,8 +26,12 @@ import {
 
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return ZONES.map((zone) => ({ zona: zone.slug }));
+export async function generateStaticParams() {
+  // Consulta en build: las rutas estáticas salen de las zonas que TIENEN
+  // inventario publicado (getZones filtra las vacías). Si se publica una
+  // propiedad en una zona nueva, aparece su landing al revalidar.
+  const zones = await getZones();
+  return zones.map((zone) => ({ zona: zone.slug }));
 }
 
 export async function generateMetadata({
@@ -36,16 +40,16 @@ export async function generateMetadata({
   params: Promise<{ zona: string }>;
 }): Promise<Metadata> {
   const { zona } = await params;
-  const zone = getZone(zona);
+  const zone = await getZone(zona);
   if (!zone) return {};
 
-  const copy = getZoneCopy(zone.slug, zone.name);
+  
   const path = `/alquiler/${zone.slug}`;
   const title = `Alquiler de Apartamentos en ${zone.name}, Isla de Margarita`;
 
   return {
     title,
-    description: copy.summary,
+    description: zone.summary,
     alternates: { canonical: path },
     openGraph: {
       type: 'website',
@@ -53,13 +57,13 @@ export async function generateMetadata({
       url: absoluteUrl(path),
       siteName: SITE.name,
       title,
-      description: copy.summary,
+      description: zone.summary,
       images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description: copy.summary,
+      description: zone.summary,
       images: ['/opengraph-image'],
     },
   };
@@ -71,19 +75,19 @@ export default async function ZonaPage({
   params: Promise<{ zona: string }>;
 }) {
   const { zona } = await params;
-  const zone = getZone(zona);
+  const zone = await getZone(zona);
   if (!zone) notFound();
 
-  const copy = getZoneCopy(zone.slug, zone.name);
+  
   const path = `/alquiler/${zone.slug}`;
-  const otherZones = ZONES.filter((z) => z.slug !== zone.slug);
+  const otherZones = (await getZones()).filter((z) => z.slug !== zone.slug);
 
   const jsonLd = graph(
     breadcrumbSchema([
       { name: 'Inicio', path: '/' },
       { name: `Alquiler en ${zone.name}`, path },
     ]),
-    zonePlaceSchema(zone, copy),
+    zonePlaceSchema(zone, { coast: zone.coast }),
     zoneItemListSchema(zone, path),
   );
 
@@ -122,7 +126,7 @@ export default async function ZonaPage({
               <em className="headline-italic-light">Isla de Margarita</em>
             </h1>
             <p className="mt-6 max-w-2xl text-body-lg text-white/85">
-              {copy.summary}
+              {zone.summary}
             </p>
 
             <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
@@ -147,7 +151,7 @@ export default async function ZonaPage({
                 <dt className="label-eyebrow text-accent">
                   Ubicación
                 </dt>
-                <dd className="mono-data mt-2 text-title-sm">{copy.coast}</dd>
+                <dd className="mono-data mt-2 text-title-sm">{zone.coast}</dd>
               </div>
             </dl>
           </div>
@@ -162,18 +166,18 @@ export default async function ZonaPage({
               Cómo es <em className="headline-italic">{zone.name}</em>
             </h2>
             <div className="mt-7 max-w-2xl space-y-5 text-body text-ink-soft leading-relaxed">
-              {copy.body.map((paragraph) => (
+              {zone.body.map((paragraph) => (
                 <p key={paragraph.slice(0, 40)}>{paragraph}</p>
               ))}
             </div>
 
-            {copy.nearby.length > 0 && (
+            {zone.nearby.length > 0 && (
               <div className="mt-10 rounded-card border border-line bg-white p-7">
                 <h3 className="font-serif text-title-sm text-brand-deep font-semibold">
                   Qué hay cerca
                 </h3>
                 <ul className="mt-4 grid gap-2.5 sm:grid-cols-2 text-body text-ink-soft">
-                  {copy.nearby.map((item) => (
+                  {zone.nearby.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span aria-hidden="true" className="text-brand">
                         ·
@@ -183,7 +187,7 @@ export default async function ZonaPage({
                   ))}
                 </ul>
                 <p className="mt-5 text-body text-ink-muted">
-                  Ideal para {copy.bestFor}.
+                  Ideal para {zone.bestFor}.
                 </p>
               </div>
             )}

@@ -20,7 +20,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { CONTACT, SITE, absoluteUrl } from './site';
-import type { Property, Zone } from './listings';
+import type { Property, Zone } from './types';
 
 type Json = Record<string, unknown>;
 

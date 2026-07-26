@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ZONES } from '@/lib/listings';
+import { getZones } from '@/lib/queries';
 import { CONTACT, SITE } from '@/lib/site';
 
 // Footer del sitio. Deliberadamente pequeño: tres franjas finas y nada más.
@@ -13,7 +13,10 @@ import { CONTACT, SITE } from '@/lib/site';
 // en null, así que esa franja simplemente no se renderiza en vez de mostrar un
 // teléfono de relleno.
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  // Server Component: consulta directa. Va en el layout, así que las 9 zonas
+  // aparecen en el footer de TODAS las páginas y su enlazado interno viaja con él.
+  const zones = await getZones();
   const year = 2026;
 
   return (
@@ -54,7 +57,7 @@ export function SiteFooter() {
         <nav aria-label="Zonas de la isla" className="mt-12 border-t border-line pt-8">
           <h2 className="label-eyebrow text-ink-subtle">Zonas de la isla</h2>
           <ul className="mt-4 flex flex-wrap gap-x-6 gap-y-2.5">
-            {ZONES.map((zone) => (
+            {zones.map((zone) => (
               <li key={zone.slug}>
                 <Link
                   href={`/alquiler/${zone.slug}`}
