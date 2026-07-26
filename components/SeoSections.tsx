@@ -19,31 +19,31 @@ export function ZoneLinksSection() {
   return (
     <section
       aria-labelledby="zonas-de-la-isla"
-      className="mt-24 border-t border-line pt-14"
+      className="section-gap reveal border-t border-line pt-14 md:pt-20"
     >
       <h2
         id="zonas-de-la-isla"
         className="font-serif text-headline text-brand-deep font-medium"
       >
-        Alquiler por zonas de la Isla de Margarita
+        Alquiler por zonas{' '}<em className="headline-italic">de la Isla de Margarita</em>
       </h2>
-      <p className="mt-3 max-w-2xl text-body text-ink/75 leading-relaxed">
+      <p className="mt-5 max-w-2xl text-body-lg text-ink-muted leading-relaxed">
         Cada zona de la isla tiene su carácter: bahías de agua calma en el sur,
         olas en la costa atlántica, viento constante en El Yaque y atardeceres en
         Juan Griego. Elige la que encaja con tu viaje.
       </p>
 
-      <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="block-gap grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {ZONES.map((zone) => (
           <li key={zone.slug}>
             <Link
               href={`/alquiler/${zone.slug}`}
               className="group flex h-full flex-col rounded-card border border-line bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink hover:shadow-hard-sm"
             >
-              <span className="font-serif text-title-sm text-brand font-semibold group-hover:underline">
+              <span className="font-serif text-title-sm text-brand-deep font-normal track-title group-hover:underline">
                 Alquiler en {zone.name}
               </span>
-              <span className="mt-2 text-meta text-ink/60">
+              <span className="mono-data mt-3 text-ink-muted">
                 {zone.properties.length}{' '}
                 {zone.properties.length === 1
                   ? 'alojamiento'
@@ -62,7 +62,7 @@ export function FaqSection() {
   return (
     <section
       aria-labelledby="preguntas-frecuentes"
-      className="mt-24 border-t border-line pt-14"
+      className="section-gap reveal border-t border-line pt-14 md:pt-20"
     >
       {/* FAQPage schema: habilita el rich result de preguntas en Google y le da
           a los motores de IA texto ya estructurado en pares pregunta/respuesta. */}
@@ -75,13 +75,13 @@ export function FaqSection() {
         id="preguntas-frecuentes"
         className="font-serif text-headline text-brand-deep font-medium"
       >
-        Preguntas frecuentes sobre alquilar en Isla de Margarita
+        Preguntas frecuentes{' '}<em className="headline-italic">sobre alquilar aquí</em>
       </h2>
 
       {/* <details> nativo en vez de acordeón con JavaScript: el contenido está
           en el HTML aunque no se haya hidratado nada, así que los crawlers lo
           leen completo y no cuesta ni un byte de JS. */}
-      <div className="mt-8 divide-y divide-line border-y border-line">
+      <div className="block-gap divide-y divide-line border-y border-line">
         {HOME_FAQ.map((item) => (
           <details key={item.q} className="group py-6">
             <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-5 text-left font-medium text-ink marker:content-none [&::-webkit-details-marker]:hidden">
@@ -111,15 +111,15 @@ export function AboutIslandSection() {
   return (
     <section
       aria-labelledby="sobre-la-isla"
-      className="mt-24 border-t border-line pt-14 pb-8"
+      className="section-gap reveal rounded-panel bg-paper-warm px-6 py-14 md:px-12 md:py-20"
     >
       <h2
         id="sobre-la-isla"
         className="font-serif text-headline text-brand-deep font-medium"
       >
-        Alquilar apartamento en Isla de Margarita
+        Alquilar apartamento{' '}<em className="headline-italic">en Isla de Margarita</em>
       </h2>
-      <div className="mt-5 grid gap-6 md:grid-cols-2 text-body leading-relaxed text-ink/80">
+      <div className="block-gap grid gap-8 md:gap-12 md:grid-cols-2 text-body leading-relaxed text-ink-soft">
         <div className="space-y-4">
           <p>
             La Isla de Margarita es la principal del estado Nueva Esparta, en el

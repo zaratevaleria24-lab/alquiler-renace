@@ -1,20 +1,42 @@
 import type {Metadata} from 'next';
-import { Fraunces, Jost } from 'next/font/google';
+import { Inter, JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 import './globals.css'; // Global styles
 import { SITE } from '@/lib/site';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
+import { SiteFooter } from '@/components/SiteFooter';
+import { SmoothScroll } from '@/components/SmoothScroll';
 
-const fraunces = Fraunces({
+// Sistema de TRES tipografías con roles separados (ver REFERENCIA-DISENO.md).
+// Antes eran dos: Fraunces (una serif decorativa, algo "wonky") y Jost (una sans
+// geométrica). Se cambian por un trío editorial más sobrio y, sobre todo, se
+// suma la CURSIVA de la serif, que es el sello visual del sistema: cada titular
+// se parte en romana + cursiva dentro de la misma frase.
+const sourceSerif = Source_Serif_4({
   subsets: ['latin'],
   variable: '--font-serif',
-  weight: ['500', '600', '700'],
+  weight: ['300', '400', '600'],
+  // La cursiva es imprescindible: sin ella no existe el recurso del titular
+  // partido, que es de donde sale la personalidad.
+  style: ['normal', 'italic'],
   display: 'swap',
 });
 
-const jost = Jost({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['300', '400', '500', '600'],
+  // Pesos 400 y 500 nada más. La referencia prohíbe 600/700 en texto corrido, y
+  // con razón: el peso alto en párrafos es lo que hacía sentir la página densa.
+  weight: ['400', '500'],
+  display: 'swap',
+});
+
+// Monoespaciada para cifras y metadatos: precios, capacidad, fechas, coordenadas.
+// Es lo que da el aire "técnico y ordenado" y, de paso, alinea los números en
+// columna —una tabla de precios en sans proporcional nunca cuadra.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  weight: ['400', '500'],
   display: 'swap',
 });
 
@@ -114,7 +136,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     <html
       // es-VE en vez de es: es una señal geográfica real, no solo de idioma.
       lang={SITE.locale}
-      className={`${fraunces.variable} ${jost.variable}`}
+      className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable}`}
     >
       <head>
         {/* Identidad de entidad del sitio: un solo @graph presente en todas
@@ -126,8 +148,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           }}
         />
       </head>
-      <body className="bg-white text-[#1A1A1A] font-sans font-light antialiased" suppressHydrationWarning>
+      {/* Fondo hueso, no blanco puro: la mitad del efecto de la paleta viene de
+          que las superficies sean cálidas. El teal sobre #FFF se ve barato;
+          sobre arena, no. */}
+      <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
+        <SmoothScroll />
         {children}
+        {/* En el layout, no en cada página: aparece igual en el home y en las
+            9 landings de zona, y su enlazado interno viaja con él. */}
+        <SiteFooter />
       </body>
     </html>
   );

@@ -25,37 +25,76 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  --font-serif: var(--font-serif), Georgia, serif;
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* ── Color ────────────────────────────────────────────────────────────────
-     Tinta con una pizca de verde en vez de negro puro: sobre fondo cálido, el
-     #000 se ve sucio y duro. Rampa completa de grises para que la jerarquía de
-     texto se construya con color y no solo con tamaño. */
-  --color-ink: #16211f;
-  --color-ink-soft: #3d4a47;
-  --color-ink-muted: #5f6d6a;
-  --color-ink-subtle: #8b9794;
-  --color-ink-faint: #b4bdba;
+  /* ── Color: "Sal y Mar" — teal apagado sobre arena ────────────────────────
+     Revisión del 2026-07-26 (tercera iteración). Se probó una paleta terracota
+     y no convenció: el teal es la identidad de la marca y se vuelve a él.
 
-  /* Teal de marca, profundizado y desaturado. El #007380 anterior se conserva
-     como referencia de identidad pero corrido hacia un verde-petróleo que lee
-     más caro y menos "cian de stock". */
-  --color-brand: #0a5c63;
-  --color-brand-deep: #073c41;
-  --color-brand-soft: #d9e7e7;
-  --color-brand-tint: #eef4f3;
+     PERO EL DIAGNÓSTICO DEL PROBLEMA ORIGINAL NO ERA EL TEAL, ERA LA
+     SATURACIÓN. El sitio tenía #007380 en superficies grandes más dos cianes
+     de saturación alta (#21BBBB, #59CCCC): ese es el "teal por defecto" que
+     delata una plantilla generada.
 
-  /* Acento vivo, SOLO para detalles mínimos (subrayados, puntos, focus).
-     El anterior #21BBBB se usaba en superficies grandes y saturaba la página. */
-  --color-accent: #2f9d96;
-  --color-coral: #d1503c;
+     Lo que hace que este teal se lea diseñado y no por defecto:
+       1. Desaturado y con la luminosidad bajada — verde mar polvoriento, no
+          turquesa de folleto.
+       2. Sobre superficies CÁLIDAS de hueso y arena. El contraste frío/cálido
+          es el truco central: el mismo teal sobre blanco puro se ve barato,
+          sobre arena se ve caro. El blanco #FFF era parte del problema.
+       3. Acento cálido de ocre para los detalles mínimos, en vez de un cian
+          más brillante. Frío para las superficies, cálido para los destellos.
+       4. Nunca en superficie ancha saturada: la barra usa un teal profundo
+          casi neutro, no el color de acción. */
 
-  /* Superficies. El crema baja de amarillo y sube de neutralidad. */
-  --color-paper: #fbf9f5;
-  --color-paper-warm: #f4efe6;
-  --color-line: #e2dbd0;
-  --color-line-strong: #cbc2b4;
+  /* CONTRASTE — cuarta iteración, 2026-07-26.
+     La queja era que la página se sentía floja de contraste. La causa no era
+     incumplir accesibilidad (el texto ya pasaba de sobra) sino falta de
+     PROFUNDIDAD: la tinta era un gris verdoso medio y el teal era claro, así
+     que todo flotaba en un rango tonal estrecho. La referencia de diseño lo
+     resuelve con tinta casi negra y cálida (#1A1714 en su variante clara), y
+     esa es la corrección de fondo: bajar la tinta y profundizar el color de
+     acción, para que exista rango entre lo más claro y lo más oscuro. */
+
+  /* Tinta casi negra y CÁLIDA. Nunca gris azulado: sobre arena se ve sucio. */
+  --color-ink: #1f1a16;
+  --color-ink-soft: #4a4239;
+  --color-ink-muted: #6a6157;
+  --color-ink-subtle: #8f867b;
+  --color-ink-faint: #b8b0a4;
+
+  /* Color de acción: mar profundo, corrido hacia el azul respecto al teal
+     anterior (#3d7370, que quedaba claro y sin peso). Más oscuro = más rango
+     tonal contra el hueso del fondo, que es de donde sale la sensación de
+     contraste. */
+  --color-brand: #22565d;
+  --color-brand-deep: #143b41;
+  --color-brand-soft: #d5e3e4;
+  --color-brand-tint: #ecf2f2;
+
+  /* Cursiva de los titulares: el tono cálido intermedio de la referencia
+     (#6B5F52 en su variante clara). Es el color del "sello" romana/cursiva. */
+  --color-italic: #6b5f52;
+
+  /* Superficie oscura del chrome (navbar): teal casi neutro, muy profundo. */
+  --color-earth: #24393a;
+
+  /* Acento CÁLIDO de ocre para destellos mínimos: el nombre en la barra,
+     filetes, versalitas. Es el contrapunto que evita el look monocromo frío. */
+  --color-accent: #b98a63;
+
+  /* Apoyos secundarios, solo en detalles. */
+  --color-sage: #8a9578;
+  --color-sea: #6e9b98;
+  --color-coral: #c0563c;
+
+  /* Superficies cálidas: hueso y arena. Esto es la mitad del efecto. */
+  --color-paper: #f7f2ea;
+  --color-paper-warm: #ede3d4;
+  --color-line: #ddd5c6;
+  --color-line-strong: #c6bca9;
 
   /* ── Tipografía ───────────────────────────────────────────────────────────
      Cuerpo en 17px. Los títulos son fluidos con clamp() para que escalen con
@@ -88,10 +127,16 @@
   --text-title--line-height: 1.25;
   --text-headline: clamp(1.75rem, 3.2vw, 2.125rem);
   --text-headline--line-height: 1.2;
-  --text-display: clamp(2.5rem, 6vw, 4.25rem);
-  --text-display--line-height: 1.04;
+  --text-display: clamp(2.25rem, 4.6vw, 3.25rem);
+  --text-display--line-height: 1.08;
+  /* Titular del hero. Menos extremo que el display anterior (llegaba a 68px y
+     partía la frase en dos líneas descomunales que se comían el hero). */
+  --text-hero: clamp(2.25rem, 5.2vw, 3.5rem);
+  --text-hero--line-height: 1.05;
 
-  --tracking-label: 0.16em;
+  /* +0.10em, el valor de la referencia. El 0.16em anterior separaba tanto que
+     las etiquetas se leian como letras sueltas. */
+  --tracking-label: 0.10em;
 
   /* ── Forma ────────────────────────────────────────────────────────────────
      Radios contenidos. La pastilla completa queda reservada para avatares y
@@ -113,9 +158,32 @@
   --shadow-lift-lg: 0 2px 4px rgba(22, 33, 31, 0.04), 0 16px 40px -12px rgba(22, 33, 31, 0.16);
 }
 
+/* ── Ritmo vertical ──────────────────────────────────────────────────────────
+   El "se siente moderno" de los sitios tipo Tulum es sobre todo AIRE: bloques
+   separados por mucho espacio en blanco, de modo que cada sección se lee sola.
+   Estas variables centralizan ese ritmo para no repartir mt-24 a mano. */
+:root {
+  --space-section: clamp(5rem, 11vw, 9.5rem);
+  --space-block: clamp(2.5rem, 5vw, 4rem);
+}
+
+.section-gap {
+  margin-top: var(--space-section);
+}
+.block-gap {
+  margin-top: var(--space-block);
+}
+
 /* Cuerpo en 17px como base heredable, y suavizado de fuentes. */
 html {
   -webkit-text-size-adjust: 100%;
+  /* NO se pone `scroll-behavior: smooth` acá: Lenis interpola el scroll por su
+     cuenta y los dos animando a la vez produce tirones. Es lo que la propia doc
+     de Lenis advierte. Ver components/SmoothScroll.tsx.
+     scroll-padding-top sí se queda: compensa la navbar fija para que al saltar
+     a una sección el título no quede TAPADO por la barra, y además sigue
+     valiendo cuando Lenis no corre (prefers-reduced-motion). */
+  scroll-padding-top: 6.5rem;
 }
 
 body {
@@ -124,10 +192,53 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Los títulos en serif ganan bastante con ligaduras y números proporcionales. */
+/* Los títulos en serif ganan bastante con ligaduras. */
 .font-serif {
   font-variant-ligatures: common-ligatures;
+}
+
+/* ── EL SELLO: titular partido en romana + cursiva ───────────────────────────
+   Según la referencia de diseño, esto es "el 80% de la personalidad". La regla:
+   la primera mitad del titular va en serif romana; la segunda, en la MISMA
+   serif pero en cursiva, peso más ligero y color cálido intermedio. Nunca
+   cambia de tamaño ni lleva subrayado — solo estilo, peso y color.
+
+   Se usa como <em className="headline-italic"> dentro del propio h1/h2, así que
+   además aporta énfasis semántico real y no solo decoración. */
+.headline-italic {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--color-italic);
+}
+
+/* Sobre foto o fondo oscuro la cursiva necesita su propio tono claro y cálido,
+   porque el #6b5f52 desaparecería. */
+.headline-italic-light {
+  font-style: italic;
+  font-weight: 300;
+  color: #f2e6d4;
+}
+
+/* Tracking de display, con los valores de la referencia. Un titular grande con
+   tracking normal se ve suelto y amateur; el negativo lo compacta y le da el
+   aire editorial. Al revés que las etiquetas pequeñas, que van abiertas. */
+.track-display {
+  letter-spacing: -0.03em;
+}
+.track-headline {
+  letter-spacing: -0.025em;
+}
+.track-title {
   letter-spacing: -0.015em;
+}
+
+/* Cifras y metadatos en monoespaciada con tracking abierto: precios, capacidad,
+   fechas. Alinea los números en columna y aporta el aire ordenado. */
+.mono-data {
+  font-family: var(--font-mono);
+  font-size: var(--text-ui);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Hide scrollbars for categories navigation */
@@ -207,8 +318,8 @@ body {
 /* Etiqueta en versalitas. Es el único lugar donde se permite 13px, porque el
    espaciado de letras y las mayúsculas compensan el tamaño. */
 .label-eyebrow {
-  font-size: var(--text-micro);
-  font-weight: 600;
+  font-size: 0.71875rem;   /* 11.5px, valor de la referencia */
+  font-weight: 500;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
@@ -219,6 +330,46 @@ body {
   outline: 2.5px solid var(--color-brand);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* ── Revelado al hacer scroll ────────────────────────────────────────────────
+   Esto es lo que se pidió como "scroll moderno tipo Locomotive", resuelto sin
+   librería.
+
+   POR QUÉ NO LOCOMOTIVE SCROLL: secuestra el scroll nativo moviendo un
+   contenedor con transforms. Consecuencias reales: rompe la barra de scroll del
+   sistema, pelea con position:sticky, estorba a lectores de pantalla y a la
+   navegación por teclado, y suma ~30KB de JS. En equipos lentos —y con la
+   conexión que hay en Venezuela— se siente PEOR que el scroll nativo, que va
+   acelerado por el compositor del navegador.
+
+   Acá se usan animaciones dirigidas por scroll de CSS: corren fuera del hilo
+   principal, cuestan cero JS y no tocan el scroll del usuario.
+
+   La doble guarda importa: el estado inicial oculto vive DENTRO del
+   @supports. Si el navegador no soporta animation-timeline, nunca se aplica
+   opacity:0 y el contenido simplemente se ve. Sin esa precaución, un navegador
+   viejo dejaría media página invisible para siempre. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      /* Entra mientras el bloque recorre el primer tramo del viewport. */
+      animation-range: entry 5% entry 45%;
+    }
+
+    @keyframes reveal-in {
+      from {
+        opacity: 0;
+        transform: translateY(1.75rem);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
 }
 
 /* Respetar a quien pidió menos movimiento. */

@@ -161,7 +161,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-ink pb-24 relative overflow-x-hidden">
+    <div className="min-h-screen bg-paper text-ink pb-24 relative overflow-x-hidden">
 
       {/* 1. NAVBAR (Fija Arriba) */}
       <nav id="navbar-floating" className="fixed top-0 left-0 right-0 z-40 px-4 pt-4 md:px-8 md:pt-6">
@@ -172,7 +172,11 @@ export default function Home() {
             vertical, así que acá manda la densidad. Los 44px táctiles siguen
             valiendo para las acciones del contenido, no para el chrome de
             escritorio. */}
-        <div className="bg-brand text-white rounded-panel px-5 py-3 md:px-7 md:py-3 shadow-[0_6px_24px_-6px_rgba(22,33,31,0.28)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
+        {/* Fondo `earth` (tierra profunda), no `brand`: la terracota es el color
+            de ACCIÓN del sitio. Usarla en una barra a todo lo ancho la gasta y
+            deja de señalar "esto se pulsa". La tierra sostiene el mismo aire
+            cálido sin competir con los botones. */}
+        <div className="bg-earth text-white rounded-panel px-5 py-3 md:px-7 md:py-3 shadow-[0_6px_24px_-8px_rgba(43,33,27,0.4)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
 
           {/* Izquierda: Logo + Nombre */}
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={handleResetSearch}>
@@ -225,8 +229,18 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
         
         {/* 2. HERO a pantalla completa, de borde a borde */}
-        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-20">
-          <section id="hero-banner" className="relative w-full overflow-hidden" style={{ height: '580px' }}>
+        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-44 md:mb-24">
+          {/* Altura de pantalla completa. Se usa `svh` (small viewport height)
+              y no `vh` ni `dvh`: en móvil, `100vh` mide como si la barra del
+              navegador no existiera —el hero queda cortado— y `100dvh` provoca
+              un salto de layout cuando la barra se oculta al desplazar. `svh`
+              toma la ventana con la barra visible: nunca se corta y nunca
+              salta. Tope de 900px para que en monitores altos el hero no se
+              vuelva un desierto vertical. */}
+          <section
+            id="hero-banner"
+            className="relative w-full overflow-hidden h-[100svh] max-h-[900px] min-h-[620px]"
+          >
             {/* Hero background image: playa de Margarita */}
             {/* Esta imagen es la LCP de la página. Va con fetchPriority alto y
                 sin lazy para que el navegador la pida de inmediato: en
@@ -244,13 +258,18 @@ export default function Home() {
               className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-[1.03]"
               referrerPolicy="no-referrer"
             />
-            {/* Overlay con degradado color Caribe */}
-            <div className="absolute inset-0 bg-gradient-to-b from-brand/50 via-accent/30 to-brand/60 flex flex-col items-center justify-center text-center px-4">
+            {/* Velo de legibilidad, no de color. El overlay anterior era un
+                degradado de marca (teal/50 + ocre/30 + teal/60) que teñía la
+                foto entera: la dejaba lavada y descolorida, y aun así el texto
+                quedaba con poco contraste sobre la arena clara. Un velo de
+                tinta, más denso abajo, hace lo contrario: la foto conserva su
+                color y el texto se lee. */}
+            <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/45 to-ink/60 flex flex-col items-center justify-center text-center px-5 pt-28 pb-44 md:pt-20 md:pb-24">
               <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-meta md:text-body font-medium tracking-[0.25em] uppercase text-white/95 mb-3"
+                className="label-eyebrow text-white/90 mb-4 tracking-[0.2em]"
               >
                 Isla de Margarita · Venezuela
               </motion.p>
@@ -258,59 +277,80 @@ export default function Home() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-serif text-display text-white font-light leading-tight max-w-3xl mb-4 tracking-tight drop-shadow-lg"
+                /* max-w-4xl en vez de 3xl: a 68px la frase se partía en dos
+                   líneas gigantes y el título se comía el hero. Con más ancho
+                   respira en una sola línea en escritorio. */
+                className="font-serif text-hero text-white font-normal leading-[1.03] max-w-4xl text-balance track-display drop-shadow-[0_2px_14px_rgba(35,38,36,0.55)]"
               >
-                Vive la Isla como en Casa
-                {/* La frase de marca no tiene ninguna palabra por la que
-                    alguien busque. El h1 es la señal de tema más fuerte de una
-                    página, así que la keyword real va DENTRO del mismo h1, en
-                    una segunda línea de menor jerarquía visual: el diseño no
-                    cambia y el encabezado deja de estar vacío para búsquedas. */}
-                <span className="mt-3 block font-sans text-title-sm md:text-title font-light tracking-normal text-white/95">
-                  Alquiler de apartamentos y autos en Isla de Margarita
-                </span>
+                {/* Titular FUNCIONAL, no frase de marca. La versión anterior
+                    decía "Vive la Isla como en Casa": bonita y sin una sola
+                    palabra por la que alguien busque, con la keyword relegada a
+                    un subtítulo. Ahora el h1 —la señal de tema más fuerte de la
+                    página— dice qué se alquila y dónde, y la frase de marca
+                    baja a kicker. */}
+                Apartamentos y carros{' '}
+                <em className="headline-italic-light">en Isla de Margarita</em>
               </motion.h1>
-              <p className="text-white/90 text-body font-light max-w-lg mb-2">
-                Alojamientos en Pampatar, Porlamar, Costa Azul, El Yaque, Juan
-                Griego y más zonas de la isla · Precios en US$
+
+              {/* Propuesta concreta. Sale de investigar el mercado: los dos
+                  segmentos reales son la estadía corta y la MENSUAL (Airbnb
+                  tiene categoría propia de larga duración para Margarita), y a
+                  los viajeros se les recomienda reservar el carro con
+                  antelación en temporada alta. Resolver alojamiento y carro
+                  junto es la diferencia frente a las plataformas de solo
+                  alojamiento. */}
+              <p className="mt-7 max-w-[38rem] text-pretty text-body md:text-body-lg text-white [text-shadow:0_1px_10px_rgba(31,26,22,0.55)]">
+                Por noche o por mes, en dólares y hablando directo con quien te
+                recibe.
               </p>
-              <div className="w-12 h-[2px] bg-accent my-2 rounded-full"></div>
+              {/* Tres datos, no adjetivos. Sustituye a la lista de zonas
+                  enumeradas —que repetía lo que ya dicen los chips y las
+                  landings— por lo que un viajero necesita saber para decidir.
+                  Minimalismo: separadores finos, sin iconos, sin tarjetas. */}
+              <ul className="mt-12 flex flex-col items-center gap-2.5 text-white sm:flex-row sm:gap-0 sm:divide-x sm:divide-white/40 [text-shadow:0_1px_3px_rgba(35,38,36,0.7),0_2px_18px_rgba(35,38,36,0.6)]">
+                <li className="text-ui-lg font-medium sm:px-5">Estadías cortas y mensuales</li>
+                <li className="text-ui-lg font-medium sm:px-5">Zonas con piscina y seguridad</li>
+                <li className="text-ui-lg font-medium sm:px-5">Sin intermediarios</li>
+              </ul>
             </div>
 
-            {/* Curva blanca de transición hacia el contenido */}
+            {/* Curva de transición hacia el contenido.
+                Iba en blanco puro mientras el fondo de la página es hueso
+                (#F7F2EA): se veía un corte de color justo debajo del hero.
+                Ahora usa el mismo hueso, así la curva funde de verdad. */}
             <svg
               className="absolute bottom-0 left-0 w-full h-[90px] md:h-[130px]"
               viewBox="0 0 1440 130"
               fill="none"
               preserveAspectRatio="none"
+              aria-hidden="true"
             >
-              <path d="M0,85 C480,20 960,20 1440,95 L1440,130 L0,130 Z" fill="white" fillOpacity="0.45" />
-              <path d="M0,105 C480,45 960,45 1440,115 L1440,130 L0,130 Z" fill="white" />
+              <path d="M0,85 C480,20 960,20 1440,95 L1440,130 L0,130 Z" fill="#F7F2EA" fillOpacity="0.4" />
+              <path d="M0,105 C480,45 960,45 1440,115 L1440,130 L0,130 Z" fill="#F7F2EA" />
             </svg>
           </section>
 
           {/* SEARCH BAR Flotante sobre el borde inferior */}
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-4xl px-4 z-20">
             <div ref={searchBarRef} className="flex flex-col gap-1.5">
-              
-              {/* Dropdown "All" a la izquierda en tab blanco separado */}
-              <div className="self-start">
-                <button
-                  onClick={() => handleResetSearch()}
-                  className="bg-white text-brand text-meta font-semibold px-5 py-2.5 rounded-chip shadow-lift flex items-center gap-2 border border-line hover:bg-paper transition-all"
-                >
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>Ver Todo</span>
-                </button>
-              </div>
+              {/* Se quitó el botón suelto "Ver Todo" que iba flotando encima de
+                  la barra. Dos razones: en móvil quedaba huérfano sobre la
+                  curva del hero y se veía roto, y era REDUNDANTE — hacía
+                  exactamente lo mismo que el chip "Todos" de la fila de
+                  categorías, que está a dos dedos de distancia. */}
 
-              {/* Barra vidrio esmerilado píldora */}
-              <div className="bg-white rounded-full p-2.5 shadow-[0_8px_32px_rgba(0,115,128,0.14)] border border-line flex flex-wrap md:flex-nowrap items-center justify-between w-full">
+              {/* Buscador: TARJETA apilada en móvil, PÍLDORA en escritorio.
+                  Antes era pastilla en los dos casos con flex-wrap, y en móvil
+                  los cuatro campos se envolvían dentro del óvalo: se amontonaban
+                  en filas desalineadas, "Agregar fecha" salía truncado y
+                  "Check Out" se partía en dos. Una pastilla solo funciona con
+                  los campos en una sola fila. */}
+              <div className="bg-white rounded-card md:rounded-full p-2 md:p-2.5 shadow-lift-lg border border-line flex flex-col md:flex-row md:items-center md:justify-between w-full divide-y divide-line md:divide-y-0">
 
                 {/* 1. Where */}
                 <div
                   onClick={() => setActivePopover(activePopover === 'where' ? null : 'where')}
-                  className={`flex-1 min-w-[120px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
+                  className={`w-full md:flex-1 md:min-w-[110px] px-4 py-3 md:py-2 rounded-chip md:rounded-full cursor-pointer transition-colors ${
                     activePopover === 'where' ? 'bg-white/70' : 'hover:bg-white/50'
                   }`}
                 >
@@ -330,7 +370,7 @@ export default function Home() {
                 {/* 2. Check In */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                  className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
+                  className={`w-full md:flex-1 md:min-w-[110px] px-4 py-3 md:py-2 rounded-chip md:rounded-full cursor-pointer transition-colors ${
                     activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
@@ -345,7 +385,7 @@ export default function Home() {
                 {/* 3. Check Out */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'dates' ? null : 'dates')}
-                  className={`flex-1 min-w-[100px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
+                  className={`w-full md:flex-1 md:min-w-[110px] px-4 py-3 md:py-2 rounded-chip md:rounded-full cursor-pointer transition-colors ${
                     activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
@@ -360,7 +400,7 @@ export default function Home() {
                 {/* 4. Who */}
                 <div 
                   onClick={() => setActivePopover(activePopover === 'guests' ? null : 'guests')}
-                  className={`flex-1 min-w-[120px] px-5 py-1.5 rounded-full cursor-pointer transition-colors ${
+                  className={`w-full md:flex-1 md:min-w-[110px] px-4 py-3 md:py-2 rounded-chip md:rounded-full cursor-pointer transition-colors ${
                     activePopover === 'guests' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
@@ -376,9 +416,10 @@ export default function Home() {
                 <button 
                   onClick={() => handleSearch()}
                   aria-label="Buscar propiedades"
-                  className="w-11 h-11 rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center transition-all shadow-md ml-2 cursor-pointer shrink-0"
+                  className="mt-2 md:mt-0 w-full md:w-12 h-12 rounded-chip md:rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 md:ml-2"
                 >
                   <Search className="w-5 h-5" />
+                  <span className="md:hidden text-ui-lg font-semibold">Buscar</span>
                 </button>
               </div>
 
@@ -618,19 +659,22 @@ export default function Home() {
               <ChevronRight className="w-4 h-4" />
             </button>
 
-            {/* Botón "Filters" píldora con gradiente turquesa */}
+            {/* Mismo alto y radio que los chips de categoría: antes usaba
+                .btn-solid (46px, borde de tinta y sombra dura) dentro de una
+                fila de chips de 42px sin borde oscuro, y sobresalía rompiendo
+                la línea. Se distingue por el relleno sólido, no por el tamaño. */}
             <button
               onClick={() => setIsFilterOpen(true)}
-              className="btn-solid cursor-pointer"
+              className="flex shrink-0 items-center gap-2.5 rounded-chip border-[1.5px] border-brand-deep bg-brand px-4 py-2.5 text-meta font-semibold tracking-wide text-white transition-all hover:bg-brand-deep cursor-pointer"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <SlidersHorizontal className="w-[17px] h-[17px]" />
               <span>Filtros</span>
             </button>
           </div>
         </section>
 
         {/* 4. SECCIONES DE LISTADOS */}
-        <section id="listings-container" className="space-y-16">
+        <section id="listings-container" className="space-y-20 md:space-y-28">
           {selectedCategory === 'All' && !searchWhere.trim() ? (
             // DISPLAY ALL 3 CURATED SECTIONS
             <>
@@ -672,11 +716,28 @@ export default function Home() {
             <div>
               <div className="flex justify-between items-end mb-8 border-b border-line pb-4">
                 <div>
-                  <h2 className="font-serif text-title md:text-headline text-brand font-medium">
-                    {selectedCategory !== 'Todos' ? `Colección ${selectedCategory}` : 'Explora Margarita Renace'}
+                  {/* El titular se construye como JSX, no como cadena: la
+                      cursiva del sello es un elemento <em>, y dentro de un
+                      template string se renderizaría como texto literal. */}
+                  <h2 className="font-serif text-headline text-ink font-normal track-headline">
+                    {selectedCategory !== 'Todos' ? (
+                      <>
+                        Colección{' '}
+                        <em className="headline-italic">{selectedCategory}</em>
+                      </>
+                    ) : (
+                      <>
+                        Alojamientos{' '}
+                        <em className="headline-italic">en toda la isla</em>
+                      </>
+                    )}
                   </h2>
-                  <p className="text-meta text-ink-muted mt-1 font-medium">
-                    {filteredProperties.length} propiedades exclusivas encontradas
+                  {/* Cifra en monoespaciada: es un dato, y en mono se lee como
+                      dato. "exclusivas" era un superlativo de folleto — la
+                      referencia pide frases secas y declarativas. */}
+                  <p className="mono-data text-ink-muted mt-2">
+                    {filteredProperties.length}{' '}
+                    {filteredProperties.length === 1 ? 'alojamiento' : 'alojamientos'}
                   </p>
                 </div>
                 {searchWhere.trim() && (
@@ -1222,10 +1283,10 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
       <div className="px-4 py-3.5 bg-white flex items-center justify-between gap-3 relative border-t border-line">
         <div className="flex-1 min-w-0">
           {/* Nombre: 15px serif elegante negro */}
-          <h4 className="font-serif text-body font-medium text-ink tracking-tight truncate group-hover:text-black transition-colors">{property.name}</h4>
+          <h4 className="font-serif text-body font-normal text-ink track-title truncate group-hover:text-black transition-colors">{property.name}</h4>
           
           {/* Precio + estadía + rating en 12px gris */}
-          <p className="text-meta text-ink-muted mt-1 font-medium truncate">
+          <p className="mono-data text-ink-muted mt-1.5 truncate">
             {property.priceText} · ★ {property.rating}
           </p>
         </div>

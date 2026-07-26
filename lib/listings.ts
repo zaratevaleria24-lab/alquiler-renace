@@ -103,7 +103,7 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
     description: 'Apartamento totalmente equipado en zona céntrica de Pampatar, a solo 5 minutos del C.C. Sambil. Cuenta con seguridad 24/7, piscina, cancha deportiva, zona de parrilla y parque infantil dentro de la urbanización. Ideal para familias: habitación principal con cama queen y baño privado, habitación secundaria con cama queen y gaveta adicional. Todo lo que necesitas cerca, en una de las zonas más cómodas de la isla.',
     host: {
       name: 'Margarita Renace',
-      avatar: '/logo.png',
+      avatar: '/logo-avatar.png',
       tagline: 'Anfitrión verificado · Los Geranios'
     },
     amenities: AMENITIES_LOS_GERANIOS,

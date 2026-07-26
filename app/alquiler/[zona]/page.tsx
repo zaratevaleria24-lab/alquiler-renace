@@ -101,7 +101,7 @@ export default async function ZonaPage({
             profundo con un filete de acento arriba se lee más editorial. */}
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-5xl mx-auto px-5 py-14 md:px-8 md:py-20">
+          <div className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-28">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li>
@@ -117,8 +117,9 @@ export default async function ZonaPage({
             <p className="label-eyebrow mb-4 text-accent">
               {SITE.region.island} · {SITE.region.state}
             </p>
-            <h1 className="font-serif text-headline md:text-display font-medium leading-tight max-w-3xl">
-              Alquiler de apartamentos en {zone.name}, Isla de Margarita
+            <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
+              Alquiler de apartamentos en {zone.name},{' '}
+              <em className="headline-italic-light">Isla de Margarita</em>
             </h1>
             <p className="mt-6 max-w-2xl text-body-lg text-white/85">
               {copy.summary}
@@ -129,7 +130,7 @@ export default async function ZonaPage({
                 <dt className="label-eyebrow text-accent">
                   Alojamientos
                 </dt>
-                <dd className="mt-1 text-title-sm">
+                <dd className="mono-data mt-2 text-title-sm">
                   {zone.properties.length}{' '}
                   {zone.properties.length === 1 ? 'disponible' : 'disponibles'}
                 </dd>
@@ -139,28 +140,28 @@ export default async function ZonaPage({
                   <dt className="label-eyebrow text-accent">
                     Desde
                   </dt>
-                  <dd className="mt-1 text-title-sm">US${zone.minPrice} / noche</dd>
+                  <dd className="mono-data mt-2 text-title-sm">US${zone.minPrice} / noche</dd>
                 </div>
               )}
               <div>
                 <dt className="label-eyebrow text-accent">
                   Ubicación
                 </dt>
-                <dd className="mt-1 text-title-sm">{copy.coast}</dd>
+                <dd className="mono-data mt-2 text-title-sm">{copy.coast}</dd>
               </div>
             </dl>
           </div>
         </header>
 
-        <main className="max-w-5xl mx-auto px-5 py-14 md:px-8 md:py-20">
+        <main className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-28">
           <section aria-labelledby="sobre-la-zona">
             <h2
               id="sobre-la-zona"
-              className="font-serif text-title md:text-headline text-brand-deep font-medium"
+              className="font-serif text-headline text-ink font-normal track-headline"
             >
-              Cómo es {zone.name}
+              Cómo es <em className="headline-italic">{zone.name}</em>
             </h2>
-            <div className="mt-5 space-y-4 text-ink/85 leading-relaxed">
+            <div className="mt-7 max-w-2xl space-y-5 text-body text-ink-soft leading-relaxed">
               {copy.body.map((paragraph) => (
                 <p key={paragraph.slice(0, 40)}>{paragraph}</p>
               ))}
@@ -171,7 +172,7 @@ export default async function ZonaPage({
                 <h3 className="font-serif text-title-sm text-brand-deep font-semibold">
                   Qué hay cerca
                 </h3>
-                <ul className="mt-3 grid gap-2 sm:grid-cols-2 text-body text-ink/80">
+                <ul className="mt-4 grid gap-2.5 sm:grid-cols-2 text-body text-ink-soft">
                   {copy.nearby.map((item) => (
                     <li key={item} className="flex gap-2">
                       <span aria-hidden="true" className="text-brand">
@@ -181,22 +182,22 @@ export default async function ZonaPage({
                     </li>
                   ))}
                 </ul>
-                <p className="mt-4 text-body text-ink/70">
+                <p className="mt-5 text-body text-ink-muted">
                   Ideal para {copy.bestFor}.
                 </p>
               </div>
             )}
           </section>
 
-          <section aria-labelledby="alojamientos" className="mt-16">
+          <section aria-labelledby="alojamientos" className="section-gap reveal">
             <h2
               id="alojamientos"
-              className="font-serif text-title md:text-headline text-brand-deep font-medium"
+              className="font-serif text-headline text-ink font-normal track-headline"
             >
               Alojamientos en {zone.name}
             </h2>
 
-            <ul className="mt-8 grid gap-8 sm:grid-cols-2">
+            <ul className="block-gap grid gap-8 md:gap-10 sm:grid-cols-2">
               {zone.properties.map((property) => (
                 <li
                   key={property.id}
@@ -231,7 +232,7 @@ export default async function ZonaPage({
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-4 font-medium text-brand">
+                    <p className="mono-data mt-5 text-brand-deep">
                       {property.priceText}
                     </p>
                     <p className="mt-1 text-meta text-ink/60">
@@ -256,10 +257,10 @@ export default async function ZonaPage({
 
           {/* Enlazado interno entre zonas: reparte autoridad y le da a los
               crawlers un camino a todas las landings desde cualquiera de ellas. */}
-          <nav aria-labelledby="otras-zonas" className="mt-16">
+          <nav aria-labelledby="otras-zonas" className="section-gap reveal">
             <h2
               id="otras-zonas"
-              className="font-serif text-title md:text-headline text-brand-deep font-medium"
+              className="font-serif text-headline text-ink font-normal track-headline"
             >
               Otras zonas de la Isla de Margarita
             </h2>
