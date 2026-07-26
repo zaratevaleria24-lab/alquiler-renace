@@ -126,16 +126,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 1,
     rating: 4.9,
     categories: ['Frente al Mar', 'Vista al Mar'],
-    image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1510798831971.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1510798831971.jpg',
+      '/images/photo-1449034446853.jpg',
+      '/images/photo-1504280390367.jpg'
     ],
     description: 'Suite moderna con balcón frente a la bahía de Pampatar y su histórico castillo San Carlos de Borromeo. Vistas espectaculares al atardecer, a pasos del malecón, tiendas y la mejor gastronomía de la isla.',
     host: {
       name: 'José Rodríguez',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1507003211169.jpg',
       tagline: 'Especialista en turismo en Margarita'
     },
     amenities: AMENITIES_LUJO,
@@ -150,16 +150,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 3,
     rating: 4.95,
     categories: ['Centro', 'Lujo'],
-    image: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1576013551627.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1576013551627.jpg',
+      '/images/photo-1566073771259.jpg',
+      '/images/photo-1512917774080.jpg'
     ],
     description: 'Amplio penthouse de lujo en el corazón de Porlamar, cerca de los centros comerciales y las zonas comerciales libres de impuestos. Piscina en la azotea con vista de 360° a la ciudad y al mar Caribe.',
     host: {
       name: 'María Fernández',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1500648767791.jpg',
       tagline: 'Anfitriona premium en Porlamar'
     },
     amenities: AMENITIES_LUJO,
@@ -174,16 +174,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.85,
     categories: ['Piscina', 'Familiar'],
-    image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1580587771525.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1580587771525.jpg',
+      '/images/photo-1600585154340.jpg',
+      '/images/photo-1600607687939.jpg'
     ],
     description: 'Apartamento familiar en el exclusivo sector Costa Azul, con conjunto cerrado, piscina y áreas verdes. A minutos de los mejores hoteles, restaurantes y de la playa. Perfecto para vacaciones en familia con total tranquilidad.',
     host: {
       name: 'Luis González',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1534528741775.jpg',
       tagline: 'Atención personalizada para familias'
     },
     amenities: AMENITIES_PLAYA,
@@ -198,16 +198,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 1,
     rating: 4.7,
     categories: ['Playa', 'Económico'],
-    image: 'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1533873984035.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1533873984035.jpg',
+      '/images/photo-1470240731273.jpg',
+      '/images/photo-1504280390367.jpg'
     ],
     description: 'Estudio acogedor y económico cerca de Playa Parguito, la favorita de los surfistas por su oleaje. Ideal para viajeros jóvenes y parejas que buscan sol, olas y buen ambiente sin gastar de más.',
     host: {
       name: 'Andrea Salazar',
-      avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1539571696357.jpg',
       tagline: 'Anfitriona surfer y amante del mar'
     },
     amenities: AMENITIES_PLAYA,
@@ -222,16 +222,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.92,
     categories: ['Frente al Mar', 'Piscina', 'Lujo'],
-    image: 'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1533090161767.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1533090161767.jpg',
+      '/images/photo-1533090161767.jpg',
+      '/images/photo-1510798831971.jpg'
     ],
     description: 'Villa de lujo con piscina privada frente a Playa Caribe, en el norte de la isla. Amplios espacios, terraza con parrillera y acceso directo a una de las playas más limpias de Margarita. Perfecta para grupos grandes.',
     host: {
       name: 'Roberto Villarroel',
-      avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1492562080023.jpg',
       tagline: 'Villas exclusivas frente al mar'
     },
     amenities: AMENITIES_LUJO,
@@ -246,16 +246,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.8,
     categories: ['Vista al Mar', 'Familiar'],
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1542314831.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1542314831.jpg',
+      '/images/photo-1566073771259.jpg',
+      '/images/photo-1576013551627.jpg'
     ],
     description: 'Apartamento con vista a la bahía de Juan Griego, famosa por tener los atardeceres más hermosos de Margarita. Ambiente tranquilo de pueblo pesquero, cerca del Fortín La Galera y ricos restaurantes de mariscos.',
     host: {
       name: 'Gabriela Rojas',
-      avatar: 'https://images.unsplash.com/photo-1489980508314-941910ded1f4?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1539571696357.jpg',
       tagline: 'Enamorada de los atardeceres de Juan Griego'
     },
     amenities: AMENITIES_CENTRO,
@@ -270,16 +270,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 3,
     rating: 4.75,
     categories: ['Playa', 'Económico'],
-    image: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1499793983690.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1499793983690.jpg',
+      '/images/photo-1515263487990.jpg',
+      '/images/photo-1580587771525.jpg'
     ],
     description: 'Loft ideal para amantes del kitesurf y windsurf, a pasos de Playa El Yaque, reconocida a nivel mundial por sus vientos. Ambiente internacional, relajado y con la mejor energía de la isla.',
     host: {
       name: 'Daniel Millán',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1506794778202.jpg',
       tagline: 'Instructor de kitesurf y anfitrión'
     },
     amenities: AMENITIES_PLAYA,
@@ -294,16 +294,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 1,
     rating: 4.88,
     categories: ['Playa', 'Familiar'],
-    image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1504280390367.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1525113990974-361be58cdf0b?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1504280390367.jpg',
+      '/images/photo-1510798831971.jpg',
+      '/images/photo-1533090161767.jpg'
     ],
     description: 'Apartamento cómodo y familiar cerca de Playa Guacuco, una amplia playa de aguas tranquilas ideal para niños. Rodeado de naturaleza, con fácil acceso en carro y a minutos de La Asunción, la capital de la isla.',
     host: {
       name: 'Patricia Guerra',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1544005313.jpg',
       tagline: 'Anfitriona familiar y atenta'
     },
     amenities: AMENITIES_PLAYA,
@@ -318,16 +318,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.97,
     categories: ['Vista al Mar', 'Lujo'],
-    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1512917774080.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1512917774080.jpg',
+      '/images/photo-1580587771525.jpg',
+      '/images/photo-1613490493576.jpg'
     ],
     description: 'Suite de lujo en el tranquilo pueblo de Manzanillo, al norte de la isla, con vistas de postal al mar Caribe. Terraza privada, acabados premium y la paz de una de las zonas más auténticas de Margarita.',
     host: {
       name: 'Alejandra Marín',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1534528741775.jpg',
       tagline: 'Anfitriona de estadías premium'
     },
     amenities: AMENITIES_LUJO,
@@ -342,16 +342,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.9,
     categories: ['Frente al Mar', 'Piscina'],
-    image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1580587771525.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1580587771525.jpg',
+      '/images/photo-1566073771259.jpg',
+      '/images/photo-1512917774080.jpg'
     ],
     description: 'Moderno apartamento en la zona de la marina de Pampatar, con piscina y vista a los yates. Excelente ubicación para disfrutar de la vida nocturna, restaurantes frente al mar y paseos en bote.',
     host: {
       name: 'Héctor Bermúdez',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1500648767791.jpg',
       tagline: 'Anfitrión cerca de la marina'
     },
     amenities: AMENITIES_LUJO,
@@ -366,16 +366,16 @@ const PROPERTIES: Property[] = [
     nightsCount: 2,
     rating: 4.6,
     categories: ['Centro', 'Económico'],
-    image: 'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
+    image: '/images/photo-1470240731273.jpg',
     gallery: [
-      'https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=800&h=600&q=80',
-      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&h=600&q=80'
+      '/images/photo-1470240731273.jpg',
+      '/images/photo-1533873984035.jpg',
+      '/images/photo-1504280390367.jpg'
     ],
     description: 'Estudio funcional y económico en pleno centro de Porlamar, ideal para viajes de compras o negocios. A pasos de tiendas, bancos y transporte. La opción más práctica para conocer la isla con un presupuesto ajustado.',
     host: {
       name: 'Yolanda Ortega',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&h=150&q=80',
+      avatar: '/images/photo-1544005313.jpg',
       tagline: 'Anfitriona práctica en el centro'
     },
     amenities: AMENITIES_CENTRO,
@@ -564,7 +564,7 @@ export default function Home() {
           <section id="hero-banner" className="relative w-full overflow-hidden" style={{ height: '580px' }}>
             {/* Hero background image: playa de Margarita */}
             <img
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&h=900&q=80"
+              src="/images/photo-1507525428034.jpg"
               alt="Playa paradisíaca del Caribe en Isla de Margarita"
               className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-[1.03]"
               referrerPolicy="no-referrer"
