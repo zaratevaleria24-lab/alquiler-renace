@@ -5,3 +5,6 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Artefacto de tsc --noEmit (se regenera solo)
+*.tsbuildinfo

@@ -35,366 +35,24 @@ import {
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// === PROPERTY DATASET ===
-interface Property {
-  id: string;
-  name: string;
-  location: string;
-  priceText: string;
-  pricePerNight: number;
-  priceOnRequest?: boolean;
-  nightsCount: number;
-  rating: number;
-  categories: string[];
-  image: string;
-  gallery: string[];
-  description: string;
-  host: {
-    name: string;
-    avatar: string;
-    tagline: string;
-  };
-  amenities: { icon: any; name: string }[];
-  guestsAllowed: { adults: number; children: number };
-}
-
-const AMENITIES_LUJO = [
-  { icon: Waves, name: 'Piscina Infinita' },
-  { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
-  { icon: Wind, name: 'Aire Acondicionado' },
-  { icon: Sparkles, name: 'Jacuzzi Privado' },
-  { icon: Palmtree, name: 'Vista Panorámica al Mar' }
-];
-
-const AMENITIES_CENTRO = [
-  { icon: Wifi, name: 'Wi-Fi de Alta Velocidad' },
-  { icon: Wind, name: 'Aire Acondicionado' },
-  { icon: Coffee, name: 'Cocina Equipada' },
-  { icon: Box, name: 'Estacionamiento Privado' },
-  { icon: Sparkles, name: 'TV Smart' }
-];
-
-const AMENITIES_LOS_GERANIOS = [
-  { icon: Wifi, name: 'Wi-Fi Constante' },
-  { icon: Wind, name: 'Aire Acondicionado' },
-  { icon: ShieldCheck, name: 'Seguridad 24/7' },
-  { icon: Waves, name: 'Piscina y Cancha Deportiva' },
-  { icon: Flame, name: 'Zona de Parrilla' },
-  { icon: Smile, name: 'Parque Infantil' },
-  { icon: Box, name: 'Estacionamiento Asignado' },
-  { icon: Coffee, name: 'Cocina Totalmente Equipada' }
-];
-
-const AMENITIES_PLAYA = [
-  { icon: Umbrella, name: 'Acceso Directo a Playa' },
-  { icon: Wifi, name: 'Wi-Fi' },
-  { icon: Wind, name: 'Aire Acondicionado' },
-  { icon: Waves, name: 'Piscina Compartida' },
-  { icon: Palmtree, name: 'Terraza Vista al Mar' }
-];
-
-const PROPERTIES: Property[] = [
-  {
-    id: '1',
-    name: 'Los Geranios A',
-    location: 'Urb. Maneiro, Pampatar, Margarita',
-    priceText: 'Consultar precio',
-    pricePerNight: 0,
-    priceOnRequest: true,
-    nightsCount: 2,
-    rating: 4.9,
-    categories: ['Centro', 'Familiar', 'Piscina'],
-    image: '/properties/los-geranios-a/habitacion-principal.jpg',
-    gallery: [
-      '/properties/los-geranios-a/habitacion-principal.jpg'
-    ],
-    description: 'Apartamento totalmente equipado en zona céntrica de Pampatar, a solo 5 minutos del C.C. Sambil. Cuenta con seguridad 24/7, piscina, cancha deportiva, zona de parrilla y parque infantil dentro de la urbanización. Ideal para familias: habitación principal con cama queen y baño privado, habitación secundaria con cama queen y gaveta adicional. Todo lo que necesitas cerca, en una de las zonas más cómodas de la isla.',
-    host: {
-      name: 'Margarita Renace',
-      avatar: '/logo.png',
-      tagline: 'Anfitrión verificado · Los Geranios'
-    },
-    amenities: AMENITIES_LOS_GERANIOS,
-    guestsAllowed: { adults: 6, children: 0 }
-  },
-  {
-    id: '2',
-    name: 'Suite Frente al Mar Pampatar',
-    location: 'Pampatar, Margarita',
-    priceText: 'US$78 / noche',
-    pricePerNight: 78,
-    nightsCount: 1,
-    rating: 4.9,
-    categories: ['Frente al Mar', 'Vista al Mar'],
-    image: '/images/photo-1510798831971.jpg',
-    gallery: [
-      '/images/photo-1510798831971.jpg',
-      '/images/photo-1449034446853.jpg',
-      '/images/photo-1504280390367.jpg'
-    ],
-    description: 'Suite moderna con balcón frente a la bahía de Pampatar y su histórico castillo San Carlos de Borromeo. Vistas espectaculares al atardecer, a pasos del malecón, tiendas y la mejor gastronomía de la isla.',
-    host: {
-      name: 'José Rodríguez',
-      avatar: '/images/photo-1507003211169.jpg',
-      tagline: 'Especialista en turismo en Margarita'
-    },
-    amenities: AMENITIES_LUJO,
-    guestsAllowed: { adults: 4, children: 2 }
-  },
-  {
-    id: '3',
-    name: 'Penthouse Porlamar Centro',
-    location: 'Porlamar, Margarita',
-    priceText: 'US$95 / noche',
-    pricePerNight: 95,
-    nightsCount: 3,
-    rating: 4.95,
-    categories: ['Centro', 'Lujo'],
-    image: '/images/photo-1576013551627.jpg',
-    gallery: [
-      '/images/photo-1576013551627.jpg',
-      '/images/photo-1566073771259.jpg',
-      '/images/photo-1512917774080.jpg'
-    ],
-    description: 'Amplio penthouse de lujo en el corazón de Porlamar, cerca de los centros comerciales y las zonas comerciales libres de impuestos. Piscina en la azotea con vista de 360° a la ciudad y al mar Caribe.',
-    host: {
-      name: 'María Fernández',
-      avatar: '/images/photo-1500648767791.jpg',
-      tagline: 'Anfitriona premium en Porlamar'
-    },
-    amenities: AMENITIES_LUJO,
-    guestsAllowed: { adults: 4, children: 2 }
-  },
-  {
-    id: '4',
-    name: 'Apartamento Costa Azul',
-    location: 'Costa Azul, Margarita',
-    priceText: 'US$62 / noche',
-    pricePerNight: 62,
-    nightsCount: 2,
-    rating: 4.85,
-    categories: ['Piscina', 'Familiar'],
-    image: '/images/photo-1580587771525.jpg',
-    gallery: [
-      '/images/photo-1580587771525.jpg',
-      '/images/photo-1600585154340.jpg',
-      '/images/photo-1600607687939.jpg'
-    ],
-    description: 'Apartamento familiar en el exclusivo sector Costa Azul, con conjunto cerrado, piscina y áreas verdes. A minutos de los mejores hoteles, restaurantes y de la playa. Perfecto para vacaciones en familia con total tranquilidad.',
-    host: {
-      name: 'Luis González',
-      avatar: '/images/photo-1534528741775.jpg',
-      tagline: 'Atención personalizada para familias'
-    },
-    amenities: AMENITIES_PLAYA,
-    guestsAllowed: { adults: 6, children: 3 }
-  },
-  {
-    id: '5',
-    name: 'Studio Playa Parguito',
-    location: 'Playa Parguito, Margarita',
-    priceText: 'US$38 / noche',
-    pricePerNight: 38,
-    nightsCount: 1,
-    rating: 4.7,
-    categories: ['Playa', 'Económico'],
-    image: '/images/photo-1533873984035.jpg',
-    gallery: [
-      '/images/photo-1533873984035.jpg',
-      '/images/photo-1470240731273.jpg',
-      '/images/photo-1504280390367.jpg'
-    ],
-    description: 'Estudio acogedor y económico cerca de Playa Parguito, la favorita de los surfistas por su oleaje. Ideal para viajeros jóvenes y parejas que buscan sol, olas y buen ambiente sin gastar de más.',
-    host: {
-      name: 'Andrea Salazar',
-      avatar: '/images/photo-1539571696357.jpg',
-      tagline: 'Anfitriona surfer y amante del mar'
-    },
-    amenities: AMENITIES_PLAYA,
-    guestsAllowed: { adults: 2, children: 0 }
-  },
-  {
-    id: '6',
-    name: 'Villa Playa Caribe',
-    location: 'Playa Caribe, Margarita',
-    priceText: 'US$155 / noche',
-    pricePerNight: 155,
-    nightsCount: 2,
-    rating: 4.92,
-    categories: ['Frente al Mar', 'Piscina', 'Lujo'],
-    image: '/images/photo-1533090161767.jpg',
-    gallery: [
-      '/images/photo-1533090161767.jpg',
-      '/images/photo-1533090161767.jpg',
-      '/images/photo-1510798831971.jpg'
-    ],
-    description: 'Villa de lujo con piscina privada frente a Playa Caribe, en el norte de la isla. Amplios espacios, terraza con parrillera y acceso directo a una de las playas más limpias de Margarita. Perfecta para grupos grandes.',
-    host: {
-      name: 'Roberto Villarroel',
-      avatar: '/images/photo-1492562080023.jpg',
-      tagline: 'Villas exclusivas frente al mar'
-    },
-    amenities: AMENITIES_LUJO,
-    guestsAllowed: { adults: 8, children: 4 }
-  },
-  {
-    id: '7',
-    name: 'Apartamento Juan Griego',
-    location: 'Juan Griego, Margarita',
-    priceText: 'US$52 / noche',
-    pricePerNight: 52,
-    nightsCount: 2,
-    rating: 4.8,
-    categories: ['Vista al Mar', 'Familiar'],
-    image: '/images/photo-1542314831.jpg',
-    gallery: [
-      '/images/photo-1542314831.jpg',
-      '/images/photo-1566073771259.jpg',
-      '/images/photo-1576013551627.jpg'
-    ],
-    description: 'Apartamento con vista a la bahía de Juan Griego, famosa por tener los atardeceres más hermosos de Margarita. Ambiente tranquilo de pueblo pesquero, cerca del Fortín La Galera y ricos restaurantes de mariscos.',
-    host: {
-      name: 'Gabriela Rojas',
-      avatar: '/images/photo-1539571696357.jpg',
-      tagline: 'Enamorada de los atardeceres de Juan Griego'
-    },
-    amenities: AMENITIES_CENTRO,
-    guestsAllowed: { adults: 4, children: 2 }
-  },
-  {
-    id: '8',
-    name: 'Loft Playa El Yaque',
-    location: 'Playa El Yaque, Margarita',
-    priceText: 'US$42 / noche',
-    pricePerNight: 42,
-    nightsCount: 3,
-    rating: 4.75,
-    categories: ['Playa', 'Económico'],
-    image: '/images/photo-1499793983690.jpg',
-    gallery: [
-      '/images/photo-1499793983690.jpg',
-      '/images/photo-1515263487990.jpg',
-      '/images/photo-1580587771525.jpg'
-    ],
-    description: 'Loft ideal para amantes del kitesurf y windsurf, a pasos de Playa El Yaque, reconocida a nivel mundial por sus vientos. Ambiente internacional, relajado y con la mejor energía de la isla.',
-    host: {
-      name: 'Daniel Millán',
-      avatar: '/images/photo-1506794778202.jpg',
-      tagline: 'Instructor de kitesurf y anfitrión'
-    },
-    amenities: AMENITIES_PLAYA,
-    guestsAllowed: { adults: 2, children: 1 }
-  },
-  {
-    id: '9',
-    name: 'Apartamento Playa Guacuco',
-    location: 'Playa Guacuco, Margarita',
-    priceText: 'US$66 / noche',
-    pricePerNight: 66,
-    nightsCount: 1,
-    rating: 4.88,
-    categories: ['Playa', 'Familiar'],
-    image: '/images/photo-1504280390367.jpg',
-    gallery: [
-      '/images/photo-1504280390367.jpg',
-      '/images/photo-1510798831971.jpg',
-      '/images/photo-1533090161767.jpg'
-    ],
-    description: 'Apartamento cómodo y familiar cerca de Playa Guacuco, una amplia playa de aguas tranquilas ideal para niños. Rodeado de naturaleza, con fácil acceso en carro y a minutos de La Asunción, la capital de la isla.',
-    host: {
-      name: 'Patricia Guerra',
-      avatar: '/images/photo-1544005313.jpg',
-      tagline: 'Anfitriona familiar y atenta'
-    },
-    amenities: AMENITIES_PLAYA,
-    guestsAllowed: { adults: 5, children: 2 }
-  },
-  {
-    id: '10',
-    name: 'Suite Manzanillo',
-    location: 'Manzanillo, Margarita',
-    priceText: 'US$120 / noche',
-    pricePerNight: 120,
-    nightsCount: 2,
-    rating: 4.97,
-    categories: ['Vista al Mar', 'Lujo'],
-    image: '/images/photo-1512917774080.jpg',
-    gallery: [
-      '/images/photo-1512917774080.jpg',
-      '/images/photo-1580587771525.jpg',
-      '/images/photo-1613490493576.jpg'
-    ],
-    description: 'Suite de lujo en el tranquilo pueblo de Manzanillo, al norte de la isla, con vistas de postal al mar Caribe. Terraza privada, acabados premium y la paz de una de las zonas más auténticas de Margarita.',
-    host: {
-      name: 'Alejandra Marín',
-      avatar: '/images/photo-1534528741775.jpg',
-      tagline: 'Anfitriona de estadías premium'
-    },
-    amenities: AMENITIES_LUJO,
-    guestsAllowed: { adults: 4, children: 2 }
-  },
-  {
-    id: '11',
-    name: 'Apartamento Marina Pampatar',
-    location: 'Pampatar, Margarita',
-    priceText: 'US$84 / noche',
-    pricePerNight: 84,
-    nightsCount: 2,
-    rating: 4.9,
-    categories: ['Frente al Mar', 'Piscina'],
-    image: '/images/photo-1580587771525.jpg',
-    gallery: [
-      '/images/photo-1580587771525.jpg',
-      '/images/photo-1566073771259.jpg',
-      '/images/photo-1512917774080.jpg'
-    ],
-    description: 'Moderno apartamento en la zona de la marina de Pampatar, con piscina y vista a los yates. Excelente ubicación para disfrutar de la vida nocturna, restaurantes frente al mar y paseos en bote.',
-    host: {
-      name: 'Héctor Bermúdez',
-      avatar: '/images/photo-1500648767791.jpg',
-      tagline: 'Anfitrión cerca de la marina'
-    },
-    amenities: AMENITIES_LUJO,
-    guestsAllowed: { adults: 4, children: 1 }
-  },
-  {
-    id: '12',
-    name: 'Studio Centro Porlamar',
-    location: 'Porlamar, Margarita',
-    priceText: 'US$32 / noche',
-    pricePerNight: 32,
-    nightsCount: 2,
-    rating: 4.6,
-    categories: ['Centro', 'Económico'],
-    image: '/images/photo-1470240731273.jpg',
-    gallery: [
-      '/images/photo-1470240731273.jpg',
-      '/images/photo-1533873984035.jpg',
-      '/images/photo-1504280390367.jpg'
-    ],
-    description: 'Estudio funcional y económico en pleno centro de Porlamar, ideal para viajes de compras o negocios. A pasos de tiendas, bancos y transporte. La opción más práctica para conocer la isla con un presupuesto ajustado.',
-    host: {
-      name: 'Yolanda Ortega',
-      avatar: '/images/photo-1544005313.jpg',
-      tagline: 'Anfitriona práctica en el centro'
-    },
-    amenities: AMENITIES_CENTRO,
-    guestsAllowed: { adults: 2, children: 0 }
-  }
-];
-
-// === CATEGORIES METADATA ===
-const CATEGORIES = [
-  { id: 'Todos', label: 'Todos', icon: Compass },
-  { id: 'Frente al Mar', label: 'Frente al Mar', icon: Waves },
-  { id: 'Playa', label: 'Playa', icon: Umbrella },
-  { id: 'Piscina', label: 'Piscina', icon: Sparkles },
-  { id: 'Vista al Mar', label: 'Vista al Mar', icon: Palmtree },
-  { id: 'Centro', label: 'Centro', icon: HomeIcon },
-  { id: 'Familiar', label: 'Familiar', icon: Users },
-  { id: 'Lujo', label: 'Lujo', icon: Star },
-  { id: 'Económico', label: 'Económico', icon: Box }
-];
+// Los datos de listados, amenities y categorías viven en lib/listings.ts:
+// el sitemap y las páginas de zona necesitan los mismos datos y no pueden
+// importarlos desde este componente 'use client'.
+import {
+  AMENITIES_CENTRO,
+  AMENITIES_LOS_GERANIOS,
+  AMENITIES_LUJO,
+  AMENITIES_PLAYA,
+  CATEGORIES,
+  PROPERTIES,
+  ZONES,
+  type Property,
+} from '@/lib/listings';
+import {
+  AboutIslandSection,
+  FaqSection,
+  ZoneLinksSection,
+} from '@/components/SeoSections';
 
 export default function Home() {
   // Navigation active links
@@ -563,9 +221,19 @@ export default function Home() {
         <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-20">
           <section id="hero-banner" className="relative w-full overflow-hidden" style={{ height: '580px' }}>
             {/* Hero background image: playa de Margarita */}
+            {/* Esta imagen es la LCP de la página. Va con fetchPriority alto y
+                sin lazy para que el navegador la pida de inmediato: en
+                Venezuela, donde la conexión es lenta, la LCP es la métrica que
+                decide si la página se siente rápida o no. width/height fijan la
+                relación de aspecto y eliminan el salto de layout (CLS). */}
             <img
               src="/images/photo-1507525428034.jpg"
-              alt="Playa paradisíaca del Caribe en Isla de Margarita"
+              alt="Playa del Caribe en Isla de Margarita, Venezuela"
+              width={1600}
+              height={900}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-[1.03]"
               referrerPolicy="no-referrer"
             />
@@ -583,11 +251,22 @@ export default function Home() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="font-serif text-4xl md:text-[56px] text-white font-light leading-tight max-w-2xl mb-4 tracking-tight drop-shadow-lg"
+                className="font-serif text-4xl md:text-[56px] text-white font-light leading-tight max-w-3xl mb-4 tracking-tight drop-shadow-lg"
               >
                 Vive la Isla como en Casa
+                {/* La frase de marca no tiene ninguna palabra por la que
+                    alguien busque. El h1 es la señal de tema más fuerte de una
+                    página, así que la keyword real va DENTRO del mismo h1, en
+                    una segunda línea de menor jerarquía visual: el diseño no
+                    cambia y el encabezado deja de estar vacío para búsquedas. */}
+                <span className="mt-3 block font-sans text-lg md:text-2xl font-light tracking-normal text-white/95">
+                  Alquiler de apartamentos y autos en Isla de Margarita
+                </span>
               </motion.h1>
-              <p className="text-white/90 text-sm md:text-base font-light max-w-md mb-2">Apartamentos y autos para tus vacaciones en el Caribe</p>
+              <p className="text-white/90 text-sm md:text-base font-light max-w-lg mb-2">
+                Alojamientos en Pampatar, Porlamar, Costa Azul, El Yaque, Juan
+                Griego y más zonas de la isla · Precios en US$
+              </p>
               <div className="w-12 h-[2px] bg-[#59CCCC] my-2 rounded-full"></div>
             </div>
 
@@ -1034,6 +713,13 @@ export default function Home() {
           )}
         </section>
 
+        {/* Contenido de SEO/GEO: enlaces a las landings de zona (si no, serían
+            huérfanas), contexto real del destino y preguntas frecuentes con
+            FAQPage schema. Ver components/SeoSections.tsx. */}
+        <ZoneLinksSection />
+        <AboutIslandSection />
+        <FaqSection />
+
       </main>
 
       {/* 5. SIDEBAR DRAWER: DETALLES DE PROPIEDAD */}
@@ -1079,9 +765,13 @@ export default function Home() {
                 {/* Image Gallery (Main + small grid) */}
                 <div className="space-y-2">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden shadow-sm">
-                    <img 
-                      src={selectedProperty.image} 
-                      alt={selectedProperty.name} 
+                    <img
+                      src={selectedProperty.image}
+                      alt={`${selectedProperty.name} — alquiler en ${selectedProperty.zone}, Isla de Margarita`}
+                      width={800}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
@@ -1089,9 +779,16 @@ export default function Home() {
                   <div className="grid grid-cols-3 gap-2">
                     {selectedProperty.gallery.map((imgUrl, idx) => (
                       <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-[#E6D7C2]/40 shadow-xs">
-                        <img 
-                          src={imgUrl} 
-                          alt={`Gallery image ${idx}`} 
+                        {/* El alt decía "Gallery image 0": en inglés y sin
+                            información. Inservible para lectores de pantalla y
+                            desperdiciado para Google Imágenes. */}
+                        <img
+                          src={imgUrl}
+                          alt={`Foto ${idx + 1} de ${selectedProperty.name}, ${selectedProperty.zone}`}
+                          width={400}
+                          height={225}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           referrerPolicy="no-referrer"
                         />
@@ -1477,9 +1174,17 @@ function PropertyCard({ property, onSelect }: PropertyCardProps) {
       
       {/* Imagen arriba con border-radius 16px y ratio 4:3 */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[16px]">
-        <img 
-          src={property.image} 
-          alt={property.name}
+        {/* El alt lleva zona e isla, no solo el nombre: es lo que posiciona
+            estas fotos en Google Imágenes, que en viajes es una fuente de
+            tráfico real. lazy + dimensiones para no bloquear la carga ni
+            provocar salto de layout con 12 tarjetas en pantalla. */}
+        <img
+          src={property.image}
+          alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
+          width={800}
+          height={600}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           referrerPolicy="no-referrer"
         />
