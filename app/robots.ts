@@ -39,19 +39,31 @@ const AI_CRAWLERS = [
   'YandexBot',
 ];
 
+// El panel ya existe (subdominio admin., con su propio noindex por cabecera y
+// por metadata). Estas rutas no se indexan desde ningún user-agent.
+const RUTAS_VEDADAS = ['/api/', '/admin/'];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
-        // El sitio no tiene panel ni API todavía, pero cuando el admin exista
-        // (va en subdominio aparte) conviene que estas rutas nunca se indexen.
-        disallow: ['/api/', '/admin/'],
+        disallow: RUTAS_VEDADAS,
       },
-      ...AI_CRAWLERS.map((userAgent) => ({ userAgent, allow: '/' })),
+      // Los bloques por nombre repiten el `disallow`: en robots.txt un
+      // user-agent con bloque propio NO hereda nada del bloque `*`, usa solo el
+      // suyo. Sin esta línea, los 16 crawlers de acá abajo tenían permiso
+      // EXPLÍCITO para /admin/ mientras el resto lo tenía vedado.
+      ...AI_CRAWLERS.map((userAgent) => ({
+        userAgent,
+        allow: '/',
+        disallow: RUTAS_VEDADAS,
+      })),
     ],
     sitemap: absoluteUrl('/sitemap.xml'),
-    host: SITE.url,
+    // `host` sin protocolo: es una directiva de Yandex y espera un nombre de
+    // dominio. Con 'https://…' delante la línea es basura que el crawler ignora.
+    host: new URL(SITE.url).host,
   };
 }

@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 import './globals.css'; // Global styles
 import { SITE } from '@/lib/site';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
+import { headers } from 'next/headers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { SmoothScroll } from '@/components/SmoothScroll';
 
@@ -131,7 +132,13 @@ export const metadata: Metadata = {
   // verification: { google: 'xxx', other: { 'msvalidate.01': 'xxx' } },
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default async function RootLayout({children}: {children: React.ReactNode}) {
+  // El footer es del sitio PÚBLICO y se estaba colando en el panel, que vive en
+  // su propio subdominio. Se decide por Host: el panel no debe mostrar las zonas
+  // ni el aviso de tarifas, que son contenido de cara al visitante.
+  const host = (await headers()).get('host') ?? '';
+  const esPanel = host.startsWith('admin.');
+
   return (
     <html
       // es-VE en vez de es: es una señal geográfica real, no solo de idioma.
@@ -152,11 +159,13 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           que las superficies sean cálidas. El teal sobre #FFF se ve barato;
           sobre arena, no. */}
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
-        <SmoothScroll />
+        {/* El scroll suave es para el sitio público; en un panel de gestión
+            estorba al desplazarse por tablas largas. */}
+        {!esPanel && <SmoothScroll />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las
             9 landings de zona, y su enlazado interno viaja con él. */}
-        <SiteFooter />
+        {!esPanel && <SiteFooter />}
       </body>
     </html>
   );

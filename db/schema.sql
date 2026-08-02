@@ -151,7 +151,10 @@ CREATE TABLE property_categories (
 CREATE TABLE admin_users (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email         text UNIQUE NOT NULL,
-  -- Hash argon2id. NUNCA la contraseña en claro, ni un hash rápido tipo SHA:
+  -- Hash scrypt, con formato scrypt$N$r$p$salt$hash (ver lib/auth.ts; decía
+  -- argon2id, que nunca se llegó a usar: requiere compilación nativa y este
+  -- servidor ya sufrió un OOM compilando dependencias).
+  -- NUNCA la contraseña en claro, ni un hash rápido tipo SHA:
   -- si la base se filtra, un SHA se revienta con diccionario en minutos.
   password_hash text NOT NULL,
   created_at    timestamptz NOT NULL DEFAULT now(),

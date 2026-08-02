@@ -55,9 +55,39 @@ Se copia el patrón de Leiros, que ya lleva 21 días en producción sin incident
 | App | Next.js 15 + TypeScript + Tailwind | Mismo stack que la web, y **reutiliza `app/globals.css`**: el panel usará los mismos tokens, así que se verá como el mismo producto |
 | Base | Postgres 16 en Docker, `127.0.0.1:5434` | Puerto propio. **NO se comparte el de Leiros (5433)**: son productos independientes, es la regla del servidor |
 | Acceso a datos | driver `pg` directo + `schema.sql` | Es lo que usa Leiros. Sin ORM: el esquema es pequeño y una dependencia menos que mantener |
-| Proceso | PM2 `margarita-admin`, puerto **3003** | 3003 estaba libre; bind a loopback |
+| Proceso | ~~PM2 `margarita-admin` en 3003~~ → **el mismo proceso, rutas `/admin`** | Ver el cambio de decisión abajo |
 | Fotos | disco en `uploads/`, servidas por **nginx** | Las fotos de propiedades son públicas, así que las sirve nginx directo sin pasar por Node. (Distinto de Leiros, donde los uploads son documentos de identidad y NO deben ser públicos) |
 | Auth | contraseña con hash argon2 + cookie de sesión firmada, httpOnly | Una sola dueña. Simple pero real: sin tokens en localStorage, con límite de intentos |
+
+### Cambio de decisión (2026-07-26): el panel vive en la MISMA app
+
+El plan original preveía una segunda app de Next en el puerto 3003. Se descartó
+al empezar a construirla, por tres razones:
+
+1. **El requisito de que el panel se vea como el sitio.** Compartiendo el
+   codebase hereda `app/globals.css` tal cual: las mismas tres tipografías, el
+   sello romana/cursiva, la paleta y el ritmo. Con dos proyectos habría que
+   duplicar los tokens, y dos copias de un sistema de diseño se desincronizan
+   siempre — es cuestión de cuándo.
+2. **Reutiliza `lib/queries.ts` y `lib/icons.ts` sin exportar nada.** Con dos
+   apps habría que publicar un paquete compartido o copiar archivos.
+3. **RAM.** El servidor tiene 3.7GB con tres productos. Un segundo proceso de
+   Next son ~80MB de más para no ganar nada.
+
+Cómo se resuelve el subdominio: nginx apunta `admin.margaritarenace.com.ve` al
+mismo proceso reescribiendo a `/admin`. Y en el vhost del dominio público
+`/admin` devuelve 404, para que el panel solo sea alcanzable por su subdominio.
+
+Las rutas del panel son dinámicas y las del sitio estáticas; Next lo admite en el
+mismo build y lo declara por ruta.
+
+### Contraseñas: `crypto.scrypt` de Node, sin dependencias
+
+El plan decía argon2. Se cambió a **scrypt, que viene en Node**, porque los
+paquetes de argon2 requieren compilación nativa y este servidor ya sufrió un OOM
+compilando (ver las notas de RAM). scrypt es memory-hard y OWASP lo acepta junto
+a argon2 y bcrypt: es una elección legítima, no un atajo. Y cero dependencias
+nuevas que mantener.
 
 ## Esquema de datos
 
