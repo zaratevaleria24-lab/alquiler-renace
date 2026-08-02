@@ -19,7 +19,7 @@ import {
   Star, 
   ArrowRight, 
   X, 
-  CheckCircle2, 
+  MessageCircle, 
   Heart, 
   Wifi, 
   Coffee, 
@@ -39,6 +39,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // Server Component y sí puede consultar Postgres. Este archivo es 'use client',
 // y un navegador no puede hablar con la base.
 import { iconFor } from '@/lib/icons';
+import { CONTACT } from '@/lib/site';
 import type { Category, Property, Zone } from '@/lib/types';
 import {
   AboutIslandSection,
@@ -50,6 +51,28 @@ export interface HomeClientProps {
   properties: Property[];
   zones: Zone[];
   categories: Category[];
+}
+
+// ── Reserva por WhatsApp ────────────────────────────────────────────────────
+// El sitio no cobra en línea: una reserva se cierra conversando, que es como
+// se alquila en Venezuela. Este enlace abre WhatsApp con el mensaje ya escrito
+// (propiedad, noches, huéspedes) para que el interesado solo tenga que enviar.
+//
+// Devuelve null mientras no exista CONTACT.whatsapp (lib/site.ts): el botón se
+// muestra desactivado y honesto. NUNCA volver a la pantalla de "reserva
+// pre-aprobada" que había antes — confirmaba solicitudes que no llegaban a
+// nadie.
+function urlReservaWhatsApp(
+  property: Property,
+  nights: number,
+  guests: number,
+): string | null {
+  if (!CONTACT.whatsapp) return null;
+  const huespedes = `${guests} ${guests === 1 ? 'huésped' : 'huéspedes'}`;
+  const texto = property.priceOnRequest
+    ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
+    : `Hola, quiero reservar «${property.name}» (${property.location}) que vi en margaritarenace.com.ve: ${nights} ${nights === 1 ? 'noche' : 'noches'}, ${huespedes}. ¿Está disponible?`;
+  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(texto)}`;
 }
 
 export default function HomeClient({
@@ -94,10 +117,15 @@ export default function HomeClient({
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
-  // Reservation Flow state (Success State)
-  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  // Cálculo de la reserva. Noches y huéspedes no se "envían" a ningún lado:
+  // van dentro del mensaje precargado de WhatsApp, que es donde se cierra la
+  // reserva de verdad. Ver urlReservaWhatsApp().
   const [bookingNights, setBookingNights] = useState(2);
   const [bookingGuests, setBookingGuests] = useState(1);
+
+  const waReserva = selectedProperty
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests)
+    : null;
 
   // Close search popovers when clicking outside
   useEffect(() => {
@@ -695,7 +723,6 @@ export default function HomeClient({
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
                   setIsDetailOpen(true);
-                  setBookingConfirmed(false);
                 }}
               />
 
@@ -706,7 +733,6 @@ export default function HomeClient({
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
                   setIsDetailOpen(true);
-                  setBookingConfirmed(false);
                 }}
               />
 
@@ -717,7 +743,6 @@ export default function HomeClient({
                 onSelectProperty={(p) => {
                   setSelectedProperty(p);
                   setIsDetailOpen(true);
-                  setBookingConfirmed(false);
                 }}
               />
             </>
@@ -769,7 +794,6 @@ export default function HomeClient({
                       onSelect={() => {
                         setSelectedProperty(property);
                         setIsDetailOpen(true);
-                        setBookingConfirmed(false);
                       }}
                     />
                   ))}
@@ -932,15 +956,27 @@ export default function HomeClient({
                     <p className="text-meta text-gray-600">
                       El precio de esta propiedad varía según la temporada. Contáctanos y te confirmamos disponibilidad y tarifa para tus fechas.
                     </p>
-                    <button
-                      onClick={() => setBookingConfirmed(true)}
-                      className="btn-solid w-full mt-3 cursor-pointer"
-                    >
-                      <span>Consultar disponibilidad</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {waReserva ? (
+                      <a
+                        href={waReserva}
+                        target="_blank"
+                        rel="noopener"
+                        className="btn-solid w-full mt-3"
+                      >
+                        <span>Consultar por WhatsApp</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn-solid w-full mt-3 opacity-60 cursor-not-allowed"
+                      >
+                        <span>Consultas por WhatsApp — muy pronto</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
-                ) : !bookingConfirmed ? (
+                ) : (
                   <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
                     <div className="flex justify-between items-baseline border-b border-line pb-3">
                       <div>
@@ -977,66 +1013,42 @@ export default function HomeClient({
                       </div>
                     </div>
 
-                    {/* Price Breakdown */}
+                    {/* Desglose. Sin "tarifa de limpieza" ni "de servicio":
+                        eran montos inventados que nadie decidió cobrar. El
+                        total es noches × precio, y cualquier costo extra se
+                        conversa por WhatsApp antes de confirmar. */}
                     <div className="space-y-2 text-meta text-gray-600 pt-2">
                       <div className="flex justify-between">
                         <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
                         <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Tarifa de limpieza</span>
-                        <span>US$10</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tarifa de servicio</span>
-                        <span>US$8</span>
-                      </div>
                       <div className="flex justify-between font-semibold text-brand border-t border-line pt-3 text-body">
                         <span>Total estimado</span>
-                        <span>US${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}</span>
+                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                       </div>
                     </div>
 
-                    <button 
-                      onClick={() => setBookingConfirmed(true)}
-                      className="btn-solid w-full mt-4 cursor-pointer"
-                    >
-                      <span>Reservar ahora</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <p className="text-micro text-center text-gray-400 mt-2 font-medium">Aún no se te cobrará ningún importe oficial</p>
+                    {waReserva ? (
+                      <a
+                        href={waReserva}
+                        target="_blank"
+                        rel="noopener"
+                        className="btn-solid w-full mt-4"
+                      >
+                        <span>Reservar por WhatsApp</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn-solid w-full mt-4 opacity-60 cursor-not-allowed"
+                      >
+                        <span>Reservas por WhatsApp — muy pronto</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                    <p className="text-micro text-center text-gray-400 mt-2 font-medium">Sin pagos en línea: confirmas disponibilidad y coordinas directo con quien te recibe</p>
                   </div>
-                ) : (
-                  // BOOKING SUCCESS STATE
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-6 bg-green-50/50 rounded-2xl border border-green-100 text-center space-y-4"
-                  >
-                    <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto stroke-[1.5]" />
-                    <div>
-                      <h3 className="font-serif text-title-sm font-semibold text-green-900">¡Reserva Solicitada con Éxito!</h3>
-                      <p className="text-meta text-green-700 mt-1 max-w-xs mx-auto">
-                        Tu solicitud para <strong>{selectedProperty.name}</strong> ha sido pre-aprobada. El anfitrión te responderá en breve.
-                      </p>
-                    </div>
-                    <div className="bg-white rounded-xl p-4 border border-green-100/60 max-w-xs mx-auto text-left text-meta space-y-1 text-gray-700">
-                      <p><strong>Ubicación:</strong> {selectedProperty.location}</p>
-                      <p><strong>Noches:</strong> {bookingNights} noches</p>
-                      <p><strong>Huéspedes:</strong> {bookingGuests} {bookingGuests === 1 ? 'persona' : 'personas'}</p>
-                      <p className="pt-2 border-t border-gray-100 font-semibold text-black">
-                        {selectedProperty.priceOnRequest
-                          ? 'Te confirmaremos el precio según temporada'
-                          : `Total: US$${(selectedProperty.pricePerNight * bookingNights + 10 + 8).toLocaleString()}`}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => setIsDetailOpen(false)}
-                      className="btn-solid"
-                    >
-                      Explorar otros destinos
-                    </button>
-                  </motion.div>
                 )}
 
               </div>
