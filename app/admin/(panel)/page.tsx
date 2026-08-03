@@ -11,12 +11,10 @@ import { refrescarTasasAction } from './actions';
 // Era un resumen que contaba cosas y no dejaba hacer nada. Se recortó a lo que
 // se usa a diario:
 //
-//   · El aviso de «falta tu WhatsApp» se fue a /admin/contenido, que es donde se
-//     arregla. Acá ocupaba media pantalla todos los días para decir algo que no
-//     se podía atender desde donde estaba. En la lateral quedó un punto en el
-//     icono de Contenido, que basta.
-//   · El aviso de los listados de relleno se fue a /admin/propiedades, que es
-//     donde se actúa sobre ellos.
+//   · Los avisos de «falta tu WhatsApp» y de los listados de relleno se fueron a
+//     /admin/pendientes, que es la única pantalla dedicada a eso. Acá ocupaban
+//     media pantalla todos los días para decir algo que no se podía atender desde
+//     donde estaba. En la lateral queda la cifra de pendientes sobre su icono.
 //   · Los accesos directos se fueron: la lateral ya es la navegación y tenerlos
 //     dos veces solo alargaba la página.
 //   · La tabla de zonas se fue: es un informe, no una herramienta.
@@ -88,10 +86,10 @@ export default async function AdminHome() {
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* La de mercado va primera y destacada: es la que se usa para cobrar.
+          {/* La del USDT va primera y destacada: es la que se usa para cobrar.
               La del BCV es la referencia legal, no el precio de la calle. */}
           <Tasa
-            etiqueta="Dólar de mercado"
+            etiqueta="Dólar USDT"
             valor={tasas.mercado}
             fuente="Binance P2P · mediana de 10 ofertas"
             destacada

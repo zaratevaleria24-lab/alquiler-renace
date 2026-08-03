@@ -272,7 +272,7 @@ export type Moneda = 'VES' | 'USD' | 'USDT' | 'EUR';
 export const MONEDAS: { key: Moneda; corto: string; desc: string }[] = [
   { key: 'VES', corto: 'Bs', desc: 'bolívares' },
   { key: 'USD', corto: 'USD BCV', desc: 'dólar oficial del BCV' },
-  { key: 'USDT', corto: 'USDT', desc: 'dólar de mercado (Binance P2P)' },
+  { key: 'USDT', corto: 'USDT', desc: 'dólar USDT (Binance P2P)' },
   { key: 'EUR', corto: 'EUR BCV', desc: 'euro oficial del BCV' },
 ];
 
