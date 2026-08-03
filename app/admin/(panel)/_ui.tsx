@@ -368,27 +368,19 @@ export function Tasa({
   etiqueta,
   valor,
   fuente,
-  destacada,
 }: {
   etiqueta: string;
   valor: number | null;
   fuente: string;
-  destacada?: boolean;
 }) {
+  // Las cuatro tarjetas van IGUALES. La del USDT estuvo un rato con fondo
+  // teñido por ser la que se usa para cobrar, pero destacar una de cuatro
+  // cifras que se leen juntas no ayuda a compararlas: rompe la fila y hace que
+  // las otras tres parezcan secundarias. El orden ya dice cuál manda.
   return (
-    <div
-      className={`rounded-card border p-5 ${
-        destacada
-          ? 'border-brand/30 bg-brand-tint'
-          : 'border-line bg-white shadow-lift'
-      }`}
-    >
+    <div className="rounded-card border border-line bg-white p-5 shadow-lift">
       <p className="text-meta font-semibold text-ink-muted">{etiqueta}</p>
-      <p
-        className={`mt-2.5 font-mono text-[1.75rem] leading-none tabular-nums ${
-          destacada ? 'text-brand-deep' : 'text-ink'
-        }`}
-      >
+      <p className="mt-2.5 font-mono text-[1.75rem] leading-none tabular-nums text-ink">
         {valor === null
           ? '—'
           : valor.toLocaleString('es-VE', {

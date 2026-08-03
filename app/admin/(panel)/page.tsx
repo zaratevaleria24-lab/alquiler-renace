@@ -80,18 +80,23 @@ export default async function AdminHome() {
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* La del USDT va primera y destacada: es la que se usa para cobrar.
-              La del BCV es la referencia legal, no el precio de la calle. */}
+          {/* La del USDT va PRIMERA: es la que se usa para cobrar. La del BCV
+              es la referencia legal, no el precio de la calle. El orden basta
+              para decir cuál manda — las cuatro tarjetas se ven iguales. */}
           <Tasa
             etiqueta="Dólar USDT"
             valor={tasas.mercado}
             fuente="Binance P2P · mediana de 10 ofertas"
-            destacada
           />
+          {/* La antigüedad solo se muestra si se sabe: cuando la tasa viene
+              de Siberia no llega la fecha de publicación del BCV, y poner «sin
+              datos» al lado de una cifra que sí está hacía dudar del número. */}
           <Tasa
             etiqueta="Dólar BCV"
             valor={tasas.bcvUsd}
-            fuente={`oficial · ${haceCuanto(tasas.bcvAt)}`}
+            fuente={
+              tasas.bcvAt ? `oficial · ${haceCuanto(tasas.bcvAt)}` : 'oficial'
+            }
           />
           <Tasa etiqueta="Euro BCV" valor={tasas.bcvEur} fuente="oficial" />
           <Tarjeta className="p-5">
