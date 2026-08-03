@@ -196,6 +196,31 @@ Qué mostrará el panel:
    estaba en `null` a mano: **el WhatsApp ya se pone sin tocar código**, y al
    guardarlo se encienden todos los botones de reservar del sitio.
 
+4c. **Herramientas financieras** — ✅ 2026-08-03.
+   El panel de inicio dejó de ser un informe y pasó a ser herramienta: tasa del
+   día (BCV USD/EUR y dólar de mercado por Binance P2P), brecha, conversor y
+   accesos directos, con el "desde" de cada zona también en bolívares.
+
+   **Modelo portado de Siberia**, el otro producto del servidor
+   (`/root/proyectos/siberia/backend/ws-server/src/main.rs`). Se copiaron las
+   FUENTES y el CÁLCULO, no el código — ver `lib/tasas.ts`:
+   - Binance P2P directo con **mediana de 10 ofertas por lado** y punto medio
+     entre compra y venta. Mediana y no promedio porque en P2P siempre hay
+     anuncios de precio absurdo.
+   - Dos variantes: todos los métodos y **solo Pago Móvil**, que cotiza más
+     bajo. La tasa mostrada es el promedio de ambas.
+   - El "paralelo" de DolarAPI se guarda pero **no se usa para calcular**:
+     Siberia lo descartó el 2026-07-19 por ser un índice opaco.
+
+   **Los productos NO se acoplan:** Margarita consulta las APIs públicas por su
+   cuenta (regla del servidor) y cachea en la tabla `tasas` a demanda, con 15
+   minutos de vigencia. Sin demonio: Siberia sondea sin parar porque su producto
+   es el gráfico en vivo; a un alquiler no le cambia nada que la tasa tenga tres
+   minutos. Comprobado el 2026-08-03: las dos implementaciones dan el MISMO BCV
+   y difieren 0,02% en Binance, solo por el segundo de la consulta.
+
+   Sin histórico a propósito: el histórico de tasas es el producto de Siberia.
+
 5. **Recolector de métricas** y el dashboard.
 6. **nginx + TLS** para el subdominio, y **script de backup** en el crontab:
    por primera vez habrá datos que se pueden perder.

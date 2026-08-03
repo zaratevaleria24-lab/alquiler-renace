@@ -357,6 +357,53 @@ export function Cifra({
   );
 }
 
+/**
+ * Tasa de cambio: la cifra grande con su unidad y su procedencia.
+ *
+ * La FUENTE va siempre visible, no en una nota al pie. Una tasa sin decir de
+ * dónde salió no sirve para cobrarle a nadie: la diferencia entre el dólar del
+ * BCV y el de mercado es justamente el dato del que vive esta pantalla.
+ */
+export function Tasa({
+  etiqueta,
+  valor,
+  fuente,
+  destacada,
+}: {
+  etiqueta: string;
+  valor: number | null;
+  fuente: string;
+  destacada?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-card border p-5 ${
+        destacada
+          ? 'border-brand/30 bg-brand-tint'
+          : 'border-line bg-white shadow-lift'
+      }`}
+    >
+      <p className="text-meta font-semibold text-ink-muted">{etiqueta}</p>
+      <p
+        className={`mt-2.5 font-mono text-[1.75rem] leading-none tabular-nums ${
+          destacada ? 'text-brand-deep' : 'text-ink'
+        }`}
+      >
+        {valor === null
+          ? '—'
+          : valor.toLocaleString('es-VE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+        <span className="ml-1.5 font-sans text-meta font-normal text-ink-muted">
+          Bs
+        </span>
+      </p>
+      <p className="mt-2.5 text-ui text-ink-subtle">{fuente}</p>
+    </div>
+  );
+}
+
 /** Aviso destacado. `tono` decide el color, no una clase suelta en cada uso. */
 export function Aviso({
   tono,
