@@ -20,6 +20,8 @@ import {
   Star, 
   ArrowRight, 
   X, 
+  MessageCircle, 
+  Heart, 
   Wifi, 
   Coffee, 
   Flame, 
@@ -38,6 +40,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // Server Component y sí puede consultar Postgres. Este archivo es 'use client',
 // y un navegador no puede hablar con la base.
 import { iconFor } from '@/lib/icons';
+import { CONTACT } from '@/lib/site';
 import type { Category, Property, Zone } from '@/lib/types';
 import {
   AboutIslandSection,
@@ -59,10 +62,27 @@ const NAV_LINKS = [
   { label: 'Zonas', href: '#zonas-de-la-isla' },
 ] as const;
 
-// La reserva por WhatsApp ya NO vive acá: se movió a
-// components/ReservaPanel.tsx, que es la caja de la página de propiedad. Al
-// pulsar un alojamiento ahora se abre /propiedad/<slug> en vez del panel
-// lateral que se abría a la derecha.
+// ── Reserva por WhatsApp ────────────────────────────────────────────────────
+// El sitio no cobra en línea: una reserva se cierra conversando, que es como
+// se alquila en Venezuela. Este enlace abre WhatsApp con el mensaje ya escrito
+// (propiedad, noches, huéspedes) para que el interesado solo tenga que enviar.
+//
+// Devuelve null mientras no exista CONTACT.whatsapp (lib/site.ts): el botón se
+// muestra desactivado y honesto. NUNCA volver a la pantalla de "reserva
+// pre-aprobada" que había antes — confirmaba solicitudes que no llegaban a
+// nadie.
+function urlReservaWhatsApp(
+  property: Property,
+  nights: number,
+  guests: number,
+): string | null {
+  if (!CONTACT.whatsapp) return null;
+  const huespedes = `${guests} ${guests === 1 ? 'huésped' : 'huéspedes'}`;
+  const texto = property.priceOnRequest
+    ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
+    : `Hola, quiero reservar «${property.name}» (${property.location}) que vi en margaritarenace.com.ve: ${nights} ${nights === 1 ? 'noche' : 'noches'}, ${huespedes}. ¿Está disponible?`;
+  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(texto)}`;
+}
 
 export default function HomeClient({
   properties: PROPERTIES,
@@ -102,11 +122,27 @@ export default function HomeClient({
   const [filterMaxPrice, setFilterMaxPrice] = useState(200);
   const [filterMinRating, setFilterMinRating] = useState(4.5);
 
-  // Escape cierra el panel de filtros y los popovers de búsqueda.
+  // Selected property for detail view (Sidebar Drawer)
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  // Cálculo de la reserva. Noches y huéspedes no se "envían" a ningún lado:
+  // van dentro del mensaje precargado de WhatsApp, que es donde se cierra la
+  // reserva de verdad. Ver urlReservaWhatsApp().
+  const [bookingNights, setBookingNights] = useState(2);
+  const [bookingGuests, setBookingGuests] = useState(1);
+
+  const waReserva = selectedProperty
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests)
+    : null;
+
+  // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
+  // la pantalla, la única salida era acertarle a la X.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return;
       setIsFilterOpen(false);
+      setIsDetailOpen(false);
       setActivePopover(null);
     }
     document.addEventListener('keydown', onKeyDown);
@@ -714,18 +750,30 @@ export default function HomeClient({
               <CarouselSection
                 title="Destacados en Margarita"
                 properties={getCuratedSection1()} 
+                onSelectProperty={(p) => {
+                  setSelectedProperty(p);
+                  setIsDetailOpen(true);
+                }}
               />
 
               {/* Section 2: Selección Premium */}
               <CarouselSection
                 title="Selección Premium"
                 properties={getCuratedSection2()} 
+                onSelectProperty={(p) => {
+                  setSelectedProperty(p);
+                  setIsDetailOpen(true);
+                }}
               />
 
               {/* Section 3: Escapadas Frente al Mar */}
               <CarouselSection
                 title="Escapadas Frente al Mar"
                 properties={getCuratedSection3()} 
+                onSelectProperty={(p) => {
+                  setSelectedProperty(p);
+                  setIsDetailOpen(true);
+                }}
               />
             </>
           ) : (
@@ -770,7 +818,14 @@ export default function HomeClient({
               {filteredProperties.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {filteredProperties.map((property) => (
-                    <PropertyCard key={property.id} property={property} />
+                    <PropertyCard 
+                      key={property.id} 
+                      property={property} 
+                      onSelect={() => {
+                        setSelectedProperty(property);
+                        setIsDetailOpen(true);
+                      }}
+                    />
                   ))}
                 </div>
               ) : (
@@ -798,6 +853,260 @@ export default function HomeClient({
         <FaqSection />
 
       </main>
+
+      {/* 5. SIDEBAR DRAWER: DETALLES DE PROPIEDAD */}
+      <AnimatePresence>
+        {isDetailOpen && selectedProperty && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDetailOpen(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+            />
+
+            {/* Drawer Panel */}
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Detalles de ${selectedProperty.name}`}
+              className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
+            >
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-line">
+                <div>
+                  <h3 className="font-serif text-title-sm font-semibold text-brand">Detalles de la Reserva</h3>
+                  <p className="text-micro text-gray-400 font-medium tracking-wide uppercase mt-0.5">{selectedProperty.location}</p>
+                </div>
+                <button 
+                  onClick={() => setIsDetailOpen(false)}
+                  aria-label="Cerrar detalles"
+                  className="w-8 h-8 rounded-full hover:bg-paper flex items-center justify-center text-gray-500 hover:text-black transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Contenido desplazable.
+                  data-lenis-prevent NO es opcional: Lenis intercepta la rueda
+                  a nivel de ventana y, sin esta marca, se llevaba el gesto para
+                  desplazar la página de detrás — el panel se quedaba
+                  ESTÁTICO y no se podía llegar ni al precio ni al botón de
+                  reservar. Lenis busca el atributo en el composedPath del
+                  evento (allowNestedScroll viene en false por defecto). */}
+              <div
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar"
+              >
+                
+                {/* Image Gallery (Main + small grid) */}
+                <div className="space-y-2">
+                  <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden shadow-sm">
+                    <img
+                      src={selectedProperty.image}
+                      alt={`${selectedProperty.name} — alquiler en ${selectedProperty.zone}, Isla de Margarita`}
+                      width={800}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {selectedProperty.gallery.map((imgUrl, idx) => (
+                      <div key={idx} className="aspect-video rounded-xl overflow-hidden border border-line/40 shadow-xs">
+                        {/* El alt decía "Gallery image 0": en inglés y sin
+                            información. Inservible para lectores de pantalla y
+                            desperdiciado para Google Imágenes. */}
+                        <img
+                          src={imgUrl}
+                          alt={`Foto ${idx + 1} de ${selectedProperty.name}, ${selectedProperty.zone}`}
+                          width={400}
+                          height={225}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          referrerPolicy="no-referrer"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Main Details */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className="font-serif text-title font-medium text-brand tracking-tight">{selectedProperty.name}</h2>
+                      <p className="text-meta text-ink-muted mt-0.5 font-medium">{selectedProperty.location}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-paper text-amber-800 border border-line rounded-chip px-3 py-1.5 text-meta font-semibold">
+                      <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
+                      <span>{selectedProperty.rating}</span>
+                    </div>
+                  </div>
+                  <p className="text-meta text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
+                  {/* La página propia es la versión canónica y compartible del
+                      alojamiento: es el enlace que se manda por WhatsApp. */}
+                  <Link
+                    href={`/propiedad/${selectedProperty.slug}`}
+                    className="inline-block text-meta font-semibold text-brand underline-offset-4 hover:underline"
+                  >
+                    Ver página completa →
+                  </Link>
+                </div>
+
+                {/* Host Info */}
+                <div className="p-4 bg-paper rounded-2xl border border-line flex items-center gap-4">
+                  <img 
+                    src={selectedProperty.host?.avatarPath ?? '/logo-avatar.png'} 
+                    alt={selectedProperty.host?.name ?? 'Margarita Renace'} 
+                    className="w-12 h-12 rounded-full object-cover shadow-xs border border-line"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div>
+                    <p className="text-meta font-semibold text-ink">Hospedado por {selectedProperty.host?.name ?? 'Margarita Renace'}</p>
+                    <p className="text-micro text-ink-muted font-medium mt-0.5">{selectedProperty.host?.tagline ?? ''}</p>
+                  </div>
+                </div>
+
+                {/* Amenities */}
+                <div>
+                  <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400 mb-3">Servicios Premium Incluidos</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedProperty.amenities.map((amenity, idx) => {
+                      const Icon = iconFor(amenity.iconKey);
+                      return (
+                        <div key={idx} className="flex items-center gap-2 text-meta text-gray-700">
+                          <div className="w-7 h-7 rounded-lg bg-paper border border-line/30 flex items-center justify-center text-gray-500">
+                            <Icon className="w-4 h-4 stroke-[1.8]" />
+                          </div>
+                          <span className="font-medium">{amenity.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Interactive Booking Calculator */}
+                {selectedProperty.priceOnRequest ? (
+                  <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-line pb-3">
+                      <span className="text-body font-semibold text-accent">Precio según temporada</span>
+                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                    </div>
+                    <p className="text-meta text-gray-600">
+                      El precio de esta propiedad varía según la temporada. Contáctanos y te confirmamos disponibilidad y tarifa para tus fechas.
+                    </p>
+                    {waReserva ? (
+                      <a
+                        href={waReserva}
+                        target="_blank"
+                        rel="noopener"
+                        className="btn-solid w-full mt-3"
+                      >
+                        <span>Consultar por WhatsApp</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn-solid w-full mt-3 opacity-60 cursor-not-allowed"
+                      >
+                        <span>Consultas por WhatsApp — muy pronto</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
+                    <div className="flex justify-between items-baseline border-b border-line pb-3">
+                      <div>
+                        <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
+                        <span className="text-meta text-gray-500 font-medium"> / noche</span>
+                      </div>
+                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Noches</label>
+                        <select 
+                          value={bookingNights} 
+                          onChange={(e) => setBookingNights(Number(e.target.value))}
+                          className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => (
+                            <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Huéspedes</label>
+                        <select 
+                          value={bookingGuests} 
+                          onChange={(e) => setBookingGuests(Number(e.target.value))}
+                          className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
+                        >
+                          {Array.from({ length: selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children }, (_, i) => i + 1).map(g => (
+                            <option key={g} value={g}>{g} {g === 1 ? 'huésped' : 'huéspedes'}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Desglose. Sin "tarifa de limpieza" ni "de servicio":
+                        eran montos inventados que nadie decidió cobrar. El
+                        total es noches × precio, y cualquier costo extra se
+                        conversa por WhatsApp antes de confirmar. */}
+                    <div className="space-y-2 text-meta text-gray-600 pt-2">
+                      <div className="flex justify-between">
+                        <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
+                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-brand border-t border-line pt-3 text-body">
+                        <span>Total estimado</span>
+                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    {waReserva ? (
+                      <a
+                        href={waReserva}
+                        target="_blank"
+                        rel="noopener"
+                        className="btn-solid w-full mt-4"
+                      >
+                        <span>Reservar por WhatsApp</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn-solid w-full mt-4 opacity-60 cursor-not-allowed"
+                      >
+                        <span>Reservas por WhatsApp — muy pronto</span>
+                        <MessageCircle className="w-4 h-4" />
+                      </button>
+                    )}
+                    <p className="text-micro text-center text-gray-400 mt-2 font-medium">Sin pagos en línea: confirmas disponibilidad y coordinas directo con quien te recibe</p>
+                  </div>
+                )}
+
+              </div>
+
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* 6. SIDEBAR DRAWER: FILTERS */}
       <AnimatePresence>
@@ -932,9 +1241,10 @@ export default function HomeClient({
 interface CarouselSectionProps {
   title: string;
   properties: Property[];
+  onSelectProperty: (property: Property) => void;
 }
 
-function CarouselSection({ title, properties }: CarouselSectionProps) {
+function CarouselSection({ title, properties, onSelectProperty }: CarouselSectionProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: false,
@@ -985,7 +1295,7 @@ function CarouselSection({ title, properties }: CarouselSectionProps) {
               key={property.id} 
               className="flex-none w-full sm:w-1/2 lg:w-1/4"
             >
-              <PropertyCard property={property} />
+              <PropertyCard property={property} onSelect={() => onSelectProperty(property)} />
             </div>
           ))}
         </div>
@@ -997,23 +1307,18 @@ function CarouselSection({ title, properties }: CarouselSectionProps) {
 // === COMPONENTE CARD DE PROPIEDAD ===
 interface PropertyCardProps {
   property: Property;
+  onSelect: () => void;
 }
 
-// La tarjeta es un ENLACE de verdad a /propiedad/<slug>.
-//
-// Antes era un <div onClick> que abría un panel lateral a la derecha. Dos
-// problemas: el alojamiento no tenía dirección propia —no se podía compartir
-// por WhatsApp, que es como se recomienda alquiler en Venezuela— y para Google
-// las tarjetas no eran enlaces, así que las 12 páginas de propiedad quedaban
-// colgando solo del sitemap. Con un <a> real: se comparte, se abre en pestaña
-// nueva, funciona sin JavaScript y los rastreadores la siguen.
-function PropertyCard({ property }: PropertyCardProps) {
-  return (
-    <Link
-      href={`/propiedad/${property.slug}`}
-      className="group bg-white border border-line rounded-card overflow-hidden cursor-pointer flex flex-col justify-between transition-all duration-200 h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-brand/40 hover:-translate-y-0.5"
-    >
+function PropertyCard({ property, onSelect }: PropertyCardProps) {
+  const [isLiked, setIsLiked] = useState(false);
 
+  return (
+    <div 
+      onClick={onSelect}
+      className="group bg-white border border-line rounded-card overflow-hidden cursor-pointer flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:border-ink hover:shadow-hard h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-brand/40 hover:-translate-y-0.5"
+    >
+      
       {/* Imagen arriba con border-radius 16px y ratio 4:3 */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[16px]">
         {/* El alt lleva zona e isla, no solo el nombre: es lo que posiciona
@@ -1031,10 +1336,17 @@ function PropertyCard({ property }: PropertyCardProps) {
           referrerPolicy="no-referrer"
         />
 
-        {/* El corazón de "favoritos" se retiró: no guardaba nada en ninguna
-            parte —era estado local que se perdía al recargar— y además un
-            <button> dentro de un <a> es HTML inválido. Vuelve cuando haya
-            cuentas de usuario donde guardarlos de verdad. */}
+        {/* Favorite Icon */}
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsLiked(!isLiked);
+          }}
+          aria-label={isLiked ? "Quitar de favoritos" : "Guardar en favoritos"}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-paper transition-all shadow-sm z-10 cursor-pointer border border-line"
+        >
+          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-coral text-coral' : 'text-gray-600'}`} />
+        </button>
 
         {/* Category Tag Overlay */}
         <div className="absolute bottom-3 left-3 flex gap-1">
@@ -1058,20 +1370,23 @@ function PropertyCard({ property }: PropertyCardProps) {
           </p>
         </div>
 
-        {/* Flecha decorativa: toda la tarjeta ya es el enlace, así que esto es
-            un <span> y no un botón — un control dentro de un enlace sería HTML
-            inválido y confundiría a los lectores de pantalla.
-            Sin anillo de tinta en reposo: son 12 tarjetas en pantalla y doce
-            círculos con borde oscuro dejan de ser un acento para volverse el
-            estilo. El borde aparece con el hover de la tarjeta. */}
-        <span
-          aria-hidden="true"
-          className="w-10 h-10 rounded-full bg-brand group-hover:bg-brand-deep text-white flex items-center justify-center border border-transparent group-hover:border-ink transition-all shrink-0"
+        {/* Botón circular negro con flecha "→" blanca, esquina inferior derecha */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          aria-label={`Ver detalles de ${property.name}`}
+          /* Sin anillo de tinta en reposo: son 12 tarjetas en pantalla y doce
+             círculos con borde oscuro dejan de ser un acento para volverse el
+             estilo. El borde aparece con el hover de la tarjeta, junto al resto
+             del tratamiento. */
+          className="w-10 h-10 rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center border border-transparent group-hover:border-ink transition-all shrink-0 cursor-pointer"
         >
           <ArrowRight className="w-[17px] h-[17px]" />
-        </span>
+        </button>
       </div>
 
-    </Link>
+    </div>
   );
 }
