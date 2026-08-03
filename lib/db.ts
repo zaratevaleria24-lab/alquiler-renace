@@ -62,6 +62,30 @@ export async function query<T extends pg.QueryResultRow = pg.QueryResultRow>(
   }
 }
 
+/**
+ * Varias escrituras como una sola unidad. Necesario porque query() toma un
+ * cliente NUEVO del pool en cada llamada: un BEGIN por query() y el COMMIT
+ * caerían en conexiones distintas y no transaccionarían nada.
+ */
+export async function withTransaction<T>(
+  fn: (
+    q: (sql: string, params?: unknown[]) => Promise<pg.QueryResult>,
+  ) => Promise<T>,
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn((sql, params) => client.query(sql, params));
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 /** Devuelve solo las filas, que es lo que quieren casi todas las llamadas. */
 export async function rows<T extends pg.QueryResultRow = pg.QueryResultRow>(
   sql: string,

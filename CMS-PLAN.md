@@ -153,6 +153,9 @@ Qué mostrará el panel:
    las landings ni el sitemap se enteran del cambio.
 3. **App admin en el 3003** con auth y el layout del panel.
 4. **CRUD de propiedades** con subida de fotos y revalidación al publicar.
+   *2026-08-03: edición completa + publicar/despublicar + revalidación LISTOS
+   (`admin/(panel)/propiedades`). Faltan: crear propiedad nueva y subir fotos.
+   Ojo: un slug NUEVO necesita rebuild (`dynamicParams=false`), editar no.*
 5. **Recolector de métricas** y el dashboard.
 6. **nginx + TLS** para el subdominio, y **script de backup** en el crontab:
    por primera vez habrá datos que se pueden perder.
