@@ -1,24 +1,35 @@
 // Tasas de cambio del bolívar. SOLO SERVIDOR.
 //
 // ═══════════════════════════════════════════════════════════════════════════
-// PORTADO DE SIBERIA (2026-08-03)
+// DE DÓNDE SALEN LAS TASAS (2026-08-03, revisado el mismo día)
 //
-// El modelo de tasas y la matemática vienen del backend Rust de Siberia
-// (`/root/proyectos/siberia/backend/ws-server/src/main.rs`), que lleva semanas
-// en producción sirviendo siberiaonline.xyz. Se copian las FUENTES y el CÁLCULO,
-// no el código: allá es un demonio en Rust que sondea sin parar porque su
-// producto es el gráfico en vivo; acá es una consulta a demanda con caché,
-// porque un alquiler no necesita la tasa al segundo.
+// PRIMERO: del propio Siberia, por HTTP a 127.0.0.1:8092. Ese servicio ya
+// sondea Binance cada 60s y DolarAPI cada 5min para su gráfico en vivo, así que
+// volver a sondear desde acá era trabajo pagado dos veces. Y peor: DOS procesos
+// golpeando la API P2P de Binance desde la MISMA IP duplican el riesgo de que
+// nos limiten a los dos. Medido: 258KB en 6ms por localhost — más barato que
+// una sola llamada a Binance.
 //
-// Los dos productos NO se acoplan: cada uno consulta las APIs públicas por su
-// cuenta. Es la regla del servidor —los tres productos no comparten nada— y
-// además evita que Margarita se quede sin tasas si Siberia está caído.
+// POR QUÉ HTTP Y NO EL WEBSOCKET, que era la idea inicial: el panel se renderiza
+// en el SERVIDOR en cada visita, y un WebSocket necesita una conexión que viva
+// entre peticiones — no hay dónde sostenerla. Y para abrirlo desde el navegador
+// habría que atravesar el `auth_request` con el que nginx protege TODO
+// siberiaonline.xyz, o montar un proxy nuevo en el vhost del panel. El WebSocket
+// entrega su primer mensaje con el estado actual; una sola llamada HTTP da lo
+// mismo en 6ms y sin piezas nuevas.
+//
+// SEGUNDO, SOLO SI SIBERIA NO RESPONDE: consulta directa a las APIs públicas.
+// El modelo y la matemática se copiaron de su backend Rust
+// (`/root/proyectos/siberia/backend/ws-server/src/main.rs`), así que el
+// resultado es el mismo. Existe para que Margarita no se quede ciega si el otro
+// producto está caído o reiniciando — es lo que permite aprovecharlo sin quedar
+// atado a él.
 //
 // DECISIONES QUE SE HEREDAN DE SIBERIA, con su motivo:
 //
-// 1. El "dólar paralelo" NO es la referencia de mercado. Siberia lo eliminó de
-//    su producto el 2026-07-19 por ser un índice opaco: nadie publica cómo se
-//    calcula. Se guarda solo como dato secundario informativo.
+// 1. El "dólar paralelo" NO se usa. Siberia lo eliminó de su producto el
+//    2026-07-19 por ser un índice opaco: nadie publica cómo se calcula. Acá
+//    tampoco se guarda — un dato que no se usa solo se queda viejo.
 //
 // 2. La tasa de mercado es BINANCE P2P DIRECTO, con la mediana de 10 ofertas
 //    por lado (compra y venta) y el punto medio entre ambas medianas. La
@@ -33,18 +44,28 @@
 
 import { rows, query } from './db';
 
+/** Siberia, en el mismo servidor. No pasa por nginx ni por internet. */
+const SIBERIA = 'http://127.0.0.1:8092/history?range=24h';
+
 const DOLARAPI = 'https://ve.dolarapi.com/v1/dolares';
 const EUROAPI = 'https://ve.dolarapi.com/v1/euros';
 const BINANCE_P2P =
   'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search';
 
-/** Minutos antes de considerar el caché vencido. El BCV publica una vez al día
- *  y el P2P se mueve despacio; 15 minutos es de sobra y evita machacar las
- *  APIs cuando la dueña recarga el panel. */
-const CACHE_MINUTOS = 15;
+/**
+ * Minutos antes de considerar el caché vencido.
+ *
+ * Eran 15 cuando cada refresco significaba salir a internet. Ahora el origen
+ * normal es Siberia por localhost, que cuesta 6ms, así que 2 minutos deja el
+ * dato prácticamente siempre fresco sin costo. Es lo que hizo innecesario el
+ * botón de «Actualizar» que había en el panel.
+ */
+const CACHE_MINUTOS = 2;
 
 /** Ofertas por lado que se piden a Binance para calcular la mediana. */
 const OFERTAS = 10;
+
+export type Origen = 'siberia' | 'apis';
 
 export interface Tasas {
   /** Bolívares por dólar oficial del BCV. */
@@ -55,12 +76,12 @@ export interface Tasas {
   binance: number | null;
   /** Binance P2P, solo Pago Móvil (cotiza más bajo). */
   binancePm: number | null;
-  /** Índice "paralelo" de DolarAPI. Opaco: informativo, no se usa para calcular. */
-  paralelo: number | null;
   /** Cuándo se trajeron estos datos. Null si nunca se ha podido. */
   obtenidoAt: Date | null;
   /** Cuándo publicó el BCV su tasa. */
   bcvAt: Date | null;
+  /** De dónde salió el dato que está guardado. Null si no hay nada guardado. */
+  origen: Origen | null;
 }
 
 export interface TasasDerivadas extends Tasas {
@@ -80,7 +101,8 @@ async function leerCache(): Promise<Tasas> {
     valor: string;
     fuente_at: Date | null;
     obtenido_at: Date;
-  }>(`SELECT fuente, valor, fuente_at, obtenido_at FROM tasas`);
+    origen: Origen;
+  }>(`SELECT fuente, valor, fuente_at, obtenido_at, origen FROM tasas`);
 
   const por = new Map(rs.map((r) => [r.fuente, r]));
   // numeric llega como string desde pg: si no se convierte, las comparaciones
@@ -95,11 +117,11 @@ async function leerCache(): Promise<Tasas> {
     bcvEur: num('bcv_eur'),
     binance: num('binance'),
     binancePm: num('binance_pm'),
-    paralelo: num('paralelo'),
     obtenidoAt: rs.length
       ? new Date(Math.max(...rs.map((r) => r.obtenido_at.getTime())))
       : null,
     bcvAt: por.get('bcv_usd')?.fuente_at ?? null,
+    origen: por.get('binance')?.origen ?? rs[0]?.origen ?? null,
   };
 }
 
@@ -129,14 +151,15 @@ async function guardar(
   fuente: string,
   valor: number,
   fuenteAt: Date | null,
+  origen: Origen,
 ): Promise<void> {
   if (!Number.isFinite(valor) || valor <= 0) return;
   await query(
-    `INSERT INTO tasas (fuente, valor, fuente_at, obtenido_at)
-     VALUES ($1, $2, $3, now())
+    `INSERT INTO tasas (fuente, valor, fuente_at, obtenido_at, origen)
+     VALUES ($1, $2, $3, now(), $4)
      ON CONFLICT (fuente) DO UPDATE
-       SET valor = $2, fuente_at = $3, obtenido_at = now()`,
-    [fuente, valor, fuenteAt],
+       SET valor = $2, fuente_at = $3, obtenido_at = now(), origen = $4`,
+    [fuente, valor, fuenteAt, origen],
   );
 }
 
@@ -162,9 +185,7 @@ async function traerDolarApi(url: string, prefijo: string): Promise<void> {
       ? new Date(fila.fechaActualizacion)
       : null;
     if (fila.fuente === 'oficial') {
-      await guardar(prefijo, fila.promedio, fecha);
-    } else if (fila.fuente === 'paralelo' && prefijo === 'bcv_usd') {
-      await guardar('paralelo', fila.promedio, fecha);
+      await guardar(prefijo, fila.promedio, fecha, 'apis');
     }
   }
 }
@@ -217,32 +238,99 @@ async function traerBinance(clave: string, payTypes: string[]): Promise<void> {
     (v): v is number => v !== null && v > 0,
   );
   if (!lados.length) throw new Error(`binance ${clave} sin ofertas`);
-  await guardar(clave, lados.reduce((s, v) => s + v, 0) / lados.length, new Date());
+  await guardar(
+    clave,
+    lados.reduce((s, v) => s + v, 0) / lados.length,
+    new Date(),
+    'apis',
+  );
 }
 
 /**
- * Refresca todas las fuentes. Cada una por separado y sin cortar a las demás:
+ * Toma el último punto del histórico de Siberia.
+ *
+ * Su `/history` no tiene un endpoint de "solo lo actual" —los rangos son
+ * 24h|7d|30d|all— pero el ÚLTIMO punto de la serie es el estado de ahora, y por
+ * localhost traer las 24h cuesta 6ms. No vale la pena recompilar el binario de
+ * Rust de un producto en producción para ahorrar 250KB que no salen de la
+ * máquina.
+ *
+ * No se guarda `fuente_at`: el punto solo dice cuándo lo observó Siberia, no
+ * cuándo lo publicó el BCV, y poner una cosa donde va la otra haría que la
+ * pantalla mintiera sobre la antigüedad del dato oficial.
+ */
+async function traerDeSiberia(): Promise<void> {
+  const resp = await fetch(SIBERIA, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(5_000),
+  });
+  if (!resp.ok) throw new Error(`siberia devolvió ${resp.status}`);
+
+  const datos = (await resp.json()) as {
+    points?: {
+      oficial?: number | null;
+      euro?: number | null;
+      binance?: number | null;
+      binance_pm?: number | null;
+    }[];
+  };
+  const ultimo = datos.points?.at(-1);
+  if (!ultimo) throw new Error('siberia devolvió el histórico vacío');
+
+  const pares: [string, number | null | undefined][] = [
+    ['bcv_usd', ultimo.oficial],
+    ['bcv_eur', ultimo.euro],
+    ['binance', ultimo.binance],
+    ['binance_pm', ultimo.binance_pm],
+  ];
+  const guardados = pares.filter(([, v]) => typeof v === 'number' && v > 0);
+  // Si el punto no trae ni una tasa usable, es mejor caer al respaldo que
+  // marcar el caché como fresco con nada dentro.
+  if (!guardados.length) throw new Error('siberia no trajo ninguna tasa usable');
+
+  for (const [clave, valor] of guardados) {
+    await guardar(clave, valor as number, null, 'siberia');
+  }
+}
+
+/**
+ * Refresca las tasas: primero Siberia, y solo si falla, las APIs públicas.
+ *
+ * En el camino de respaldo cada fuente va por separado y sin cortar a las demás:
  * si Binance falla, el BCV igual se actualiza. Una tasa vieja es aceptable;
  * quedarse sin ninguna porque una API se cayó, no.
+ *
+ * Devuelve de dónde salió, para que la pantalla lo diga. Que la dueña vea
+ * «consulta directa» es la señal de que Siberia está caído — información útil,
+ * y gratis.
  */
-export async function refrescarTasas(): Promise<string[]> {
-  const fallos: string[] = [];
+export async function refrescarTasas(): Promise<'siberia' | 'apis' | 'nada'> {
+  try {
+    await traerDeSiberia();
+    return 'siberia';
+  } catch (err) {
+    console.warn(
+      '[tasas] Siberia no respondió, se consultan las APIs:',
+      err instanceof Error ? err.message : err,
+    );
+  }
+
   const tareas: [string, Promise<void>][] = [
     ['BCV USD', traerDolarApi(DOLARAPI, 'bcv_usd')],
     ['BCV EUR', traerDolarApi(EUROAPI, 'bcv_eur')],
     ['Binance', traerBinance('binance', [])],
     ['Binance Pago Móvil', traerBinance('binance_pm', ['PagoMovil'])],
   ];
-
-  for (const [nombre, tarea] of await Promise.allSettled(
-    tareas.map(([, t]) => t),
-  ).then((rs) => rs.map((r, i) => [tareas[i][0], r] as const))) {
-    if (tarea.status === 'rejected') {
-      fallos.push(nombre);
-      console.error(`[tasas] ${nombre} falló:`, tarea.reason?.message ?? tarea.reason);
+  const rs = await Promise.allSettled(tareas.map(([, t]) => t));
+  rs.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      console.error(
+        `[tasas] ${tareas[i][0]} falló:`,
+        r.reason?.message ?? r.reason,
+      );
     }
-  }
-  return fallos;
+  });
+  return rs.some((r) => r.status === 'fulfilled') ? 'apis' : 'nada';
 }
 
 /**

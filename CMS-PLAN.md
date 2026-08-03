@@ -212,12 +212,23 @@ Qué mostrará el panel:
    - El "paralelo" de DolarAPI se guarda pero **no se usa para calcular**:
      Siberia lo descartó el 2026-07-19 por ser un índice opaco.
 
-   **Los productos NO se acoplan:** Margarita consulta las APIs públicas por su
-   cuenta (regla del servidor) y cachea en la tabla `tasas` a demanda, con 15
-   minutos de vigencia. Sin demonio: Siberia sondea sin parar porque su producto
-   es el gráfico en vivo; a un alquiler no le cambia nada que la tasa tenga tres
-   minutos. Comprobado el 2026-08-03: las dos implementaciones dan el MISMO BCV
-   y difieren 0,02% en Binance, solo por el segundo de la consulta.
+   **De dónde sale el dato (revisado el mismo día):** PRIMERO del propio
+   Siberia, por HTTP a `127.0.0.1:8092/history` — ya sondea Binance cada 60s,
+   así que sondear otra vez era trabajo pagado dos veces, y dos procesos
+   golpeando la API P2P desde la misma IP duplican el riesgo de que nos limiten.
+   Medido: 258KB en 6ms por localhost. **Si Siberia no responde**, cae a la
+   consulta directa de las APIs (mismo cálculo), así que se aprovecha sin quedar
+   atado. La columna `tasas.origen` guarda cuál de los dos fue, y la pantalla lo
+   dice: ver «consulta directa» es la señal de que Siberia está caído.
+
+   No se usa el WEBSOCKET de Siberia aunque exista: el panel se renderiza en el
+   servidor en cada visita y no hay dónde sostener una conexión persistente, y
+   abrirlo desde el navegador exigiría atravesar el `auth_request` que protege
+   todo siberiaonline.xyz. Su primer mensaje trae el estado actual; una llamada
+   HTTP da lo mismo en 6ms.
+
+   Con el dato viniendo de localhost el caché baja a 2 minutos y el botón de
+   «Actualizar» desapareció: pedir a mano lo que ya está fresco no cambiaba nada.
 
    Sin histórico a propósito: el histórico de tasas es el producto de Siberia.
 

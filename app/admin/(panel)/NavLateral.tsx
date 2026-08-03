@@ -8,8 +8,8 @@ import {
   Home,
   Image as ImageIcon,
   LayoutDashboard,
-  ListChecks,
   MapPin,
+  Settings,
 } from 'lucide-react';
 
 // Navegación del panel: una tira de iconos, sin texto.
@@ -29,10 +29,11 @@ const NAV = [
   { href: '/admin', label: 'Herramientas', icono: LayoutDashboard, listo: true },
   { href: '/admin/propiedades', label: 'Propiedades', icono: Home, listo: true },
   { href: '/admin/contenido', label: 'Contenido', icono: ImageIcon, listo: true },
-  { href: '/admin/pendientes', label: 'Lo que falta', icono: ListChecks, listo: true },
   { href: '/admin/vehiculos', label: 'Vehículos', icono: Car, listo: false },
   { href: '/admin/zonas', label: 'Zonas', icono: MapPin, listo: false },
   { href: '/admin/metricas', label: 'Métricas', icono: BarChart3, listo: false },
+  // Última a propósito: es utilidad, no trabajo diario.
+  { href: '/admin/configuracion', label: 'Configuración', icono: Settings, listo: true },
 ];
 
 export default function NavLateral({
@@ -73,7 +74,7 @@ export default function NavLateral({
 
                 {/* Contador de pendientes. Cifra y no punto: saber que quedan
                     tres cosas es distinto de saber que queda "algo". */}
-                {pendientes > 0 && item.href === '/admin/pendientes' && (
+                {pendientes > 0 && item.href === '/admin/configuracion' && (
                   <span
                     aria-hidden="true"
                     className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-coral px-1 font-mono text-[10px] font-semibold leading-none text-white ring-2 ring-white"
@@ -97,7 +98,7 @@ export default function NavLateral({
               >
                 {item.label}
                 {!item.listo && ' · en construcción'}
-                {pendientes > 0 && item.href === '/admin/pendientes' && ` · ${pendientes}`}
+                {pendientes > 0 && item.href === '/admin/configuracion' && ` · ${pendientes}`}
               </span>
             </li>
           );

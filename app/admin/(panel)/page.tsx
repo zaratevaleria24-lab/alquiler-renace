@@ -1,9 +1,7 @@
-import { RefreshCw } from 'lucide-react';
 import { getInventoryHealth } from '@/lib/queries';
 import { MONEDAS, type Moneda, getTasas, tasaDe } from '@/lib/tasas';
 import { Aviso, Cifra, Seccion, Tarjeta, Tasa } from './_ui';
 import Conversor from './Conversor';
-import { refrescarTasasAction } from './actions';
 
 // Inicio del panel: HERRAMIENTAS, no informe.
 //
@@ -22,6 +20,10 @@ import { refrescarTasasAction } from './actions';
 // Queda la TASA y el CONVERSOR arriba —se cobra en dólares y el cliente paga en
 // bolívares, así que es lo que se necesita en cada conversación— y las cuatro
 // cifras del inventario abajo, de un vistazo.
+//
+// El botón de «Actualizar» también se fue: la tasa la sirve Siberia, que ya
+// sondea Binance cada minuto, así que el dato nunca tiene más de dos minutos y
+// pedirlo a mano no cambiaba nada.
 //
 // El modelo de tasas viene de Siberia, el otro producto del servidor. Ver
 // lib/tasas.ts para qué se copió, qué no y por qué.
@@ -63,25 +65,17 @@ export default async function AdminHome() {
         id="tasas"
         titulo="Tasa"
         cursiva="de hoy"
-        descripcion={`Actualizada ${haceCuanto(tasas.obtenidoAt)}. Se refresca sola cada 15 minutos.`}
-        acciones={
-          <form action={refrescarTasasAction}>
-            <button
-              type="submit"
-              title="Traer la tasa de ahora mismo"
-              className="inline-flex items-center gap-2 rounded-control border border-line bg-white px-3.5 py-2 text-meta font-medium text-ink-soft transition-colors hover:border-line-strong hover:text-brand"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Actualizar
-            </button>
-          </form>
+        descripcion={
+          tasas.origen === 'apis'
+            ? `Actualizada ${haceCuanto(tasas.obtenidoAt)} por consulta directa: Siberia no respondió.`
+            : `Actualizada ${haceCuanto(tasas.obtenidoAt)}. Se toma de Siberia, que ya sondea Binance cada minuto.`
         }
       >
         {tasas.vencido && tasas.obtenidoAt && (
           <Aviso tono="error">
-            No se pudo contactar a las fuentes en el último intento. Lo que ves es
-            el último dato bueno, de {haceCuanto(tasas.obtenidoAt)} — confírmalo
-            antes de cobrar con él.
+            No se pudo traer la tasa: ni Siberia ni las APIs respondieron. Lo que
+            ves es el último dato bueno, de {haceCuanto(tasas.obtenidoAt)} —
+            confírmalo antes de cobrar con él.
           </Aviso>
         )}
 

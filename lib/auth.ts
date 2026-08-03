@@ -213,6 +213,50 @@ export async function usuarioActual(): Promise<AdminUser | null> {
   return r ?? null;
 }
 
+/**
+ * Cambia la contraseña del usuario, comprobando la actual.
+ *
+ * POR QUÉ EXISTE: hasta hoy la única forma era entrar por SSH y correr
+ * `node db/create-admin.mjs`, o sea que la dueña no podía cambiar su propia
+ * contraseña sin mí. Eso no es aceptable en un panel que ya está expuesto a
+ * internet.
+ *
+ * Se piden las DOS: la actual y la nueva. Sin la actual, cualquiera con la
+ * sesión abierta —un teléfono desbloqueado sobre una mesa— podría dejar a la
+ * dueña fuera de su propio panel.
+ *
+ * Y se cierran TODAS las demás sesiones. Cambiar la contraseña suele significar
+ * "creo que alguien más entró": si las sesiones viejas siguen valiendo, el cambio
+ * no sirve de nada. La actual se conserva para no expulsar a quien lo hizo.
+ */
+export async function cambiarPassword(
+  userId: string,
+  actual: string,
+  nueva: string,
+): Promise<'ok' | 'actual-incorrecta' | 'usuario-inexistente'> {
+  const [u] = await rows<{ password_hash: string }>(
+    `SELECT password_hash FROM admin_users WHERE id = $1`,
+    [userId],
+  );
+  if (!u) return 'usuario-inexistente';
+  if (!(await verifyPassword(actual, u.password_hash))) {
+    return 'actual-incorrecta';
+  }
+
+  await query(`UPDATE admin_users SET password_hash = $2 WHERE id = $1`, [
+    userId,
+    await hashPassword(nueva),
+  ]);
+
+  const store = await cookies();
+  const token = store.get(SESSION_COOKIE)?.value;
+  await query(
+    `DELETE FROM sessions WHERE user_id = $1 AND token_hash <> $2`,
+    [userId, token ? hashToken(token) : ''],
+  );
+  return 'ok';
+}
+
 export async function cerrarSesion(): Promise<void> {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
