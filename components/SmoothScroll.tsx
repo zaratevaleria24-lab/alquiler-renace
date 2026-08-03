@@ -1,6 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
+
+interface LenisLike {
+  raf: (t: number) => void;
+  destroy: () => void;
+  resize: () => void;
+  scrollTo: (t: number, o?: { immediate?: boolean }) => void;
+}
 
 // Scroll suave del sitio.
 //
@@ -20,6 +28,10 @@ import { useEffect } from 'react';
 // El componente no renderiza nada: solo instala el bucle y lo limpia al salir.
 
 export function SmoothScroll() {
+  const instancia = useRef<LenisLike | null>(null);
+  const pendiente = useRef(0);
+  const pathname = usePathname();
+
   useEffect(() => {
     // Quien pidió menos movimiento en su sistema se queda con el scroll nativo.
     // Es una preferencia de accesibilidad real: el scroll interpolado puede
@@ -29,7 +41,7 @@ export function SmoothScroll() {
     ).matches;
     if (prefersReduced) return;
 
-    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
+    let lenis: LenisLike | null = null;
     let frame = 0;
     let cancelled = false;
 
@@ -50,7 +62,14 @@ export function SmoothScroll() {
         smoothWheel: true,
         syncTouch: false,
         touchMultiplier: 1.6,
+        // Los enlaces a #ancla los maneja Lenis. Sin esto el navegador hace un
+        // salto NATIVO que deja la posición interna de Lenis desincronizada de
+        // la real, y a partir de ahí la rueda parece no responder. El offset
+        // replica el scroll-padding-top de html (6.5rem), que Lenis no lee, para
+        // que la barra fija no tape el título de destino.
+        anchors: { offset: -104 },
       });
+      instancia.current = lenis;
 
       const raf = (time: number) => {
         lenis?.raf(time);
@@ -63,8 +82,35 @@ export function SmoothScroll() {
       cancelled = true;
       cancelAnimationFrame(frame);
       lenis?.destroy();
+      instancia.current = null;
     };
   }, []);
+
+  // Al cambiar de ruta: arriba y a recalcular.
+  //
+  // Este componente vive en el layout RAÍZ, así que sobrevive a las
+  // navegaciones del cliente: la misma instancia de Lenis pasa del home a
+  // /propiedad/<slug> o /alquiler/<zona>. El problema es que se queda con la
+  // posición y las medidas de la página ANTERIOR. Viniendo del home —que es
+  // larguísimo— a una subpágina más corta, su límite interno y el real no
+  // coinciden y la rueda parece no hacer nada: la página se ve congelada.
+  //
+  // scrollTo(0, immediate) resincroniza la posición y resize() vuelve a medir.
+  // El doble rAF espera a que la nueva ruta esté pintada; medir antes daría
+  // otra vez la altura vieja.
+  useEffect(() => {
+    const lenis = instancia.current;
+    if (!lenis) return;
+
+    lenis.scrollTo(0, { immediate: true });
+    const f1 = requestAnimationFrame(() => {
+      const f2 = requestAnimationFrame(() => lenis.resize());
+      pendiente.current = f2;
+    });
+    pendiente.current = f1;
+
+    return () => cancelAnimationFrame(pendiente.current);
+  }, [pathname]);
 
   return null;
 }

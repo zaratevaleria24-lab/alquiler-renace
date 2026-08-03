@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* Hoja de Lenis. Faltaba, y sin ella los contenedores marcados con
+   data-lenis-prevent no reciben `overscroll-behavior: contain`: al llegar al
+   final del panel lateral el gesto se encadenaba a la página de detrás. */
+@import "lenis/dist/lenis.css";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SISTEMA DE DISEÑO — Margarita Renace

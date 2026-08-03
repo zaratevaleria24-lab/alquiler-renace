@@ -54,6 +54,14 @@ export interface HomeClientProps {
   categories: Category[];
 }
 
+/** Menú de la navbar. Cada destino es un id que EXISTE en la página; el
+ *  scroll-padding-top de html compensa la barra fija al saltar. */
+const NAV_LINKS = [
+  { label: 'Inicio', href: '#hero-frame' },
+  { label: 'Apartamentos', href: '#listings-container' },
+  { label: 'Zonas', href: '#zonas-de-la-isla' },
+] as const;
+
 // ── Reserva por WhatsApp ────────────────────────────────────────────────────
 // El sitio no cobra en línea: una reserva se cierra conversando, que es como
 // se alquila en Venezuela. Este enlace abre WhatsApp con el mensaje ya escrito
@@ -127,6 +135,19 @@ export default function HomeClient({
   const waReserva = selectedProperty
     ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests)
     : null;
+
+  // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
+  // la pantalla, la única salida era acertarle a la X.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return;
+      setIsFilterOpen(false);
+      setIsDetailOpen(false);
+      setActivePopover(null);
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   // Close search popovers when clicking outside
   useEffect(() => {
@@ -233,20 +254,28 @@ export default function HomeClient({
             <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide text-white leading-none whitespace-nowrap">Margarita<span className="text-accent"> Renace</span></span>
           </div>
 
-          {/* Centro: Links de Navegación */}
+          {/* Centro: Links de Navegación.
+              Eran <button> que solo cambiaban su propio color: al pulsarlos no
+              pasaba NADA —la página se quedaba quieta— porque activeNavLink no
+              se usaba para nada más. Ahora son anclas a secciones que existen
+              de verdad. «Autos» salió del menú a propósito: no hay catálogo ni
+              ruta /autos todavía, y un enlace que no lleva a ninguna parte es
+              justo el bug que se está arreglando. Vuelve cuando exista la
+              sección (el h1 y las FAQ ya la anuncian). */}
           <div className="hidden md:flex items-center gap-0.5 bg-white/10 rounded-control p-1 border border-white/10">
-            {['Inicio', 'Apartamentos', 'Autos'].map((link) => (
-              <button
-                key={link}
-                onClick={() => setActiveNavLink(link)}
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setActiveNavLink(link.label)}
                 className={`px-4 py-2 rounded-chip text-ui font-medium tracking-wide transition-all ${
-                  activeNavLink === link
+                  activeNavLink === link.label
                     ? 'bg-white text-brand'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {link}
-              </button>
+                {link.label}
+              </a>
             ))}
           </div>
 
@@ -844,6 +873,9 @@ export default function HomeClient({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Detalles de ${selectedProperty.name}`}
               className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
             >
 
@@ -862,8 +894,17 @@ export default function HomeClient({
                 </button>
               </div>
 
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+              {/* Contenido desplazable.
+                  data-lenis-prevent NO es opcional: Lenis intercepta la rueda
+                  a nivel de ventana y, sin esta marca, se llevaba el gesto para
+                  desplazar la página de detrás — el panel se quedaba
+                  ESTÁTICO y no se podía llegar ni al precio ni al botón de
+                  reservar. Lenis busca el atributo en el composedPath del
+                  evento (allowNestedScroll viene en false por defecto). */}
+              <div
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar"
+              >
                 
                 {/* Image Gallery (Main + small grid) */}
                 <div className="space-y-2">
@@ -1086,6 +1127,9 @@ export default function HomeClient({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Filtros de búsqueda"
               className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
             >
 
@@ -1103,8 +1147,12 @@ export default function HomeClient({
                 </button>
               </div>
 
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Igual que el panel de detalles: sin data-lenis-prevent la
+                  lista de filtros no se puede desplazar. */}
+              <div
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto p-6 space-y-6"
+              >
                 
                 {/* Price Range */}
                 <div className="space-y-4">
