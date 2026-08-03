@@ -131,6 +131,43 @@ export function zoneItemListSchema(zone: Zone, path: string): Json {
   };
 }
 
+/**
+ * Un alojamiento con página propia (/propiedad/<slug>). Misma regla de arriba:
+ * sin aggregateRating, Review ni Offer mientras el listado no sea real con
+ * reseñas verificables. El precio va como texto visible en la página, no como
+ * dato estructurado.
+ */
+export function propertySchema(p: Property, path: string): Json {
+  return {
+    '@type': 'Accommodation',
+    '@id': absoluteUrl(`${path}#alojamiento`),
+    name: p.name,
+    description: p.description,
+    url: absoluteUrl(path),
+    image: p.images.map((img) => absoluteUrl(img.path)),
+    occupancy: {
+      '@type': 'QuantitativeValue',
+      value: p.guestsAllowed.adults + p.guestsAllowed.children,
+      unitText: 'huéspedes',
+    },
+    amenityFeature: p.amenities.map((a) => ({
+      '@type': 'LocationFeatureSpecification',
+      name: a.name,
+      value: true,
+    })),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: p.zone,
+      addressRegion: SITE.region.state,
+      addressCountry: SITE.region.country,
+    },
+    containedInPlace: {
+      '@type': 'Place',
+      name: `${p.zone}, ${SITE.region.island}`,
+    },
+  };
+}
+
 /** Un lugar de la isla, para anclar geográficamente la landing de zona. */
 export function zonePlaceSchema(zone: Zone, copy: { coast: string }): Json {
   return {

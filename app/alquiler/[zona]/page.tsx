@@ -207,18 +207,27 @@ export default async function ZonaPage({
                   key={property.id}
                   className="group overflow-hidden rounded-card border border-line bg-white transition-all duration-200 hover:border-ink hover:shadow-hard-sm"
                 >
-                  <img
-                    src={property.image}
-                    alt={`${property.name} — alojamiento en ${property.zone}, Isla de Margarita`}
-                    width={800}
-                    height={600}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-56 w-full object-cover"
-                  />
+                  {/* Foto y nombre enlazan a la página propia de la propiedad:
+                      sin estos enlaces, /propiedad/<slug> sería huérfana. */}
+                  <Link href={`/propiedad/${property.slug}`}>
+                    <img
+                      src={property.image}
+                      alt={`${property.name} — alojamiento en ${property.zone}, Isla de Margarita`}
+                      width={800}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-56 w-full object-cover"
+                    />
+                  </Link>
                   <div className="p-5">
                     <h3 className="font-serif text-title-sm text-brand-deep font-semibold">
-                      {property.name}
+                      <Link
+                        href={`/propiedad/${property.slug}`}
+                        className="hover:underline underline-offset-4"
+                      >
+                        {property.name}
+                      </Link>
                     </h3>
                     <p className="mt-1 text-body text-ink/60">
                       {property.location}

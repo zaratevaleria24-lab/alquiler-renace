@@ -99,6 +99,13 @@ export async function getProperties(): Promise<Property[]> {
   return (await rows<PropertyRow>(PROPERTY_SELECT)).map(toProperty);
 }
 
+/** Una propiedad por su slug, para /propiedad/<slug>. Mismo patrón que
+ *  getZone(): filtra en memoria porque solo corre en build/revalidación y el
+ *  inventario es pequeño; la consulta ya viene agregada. */
+export async function getProperty(slug: string): Promise<Property | undefined> {
+  return (await getProperties()).find((p) => p.slug === slug);
+}
+
 // ── Zonas ───────────────────────────────────────────────────────────────────
 
 type ZoneRow = {

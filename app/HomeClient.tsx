@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Globe, 
@@ -912,6 +913,14 @@ export default function HomeClient({
                     </div>
                   </div>
                   <p className="text-meta text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
+                  {/* La página propia es la versión canónica y compartible del
+                      alojamiento: es el enlace que se manda por WhatsApp. */}
+                  <Link
+                    href={`/propiedad/${selectedProperty.slug}`}
+                    className="inline-block text-meta font-semibold text-brand underline-offset-4 hover:underline"
+                  >
+                    Ver página completa →
+                  </Link>
                 </div>
 
                 {/* Host Info */}
