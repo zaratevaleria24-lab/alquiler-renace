@@ -26,27 +26,71 @@ sigue sirve a eso.
 
 ## 1. Confianza: el activo que la competencia no tiene
 
-### 1.1 El RTN es el hallazgo más importante de esta investigación
+### 1.1 DESCARTADO: la confianza NO se construye con registros del Estado
 
-Venezuela tiene el **Registro Turístico Nacional (RTN)** del Ministerio de
-Turismo: obligatorio para todo prestador de servicios turísticos —alojamientos y
-posadas incluidos— con carácter *único, público, permanente y obligatorio*. Se
-tramita en línea en `mintur.gob.ve` y hay que inscribirse dentro de los 30 días
-hábiles de iniciar actividades. También existe la **Licencia de Turismo**.
+> **Nota del 2026-08-03.** La primera versión de este documento recomendaba
+> tramitar y publicar el **RTN** (Registro Turístico Nacional de MINTUR) como
+> principal señal de confianza. **La dueña lo descartó y tiene razón.** Queda
+> anotado para que a nadie se le ocurra volver a proponerlo.
+>
+> El razonamiento era: es un registro estatal, verificable, obligatorio, y casi
+> ningún competidor informal lo menciona. Todo eso es cierto **y da igual**,
+> porque el análisis ignoraba el costo real:
+>
+> - Registrarse te vuelve **visible como negocio con ingresos en divisas** ante
+>   la administración tributaria y ante cualquier inspección.
+> - Te mete en un marco de **fiscalización discrecional** en el que es fácil
+>   entrar y muy difícil salir.
+> - El registro es **público**: también te expone a quien no debería estar
+>   mirando.
+> - **No hay seguridad jurídica que lo respalde.** Un certificado del Estado no
+>   funciona como escudo; en el mejor de los casos no sirve de nada y en el peor
+>   es una dirección postal.
+>
+> Regla general que se deriva de esto: **en un entorno de baja confianza
+> institucional, la confianza no se importa de una institución — se demuestra.**
+> Todo lo que sigue está construido para no depender de ningún tercero oficial.
 
-Por qué esto lo cambia todo:
+### 1.1-bis Lo que sustituye al registro: demostrar en vez de certificar
 
-- Es un registro **estatal y verificable**. No es un sello que uno se inventa.
-- Casi ningún competidor informal de Instagram lo tiene ni lo menciona.
-- En Venezuela, "estar registrado" pesa culturalmente: separa al negocio formal
-  del que desaparece con tu depósito.
-- Da pie a decir algo que ninguno puede copiar sin hacer el trámite:
-  **"Somos un prestador turístico registrado. Este es nuestro número de RTN."**
+Las dos piezas de abajo son más convincentes que cualquier certificado, cuestan
+cero y no te exponen a nada.
 
-**Acción:** tramitar el RTN y publicar el número en el sitio (footer, página
-"Quiénes somos", y como `identifier` en los datos estructurados). Si ya existe,
-publicarlo mañana. Es la pieza de confianza con mejor relación esfuerzo/impacto
-de todo este documento.
+**A. Videollamada antes de pagar.** *"Antes de que pagues un bolívar, te muestro
+el apartamento en vivo por videollamada, cuando tú quieras."*
+
+Es la señal de confianza más fuerte que existe en este mercado, porque:
+
+- **Es imposible de falsificar.** Un estafador no puede enseñarte en vivo un
+  apartamento que no controla, ni recorrerlo respondiendo lo que le preguntes.
+- Resuelve el miedo exacto del cliente —"¿existe esto de verdad?"— sin pedirle
+  que confíe en un papel.
+- No cuesta nada y **ningún competidor lo ofrece**.
+- Se puede anunciar como política, y una política publicada compromete.
+
+**B. La estructura de pago hace innecesaria la confianza.** Reservas con 30%, el
+resto al llegar y ver el apartamento (§1.2). Cuando el cliente arriesga poco, no
+necesita creerte: le alcanza con que la matemática lo proteja.
+
+Juntas cubren el 100% del riesgo percibido sin un solo trámite.
+
+**C. Huella digital con antigüedad.** Lo que un estafador no puede fabricar es
+**tiempo**: un Instagram con dos años de publicaciones geoetiquetadas, con
+comentarios de gente real y caras que se repiten. Empezar a acumular eso hoy es
+en sí una inversión en confianza — y explica por qué publicar constante importa
+más que publicar perfecto.
+
+**D. Reputación prestada de plataformas.** Si hay o hubo perfil en Airbnb o
+Booking **con reseñas**, enseñar ese historial como prueba social funciona: esas
+reseñas son costosas de falsificar y la verificación la hizo la plataforma. Ojo
+con el matiz: mostrar reputación es una cosa; usar la plataforma para desviar
+pagos fuera de ella va contra sus términos y puede costar la cuenta. Enseñar, sí;
+captar dentro para cobrar fuera, no.
+
+**E. Anclas locales.** En Venezuela la confianza viaja por **redes personales**,
+no por certificados. Vale más "pregúntale al conserje del edificio" o "estamos a
+dos cuadras de [negocio conocido]" que cualquier sello. Nombres verificables de
+gente y lugares que el cliente puede contrastar por su cuenta.
 
 ### 1.2 La regla de pago como bandera, no como letra pequeña
 
@@ -67,12 +111,23 @@ Una página `/como-verificamos` que explique: visitamos la propiedad en persona,
 comprobamos que quien alquila es el dueño, y las fotos las tomamos nosotros con
 fecha. Con 4 propiedades verificadas le ganas a 300 sin verificar.
 
-### 1.4 Cara, nombre y NAP consistente
+### 1.4 Cara y nombre, con la dirección bajo control
 
-El SEO local depende de un **NAP** (nombre, dirección, teléfono) idéntico en el
-sitio, en Google y en cualquier directorio. Y en Venezuela se le compra a
-personas: página "Quiénes somos" con nombre real, foto, RIF, RTN, años en la
-isla. El mismo número de WhatsApp en todas partes.
+En Venezuela se le compra a personas: página "Quiénes somos" con **nombre real,
+foto y años en la isla**. Eso es lo que genera confianza — no documentos fiscales,
+que además no se publican (ver §1.1).
+
+**La dirección exacta no se publica.** Tres razones: seguridad personal, no dar
+un objetivo a quien no debe, y que para el visitante la zona ya es suficiente
+para decidir. A nivel de zona —"Urb. Maneiro, Pampatar"— basta, y es lo que ya
+hace el sitio.
+
+Sobre el **NAP** (nombre, dirección, teléfono consistentes), que el SEO local
+pide: la ficha de Google se puede configurar como **negocio con zona de
+servicio**, sin dirección pública visible. Se declara el área que cubres —la isla—
+y Google no muestra la calle. Se conserva el beneficio de posicionamiento sin
+exponer dónde vives. Lo que sí debe ser idéntico en todas partes es **el nombre y
+el número de WhatsApp**.
 
 ### 1.5 Reseñas: son el 16% del posicionamiento local *y* el 92% de la confianza
 
@@ -139,8 +194,9 @@ Lo que falta en nuestro caso concreto:
   implementado en `lib/schema.ts`).
 - **Tipo más específico que `LocalBusiness`** cuando aplique: los tipos genéricos
   ayudan menos a que una IA te clasifique bien.
-- **`identifier` con el RTN**: un identificador oficial verificable en los datos
-  estructurados es una señal de legitimidad que casi nadie emite.
+- **NO se emite ningún identificador oficial** (RTN, RIF) en los datos
+  estructurados: ver §1.1. Lo que sí refuerza la entidad sin exponer nada es
+  `sameAs` a perfiles propios, reseñas reales y menciones de terceros.
 
 ### 2.3 Contenido de intención comercial (on-page, 19%)
 
@@ -292,8 +348,15 @@ Por qué es la mejor idea de este documento:
 - Es defendible: requiere presencia física y confianza, cosa que una plataforma
   extranjera no puede replicar.
 
-Lo que exige: rendición de cuentas mensual con fotos y números, y un contrato
-claro. La transparencia *es* el producto.
+Lo que exige: rendición de cuentas mensual con fotos y números, y reglas
+escritas. La transparencia *es* el producto.
+
+**Advertencia, por lo mismo del §1.1:** administrar la propiedad y el dinero de
+otro es la parte del negocio con más exposición legal, y en un entorno sin
+seguridad jurídica los acuerdos escritos protegen menos de lo que uno querría.
+Antes de escalar esto conviene consultarlo con alguien que conozca el terreno
+—no darlo por resuelto con una plantilla de contrato— y empezar con pocos dueños
+y de confianza en vez de abrir el programa de golpe.
 
 ---
 
@@ -319,9 +382,9 @@ Overviews y anotar si el sitio sale citado. Eso es el KPI de GEO.
 
 | Cuándo | Qué | Por qué ahí |
 |---|---|---|
-| **Esta semana** | WhatsApp en `/admin/contenido` · Google Business Profile · tramitar/publicar RTN | Sin WhatsApp no hay negocio; GBP es el 32%; el RTN es el diferenciador |
-| **Semana 2** | WhatsApp Business con catálogo · Instagram alineado · página "Quiénes somos" con RTN y RIF | Cierra el circuito de confianza |
-| **Semana 3–4** | `/como-verificamos` · regla del 30% · métodos de pago · depósitos y mínimos en fichas | Convierte la confianza en argumento visible |
+| **Esta semana** | WhatsApp en `/admin/contenido` · Google Business Profile **como negocio con zona de servicio**, sin dirección pública · anunciar la videollamada previa | Sin WhatsApp no hay negocio; GBP es el 32%; la videollamada es la confianza que no exige trámites |
+| **Semana 2** | WhatsApp Business con catálogo · Instagram alineado (empieza a acumular antigüedad) · página "Quiénes somos" con cara y nombre, sin documentos | Cierra el circuito de confianza sin exponerte |
+| **Semana 3–4** | `/como-verificamos` (con la videollamada como pieza central) · regla del 30% · métodos de pago · depósitos y mínimos en fichas | Convierte la confianza en argumento visible |
 | **Semana 4–6** | Datos reales de 4 aptos y 5 carros · CRUD de vehículos · recolector de métricas | Inventario real y capacidad de medir |
 | **Semana 6–10** | Cluster de contenido (6 artículos) · reseñas reales · `sameAs` lleno | SEO y GEO de fondo, que tardan en madurar |
 | **Octubre** | Campaña de diciembre · paquete diáspora | La diáspora reserva 4–8 semanas antes |
@@ -334,7 +397,7 @@ Overviews y anotar si el sitio sale citado. Eso es el KPI de GEO.
 Investigación del 2026-08-03. Los enlaces quedan para poder re-verificar, porque
 varios datos (frecuencias de ferry, vuelos, precios) cambian rápido.
 
-- MINTUR — Registro Turístico Nacional: https://www.mintur.gob.ve/rtn y https://www.mintur.gob.ve/licencia
+- MINTUR — Registro Turístico Nacional (consultado y **descartado**, ver §1.1): https://www.mintur.gob.ve/rtn
 - Local Search Ranking Factors 2026 (reparto de señales): https://www.clickrank.ai/local-seo-ranking-factors/ · https://www.brightlocal.com/learn/google-local-algorithm-and-ranking-factors/
 - GBP y E-E-A-T local: https://www.sparkzmarketing.com/post/google-business-profile-ranking-factors-2026-win-local
 - GEO y el 11% de solapamiento entre motores: https://www.leapd.ai/blog/ai-visibility/how-chatgpt-google-ai-overviews-and-perplexity-source-information-in-2026 · https://www.enrichlabs.ai/blog/generative-engine-optimization-geo-complete-guide-2026
