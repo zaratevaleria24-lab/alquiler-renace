@@ -216,7 +216,7 @@ export default function PropiedadForm({
           {propiedad ? 'Guardar y regenerar el sitio' : 'Crear propiedad'}
         </button>
         <Link
-          href="/propiedades"
+          href="/admin/propiedades"
           className="text-body text-ink-muted underline-offset-4 hover:underline"
         >
           Cancelar

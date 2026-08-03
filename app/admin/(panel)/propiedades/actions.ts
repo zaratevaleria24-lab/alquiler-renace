@@ -14,7 +14,7 @@ import { query, rows, withTransaction } from '@/lib/db';
 import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
 
 async function exigirSesion(): Promise<void> {
-  if (!(await usuarioActual())) redirect('/login');
+  if (!(await usuarioActual())) redirect('/admin/login');
 }
 
 /**
@@ -119,7 +119,7 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   }
 
   regenerarSitio();
-  redirect('/propiedades?guardado=1');
+  redirect('/admin/propiedades?guardado=1');
 }
 
 /** Slug para URL: minúsculas sin acentos, guiones, y sufijo -2, -3… si choca
@@ -164,7 +164,7 @@ export async function crearPropiedadAction(formData: FormData): Promise<void> {
   const amenidades = formData.getAll('amenidades').map(String);
 
   if (!name || !zoneSlug || !location) {
-    redirect('/propiedades/nueva?error=faltan-datos');
+    redirect('/admin/propiedades/nueva?error=faltan-datos');
   }
 
   const priceText = priceOnRequest
@@ -205,7 +205,7 @@ export async function crearPropiedadAction(formData: FormData): Promise<void> {
       return nuevoId;
     });
   } catch {
-    redirect('/propiedades/nueva?error=no-guardado');
+    redirect('/admin/propiedades/nueva?error=no-guardado');
   }
 
   regenerarSitio();
@@ -222,7 +222,7 @@ export async function subirFotosAction(formData: FormData): Promise<void> {
     .getAll('fotos')
     .filter((f): f is File => f instanceof File && f.size > 0);
 
-  if (!id) redirect('/propiedades');
+  if (!id) redirect('/admin/propiedades');
   if (archivos.length === 0) redirect(`/propiedades/${id}?error=sin-fotos`);
 
   const [prop] = await rows<{ slug: string; name: string; zone_name: string }>(
@@ -231,7 +231,7 @@ export async function subirFotosAction(formData: FormData): Promise<void> {
      WHERE p.id = $1`,
     [id],
   );
-  if (!prop) redirect('/propiedades');
+  if (!prop) redirect('/admin/propiedades');
 
   try {
     for (const [i, archivo] of archivos.entries()) {
@@ -262,7 +262,7 @@ export async function borrarFotoAction(formData: FormData): Promise<void> {
 
   const id = String(formData.get('id') ?? '');
   const fotoId = String(formData.get('foto_id') ?? '');
-  if (!id || !fotoId) redirect('/propiedades');
+  if (!id || !fotoId) redirect('/admin/propiedades');
 
   const [foto] = await rows<{ path: string; is_cover: boolean }>(
     `SELECT path, is_cover FROM property_images WHERE id = $1 AND property_id = $2`,
@@ -294,7 +294,7 @@ export async function marcarPortadaAction(formData: FormData): Promise<void> {
 
   const id = String(formData.get('id') ?? '');
   const fotoId = String(formData.get('foto_id') ?? '');
-  if (!id || !fotoId) redirect('/propiedades');
+  if (!id || !fotoId) redirect('/admin/propiedades');
 
   await withTransaction(async (q) => {
     await q(
@@ -316,7 +316,7 @@ export async function alternarPublicacionAction(formData: FormData): Promise<voi
 
   const id = String(formData.get('id') ?? '');
   const publicar = asBool(formData.get('publicar'));
-  if (!id) redirect('/propiedades');
+  if (!id) redirect('/admin/propiedades');
 
   await query(
     `UPDATE properties SET is_published = $2, updated_at = now() WHERE id = $1`,
@@ -324,5 +324,5 @@ export async function alternarPublicacionAction(formData: FormData): Promise<voi
   );
 
   regenerarSitio();
-  redirect('/propiedades');
+  redirect('/admin/propiedades');
 }

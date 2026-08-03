@@ -40,7 +40,6 @@ import { motion, AnimatePresence } from 'motion/react';
 // Server Component y sí puede consultar Postgres. Este archivo es 'use client',
 // y un navegador no puede hablar con la base.
 import { iconFor } from '@/lib/icons';
-import { CONTACT } from '@/lib/site';
 import type { Category, Property, Zone } from '@/lib/types';
 import {
   AboutIslandSection,
@@ -52,6 +51,16 @@ export interface HomeClientProps {
   properties: Property[];
   zones: Zone[];
   categories: Category[];
+  /** Contenido editable desde /admin/contenido. Llega por props porque este
+   *  archivo es 'use client' y lib/settings.ts abre Postgres. */
+  contenido: {
+    heroImage: string;
+    heroImageAlt: string;
+    heroKicker: string;
+    heroSubtitulo: string;
+  };
+  /** Solo dígitos, o null mientras no esté configurado. */
+  whatsapp: string | null;
 }
 
 /** Menú de la navbar. Cada destino es un id que EXISTE en la página; el
@@ -75,19 +84,22 @@ function urlReservaWhatsApp(
   property: Property,
   nights: number,
   guests: number,
+  whatsapp: string | null,
 ): string | null {
-  if (!CONTACT.whatsapp) return null;
+  if (!whatsapp) return null;
   const huespedes = `${guests} ${guests === 1 ? 'huésped' : 'huéspedes'}`;
   const texto = property.priceOnRequest
     ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
     : `Hola, quiero reservar «${property.name}» (${property.location}) que vi en margaritarenace.com.ve: ${nights} ${nights === 1 ? 'noche' : 'noches'}, ${huespedes}. ¿Está disponible?`;
-  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(texto)}`;
+  return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
 }
 
 export default function HomeClient({
   properties: PROPERTIES,
   zones: ZONES,
   categories,
+  contenido,
+  whatsapp,
 }: HomeClientProps) {
   // Se renombran a mayúsculas en la desestructuración para no tocar las ~40
   // referencias del cuerpo del componente, que ya usaban esos nombres cuando
@@ -133,7 +145,7 @@ export default function HomeClient({
   const [bookingGuests, setBookingGuests] = useState(1);
 
   const waReserva = selectedProperty
-    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests)
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp)
     : null;
 
   // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
@@ -324,8 +336,8 @@ export default function HomeClient({
                 decide si la página se siente rápida o no. width/height fijan la
                 relación de aspecto y eliminan el salto de layout (CLS). */}
             <img
-              src="/images/photo-1507525428034.webp"
-              alt="Playa del Caribe en Isla de Margarita, Venezuela"
+              src={contenido.heroImage}
+              alt={contenido.heroImageAlt}
               width={1600}
               height={900}
               loading="eager"
@@ -342,7 +354,7 @@ export default function HomeClient({
                 color y el texto se lee. */}
             <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/45 to-ink/60 flex flex-col items-center justify-center text-center px-5 pt-28 pb-44 md:pt-20 md:pb-24">
               <p className="label-eyebrow rise rise-1 text-white/90 mb-4 tracking-[0.2em]">
-                Isla de Margarita · Venezuela
+                {contenido.heroKicker}
               </p>
               <h1
                 /* max-w-4xl en vez de 3xl: a 68px la frase se partía en dos
@@ -368,8 +380,7 @@ export default function HomeClient({
                   junto es la diferencia frente a las plataformas de solo
                   alojamiento. */}
               <p className="rise rise-3 mt-7 max-w-[38rem] text-pretty text-body md:text-body-lg text-white [text-shadow:0_1px_10px_rgba(31,26,22,0.55)]">
-                Por noche o por mes, en dólares y hablando directo con quien te
-                recibe.
+                {contenido.heroSubtitulo}
               </p>
               {/* Tres datos, no adjetivos. Sustituye a la lista de zonas
                   enumeradas —que repetía lo que ya dicen los chips y las

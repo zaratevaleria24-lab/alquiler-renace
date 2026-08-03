@@ -81,7 +81,7 @@ export default async function AdminHome() {
             ))}
           </ul>
           <p className="mt-6">
-            <Link href="/propiedades" className="btn-outline">
+            <Link href="/admin/propiedades" className="btn-outline">
               Revisar propiedades
             </Link>
           </p>

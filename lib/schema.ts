@@ -19,13 +19,16 @@
 // corresponde agregar aggregateRating con su reviewCount real.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { CONTACT, SITE, absoluteUrl } from './site';
+import { SITE, absoluteUrl } from './site';
+import type { Contacto } from './settings';
 import type { Property, Zone } from './types';
 
 type Json = Record<string, unknown>;
 
-/** Organización + negocio local. Base de la identidad de entidad del sitio. */
-export function organizationSchema(): Json {
+/** Organización + negocio local. Base de la identidad de entidad del sitio.
+ *  El contacto llega como parámetro: vive en la base (site_settings), editable
+ *  desde /admin/contenido. Antes era una constante en null en lib/site.ts. */
+export function organizationSchema(CONTACT: Contacto): Json {
   const schema: Json = {
     '@type': ['Organization', 'LocalBusiness'],
     '@id': absoluteUrl('/#organizacion'),
@@ -50,7 +53,7 @@ export function organizationSchema(): Json {
       addressRegion: SITE.region.state,
       addressCountry: SITE.region.country,
       // streetAddress y postalCode se agregan cuando existan los datos reales
-      // (ver CONTACT en lib/site.ts). Sin dirección verificable, el paquete
+      // (se editan en /admin/contenido). Sin dirección verificable, el paquete
       // local de Google no aplica igual: hace falta Google Business Profile.
       ...(CONTACT.streetAddress ? { streetAddress: CONTACT.streetAddress } : {}),
     },

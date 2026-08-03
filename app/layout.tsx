@@ -5,6 +5,7 @@ import { SITE } from '@/lib/site';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import { headers } from 'next/headers';
 import { SiteFooter } from '@/components/SiteFooter';
+import { getContacto } from '@/lib/settings';
 import { SmoothScroll } from '@/components/SmoothScroll';
 
 // Sistema de TRES tipografías con roles separados (ver REFERENCIA-DISENO.md).
@@ -138,6 +139,8 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // ni el aviso de tarifas, que son contenido de cara al visitante.
   const host = (await headers()).get('host') ?? '';
   const esPanel = host.startsWith('admin.');
+  // El contacto vive en la base y se edita en /admin/contenido.
+  const contacto = await getContacto();
 
   return (
     <html
@@ -151,7 +154,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: graph(organizationSchema(), websiteSchema()),
+            __html: graph(organizationSchema(contacto), websiteSchema()),
           }}
         />
       </head>

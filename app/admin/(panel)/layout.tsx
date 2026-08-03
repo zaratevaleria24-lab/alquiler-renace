@@ -33,12 +33,16 @@ export const metadata: Metadata = {
 // esto, Next intentaría prerenderizarlas en el build y fallaría.
 export const dynamic = 'force-dynamic';
 
+// Rutas REALES, con el prefijo /admin. Antes eran '/', '/propiedades'… y
+// funcionaban solo porque el middleware reescribía; ver el comentario de
+// middleware.ts sobre por qué se abandonó ese truco.
 const NAV = [
-  { href: '/', label: 'Resumen' },
-  { href: '/propiedades', label: 'Propiedades' },
-  { href: '/vehiculos', label: 'Vehículos' },
-  { href: '/zonas', label: 'Zonas' },
-  { href: '/metricas', label: 'Métricas' },
+  { href: '/admin', label: 'Resumen' },
+  { href: '/admin/propiedades', label: 'Propiedades' },
+  { href: '/admin/contenido', label: 'Contenido' },
+  { href: '/admin/vehiculos', label: 'Vehículos' },
+  { href: '/admin/zonas', label: 'Zonas' },
+  { href: '/admin/metricas', label: 'Métricas' },
 ];
 
 export default async function AdminLayout({
@@ -51,14 +55,14 @@ export default async function AdminLayout({
   // El guardia va en el LAYOUT y no en cada página: así una ruta nueva del panel
   // queda protegida por omisión. Olvidar el guardia en una página suelta es el
   // error clásico que deja un panel abierto.
-  if (!user) redirect('/login');
+  if (!user) redirect('/admin/login');
 
   return (
     <div className="min-h-screen bg-paper">
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5">
+            <Link href="/admin" className="flex items-center gap-2.5">
               <img
                 src="/icon.png"
                 alt=""

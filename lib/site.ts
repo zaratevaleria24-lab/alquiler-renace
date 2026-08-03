@@ -22,32 +22,15 @@ export const SITE = {
   },
 } as const;
 
-/**
- * DATOS DE CONTACTO — PENDIENTES DE LA DUEÑA.
- *
- * El SEO local (Google Business Profile, LocalBusiness schema, paquete local
- * de resultados) depende de un NAP consistente: mismo nombre, dirección y
- * teléfono en el sitio, en Google y en cualquier directorio.
- *
- * No se inventan: un teléfono o dirección falsos en datos estructurados es
- * exactamente lo que Google penaliza, y además rompe la confianza del usuario.
- * Cuando existan los reales, ponerlos acá y se propagan solos al JSON-LD, al
- * footer y a las páginas de zona.
- */
-export const CONTACT = {
-  /** Formato internacional, ej. '+58 295 000 0000'. */
-  phone: null as string | null,
-  /** Solo dígitos con código de país, ej. '584140000000'. */
-  whatsapp: null as string | null,
-  email: null as string | null,
-  streetAddress: null as string | null,
-  /** Perfiles oficiales (Instagram, Facebook, Google Business…). */
-  sameAs: [] as string[],
-};
-
-export const hasContactInfo = Boolean(
-  CONTACT.phone || CONTACT.whatsapp || CONTACT.email,
-);
+// LOS DATOS DE CONTACTO YA NO VIVEN ACÁ.
+//
+// Eran una constante con todo en null que solo se podía cambiar editando este
+// archivo, compilando y reiniciando. Desde el 2026-08-03 están en la base
+// (site_settings) y se editan en /admin/contenido: ver lib/settings.ts, que
+// expone getContacto() con la misma forma que tenía CONTACT.
+//
+// Este módulo se queda con lo que de verdad es constante del sitio: dominio,
+// idioma, moneda y geografía de la isla.
 
 /** URL absoluta a partir de una ruta relativa. */
 export function absoluteUrl(path = '/'): string {

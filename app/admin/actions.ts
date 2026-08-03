@@ -79,10 +79,10 @@ export async function iniciarSesionAction(
   }
 
   await crearSesion(user.id);
-  redirect('/');
+  redirect('/admin');
 }
 
 export async function cerrarSesionAction(): Promise<void> {
   await cerrarSesion();
-  redirect('/login');
+  redirect('/admin/login');
 }

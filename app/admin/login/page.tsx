@@ -4,7 +4,7 @@ import { LoginForm } from './LoginForm';
 
 export default async function LoginPage() {
   // Con sesión abierta no tiene sentido mostrar el login.
-  if (await usuarioActual()) redirect('/');
+  if (await usuarioActual()) redirect('/admin');
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-paper px-5 py-16">

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getZones } from '@/lib/queries';
-import { CONTACT, SITE } from '@/lib/site';
+import { SITE } from '@/lib/site';
+import { getContacto } from '@/lib/settings';
 
 // Footer del sitio. Deliberadamente pequeño: tres franjas finas y nada más.
 //
@@ -9,11 +10,12 @@ import { CONTACT, SITE } from '@/lib/site';
 // existen. Los enlaces de zona sí valen la pena: son reales, y reparten enlazado
 // interno hacia las 9 landings desde todas las páginas del sitio.
 //
-// Los datos de contacto aparecen solos cuando existan en lib/site.ts. Hoy están
-// en null, así que esa franja simplemente no se renderiza en vez de mostrar un
-// teléfono de relleno.
+// Los datos de contacto aparecen solos en cuanto se guarden en /admin/contenido.
+// Mientras no existan, esa franja simplemente no se renderiza, en vez de mostrar
+// un teléfono de relleno.
 
 export async function SiteFooter() {
+  const CONTACT = await getContacto();
   // Server Component: consulta directa. Va en el layout, así que las 9 zonas
   // aparecen en el footer de TODAS las páginas y su enlazado interno viaja con él.
   const zones = await getZones();

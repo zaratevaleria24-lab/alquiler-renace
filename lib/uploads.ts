@@ -73,6 +73,46 @@ export async function guardarFoto(
 }
 
 /**
+ * Guarda una imagen del SITIO (portada, logo…), no de una propiedad.
+ *
+ * Va a su propia carpeta y con nombre por fecha en vez de sobreescribir: si la
+ * dueña sube una portada peor, la anterior sigue en disco y basta con volver a
+ * apuntar el ajuste. Además evita que el navegador siga mostrando la vieja por
+ * caché, que es lo que pasaría reusando el mismo nombre.
+ *
+ * El hero es la imagen más grande del sitio y su LCP, así que se permite más
+ * ancho que en las fotos de propiedad.
+ */
+export async function guardarImagenSitio(
+  file: File,
+  clave: string,
+): Promise<string> {
+  if (file.size === 0) throw new FotoInvalidaError('archivo vacío');
+  if (file.size > MAX_FOTO_BYTES) {
+    throw new FotoInvalidaError('la imagen pesa más de 12MB');
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  let webp: Buffer;
+  try {
+    webp = await sharp(buffer)
+      .rotate()
+      .resize({ width: 2000, withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer();
+  } catch {
+    throw new FotoInvalidaError('el archivo no es una imagen válida');
+  }
+
+  const nombre = `${clave.replace(/[^a-z0-9_-]/g, '')}-${Date.now()}.webp`;
+  const dirFisico = path.join(UPLOADS_DIR, 'sitio');
+  await mkdir(dirFisico, { recursive: true });
+  await sharp(webp).toFile(path.join(dirFisico, nombre));
+
+  return `${PUBLIC_PREFIX}/sitio/${nombre}`;
+}
+
+/**
  * Borra el archivo físico de una foto subida. Solo toca rutas bajo /uploads:
  * las fotos históricas del seed viven en public/ (van con el repo) y de esas
  * solo se borra la fila en la base.

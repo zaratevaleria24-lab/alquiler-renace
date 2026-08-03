@@ -27,7 +27,7 @@ export default async function PropiedadesPage({
             Propiedades <em className="headline-italic">del inventario</em>
           </h1>
         </div>
-        <Link href="/propiedades/nueva" className="btn-solid">
+        <Link href="/admin/propiedades/nueva" className="btn-solid">
           Nueva propiedad
         </Link>
       </header>
@@ -69,7 +69,7 @@ export default async function PropiedadesPage({
                     )}
                     <div>
                       <Link
-                        href={`/propiedades/${p.id}`}
+                        href={`/admin/propiedades/${p.id}`}
                         className="text-body font-semibold text-ink underline-offset-4 hover:underline"
                       >
                         {p.name}

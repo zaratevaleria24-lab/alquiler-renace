@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProperties, getProperty, getZone } from '@/lib/queries';
+import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { iconFor } from '@/lib/icons';
 import { breadcrumbSchema, graph, propertySchema } from '@/lib/schema';
@@ -84,7 +85,10 @@ export default async function PropiedadPage({
 
   const path = `/propiedad/${property.slug}`;
   const zonePath = `/alquiler/${property.zoneSlug}`;
-  const zone = await getZone(property.zoneSlug);
+  const [zone, contacto] = await Promise.all([
+    getZone(property.zoneSlug),
+    getContacto(),
+  ]);
   const vecinas = (zone?.properties ?? []).filter((p) => p.slug !== property.slug);
   const capacidad =
     property.guestsAllowed.adults +
@@ -256,6 +260,7 @@ export default async function PropiedadPage({
                 property.guestsAllowed.adults + property.guestsAllowed.children
               }
               capacidadTexto={capacidad}
+              whatsapp={contacto.whatsapp}
             />
           </section>
 

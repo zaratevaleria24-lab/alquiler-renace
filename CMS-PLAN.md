@@ -59,6 +59,33 @@ Se copia el patrón de Leiros, que ya lleva 21 días en producción sin incident
 | Fotos | disco en `uploads/`, servidas por **nginx** | Las fotos de propiedades son públicas, así que las sirve nginx directo sin pasar por Node. (Distinto de Leiros, donde los uploads son documentos de identidad y NO deben ser públicos) |
 | Auth | contraseña con hash argon2 + cookie de sesión firmada, httpOnly | Una sola dueña. Simple pero real: sin tokens en localStorage, con límite de intentos |
 
+### Corrección (2026-08-03): rutas REALES bajo /admin, sin reescritura
+
+El panel sigue en la misma app, pero **ya no se reescribe `/` → `/admin`**. Ese
+truco hacía que entrar al panel acabara mostrando **el sitio público**:
+
+- Reproducido en Chrome contra producción: `POST /login` → 303 → se quedaba en
+  `/` con el home público, mientras que cargar `/` a mano con la misma sesión sí
+  daba el panel.
+- Causa: el login usa `useActionState`, así que el envío es una Server Action y
+  su `redirect('/')` lo resuelve el enrutador del **cliente**. Ese enrutador
+  busca `/` en la tabla de rutas de la app —donde `/` ES el home público, además
+  estático y precargado— y lo sirve sin volver a pasar por el middleware. La
+  reescritura solo existe por petición; la caché del enrutador la esquiva.
+
+Mientras `/` signifique dos cosas según el `Host`, el enrutador puede
+equivocarse. Ahora las rutas del panel son `/admin`, `/admin/propiedades`… y el
+middleware **redirige** (no reescribe) cualquier otra ruta del subdominio a su
+equivalente con prefijo. La URL muestra `/admin/...`: en un panel privado no
+molesta y a cambio no hay ambigüedad.
+
+**Trampa al hacer ese redirect:** en middleware, `request.nextUrl` trae el
+origen INTERNO, así que el primer intento respondía
+`location: http://localhost:3002/admin` — el navegador de la dueña habría
+intentado abrir *su* localhost. Hay que fijar `url.host` (de la cabecera Host) y
+`url.protocol = 'https:'` a mano. Un rewrite no lo notaba porque nunca sale a la
+red. Ver el comentario en `middleware.ts`.
+
 ### Cambio de decisión (2026-07-26): el panel vive en la MISMA app
 
 El plan original preveía una segunda app de Next en el puerto 3003. Se descartó
@@ -160,6 +187,15 @@ Qué mostrará el panel:
    en ambos vhosts (el `^~` importa: la location regex de extensiones del vhost
    admin se lo comía) y van al backup diario. Los slugs nuevos renderizan a
    demanda (`dynamicParams=true`): crear ya no exige rebuild.*
+4b. **Contenido del sitio** (`/admin/contenido`) — ✅ 2026-08-03.
+   Foto de portada (subida y optimizada a WebP, con "volver a la original"),
+   textos del encabezado y **datos de contacto**. Tabla `site_settings` de
+   clave/valor: los valores por defecto y los tipos viven en `lib/settings.ts`,
+   no en la base, así que sin fila el sitio muestra lo de siempre y borrar la
+   fila revierte. Esto retiró la constante `CONTACT` de `lib/site.ts`, que
+   estaba en `null` a mano: **el WhatsApp ya se pone sin tocar código**, y al
+   guardarlo se encienden todos los botones de reservar del sitio.
+
 5. **Recolector de métricas** y el dashboard.
 6. **nginx + TLS** para el subdominio, y **script de backup** en el crontab:
    por primera vez habrá datos que se pueden perder.

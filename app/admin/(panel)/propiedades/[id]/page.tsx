@@ -52,7 +52,7 @@ export default async function EditarPropiedadPage({
   return (
     <div className="max-w-3xl">
       <nav aria-label="Ruta" className="text-ui text-ink-muted">
-        <Link href="/propiedades" className="underline-offset-4 hover:underline">
+        <Link href="/admin/propiedades" className="underline-offset-4 hover:underline">
           ← Propiedades
         </Link>
       </nav>

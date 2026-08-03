@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { CONTACT } from '@/lib/site';
 
 // Calculadora de reserva de la página de propiedad.
 //
@@ -23,6 +22,8 @@ export interface ReservaPanelProps {
   precioAConsultar: boolean;
   maxHuespedes: number;
   capacidadTexto: string;
+  /** Solo dígitos, o null mientras no se haya configurado en el panel. */
+  whatsapp: string | null;
 }
 
 const NOCHES = [1, 2, 3, 4, 5, 6, 7, 10, 14, 21, 30];
@@ -35,6 +36,7 @@ export default function ReservaPanel({
   precioAConsultar,
   maxHuespedes,
   capacidadTexto,
+  whatsapp: numero,
 }: ReservaPanelProps) {
   const [noches, setNoches] = useState(2);
   const [huespedes, setHuespedes] = useState(1);
@@ -44,8 +46,8 @@ export default function ReservaPanel({
   const mensaje = precioAConsultar
     ? `Hola, vi «${nombre}» (${ubicacion}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${textoHuespedes}?`
     : `Hola, quiero reservar «${nombre}» (${ubicacion}) que vi en margaritarenace.com.ve: ${noches} ${noches === 1 ? 'noche' : 'noches'}, ${textoHuespedes}. ¿Está disponible?`;
-  const whatsapp = CONTACT.whatsapp
-    ? `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(mensaje)}`
+  const whatsapp = numero
+    ? `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
     : null;
 
   return (
