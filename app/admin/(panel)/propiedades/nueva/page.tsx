@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+import { Aviso } from '../../_ui';
 import { getCatalogosAdmin } from '@/lib/admin';
 import PropiedadForm from '../PropiedadForm';
 import { crearPropiedadAction } from '../actions';
@@ -21,30 +23,34 @@ export default async function NuevaPropiedadPage({
   ]);
 
   return (
-    <div className="max-w-3xl">
-      <nav aria-label="Ruta" className="text-ui text-ink-muted">
-        <Link href="/admin/propiedades" className="underline-offset-4 hover:underline">
-          ← Propiedades
+    <div>
+      <nav aria-label="Ruta" className="text-ui">
+        <Link
+          href="/admin/propiedades"
+          className="inline-flex items-center gap-1.5 text-ink-muted transition-colors hover:text-brand"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Propiedades
         </Link>
       </nav>
 
-      <header className="mt-6">
-        <p className="label-eyebrow text-ink-subtle">Nueva propiedad</p>
-        <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
+      <header className="mt-5">
+        <p className="text-meta font-semibold text-ink-subtle">Nueva propiedad</p>
+        <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">
           Sumar <em className="headline-italic">inventario</em>
         </h1>
-        <p className="mt-5 max-w-2xl text-body text-ink-soft">
+        <p className="mt-4 max-w-2xl text-body text-ink-soft">
           La dirección de la página pública se genera sola a partir del nombre.
-          Al crear, pasas directo a subir las fotos.
+          Nace como borrador y al crearla pasas directo a subir las fotos.
         </p>
       </header>
 
       {error && (
-        <p className="mt-8 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
+        <Aviso tono="error">
           {error === 'faltan-datos'
             ? 'Faltan datos obligatorios: nombre, zona y dirección no pueden quedar vacíos.'
             : 'No se pudo crear. Revisa los datos e intenta otra vez.'}
-        </p>
+        </Aviso>
       )}
 
       <PropiedadForm action={crearPropiedadAction} catalogos={catalogos} />

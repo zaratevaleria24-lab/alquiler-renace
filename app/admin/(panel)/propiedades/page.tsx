@@ -1,10 +1,12 @@
 import Link from 'next/link';
+import { ArrowUpRight, Eye, EyeOff, ImageOff, Pencil, Plus } from 'lucide-react';
 import { listarPropiedadesAdmin } from '@/lib/admin';
+import { Aviso, Insignia, Tarjeta } from '../_ui';
 import { alternarPublicacionAction } from './actions';
 
 // Lista de propiedades del panel: TODO el inventario, borradores incluidos.
 // Publicar/despublicar es un formulario por fila (funciona sin JavaScript,
-// igual que el login); la edición completa vive en /propiedades/<id>.
+// igual que el login); la edición completa vive en /admin/propiedades/<id>.
 
 export const dynamic = 'force-dynamic';
 
@@ -20,119 +22,166 @@ export default async function PropiedadesPage({
 
   return (
     <div>
-      <header className="flex flex-wrap items-end justify-between gap-6">
+      <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          <p className="label-eyebrow text-ink-subtle">Panel</p>
-          <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
-            Propiedades <em className="headline-italic">del inventario</em>
+          <p className="text-meta font-semibold text-ink-subtle">Inventario</p>
+          <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">
+            Propiedades
           </h1>
+          <p className="mt-2 text-meta text-ink-muted">
+            {propiedades.length}{' '}
+            {propiedades.length === 1 ? 'alojamiento' : 'alojamientos'} ·{' '}
+            {propiedades.filter((p) => p.isPublished).length} publicados
+          </p>
         </div>
         <Link href="/admin/propiedades/nueva" className="btn-solid">
+          <Plus className="h-4 w-4" />
           Nueva propiedad
         </Link>
       </header>
 
       {guardado && (
-        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
-          Cambios guardados. El sitio público se regenera solo: la página
-          editada mostrará lo nuevo en la próxima visita.
-        </p>
+        <Aviso tono="ok">
+          Cambios guardados. El sitio público se regenera solo: la página editada
+          mostrará lo nuevo en la próxima visita.
+        </Aviso>
       )}
 
-      <div className="mt-10 overflow-x-auto rounded-card border border-line bg-white">
-        <table className="w-full min-w-[44rem] text-left">
-          <thead>
-            <tr className="border-b border-line">
-              <th className="label-eyebrow px-5 py-4 text-ink-subtle">Propiedad</th>
-              <th className="label-eyebrow px-5 py-4 text-ink-subtle">Zona</th>
-              <th className="label-eyebrow px-5 py-4 text-ink-subtle">Tarifa</th>
-              <th className="label-eyebrow px-5 py-4 text-ink-subtle">Estado</th>
-              <th className="label-eyebrow px-5 py-4 text-ink-subtle">
-                <span className="sr-only">Acciones</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {propiedades.map((p) => (
-              <tr key={p.id} className="border-b border-line last:border-0">
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    {p.cover && (
-                      <img
-                        src={p.cover}
-                        alt=""
-                        width={56}
-                        height={42}
-                        loading="lazy"
-                        className="h-10 w-14 rounded-lg border border-line object-cover"
-                      />
-                    )}
-                    <div>
+      <Tarjeta className="mt-10 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[46rem] text-left">
+            <thead>
+              <tr className="border-b border-line bg-paper/40">
+                <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                  Propiedad
+                </th>
+                <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                  Zona
+                </th>
+                <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                  Tarifa
+                </th>
+                <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                  Estado
+                </th>
+                <th className="px-5 py-3.5 text-right text-meta font-semibold text-ink-muted">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {propiedades.map((p) => (
+                <tr
+                  key={p.id}
+                  className="border-b border-line/70 transition-colors last:border-0 hover:bg-paper/40"
+                >
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3.5">
+                      {p.cover ? (
+                        <img
+                          src={p.cover}
+                          alt=""
+                          width={64}
+                          height={48}
+                          loading="lazy"
+                          className="h-12 w-16 shrink-0 rounded-control border border-line object-cover"
+                        />
+                      ) : (
+                        // Hueco explícito en vez de nada: una propiedad sin foto
+                        // se ve rota en la web y hay que poder detectarlo acá.
+                        <span
+                          title="Sin foto"
+                          className="flex h-12 w-16 shrink-0 items-center justify-center rounded-control border border-dashed border-line-strong bg-paper text-ink-faint"
+                        >
+                          <ImageOff className="h-4 w-4" />
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <Link
+                          href={`/admin/propiedades/${p.id}`}
+                          className="block truncate text-body font-semibold text-ink underline-offset-4 hover:text-brand hover:underline"
+                        >
+                          {p.name}
+                        </Link>
+                        {!p.isReal && (
+                          <span className="mt-1 inline-block text-ui font-medium text-coral">
+                            listado de relleno
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-body text-ink-muted">
+                    {p.zoneName}
+                  </td>
+                  <td className="px-5 py-4 font-mono text-ui tabular-nums text-ink-muted">
+                    {p.priceText}
+                  </td>
+                  <td className="px-5 py-4">
+                    <Insignia tono={p.isPublished ? 'ok' : 'neutro'}>
+                      {p.isPublished ? 'publicada' : 'borrador'}
+                    </Insignia>
+                  </td>
+                  <td className="px-5 py-4">
+                    {/* Acciones con icono: en una tabla de doce filas, tres
+                        enlaces de texto por fila se convierten en ruido. */}
+                    <div className="flex items-center justify-end gap-1">
                       <Link
                         href={`/admin/propiedades/${p.id}`}
-                        className="text-body font-semibold text-ink underline-offset-4 hover:underline"
+                        title="Editar"
+                        className="flex h-9 w-9 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-brand-tint hover:text-brand-deep"
                       >
-                        {p.name}
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Editar {p.name}</span>
                       </Link>
-                      {!p.isReal && (
-                        <p className="mt-0.5 text-micro font-medium text-coral">
-                          relleno
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-4 text-body text-ink-muted">{p.zoneName}</td>
-                <td className="mono-data px-5 py-4 text-ink-muted">{p.priceText}</td>
-                <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex items-center rounded-chip px-2.5 py-1 text-ui font-medium ${
-                      p.isPublished
-                        ? 'bg-brand-tint text-brand-deep'
-                        : 'bg-paper text-ink-muted'
-                    }`}
-                  >
-                    {p.isPublished ? 'publicada' : 'borrador'}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex items-center justify-end gap-4">
-                    {p.isPublished && (
-                      <a
-                        href={`https://margaritarenace.com.ve/propiedad/${p.slug}`}
-                        target="_blank"
-                        rel="noopener"
-                        className="text-meta text-brand underline-offset-4 hover:underline"
-                      >
-                        ver
-                      </a>
-                    )}
-                    <form action={alternarPublicacionAction}>
-                      <input type="hidden" name="id" value={p.id} />
-                      <input
-                        type="hidden"
-                        name="publicar"
-                        value={p.isPublished ? '' : 'true'}
-                      />
-                      <button
-                        type="submit"
-                        className="text-meta font-medium text-ink-muted underline-offset-4 hover:text-brand hover:underline"
-                      >
-                        {p.isPublished ? 'despublicar' : 'publicar'}
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
 
-      <p className="mt-6 text-meta text-ink-muted">
+                      {p.isPublished && (
+                        <a
+                          href={`https://margaritarenace.com.ve/propiedad/${p.slug}`}
+                          target="_blank"
+                          rel="noopener"
+                          title="Ver en la web"
+                          className="flex h-9 w-9 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-brand-tint hover:text-brand-deep"
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                          <span className="sr-only">Ver {p.name} en la web</span>
+                        </a>
+                      )}
+
+                      <form action={alternarPublicacionAction}>
+                        <input type="hidden" name="id" value={p.id} />
+                        <input
+                          type="hidden"
+                          name="publicar"
+                          value={p.isPublished ? '' : 'true'}
+                        />
+                        <button
+                          type="submit"
+                          title={p.isPublished ? 'Despublicar' : 'Publicar'}
+                          className="flex h-9 w-9 items-center justify-center rounded-control text-ink-muted transition-colors hover:bg-paper-warm hover:text-ink"
+                        >
+                          {p.isPublished ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">
+                            {p.isPublished ? 'Despublicar' : 'Publicar'} {p.name}
+                          </span>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Tarjeta>
+
+      <p className="mt-5 text-meta text-ink-muted">
         Despublicar esconde la propiedad de la web sin borrar nada: deja de
-        aparecer en el home, en su zona y en el sitemap al regenerarse. Crear
-        propiedades nuevas y subir fotos llega con el siguiente paso del plan.
+        aparecer en el home, en su zona y en el sitemap al regenerarse.
       </p>
     </div>
   );

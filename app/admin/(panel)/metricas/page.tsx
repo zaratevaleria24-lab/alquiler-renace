@@ -2,19 +2,35 @@
 // Existe para que la navegación del panel no lleve a un 404, que da la sensación
 // de que algo está roto cuando en realidad está sin construir.
 
+import { BarChart3 } from 'lucide-react';
+import { Tarjeta } from '../_ui';
+
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return (
     <div>
-      <p className="label-eyebrow text-ink-subtle">Panel</p>
-      <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
-        Metricas <em className="headline-italic">en construcción</em>
-      </h1>
-      <p className="mt-6 max-w-2xl text-body text-ink-soft">
-        Esta sección todavía no está lista. El resumen ya muestra el estado real
-        del inventario; esto llega en el siguiente paso.
-      </p>
+      <header>
+        <p className="text-meta font-semibold text-ink-subtle">Panel</p>
+        <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">
+          Métricas
+        </h1>
+      </header>
+
+      <Tarjeta className="mt-10 p-8 text-center md:p-12">
+        <span
+          aria-hidden="true"
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-tint text-brand"
+        >
+          <BarChart3 className="h-6 w-6" />
+        </span>
+        <h2 className="mt-6 font-serif text-title font-normal track-title text-ink">
+          En construcción
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-body text-ink-soft">
+          El recolector propio de visitas todavía no está montado. Preferimos no mostrar tarjetas con ceros: cuando mida de verdad, aparece acá.
+        </p>
+      </Tarjeta>
     </div>
   );
 }

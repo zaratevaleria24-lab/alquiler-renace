@@ -1,4 +1,6 @@
+import { RotateCcw } from 'lucide-react';
 import { CAMPOS_UI, getAjustes } from '@/lib/settings';
+import { Aviso, Campo, Seccion, Tarjeta, ZonaSubida } from '../_ui';
 import {
   guardarContenidoAction,
   restaurarImagenAction,
@@ -24,9 +26,7 @@ const MENSAJES: Record<string, string> = {
   'no-guardado': 'No se pudo guardar. Intenta otra vez.',
 };
 
-const inputCls =
-  'w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-body text-ink focus:outline-none focus:border-ink';
-const labelCls = 'block text-micro uppercase font-semibold text-ink-subtle mb-1.5';
+const CLAVES_CONTACTO = ['whatsapp', 'email', 'telefono', 'direccion', 'instagram'];
 
 export default async function ContenidoPage({
   searchParams,
@@ -39,172 +39,141 @@ export default async function ContenidoPage({
   ]);
 
   const imagenes = CAMPOS_UI.filter((c) => c.tipo === 'imagen');
-  const contacto = CAMPOS_UI.filter((c) =>
-    ['whatsapp', 'email', 'telefono', 'direccion', 'instagram'].includes(c.key),
-  );
+  const contacto = CAMPOS_UI.filter((c) => CLAVES_CONTACTO.includes(c.key));
   const textos = CAMPOS_UI.filter(
-    (c) =>
-      c.tipo === 'texto' &&
-      !contacto.some((k) => k.key === c.key),
+    (c) => c.tipo === 'texto' && !CLAVES_CONTACTO.includes(c.key),
   );
 
   const sinWhatsApp = ajustes.whatsapp.trim() === '';
 
   return (
-    <div className="max-w-3xl">
+    <div>
       <header>
-        <p className="label-eyebrow text-ink-subtle">Panel</p>
-        <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
+        <p className="text-meta font-semibold text-ink-subtle">Sitio público</p>
+        <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">
           Contenido <em className="headline-italic">de la página</em>
         </h1>
-        <p className="mt-5 text-body text-ink-soft">
-          Lo que cambies acá se publica en la web al guardar: no hace falta tocar
+        <p className="mt-4 max-w-2xl text-body text-ink-soft">
+          Lo que cambies acá se publica en la web al guardar. No hace falta tocar
           código ni esperar a nadie.
         </p>
       </header>
 
       {guardado && (
-        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
-          Guardado. El sitio público se regenera solo: recarga margaritarenace.com.ve
-          para verlo.
-        </p>
+        <Aviso tono="ok">
+          Guardado. El sitio público se regenera solo: recarga
+          margaritarenace.com.ve para verlo.
+        </Aviso>
       )}
       {error && (
-        <p className="mt-8 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
-          {MENSAJES[error] ?? MENSAJES['no-guardado']}
-        </p>
+        <Aviso tono="error">{MENSAJES[error] ?? MENSAJES['no-guardado']}</Aviso>
       )}
 
       {sinWhatsApp && (
-        <section className="mt-10 rounded-card border border-coral/35 bg-coral/5 p-6 md:p-7">
-          <h2 className="font-serif text-title font-normal track-title text-ink">
-            Todavía no hay WhatsApp configurado
-          </h2>
-          <p className="mt-4 text-body text-ink-soft">
-            Los botones de «Reservar» del sitio están desactivados porque no hay
-            a dónde escribir. En cuanto pongas el número aquí abajo se encienden
-            todos, con el mensaje de la propiedad ya escrito para el interesado.
-          </p>
-        </section>
+        <Aviso tono="atencion" titulo="Todavía no hay WhatsApp configurado">
+          Los botones de «Reservar» del sitio están apagados porque no hay a
+          dónde escribir. En cuanto pongas el número aquí abajo se encienden
+          todos, con el mensaje de la propiedad ya escrito para el interesado.
+        </Aviso>
       )}
 
-      {/* ── Imágenes ─────────────────────────────────────────────────────── */}
-      <section aria-labelledby="imagenes" className="mt-12">
-        <h2 id="imagenes" className="label-eyebrow text-ink-subtle">
-          Imágenes
-        </h2>
+      <Seccion id="imagenes" titulo="Imágenes">
         {imagenes.map((campo) => (
-          <div
-            key={campo.key}
-            className="mt-5 overflow-hidden rounded-card border border-line bg-white"
-          >
+          <Tarjeta key={campo.key} className="overflow-hidden">
             <img
               src={ajustes[campo.key]}
               alt=""
-              width={800}
-              height={400}
-              className="aspect-[2/1] w-full object-cover"
+              width={960}
+              height={420}
+              className="aspect-[21/9] w-full object-cover"
             />
-            <div className="p-5">
-              <p className="text-body font-semibold text-ink">{campo.label}</p>
-              {campo.ayuda && (
-                <p className="mt-1 text-meta text-ink-muted">{campo.ayuda}</p>
-              )}
-              <p className="mono-data mt-3 truncate text-ink-subtle">
+            <div className="p-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-body font-semibold text-ink">
+                    {campo.label}
+                  </p>
+                  {campo.ayuda && (
+                    <p className="mt-1.5 max-w-xl text-meta text-ink-muted">
+                      {campo.ayuda}
+                    </p>
+                  )}
+                </div>
+                {/* Solo aparece si hay algo a lo que volver. */}
+                {ajustes[campo.key] !== campo.porDefecto && (
+                  <form action={restaurarImagenAction}>
+                    <input type="hidden" name="clave" value={campo.key} />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 rounded-control px-3 py-2 text-meta text-ink-muted transition-colors hover:bg-paper hover:text-ink"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                      Volver a la original
+                    </button>
+                  </form>
+                )}
+              </div>
+
+              <p className="mono-data mt-4 truncate text-ink-subtle">
                 {ajustes[campo.key]}
               </p>
 
-              <form
-                action={subirImagenSitioAction}
-                className="mt-4 flex flex-wrap items-center gap-4"
-              >
+              <form action={subirImagenSitioAction} className="mt-5">
                 <input type="hidden" name="clave" value={campo.key} />
-                <input
-                  type="file"
+                <ZonaSubida
                   name="imagen"
-                  required
-                  accept="image/*"
-                  className="text-body text-ink-soft file:mr-4 file:rounded-chip file:border file:border-line file:bg-paper file:px-4 file:py-2 file:text-meta file:font-semibold file:text-brand-deep"
+                  titulo="Cambiar esta imagen"
+                  ayuda="Se optimiza sola a WebP. Horizontal y luminosa funciona mejor."
+                  etiquetaBoton="Subir imagen"
                 />
-                <button type="submit" className="btn-solid">
-                  Cambiar imagen
-                </button>
               </form>
-
-              {ajustes[campo.key] !== campo.porDefecto && (
-                <form action={restaurarImagenAction} className="mt-3">
-                  <input type="hidden" name="clave" value={campo.key} />
-                  <button
-                    type="submit"
-                    className="text-meta text-ink-muted underline-offset-4 hover:text-brand hover:underline"
-                  >
-                    volver a la imagen original
-                  </button>
-                </form>
-              )}
             </div>
-          </div>
+          </Tarjeta>
         ))}
-      </section>
+      </Seccion>
 
-      {/* ── Textos y contacto: un solo formulario ────────────────────────── */}
-      <form action={guardarContenidoAction} className="mt-14 space-y-12">
-        <fieldset>
-          <legend className="label-eyebrow text-ink-subtle">
-            Cómo te contactan
-          </legend>
-          <p className="mt-2 text-meta text-ink-muted">
-            Deja vacío lo que no tengas: el sitio esconde solo lo que falta, en
-            vez de mostrar un dato inventado.
-          </p>
-          <div className="mt-5 space-y-5">
+      {/* Textos y contacto: un solo formulario, un solo botón de guardar. */}
+      <form action={guardarContenidoAction}>
+        <Seccion
+          id="contacto"
+          titulo="Cómo te"
+          cursiva="contactan"
+          descripcion="Deja vacío lo que no tengas: el sitio esconde solo lo que falta, en vez de mostrar un dato inventado."
+        >
+          <Tarjeta className="space-y-5 p-6">
             {contacto.map((campo) => (
-              <div key={campo.key}>
-                <label htmlFor={campo.key} className={labelCls}>
-                  {campo.label}
-                </label>
-                <input
-                  id={campo.key}
-                  name={campo.key}
-                  defaultValue={ajustes[campo.key]}
-                  className={inputCls}
-                />
-                {campo.ayuda && (
-                  <p className="mt-1.5 text-meta text-ink-muted">{campo.ayuda}</p>
-                )}
-              </div>
+              <Campo
+                key={campo.key}
+                name={campo.key}
+                label={campo.label}
+                ayuda={campo.ayuda}
+                defaultValue={ajustes[campo.key]}
+              />
             ))}
-          </div>
-        </fieldset>
+          </Tarjeta>
+        </Seccion>
 
-        <fieldset>
-          <legend className="label-eyebrow text-ink-subtle">
-            Textos de la portada
-          </legend>
-          <div className="mt-5 space-y-5">
+        <Seccion id="textos" titulo="Textos de" cursiva="la portada">
+          <Tarjeta className="space-y-5 p-6">
             {textos.map((campo) => (
-              <div key={campo.key}>
-                <label htmlFor={campo.key} className={labelCls}>
-                  {campo.label}
-                </label>
-                <input
-                  id={campo.key}
-                  name={campo.key}
-                  defaultValue={ajustes[campo.key]}
-                  className={inputCls}
-                />
-                {campo.ayuda && (
-                  <p className="mt-1.5 text-meta text-ink-muted">{campo.ayuda}</p>
-                )}
-              </div>
+              <Campo
+                key={campo.key}
+                name={campo.key}
+                label={campo.label}
+                ayuda={campo.ayuda}
+                defaultValue={ajustes[campo.key]}
+              />
             ))}
-          </div>
-        </fieldset>
+          </Tarjeta>
+        </Seccion>
 
-        <div className="border-t border-line pt-8">
+        <div className="sticky bottom-0 mt-10 -mx-5 flex items-center gap-5 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
           <button type="submit" className="btn-solid">
             Guardar y publicar
           </button>
+          <span className="hidden text-meta text-ink-muted sm:block">
+            Los cambios salen en la web al instante
+          </span>
         </div>
       </form>
     </div>

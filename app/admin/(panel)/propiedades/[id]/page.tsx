@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCatalogosAdmin, getFotosAdmin, getPropiedadAdmin } from '@/lib/admin';
+import { ArrowUpRight, ChevronLeft, Star, Trash2 } from 'lucide-react';
+import { Aviso, Insignia, Seccion, ZonaSubida } from '../../_ui';
 import PropiedadForm from '../PropiedadForm';
 import {
   borrarFotoAction,
@@ -50,139 +52,139 @@ export default async function EditarPropiedadPage({
   if (!propiedad) notFound();
 
   return (
-    <div className="max-w-3xl">
-      <nav aria-label="Ruta" className="text-ui text-ink-muted">
-        <Link href="/admin/propiedades" className="underline-offset-4 hover:underline">
-          ← Propiedades
+    <div>
+      <nav aria-label="Ruta" className="text-ui">
+        <Link
+          href="/admin/propiedades"
+          className="inline-flex items-center gap-1.5 text-ink-muted transition-colors hover:text-brand"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Propiedades
         </Link>
       </nav>
 
-      <header className="mt-6">
-        <p className="label-eyebrow text-ink-subtle">Editar propiedad</p>
-        <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
-          {propiedad.name}
-        </h1>
-        <p className="mono-data mt-3 text-ink-subtle">
-          margaritarenace.com.ve/propiedad/{propiedad.slug}
-        </p>
+      <header className="mt-5 flex flex-wrap items-end justify-between gap-5">
+        <div className="min-w-0">
+          <p className="text-meta font-semibold text-ink-subtle">
+            Editar propiedad
+          </p>
+          <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">
+            {propiedad.name}
+          </h1>
+          {/* La dirección pública, pulsable: es la comprobación más rápida de
+              que un cambio salió bien. */}
+          <a
+            href={`https://margaritarenace.com.ve/propiedad/${propiedad.slug}`}
+            target="_blank"
+            rel="noopener"
+            className="mono-data mt-2.5 inline-flex items-center gap-1.5 text-ink-subtle transition-colors hover:text-brand"
+          >
+            /propiedad/{propiedad.slug}
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </a>
+        </div>
+        <Insignia tono={propiedad.isPublished ? 'ok' : 'neutro'}>
+          {propiedad.isPublished ? 'publicada' : 'borrador'}
+        </Insignia>
       </header>
 
       {creada && (
-        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
+        <Aviso tono="ok">
           Propiedad creada{propiedad.isPublished ? ' y publicada' : ' como borrador'}.
           El siguiente paso son las fotos, aquí abajo.
-        </p>
+        </Aviso>
       )}
       {guardado && (
-        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
-          Cambios guardados. El sitio público se regenera solo.
-        </p>
+        <Aviso tono="ok">Cambios guardados. El sitio público se regenera solo.</Aviso>
       )}
       {error && (
-        <p className="mt-8 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
-          {MENSAJES[error] ?? MENSAJES['no-guardado']}
-        </p>
+        <Aviso tono="error">{MENSAJES[error] ?? MENSAJES['no-guardado']}</Aviso>
       )}
 
-      {/* ── Fotos ─────────────────────────────────────────────────────────── */}
-      <section aria-labelledby="fotos" className="mt-12">
-        <h2 id="fotos" className="label-eyebrow text-ink-subtle">
-          Fotos ({fotos.length})
-        </h2>
-
+      <Seccion
+        id="fotos"
+        titulo="Fotos"
+        descripcion={
+          fotos.length > 0
+            ? `${fotos.length} ${fotos.length === 1 ? 'imagen' : 'imágenes'}. La portada es la que se ve en el listado y al compartir el enlace.`
+            : undefined
+        }
+      >
         {fotos.length > 0 ? (
-          <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+          <ul className="grid gap-4 sm:grid-cols-3">
             {fotos.map((foto) => (
-              <li
-                key={foto.id}
-                className="overflow-hidden rounded-card border border-line bg-white"
-              >
-                <img
-                  src={foto.path}
-                  alt={foto.alt}
-                  width={400}
-                  height={250}
-                  loading="lazy"
-                  className="aspect-video w-full object-cover"
-                />
-                <div className="flex items-center justify-between px-3 py-2.5">
-                  {foto.isCover ? (
-                    <span className="rounded-chip bg-brand-tint px-2 py-0.5 text-ui font-medium text-brand-deep">
-                      portada
-                    </span>
-                  ) : (
-                    <form action={marcarPortadaAction}>
+              <li key={foto.id} className="group relative">
+                <div className="overflow-hidden rounded-card border border-line bg-white shadow-lift">
+                  <img
+                    src={foto.path}
+                    alt={foto.alt}
+                    width={400}
+                    height={250}
+                    loading="lazy"
+                    className="aspect-video w-full object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-2 px-3 py-2.5">
+                    {foto.isCover ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-chip bg-brand-tint px-2.5 py-1 text-ui font-medium text-brand-deep">
+                        <Star className="h-3 w-3 fill-current" />
+                        portada
+                      </span>
+                    ) : (
+                      <form action={marcarPortadaAction}>
+                        <input type="hidden" name="id" value={propiedad.id} />
+                        <input type="hidden" name="foto_id" value={foto.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center gap-1.5 rounded-chip px-2 py-1 text-ui text-ink-muted transition-colors hover:bg-paper hover:text-brand"
+                        >
+                          <Star className="h-3 w-3" />
+                          hacer portada
+                        </button>
+                      </form>
+                    )}
+                    <form action={borrarFotoAction}>
                       <input type="hidden" name="id" value={propiedad.id} />
                       <input type="hidden" name="foto_id" value={foto.id} />
                       <button
                         type="submit"
-                        className="text-ui text-ink-muted underline-offset-4 hover:text-brand hover:underline"
+                        title="Borrar foto"
+                        className="flex h-8 w-8 items-center justify-center rounded-control text-ink-faint transition-colors hover:bg-coral/10 hover:text-coral"
                       >
-                        hacer portada
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Borrar esta foto</span>
                       </button>
                     </form>
-                  )}
-                  <form action={borrarFotoAction}>
-                    <input type="hidden" name="id" value={propiedad.id} />
-                    <input type="hidden" name="foto_id" value={foto.id} />
-                    <button
-                      type="submit"
-                      className="text-ui text-coral underline-offset-4 hover:underline"
-                    >
-                      borrar
-                    </button>
-                  </form>
+                  </div>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-4 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
+          <Aviso tono="error">
             Sin fotos todavía. Una propiedad publicada sin foto se ve rota en la
             web: sube al menos la principal antes de publicar.
-          </p>
+          </Aviso>
         )}
 
-        <form
-          action={subirFotosAction}
-          className="mt-6 rounded-card border border-line bg-white p-5"
-        >
+        <form action={subirFotosAction} className="mt-6">
           <input type="hidden" name="id" value={propiedad.id} />
-          <label htmlFor="fotos-input" className="block text-body font-semibold text-ink">
-            Subir fotos
-          </label>
-          <p className="mt-1 text-meta text-ink-muted">
-            Se optimizan solas: WebP, máximo 1600px de ancho. Horizontales y con
-            luz de día funcionan mejor (ver DATOS-PENDIENTES.md).
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            <input
-              id="fotos-input"
-              type="file"
-              name="fotos"
-              multiple
-              required
-              accept="image/*"
-              className="text-body text-ink-soft file:mr-4 file:rounded-chip file:border file:border-line file:bg-paper file:px-4 file:py-2 file:text-meta file:font-semibold file:text-brand-deep"
-            />
-            <button type="submit" className="btn-solid">
-              Subir y optimizar
-            </button>
-          </div>
+          <ZonaSubida
+            name="fotos"
+            multiple
+            titulo="Añadir fotos"
+            ayuda="Se optimizan solas a WebP, máximo 1600px de ancho. Horizontales y con luz de día funcionan mejor."
+            etiquetaBoton="Subir y optimizar"
+          />
         </form>
-      </section>
+      </Seccion>
 
-      {/* ── Datos ─────────────────────────────────────────────────────────── */}
-      <section aria-labelledby="datos" className="mt-14">
-        <h2 id="datos" className="label-eyebrow text-ink-subtle">
-          Datos
-        </h2>
+      <div className="mt-4">
         <PropiedadForm
           action={guardarPropiedadAction}
           catalogos={catalogos}
           propiedad={propiedad}
         />
-      </section>
+      </div>
     </div>
   );
 }

@@ -1,19 +1,28 @@
 import Link from 'next/link';
 import type { PropiedadEdicion } from '@/lib/admin';
+import {
+  Campo,
+  Chip,
+  Interruptor,
+  Seccion,
+  Selector,
+  Tarjeta,
+} from '../_ui';
 
 // Formulario compartido por CREAR y EDITAR: un solo lugar donde viven los
 // campos, así los dos flujos no se desincronizan. Server Component + Server
 // Action: funciona sin JavaScript, como todo el panel.
+//
+// Categorías y amenidades van como CHIPS y no como casillas: eran treinta
+// checkboxes nativos en tres columnas, la parte más anticuada del panel y la más
+// incómoda de tocar en un teléfono. Los chips siguen siendo `input` reales
+// (ver _ui.tsx), así que el formulario sigue enviándose sin JavaScript.
 
 type Catalogos = {
   zonas: { slug: string; name: string }[];
   categorias: { key: string; label: string }[];
   amenidades: { key: string; name: string }[];
 };
-
-const inputCls =
-  'w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-body text-ink focus:outline-none focus:border-ink';
-const labelCls = 'block text-micro uppercase font-semibold text-ink-subtle mb-1.5';
 
 export default function PropiedadForm({
   action,
@@ -26,201 +35,160 @@ export default function PropiedadForm({
   propiedad?: PropiedadEdicion;
 }) {
   return (
-    <form action={action} className="mt-10 space-y-10">
+    <form action={action}>
       {propiedad && <input type="hidden" name="id" value={propiedad.id} />}
 
-      <fieldset className="space-y-5">
-        <legend className="label-eyebrow text-ink-subtle">Identidad</legend>
-        <div>
-          <label htmlFor="name" className={labelCls}>Nombre</label>
-          <input
-            id="name"
+      <Seccion id="identidad" titulo="Identidad">
+        <Tarjeta className="space-y-5 p-6">
+          <Campo
             name="name"
+            label="Nombre"
             required
             defaultValue={propiedad?.name}
             placeholder="Ej. Los Geranios B"
-            className={inputCls}
           />
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="zone_slug" className={labelCls}>Zona</label>
-            <select
-              id="zone_slug"
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Selector
               name="zone_slug"
+              label="Zona"
               defaultValue={propiedad?.zoneSlug}
-              className={inputCls}
-            >
-              {catalogos.zonas.map((z) => (
-                <option key={z.slug} value={z.slug}>{z.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="location" className={labelCls}>Dirección visible</label>
-            <input
-              id="location"
+              opciones={catalogos.zonas.map((z) => ({
+                value: z.slug,
+                label: z.name,
+              }))}
+            />
+            <Campo
               name="location"
+              label="Dirección visible"
               required
               defaultValue={propiedad?.location}
-              placeholder="Ej. Urb. Maneiro, Pampatar, Margarita"
-              className={inputCls}
+              placeholder="Ej. Urb. Maneiro, Pampatar"
             />
           </div>
-        </div>
-        <div>
-          <label htmlFor="description" className={labelCls}>Descripción</label>
-          <textarea
-            id="description"
+          <Campo
             name="description"
-            rows={4}
+            label="Descripción"
+            filas={5}
             defaultValue={propiedad?.description}
-            className={inputCls}
+            ayuda="Qué tiene, qué hay cerca y para quién encaja. Tres a cinco líneas."
           />
-        </div>
-      </fieldset>
+        </Tarjeta>
+      </Seccion>
 
-      <fieldset className="space-y-5">
-        <legend className="label-eyebrow text-ink-subtle">Precio y capacidad</legend>
-        <div className="grid gap-5 sm:grid-cols-3">
-          <div>
-            <label htmlFor="price_per_night" className={labelCls}>US$ por noche</label>
-            <input
-              id="price_per_night"
+      <Seccion id="precio" titulo="Precio y" cursiva="capacidad">
+        <Tarjeta className="space-y-6 p-6">
+          <div className="grid gap-5 sm:grid-cols-3">
+            <Campo
               name="price_per_night"
+              label="US$ por noche"
               type="number"
               min={0}
-              step={1}
               defaultValue={propiedad?.pricePerNight ?? 0}
-              className={inputCls}
             />
-          </div>
-          <div>
-            <label htmlFor="guests_adults" className={labelCls}>Adultos</label>
-            <input
-              id="guests_adults"
+            <Campo
               name="guests_adults"
+              label="Adultos"
               type="number"
               min={1}
               max={50}
               defaultValue={propiedad?.guestsAdults ?? 2}
-              className={inputCls}
             />
-          </div>
-          <div>
-            <label htmlFor="guests_children" className={labelCls}>Niños</label>
-            <input
-              id="guests_children"
+            <Campo
               name="guests_children"
+              label="Niños"
               type="number"
               min={0}
               max={50}
               defaultValue={propiedad?.guestsChildren ?? 0}
-              className={inputCls}
             />
           </div>
-        </div>
-        <label className="flex items-start gap-3 text-body text-ink-soft">
-          <input
-            type="checkbox"
-            name="price_on_request"
-            defaultChecked={propiedad?.priceOnRequest ?? false}
-            className="mt-1 h-4 w-4 accent-[#0E7490]"
-          />
-          <span>
-            Precio a consultar
-            <span className="block text-meta text-ink-muted">
-              La web mostrará «Consultar precio» y se ignora el monto de arriba.
-            </span>
-          </span>
-        </label>
-      </fieldset>
+          <div className="border-t border-line pt-5">
+            <Interruptor
+              name="price_on_request"
+              label="Precio a consultar"
+              ayuda="La web mostrará «Consultar precio» y se ignora el monto de arriba."
+              defaultChecked={propiedad?.priceOnRequest ?? false}
+            />
+          </div>
+        </Tarjeta>
+      </Seccion>
 
-      <fieldset>
-        <legend className="label-eyebrow text-ink-subtle">Categorías</legend>
-        <p className="mt-2 text-meta text-ink-muted">
-          Son las claves de los filtros del home: selección cerrada a propósito.
-        </p>
-        <ul className="mt-4 grid gap-2.5 sm:grid-cols-3">
-          {catalogos.categorias.map((c) => (
-            <li key={c.key}>
-              <label className="flex items-center gap-2.5 text-body text-ink-soft">
-                <input
-                  type="checkbox"
-                  name="categorias"
-                  value={c.key}
-                  defaultChecked={propiedad?.categoryKeys.includes(c.key) ?? false}
-                  className="h-4 w-4 accent-[#0E7490]"
-                />
-                {c.label}
-              </label>
-            </li>
-          ))}
-        </ul>
-      </fieldset>
+      <Seccion
+        id="categorias"
+        titulo="Categorías"
+        descripcion="Son las claves de los filtros del home, así que la lista es cerrada a propósito."
+      >
+        <Tarjeta className="p-6">
+          <div className="flex flex-wrap gap-2.5">
+            {catalogos.categorias.map((c) => (
+              <Chip
+                key={c.key}
+                name="categorias"
+                value={c.key}
+                label={c.label}
+                defaultChecked={propiedad?.categoryKeys.includes(c.key) ?? false}
+              />
+            ))}
+          </div>
+        </Tarjeta>
+      </Seccion>
 
-      <fieldset>
-        <legend className="label-eyebrow text-ink-subtle">Amenidades</legend>
-        <ul className="mt-4 grid gap-2.5 sm:grid-cols-3">
-          {catalogos.amenidades.map((a) => (
-            <li key={a.key}>
-              <label className="flex items-center gap-2.5 text-body text-ink-soft">
-                <input
-                  type="checkbox"
-                  name="amenidades"
-                  value={a.key}
-                  defaultChecked={propiedad?.amenityKeys.includes(a.key) ?? false}
-                  className="h-4 w-4 accent-[#0E7490]"
-                />
-                {a.name}
-              </label>
-            </li>
-          ))}
-        </ul>
-      </fieldset>
+      <Seccion
+        id="amenidades"
+        titulo="Amenidades"
+        descripcion="Se muestran con su icono en la ficha del alojamiento."
+      >
+        <Tarjeta className="p-6">
+          <div className="flex flex-wrap gap-2.5">
+            {catalogos.amenidades.map((a) => (
+              <Chip
+                key={a.key}
+                name="amenidades"
+                value={a.key}
+                label={a.name}
+                defaultChecked={propiedad?.amenityKeys.includes(a.key) ?? false}
+              />
+            ))}
+          </div>
+        </Tarjeta>
+      </Seccion>
 
-      <fieldset className="space-y-4">
-        <legend className="label-eyebrow text-ink-subtle">Estado</legend>
-        <label className="flex items-start gap-3 text-body text-ink-soft">
-          <input
-            type="checkbox"
+      <Seccion id="estado" titulo="Estado">
+        <Tarjeta className="space-y-5 p-6">
+          <Interruptor
             name="is_published"
+            label="Publicada en la web"
+            ayuda="Apagado, la propiedad no aparece en el sitio pero no se borra."
             defaultChecked={propiedad?.isPublished ?? false}
-            className="mt-1 h-4 w-4 accent-[#0E7490]"
           />
-          <span>
-            Publicada
-            <span className="block text-meta text-ink-muted">
-              Sin marcar, la propiedad no aparece en la web (queda en borrador).
-            </span>
-          </span>
-        </label>
-        <label className="flex items-start gap-3 text-body text-ink-soft">
-          <input
-            type="checkbox"
-            name="is_real"
-            defaultChecked={propiedad?.isReal ?? true}
-            className="mt-1 h-4 w-4 accent-[#0E7490]"
-          />
-          <span>
-            Inventario real
-            <span className="block text-meta text-ink-muted">
-              Sin marcar cuenta como listado de relleno y el resumen lo avisa.
-            </span>
-          </span>
-        </label>
-      </fieldset>
+          <div className="border-t border-line pt-5">
+            <Interruptor
+              name="is_real"
+              label="Inventario real"
+              ayuda="Apagado cuenta como listado de relleno y el resumen lo avisa."
+              defaultChecked={propiedad?.isReal ?? true}
+            />
+          </div>
+        </Tarjeta>
+      </Seccion>
 
-      <div className="flex items-center gap-5 border-t border-line pt-8">
+      {/* Barra de acciones pegada abajo: en un formulario largo, tener que
+          buscar el botón de guardar al final es de las cosas que más molestan. */}
+      <div className="sticky bottom-0 mt-10 -mx-5 flex items-center gap-5 border-t border-line bg-paper/95 px-5 py-4 backdrop-blur-sm md:-mx-10 md:px-10">
         <button type="submit" className="btn-solid">
-          {propiedad ? 'Guardar y regenerar el sitio' : 'Crear propiedad'}
+          {propiedad ? 'Guardar cambios' : 'Crear propiedad'}
         </button>
         <Link
           href="/admin/propiedades"
-          className="text-body text-ink-muted underline-offset-4 hover:underline"
+          className="text-body text-ink-muted underline-offset-4 hover:text-ink hover:underline"
         >
           Cancelar
         </Link>
+        {propiedad && (
+          <span className="ml-auto hidden text-meta text-ink-muted sm:block">
+            Al guardar, la web se regenera sola
+          </span>
+        )}
       </div>
     </form>
   );
