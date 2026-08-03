@@ -10,9 +10,9 @@ import {
 // Contenido del sitio: la foto de portada, los textos del encabezado y los
 // datos de contacto. Todo lo que antes obligaba a editar TypeScript.
 //
-// El WhatsApp va PRIMERO en su propio bloque destacado porque es el dato que
-// enciende todos los botones de reservar del sitio: mientras esté vacío, la web
-// no tiene ninguna forma de que un interesado escriba.
+// Acá NO hay avisos de lo que falta: eso vive en /admin/pendientes, que es la
+// única pantalla que se dedica a eso. Esta es de trabajo, y un cartel repetido en
+// cada visita solo estorba.
 
 export const dynamic = 'force-dynamic';
 
@@ -44,8 +44,6 @@ export default async function ContenidoPage({
     (c) => c.tipo === 'texto' && !CLAVES_CONTACTO.includes(c.key),
   );
 
-  const sinWhatsApp = ajustes.whatsapp.trim() === '';
-
   return (
     <div>
       <header>
@@ -67,14 +65,6 @@ export default async function ContenidoPage({
       )}
       {error && (
         <Aviso tono="error">{MENSAJES[error] ?? MENSAJES['no-guardado']}</Aviso>
-      )}
-
-      {sinWhatsApp && (
-        <Aviso tono="atencion" titulo="Todavía no hay WhatsApp configurado">
-          Los botones de «Reservar» del sitio están apagados porque no hay a
-          dónde escribir. En cuanto pongas el número aquí abajo se encienden
-          todos, con el mensaje de la propiedad ya escrito para el interesado.
-        </Aviso>
       )}
 
       <Seccion id="imagenes" titulo="Imágenes">
