@@ -20,6 +20,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 1,
     },
+    {
+      url: absoluteUrl('/autos'),
+      lastModified: buildDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
     ...ZONES.map((zone) => ({
       url: absoluteUrl(`/alquiler/${zone.slug}`),
       lastModified: buildDate,

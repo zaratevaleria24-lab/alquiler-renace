@@ -72,6 +72,30 @@ export async function SiteFooter() {
           </ul>
         </nav>
 
+        {/* Secciones del sitio. Va en el layout, así que /autos queda enlazada
+            desde TODAS las páginas: sin esto solo la alcanzaría el menú del
+            home y sería casi huérfana para los rastreadores. */}
+        <nav aria-label="Secciones" className="mt-8">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2.5">
+            <li>
+              <Link
+                href="/"
+                className="text-meta text-ink-soft underline-offset-4 transition-colors hover:text-brand hover:underline"
+              >
+                Apartamentos
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/autos"
+                className="text-meta text-ink-soft underline-offset-4 transition-colors hover:text-brand hover:underline"
+              >
+                Alquiler de carros
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
         {/* Línea legal */}
         <div className="mt-10 flex flex-col gap-2 border-t border-line pt-6 text-ui text-ink-subtle sm:flex-row sm:items-center sm:justify-between">
           <p>

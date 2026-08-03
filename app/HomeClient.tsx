@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  Globe, 
   Menu, 
   Search, 
   Compass, 
@@ -63,11 +62,18 @@ export interface HomeClientProps {
   whatsapp: string | null;
 }
 
-/** Menú de la navbar. Cada destino es un id que EXISTE en la página; el
- *  scroll-padding-top de html compensa la barra fija al saltar. */
+/**
+ * Menú de la navbar. Todos los destinos existen de verdad: los que empiezan por
+ * '#' son secciones de esta página (el scroll-padding-top de html compensa la
+ * barra fija al saltar) y los que empiezan por '/' son páginas.
+ *
+ * «Autos» volvió al menú el 2026-08-03, ahora que existe /autos. Estuvo fuera
+ * unos días porque era un botón que no llevaba a ninguna parte.
+ */
 const NAV_LINKS = [
   { label: 'Inicio', href: '#hero-frame' },
   { label: 'Apartamentos', href: '#listings-container' },
+  { label: 'Autos', href: '/autos' },
   { label: 'Zonas', href: '#zonas-de-la-isla' },
 ] as const;
 
@@ -115,6 +121,10 @@ export default function HomeClient({
   // Navigation active links
   const [activeNavLink, setActiveNavLink] = useState('Inicio');
 
+  // Menú de teléfono. La fila de enlaces del centro es `hidden md:flex`, así
+  // que en móvil esto es la ÚNICA navegación que hay.
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   // Interactive categories navigation state
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const categoriesScrollRef = useRef<HTMLDivElement>(null);
@@ -155,6 +165,7 @@ export default function HomeClient({
       if (event.key !== 'Escape') return;
       setIsFilterOpen(false);
       setIsDetailOpen(false);
+      setIsMenuOpen(false);
       setActivePopover(null);
     }
     document.addEventListener('keydown', onKeyDown);
@@ -268,12 +279,13 @@ export default function HomeClient({
 
           {/* Centro: Links de Navegación.
               Eran <button> que solo cambiaban su propio color: al pulsarlos no
-              pasaba NADA —la página se quedaba quieta— porque activeNavLink no
-              se usaba para nada más. Ahora son anclas a secciones que existen
-              de verdad. «Autos» salió del menú a propósito: no hay catálogo ni
-              ruta /autos todavía, y un enlace que no lleva a ninguna parte es
-              justo el bug que se está arreglando. Vuelve cuando exista la
-              sección (el h1 y las FAQ ya la anuncian). */}
+              pasaba NADA porque activeNavLink no se usaba para nada más. Ahora
+              son enlaces a destinos que existen de verdad.
+
+              OJO CON EL `hidden md:flex`: en móvil esta fila NO se ve, así que
+              la navegación de teléfono depende por completo del botón de menú
+              de abajo. Estuvo sin acción hasta el 2026-08-03: en un teléfono la
+              navbar era decoración. Si algún día se toca uno, revisar el otro. */}
           <div className="hidden md:flex items-center gap-0.5 bg-white/10 rounded-control p-1 border border-white/10">
             {NAV_LINKS.map((link) => (
               <a
@@ -297,21 +309,55 @@ export default function HomeClient({
               Publica tu Propiedad
             </span>
 
-            <button
-              aria-label="Seleccionar idioma"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/35 transition-all cursor-pointer"
-            >
-              <Globe className="w-[17px] h-[17px]" />
-            </button>
+            {/* El selector de idioma se retiró: era un botón sin acción y el
+                sitio solo existe en español. Vuelve cuando haya una versión en
+                inglés de verdad (está anotado en SEO.md como pendiente). */}
 
             <button
-              aria-label="Menú de navegación"
+              onClick={() => setIsMenuOpen((abierto) => !abierto)}
+              aria-label={isMenuOpen ? 'Cerrar menú' : 'Menú de navegación'}
+              aria-expanded={isMenuOpen}
+              aria-controls="menu-movil"
               className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/35 transition-all cursor-pointer"
             >
-              <Menu className="w-[17px] h-[17px]" />
+              {isMenuOpen ? (
+                <X className="w-[17px] h-[17px]" />
+              ) : (
+                <Menu className="w-[17px] h-[17px]" />
+              )}
             </button>
           </div>
         </div>
+
+        {/* Menú desplegable de teléfono.
+            Va DENTRO del <nav> fijo para heredar su posición, y solo se muestra
+            por debajo de md: en escritorio la fila del centro ya hace el trabajo
+            y tener las dos sería duplicar la navegación. */}
+        {isMenuOpen && (
+          <div
+            id="menu-movil"
+            className="md:hidden mt-2 rounded-control border border-white/15 bg-earth/95 p-2 shadow-hard backdrop-blur-xl"
+          >
+            <ul className="flex flex-col">
+              {NAV_LINKS.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    onClick={() => {
+                      setActiveNavLink(link.label);
+                      // Cerrar al elegir: si no, el menú tapa justo la sección
+                      // a la que se acaba de saltar.
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex min-h-[48px] items-center rounded-chip px-4 text-body font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
