@@ -7,6 +7,7 @@ import { headers } from 'next/headers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { getContacto } from '@/lib/settings';
 import { SmoothScroll } from '@/components/SmoothScroll';
+import { Medidor } from '@/components/Medidor';
 
 // Sistema de TRES tipografías con roles separados (ver REFERENCIA-DISENO.md).
 // Antes eran dos: Fraunces (una serif decorativa, algo "wonky") y Jost (una sans
@@ -165,6 +166,8 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {/* El scroll suave es para el sitio público; en un panel de gestión
             estorba al desplazarse por tablas largas. */}
         {!esPanel && <SmoothScroll />}
+        {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
+        {!esPanel && <Medidor />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las
             9 landings de zona, y su enlazado interno viaja con él. */}

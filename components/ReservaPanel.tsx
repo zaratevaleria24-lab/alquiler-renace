@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
+import { avisar } from './Medidor';
 
 // Calculadora de reserva de la página de propiedad.
 //
@@ -121,6 +122,9 @@ export default function ReservaPanel({
           href={whatsapp}
           target="_blank"
           rel="noopener"
+          // Se registra el clic sin esperar la respuesta: el enlace abre igual.
+          // Es el proxy de conversión más cercano que hay sin sistema de reservas.
+          onClick={() => avisar({ kind: 'whatsapp' })}
           className="btn-solid mt-5 w-full"
         >
           <span>{precioAConsultar ? 'Consultar por WhatsApp' : 'Reservar por WhatsApp'}</span>

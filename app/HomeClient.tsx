@@ -38,6 +38,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // Los datos NO se importan: llegan por props desde app/page.tsx, que es un
 // Server Component y sí puede consultar Postgres. Este archivo es 'use client',
 // y un navegador no puede hablar con la base.
+import { avisar } from '@/components/Medidor';
 import { iconFor } from '@/lib/icons';
 import type { Category, Property, Zone } from '@/lib/types';
 import {
@@ -233,6 +234,11 @@ export default function HomeClient({
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setActivePopover(null);
+    // Lo que la gente ESCRIBE es el dato más valioso del recolector: revela
+    // demanda que el inventario no cubre. Solo si escribió algo.
+    if (searchWhere.trim()) {
+      avisar({ kind: 'busqueda', meta: { q: searchWhere.trim() } });
+    }
     // Smooth scroll down to listings section
     const element = document.getElementById('listings-container');
     if (element) {
@@ -558,21 +564,33 @@ export default function HomeClient({
                     className="absolute top-full left-0 right-0 md:left-4 md:right-auto md:w-96 mt-2 bg-white rounded-2xl border border-line shadow-2xl p-5 z-50 text-ink"
                   >
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-meta uppercase tracking-[0.15em] font-semibold text-gray-400">Destinos Exclusivos</h4>
+                      {/* Las zonas REALES de la isla, leídas de la base.
+                          Hasta el 2026-08-03 acá había una lista de la
+                          plantilla original: Goa, Bali, Santorini, Zermatt,
+                          Lofoten… En un sitio de alquiler en Margarita eso
+                          destruía la credibilidad de golpe, y encima al elegir
+                          cualquiera la búsqueda filtraba por ese texto y no
+                          encontraba nada: el visitante veía «Sin resultados».
+                          Ahora salen las zonas que sí tienen inventario, con
+                          cuántos alojamientos hay en cada una. */}
+                      <h4 className="text-meta uppercase tracking-[0.15em] font-semibold text-gray-400">Zonas de la isla</h4>
                       <X className="w-4 h-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setActivePopover(null)} />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      {['Goa, India', 'Kodaikanal, India', 'Uluwatu, Bali', 'Lake Como, Italy', 'Wadi Rum, Jordan', 'Lofoten, Norway', 'Ubud, Bali', 'Malibu, USA', 'Santorini, Greece', 'Zermatt, Switzerland'].map((dest) => (
+                      {ZONES.map((zona) => (
                         <button
-                          key={dest}
+                          key={zona.slug}
                           onClick={() => {
-                            setSearchWhere(dest);
+                            setSearchWhere(zona.name);
                             setActivePopover('dates'); // auto transition
                           }}
                           className="flex items-center gap-2 p-2.5 rounded-xl border border-line/40 hover:border-ink hover:bg-paper text-left transition-all text-meta font-medium text-gray-700 hover:text-black"
                         >
                           <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" />
-                          <span className="truncate">{dest}</span>
+                          <span className="truncate">{zona.name}</span>
+                          <span className="ml-auto shrink-0 text-ui text-ink-faint">
+                            {zona.properties.length}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -1068,6 +1086,13 @@ export default function HomeClient({
                         href={waReserva}
                         target="_blank"
                         rel="noopener"
+                        onClick={() =>
+                          avisar({
+                            kind: 'whatsapp',
+                            path: `/propiedad/${selectedProperty.slug}`,
+                            propertyId: selectedProperty.id,
+                          })
+                        }
                         className="btn-solid w-full mt-3"
                       >
                         <span>Consultar por WhatsApp</span>
@@ -1140,6 +1165,13 @@ export default function HomeClient({
                         href={waReserva}
                         target="_blank"
                         rel="noopener"
+                        onClick={() =>
+                          avisar({
+                            kind: 'whatsapp',
+                            path: `/propiedad/${selectedProperty.slug}`,
+                            propertyId: selectedProperty.id,
+                          })
+                        }
                         className="btn-solid w-full mt-4"
                       >
                         <span>Reservar por WhatsApp</span>

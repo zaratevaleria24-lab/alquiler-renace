@@ -232,7 +232,32 @@ Qué mostrará el panel:
 
    Sin histórico a propósito: el histórico de tasas es el producto de Siberia.
 
-5. **Recolector de métricas** y el dashboard.
+5. **Recolector de métricas** y el dashboard — ✅ 2026-08-03.
+   Migración 007. Aviso desde el NAVEGADOR a `/api/visita`: el sitio es estático
+   y nginx lo cachea, pero el motivo bueno es que un aviso con JavaScript
+   **descarta solo a los rastreadores**, que no lo ejecutan (comprobado: el
+   propio Chrome headless de las pruebas quedó filtrado por traer
+   «HeadlessChrome» en su agente).
+
+   **NO se guarda ninguna IP.** Misma lógica que descartar el registro ante el
+   Estado (ver `ESTRATEGIA.md` §1.1): una base con las IPs de quién visitó es
+   exposición para los VISITANTES. Se guarda `hash(IP + navegador + sal del día)`,
+   que distingue visitantes dentro del día sin saber quién es ninguno; la sal
+   cambia cada día y **las de más de dos días se borran**, así que los hashes
+   viejos no se pueden recalcular ni teniendo la IP. Sin cookies, así que
+   tampoco hace falta banner de consentimiento. Tampoco se guarda el user-agent
+   (solo «móvil»/«escritorio») ni la URL de procedencia completa (solo el host).
+
+   **El país lo regala Cloudflare** en la cabecera `CF-IPCountry` de cada
+   petición: cero latencia y sin depender de un servicio externo que en Venezuela
+   podría no cargar. Verificado en producción. Ciudad exigiría una base
+   geográfica local — pendiente, y el país ya da el corte que importa.
+
+   El dashboard mide lo que decide algo: **diáspora vs local** (dónde pautar),
+   páginas por zona (qué inventario conseguir), **clics de WhatsApp por ficha**
+   —con la cifra en rojo si una ficha tiene visitas y ningún contacto— y **qué
+   escribe la gente en el buscador**, que revela demanda que el inventario no
+   cubre. Sin librería de gráficos: barras proporcionales en CSS.
 6. **nginx + TLS** para el subdominio, y **script de backup** en el crontab:
    por primera vez habrá datos que se pueden perder.
 

@@ -31,7 +31,7 @@ const NAV = [
   { href: '/admin/contenido', label: 'Contenido', icono: ImageIcon, listo: true },
   { href: '/admin/vehiculos', label: 'Vehículos', icono: Car, listo: false },
   { href: '/admin/zonas', label: 'Zonas', icono: MapPin, listo: false },
-  { href: '/admin/metricas', label: 'Métricas', icono: BarChart3, listo: false },
+  { href: '/admin/metricas', label: 'Métricas', icono: BarChart3, listo: true },
   // Última a propósito: es utilidad, no trabajo diario.
   { href: '/admin/configuracion', label: 'Configuración', icono: Settings, listo: true },
 ];

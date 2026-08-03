@@ -231,7 +231,12 @@ export default async function AutosPage() {
                 te decimos qué hay disponible.
               </p>
               {wa ? (
-                <a href={wa} target="_blank" rel="noopener" className="btn-solid mt-8">
+                <a
+                  href={wa}
+                  target="_blank"
+                  rel="noopener"
+                  className="btn-solid mt-8"
+                >
                   Preguntar por WhatsApp
                 </a>
               ) : (
