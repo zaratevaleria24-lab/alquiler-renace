@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProperties, getProperty, getZone } from '@/lib/queries';
-import { CONTACT, SITE, absoluteUrl } from '@/lib/site';
+import { SITE, absoluteUrl } from '@/lib/site';
 import { iconFor } from '@/lib/icons';
 import { breadcrumbSchema, graph, propertySchema } from '@/lib/schema';
+import ReservaPanel from '@/components/ReservaPanel';
 
 // Página propia por propiedad: /propiedad/los-geranios-a, etc.
 //
@@ -72,14 +73,6 @@ export async function generateMetadata({
   };
 }
 
-/** Mensaje precargado del CTA. Sin noches/huéspedes: la página es estática y
- *  no tiene el estado del drawer; el detalle se conversa en WhatsApp. */
-function urlConsultaWhatsApp(name: string, location: string): string | null {
-  if (!CONTACT.whatsapp) return null;
-  const texto = `Hola, vi «${name}» (${location}) en margaritarenace.com.ve y quiero saber disponibilidad para mis fechas.`;
-  return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(texto)}`;
-}
-
 export default async function PropiedadPage({
   params,
 }: {
@@ -93,7 +86,6 @@ export default async function PropiedadPage({
   const zonePath = `/alquiler/${property.zoneSlug}`;
   const zone = await getZone(property.zoneSlug);
   const vecinas = (zone?.properties ?? []).filter((p) => p.slug !== property.slug);
-  const whatsapp = urlConsultaWhatsApp(property.name, property.location);
   const capacidad =
     property.guestsAllowed.adults +
     (property.guestsAllowed.children > 0
@@ -252,33 +244,19 @@ export default async function PropiedadPage({
               )}
             </div>
 
-            {/* Caja de reserva. Misma honestidad que el drawer del home: sin
-                pagos en línea y sin tarifas inventadas; el cierre es WhatsApp. */}
-            <aside className="h-fit rounded-card border border-line bg-white p-6 md:sticky md:top-6">
-              <p className="mono-data text-title-sm text-brand-deep">{property.priceText}</p>
-              <p className="mt-2 text-meta text-ink-muted">
-                Hasta {capacidad}. {property.priceOnRequest
-                  ? 'La tarifa varía según la temporada: consulta por tus fechas.'
-                  : 'Confirma disponibilidad para tus fechas antes de reservar.'}
-              </p>
-              {whatsapp ? (
-                <a
-                  href={whatsapp}
-                  target="_blank"
-                  rel="noopener"
-                  className="btn-solid mt-5 w-full"
-                >
-                  Consultar por WhatsApp
-                </a>
-              ) : (
-                <button disabled className="btn-solid mt-5 w-full cursor-not-allowed opacity-60">
-                  Consultas por WhatsApp — muy pronto
-                </button>
-              )}
-              <p className="mt-3 text-center text-micro font-medium text-gray-400">
-                Sin pagos en línea: coordinas directo con quien te recibe
-              </p>
-            </aside>
+            {/* Calculadora de reserva: el único trozo cliente de esta página.
+                Vino del panel lateral del home, que se retiró. */}
+            <ReservaPanel
+              nombre={property.name}
+              ubicacion={property.location}
+              precioTexto={property.priceText}
+              precioPorNoche={property.pricePerNight}
+              precioAConsultar={property.priceOnRequest}
+              maxHuespedes={
+                property.guestsAllowed.adults + property.guestsAllowed.children
+              }
+              capacidadTexto={capacidad}
+            />
           </section>
 
           {/* Enlazado interno: a la landing de la zona (contexto y autoridad) y
