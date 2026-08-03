@@ -24,7 +24,9 @@ import {
 // necesitan los crawlers clásicos y los de IA. El home, al ser un componente
 // cliente enorme, depende de hidratación para parte de su contenido.
 
-export const dynamicParams = false;
+// dynamicParams=true: si una zona estrena inventario publicado desde el panel,
+// su landing se renderiza a demanda en la primera visita, sin rebuild.
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   // Consulta en build: las rutas estáticas salen de las zonas que TIENEN

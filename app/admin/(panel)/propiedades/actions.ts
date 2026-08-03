@@ -10,7 +10,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { usuarioActual } from '@/lib/auth';
-import { query, withTransaction } from '@/lib/db';
+import { query, rows, withTransaction } from '@/lib/db';
+import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
 
 async function exigirSesion(): Promise<void> {
   if (!(await usuarioActual())) redirect('/login');
@@ -119,6 +120,195 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
 
   regenerarSitio();
   redirect('/propiedades?guardado=1');
+}
+
+/** Slug para URL: minúsculas sin acentos, guiones, y sufijo -2, -3… si choca
+ *  con uno existente. Se genera UNA vez al crear; después no cambia (la URL
+ *  pública es estable, ver el comentario del schema). */
+async function slugDisponible(nombre: string): Promise<string> {
+  const base =
+    nombre
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'propiedad';
+
+  for (let n = 0; ; n++) {
+    const candidato = n === 0 ? base : `${base}-${n + 1}`;
+    const [existe] = await rows(
+      `SELECT 1 FROM properties WHERE slug = $1`,
+      [candidato],
+    );
+    if (!existe) return candidato;
+  }
+}
+
+export async function crearPropiedadAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+
+  const name = String(formData.get('name') ?? '').trim();
+  const zoneSlug = String(formData.get('zone_slug') ?? '');
+  const location = String(formData.get('location') ?? '').trim();
+  const description = String(formData.get('description') ?? '').trim();
+  const priceOnRequest = asBool(formData.get('price_on_request'));
+  const pricePerNight = priceOnRequest
+    ? 0
+    : asIntEnRango(formData.get('price_per_night'), 0, 100_000, 0);
+  const guestsAdults = asIntEnRango(formData.get('guests_adults'), 1, 50, 2);
+  const guestsChildren = asIntEnRango(formData.get('guests_children'), 0, 50, 0);
+  const isReal = asBool(formData.get('is_real'));
+  const isPublished = asBool(formData.get('is_published'));
+  const categorias = formData.getAll('categorias').map(String);
+  const amenidades = formData.getAll('amenidades').map(String);
+
+  if (!name || !zoneSlug || !location) {
+    redirect('/propiedades/nueva?error=faltan-datos');
+  }
+
+  const priceText = priceOnRequest
+    ? 'Consultar precio'
+    : `US$${pricePerNight} / noche`;
+  const slug = await slugDisponible(name);
+
+  let id = '';
+  try {
+    id = await withTransaction(async (q) => {
+      const res = await q(
+        `INSERT INTO properties
+           (slug, name, zone_slug, location, description,
+            price_per_night, price_on_request, price_text,
+            guests_adults, guests_children, is_real, is_published, sort_order)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,
+                 (SELECT COALESCE(max(sort_order),0)+1 FROM properties))
+         RETURNING id`,
+        [
+          slug, name, zoneSlug, location, description,
+          pricePerNight, priceOnRequest, priceText,
+          guestsAdults, guestsChildren, isReal, isPublished,
+        ],
+      );
+      const nuevoId = (res.rows[0] as { id: string }).id;
+      for (const key of categorias) {
+        await q(
+          `INSERT INTO property_categories (property_id, category_key) VALUES ($1, $2)`,
+          [nuevoId, key],
+        );
+      }
+      for (const [i, key] of amenidades.entries()) {
+        await q(
+          `INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES ($1, $2, $3)`,
+          [nuevoId, key, i],
+        );
+      }
+      return nuevoId;
+    });
+  } catch {
+    redirect('/propiedades/nueva?error=no-guardado');
+  }
+
+  regenerarSitio();
+  // Directo a la edición: lo primero que necesita una propiedad recién creada
+  // son sus fotos, y se suben desde ahí.
+  redirect(`/propiedades/${id}?creada=1`);
+}
+
+export async function subirFotosAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+
+  const id = String(formData.get('id') ?? '');
+  const archivos = formData
+    .getAll('fotos')
+    .filter((f): f is File => f instanceof File && f.size > 0);
+
+  if (!id) redirect('/propiedades');
+  if (archivos.length === 0) redirect(`/propiedades/${id}?error=sin-fotos`);
+
+  const [prop] = await rows<{ slug: string; name: string; zone_name: string }>(
+    `SELECT p.slug, p.name, z.name AS zone_name
+     FROM properties p JOIN zones z ON z.slug = p.zone_slug
+     WHERE p.id = $1`,
+    [id],
+  );
+  if (!prop) redirect('/propiedades');
+
+  try {
+    for (const [i, archivo] of archivos.entries()) {
+      const path = await guardarFoto(archivo, prop.slug, i);
+      // La primera foto de una propiedad sin portada queda de portada; el alt
+      // sigue la convención del sitio (nombre + zona + isla, por Google Imágenes).
+      await query(
+        `INSERT INTO property_images (property_id, path, alt, is_cover, sort_order)
+         VALUES ($1, $2, $3,
+                 NOT EXISTS (SELECT 1 FROM property_images WHERE property_id = $1 AND is_cover),
+                 (SELECT COALESCE(max(sort_order),0)+1 FROM property_images WHERE property_id = $1))`,
+        [id, path, `${prop.name} — alquiler en ${prop.zone_name}, Isla de Margarita`],
+      );
+    }
+  } catch (err) {
+    if (err instanceof FotoInvalidaError) {
+      redirect(`/propiedades/${id}?error=foto-invalida`);
+    }
+    redirect(`/propiedades/${id}?error=no-guardado`);
+  }
+
+  regenerarSitio();
+  redirect(`/propiedades/${id}?guardado=1`);
+}
+
+export async function borrarFotoAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+
+  const id = String(formData.get('id') ?? '');
+  const fotoId = String(formData.get('foto_id') ?? '');
+  if (!id || !fotoId) redirect('/propiedades');
+
+  const [foto] = await rows<{ path: string; is_cover: boolean }>(
+    `SELECT path, is_cover FROM property_images WHERE id = $1 AND property_id = $2`,
+    [fotoId, id],
+  );
+  if (foto) {
+    await withTransaction(async (q) => {
+      await q(`DELETE FROM property_images WHERE id = $1`, [fotoId]);
+      if (foto.is_cover) {
+        // Se borró la portada: la siguiente foto asciende, para que la
+        // propiedad nunca quede publicada sin imagen de portada.
+        await q(
+          `UPDATE property_images SET is_cover = true
+           WHERE id = (SELECT id FROM property_images
+                       WHERE property_id = $1 ORDER BY sort_order LIMIT 1)`,
+          [id],
+        );
+      }
+    });
+    await borrarArchivoFoto(foto.path);
+  }
+
+  regenerarSitio();
+  redirect(`/propiedades/${id}?guardado=1`);
+}
+
+export async function marcarPortadaAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+
+  const id = String(formData.get('id') ?? '');
+  const fotoId = String(formData.get('foto_id') ?? '');
+  if (!id || !fotoId) redirect('/propiedades');
+
+  await withTransaction(async (q) => {
+    await q(
+      `UPDATE property_images SET is_cover = false WHERE property_id = $1`,
+      [id],
+    );
+    await q(
+      `UPDATE property_images SET is_cover = true WHERE id = $1 AND property_id = $2`,
+      [fotoId, id],
+    );
+  });
+
+  regenerarSitio();
+  redirect(`/propiedades/${id}?guardado=1`);
 }
 
 export async function alternarPublicacionAction(formData: FormData): Promise<void> {

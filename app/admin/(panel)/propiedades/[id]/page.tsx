@@ -1,37 +1,51 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getCatalogosAdmin, getPropiedadAdmin } from '@/lib/admin';
-import { guardarPropiedadAction } from '../actions';
+import { getCatalogosAdmin, getFotosAdmin, getPropiedadAdmin } from '@/lib/admin';
+import PropiedadForm from '../PropiedadForm';
+import {
+  borrarFotoAction,
+  guardarPropiedadAction,
+  marcarPortadaAction,
+  subirFotosAction,
+} from '../actions';
 
-// Edición de una propiedad. Formulario HTML puro con Server Action, como el
-// login: si la hidratación falla o tarda —conexiones de Venezuela—, el guardado
-// sigue funcionando como un POST normal.
+// Edición de una propiedad: el formulario compartido (PropiedadForm) más la
+// gestión de fotos, que solo existe acá — una propiedad recién creada llega a
+// esta página justamente para recibir sus fotos.
 //
-// Lo que NO se edita acá, a propósito:
+// Lo que NO se edita, a propósito:
 //   · slug — la URL pública es estable; renombrar la propiedad no la rompe.
 //   · rating — solo debe existir con reseñas reales (regla de SEO.md). Un campo
 //     editable invita a inventarlo.
 //   · price_text — se deriva del precio en la action, para que el texto visible
 //     y el número de filtrado no se contradigan nunca.
-//   · fotos — llegan con la subida de imágenes (siguiente paso del plan).
 
 export const dynamic = 'force-dynamic';
 
-const inputCls =
-  'w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-body text-ink focus:outline-none focus:border-ink';
-const labelCls = 'block text-micro uppercase font-semibold text-ink-subtle mb-1.5';
+const MENSAJES: Record<string, string> = {
+  'faltan-datos':
+    'Faltan datos obligatorios: nombre, zona y dirección no pueden quedar vacíos.',
+  'sin-fotos': 'No llegó ningún archivo: elige al menos una foto antes de subir.',
+  'foto-invalida':
+    'Alguno de los archivos no es una imagen válida o pesa más de 12MB.',
+  'no-guardado': 'No se pudo guardar. Revisa los datos e intenta otra vez.',
+};
 
 export default async function EditarPropiedadPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; creada?: string; guardado?: string }>;
 }) {
-  const [{ id }, { error }] = await Promise.all([params, searchParams]);
-  const [propiedad, catalogos] = await Promise.all([
+  const [{ id }, { error, creada, guardado }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const [propiedad, catalogos, fotos] = await Promise.all([
     getPropiedadAdmin(id),
     getCatalogosAdmin(),
+    getFotosAdmin(id),
   ]);
   if (!propiedad) notFound();
 
@@ -53,209 +67,122 @@ export default async function EditarPropiedadPage({
         </p>
       </header>
 
+      {creada && (
+        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
+          Propiedad creada{propiedad.isPublished ? ' y publicada' : ' como borrador'}.
+          El siguiente paso son las fotos, aquí abajo.
+        </p>
+      )}
+      {guardado && (
+        <p className="mt-8 rounded-card border border-brand/30 bg-brand-tint px-5 py-4 text-body text-brand-deep">
+          Cambios guardados. El sitio público se regenera solo.
+        </p>
+      )}
       {error && (
         <p className="mt-8 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
-          {error === 'faltan-datos'
-            ? 'Faltan datos obligatorios: nombre, zona y dirección no pueden quedar vacíos.'
-            : 'No se pudo guardar. Revisa los datos e intenta otra vez.'}
+          {MENSAJES[error] ?? MENSAJES['no-guardado']}
         </p>
       )}
 
-      <form action={guardarPropiedadAction} className="mt-10 space-y-10">
-        <input type="hidden" name="id" value={propiedad.id} />
+      {/* ── Fotos ─────────────────────────────────────────────────────────── */}
+      <section aria-labelledby="fotos" className="mt-12">
+        <h2 id="fotos" className="label-eyebrow text-ink-subtle">
+          Fotos ({fotos.length})
+        </h2>
 
-        <fieldset className="space-y-5">
-          <legend className="label-eyebrow text-ink-subtle">Identidad</legend>
-          <div>
-            <label htmlFor="name" className={labelCls}>Nombre</label>
-            <input
-              id="name"
-              name="name"
-              required
-              defaultValue={propiedad.name}
-              className={inputCls}
-            />
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="zone_slug" className={labelCls}>Zona</label>
-              <select
-                id="zone_slug"
-                name="zone_slug"
-                defaultValue={propiedad.zoneSlug}
-                className={inputCls}
+        {fotos.length > 0 ? (
+          <ul className="mt-5 grid gap-4 sm:grid-cols-3">
+            {fotos.map((foto) => (
+              <li
+                key={foto.id}
+                className="overflow-hidden rounded-card border border-line bg-white"
               >
-                {catalogos.zonas.map((z) => (
-                  <option key={z.slug} value={z.slug}>{z.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="location" className={labelCls}>Dirección visible</label>
-              <input
-                id="location"
-                name="location"
-                required
-                defaultValue={propiedad.location}
-                className={inputCls}
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="description" className={labelCls}>Descripción</label>
-            <textarea
-              id="description"
-              name="description"
-              rows={4}
-              defaultValue={propiedad.description}
-              className={inputCls}
-            />
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-5">
-          <legend className="label-eyebrow text-ink-subtle">Precio y capacidad</legend>
-          <div className="grid gap-5 sm:grid-cols-3">
-            <div>
-              <label htmlFor="price_per_night" className={labelCls}>US$ por noche</label>
-              <input
-                id="price_per_night"
-                name="price_per_night"
-                type="number"
-                min={0}
-                step={1}
-                defaultValue={propiedad.pricePerNight}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label htmlFor="guests_adults" className={labelCls}>Adultos</label>
-              <input
-                id="guests_adults"
-                name="guests_adults"
-                type="number"
-                min={1}
-                max={50}
-                defaultValue={propiedad.guestsAdults}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label htmlFor="guests_children" className={labelCls}>Niños</label>
-              <input
-                id="guests_children"
-                name="guests_children"
-                type="number"
-                min={0}
-                max={50}
-                defaultValue={propiedad.guestsChildren}
-                className={inputCls}
-              />
-            </div>
-          </div>
-          <label className="flex items-start gap-3 text-body text-ink-soft">
-            <input
-              type="checkbox"
-              name="price_on_request"
-              defaultChecked={propiedad.priceOnRequest}
-              className="mt-1 h-4 w-4 accent-[#0E7490]"
-            />
-            <span>
-              Precio a consultar
-              <span className="block text-meta text-ink-muted">
-                La web mostrará «Consultar precio» y se ignora el monto de arriba.
-              </span>
-            </span>
-          </label>
-        </fieldset>
-
-        <fieldset>
-          <legend className="label-eyebrow text-ink-subtle">Categorías</legend>
-          <p className="mt-2 text-meta text-ink-muted">
-            Son las claves de los filtros del home: selección cerrada a propósito.
+                <img
+                  src={foto.path}
+                  alt={foto.alt}
+                  width={400}
+                  height={250}
+                  loading="lazy"
+                  className="aspect-video w-full object-cover"
+                />
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  {foto.isCover ? (
+                    <span className="rounded-chip bg-brand-tint px-2 py-0.5 text-ui font-medium text-brand-deep">
+                      portada
+                    </span>
+                  ) : (
+                    <form action={marcarPortadaAction}>
+                      <input type="hidden" name="id" value={propiedad.id} />
+                      <input type="hidden" name="foto_id" value={foto.id} />
+                      <button
+                        type="submit"
+                        className="text-ui text-ink-muted underline-offset-4 hover:text-brand hover:underline"
+                      >
+                        hacer portada
+                      </button>
+                    </form>
+                  )}
+                  <form action={borrarFotoAction}>
+                    <input type="hidden" name="id" value={propiedad.id} />
+                    <input type="hidden" name="foto_id" value={foto.id} />
+                    <button
+                      type="submit"
+                      className="text-ui text-coral underline-offset-4 hover:underline"
+                    >
+                      borrar
+                    </button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-4 rounded-card border border-coral/35 bg-coral/5 px-5 py-4 text-body text-ink">
+            Sin fotos todavía. Una propiedad publicada sin foto se ve rota en la
+            web: sube al menos la principal antes de publicar.
           </p>
-          <ul className="mt-4 grid gap-2.5 sm:grid-cols-3">
-            {catalogos.categorias.map((c) => (
-              <li key={c.key}>
-                <label className="flex items-center gap-2.5 text-body text-ink-soft">
-                  <input
-                    type="checkbox"
-                    name="categorias"
-                    value={c.key}
-                    defaultChecked={propiedad.categoryKeys.includes(c.key)}
-                    className="h-4 w-4 accent-[#0E7490]"
-                  />
-                  {c.label}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </fieldset>
+        )}
 
-        <fieldset>
-          <legend className="label-eyebrow text-ink-subtle">Amenidades</legend>
-          <ul className="mt-4 grid gap-2.5 sm:grid-cols-3">
-            {catalogos.amenidades.map((a) => (
-              <li key={a.key}>
-                <label className="flex items-center gap-2.5 text-body text-ink-soft">
-                  <input
-                    type="checkbox"
-                    name="amenidades"
-                    value={a.key}
-                    defaultChecked={propiedad.amenityKeys.includes(a.key)}
-                    className="h-4 w-4 accent-[#0E7490]"
-                  />
-                  {a.name}
-                </label>
-              </li>
-            ))}
-          </ul>
-        </fieldset>
-
-        <fieldset className="space-y-4">
-          <legend className="label-eyebrow text-ink-subtle">Estado</legend>
-          <label className="flex items-start gap-3 text-body text-ink-soft">
-            <input
-              type="checkbox"
-              name="is_published"
-              defaultChecked={propiedad.isPublished}
-              className="mt-1 h-4 w-4 accent-[#0E7490]"
-            />
-            <span>
-              Publicada
-              <span className="block text-meta text-ink-muted">
-                Sin marcar, la propiedad desaparece de la web pero no se borra.
-              </span>
-            </span>
+        <form
+          action={subirFotosAction}
+          className="mt-6 rounded-card border border-line bg-white p-5"
+        >
+          <input type="hidden" name="id" value={propiedad.id} />
+          <label htmlFor="fotos-input" className="block text-body font-semibold text-ink">
+            Subir fotos
           </label>
-          <label className="flex items-start gap-3 text-body text-ink-soft">
+          <p className="mt-1 text-meta text-ink-muted">
+            Se optimizan solas: WebP, máximo 1600px de ancho. Horizontales y con
+            luz de día funcionan mejor (ver DATOS-PENDIENTES.md).
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
             <input
-              type="checkbox"
-              name="is_real"
-              defaultChecked={propiedad.isReal}
-              className="mt-1 h-4 w-4 accent-[#0E7490]"
+              id="fotos-input"
+              type="file"
+              name="fotos"
+              multiple
+              required
+              accept="image/*"
+              className="text-body text-ink-soft file:mr-4 file:rounded-chip file:border file:border-line file:bg-paper file:px-4 file:py-2 file:text-meta file:font-semibold file:text-brand-deep"
             />
-            <span>
-              Inventario real
-              <span className="block text-meta text-ink-muted">
-                Sin marcar cuenta como listado de relleno y el resumen lo avisa.
-              </span>
-            </span>
-          </label>
-        </fieldset>
+            <button type="submit" className="btn-solid">
+              Subir y optimizar
+            </button>
+          </div>
+        </form>
+      </section>
 
-        <div className="flex items-center gap-5 border-t border-line pt-8">
-          <button type="submit" className="btn-solid">
-            Guardar y regenerar el sitio
-          </button>
-          <Link
-            href="/propiedades"
-            className="text-body text-ink-muted underline-offset-4 hover:underline"
-          >
-            Cancelar
-          </Link>
-        </div>
-      </form>
+      {/* ── Datos ─────────────────────────────────────────────────────────── */}
+      <section aria-labelledby="datos" className="mt-14">
+        <h2 id="datos" className="label-eyebrow text-ink-subtle">
+          Datos
+        </h2>
+        <PropiedadForm
+          action={guardarPropiedadAction}
+          catalogos={catalogos}
+          propiedad={propiedad}
+        />
+      </section>
     </div>
   );
 }

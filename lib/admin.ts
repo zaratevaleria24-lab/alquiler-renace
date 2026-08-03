@@ -110,6 +110,23 @@ export async function getPropiedadAdmin(
   };
 }
 
+export interface FotoFila {
+  id: string;
+  path: string;
+  alt: string;
+  isCover: boolean;
+}
+
+export async function getFotosAdmin(propertyId: string): Promise<FotoFila[]> {
+  const rs = await rows<{ id: string; path: string; alt: string; is_cover: boolean }>(
+    `SELECT id, path, alt, is_cover FROM property_images
+     WHERE property_id = $1
+     ORDER BY is_cover DESC, sort_order`,
+    [propertyId],
+  );
+  return rs.map((r) => ({ id: r.id, path: r.path, alt: r.alt, isCover: r.is_cover }));
+}
+
 /** Catálogos completos para los selects del formulario. A diferencia del sitio
  *  público, acá se listan TODAS las zonas, tengan inventario o no. */
 export async function getCatalogosAdmin() {

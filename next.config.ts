@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      // El límite por defecto es 1MB: no alcanza para subir fotos desde el
+      // panel. 15MB permite varias fotos de teléfono por envío; sharp las
+      // reduce a WebP en el servidor, así que a disco llega mucho menos.
+      bodySizeLimit: '15mb',
+    },
+  },
   typescript: {
     ignoreBuildErrors: false,
   },

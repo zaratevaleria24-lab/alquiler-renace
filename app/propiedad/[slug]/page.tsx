@@ -19,7 +19,10 @@ import { breadcrumbSchema, graph, propertySchema } from '@/lib/schema';
 // el build. El drawer del home sigue existiendo como UX rápida de exploración;
 // esta es la versión canónica y enlazable del mismo contenido.
 
-export const dynamicParams = false;
+// dynamicParams=true: un slug que no salió del build (una propiedad creada
+// desde el panel) se renderiza a demanda en la primera visita y queda cacheado
+// como estático. Sin esto, todo alta nueva exigiría un rebuild manual.
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const properties = await getProperties();

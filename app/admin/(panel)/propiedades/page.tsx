@@ -20,11 +20,16 @@ export default async function PropiedadesPage({
 
   return (
     <div>
-      <header>
-        <p className="label-eyebrow text-ink-subtle">Panel</p>
-        <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
-          Propiedades <em className="headline-italic">del inventario</em>
-        </h1>
+      <header className="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p className="label-eyebrow text-ink-subtle">Panel</p>
+          <h1 className="mt-3 font-serif text-headline font-normal track-headline text-ink">
+            Propiedades <em className="headline-italic">del inventario</em>
+          </h1>
+        </div>
+        <Link href="/propiedades/nueva" className="btn-solid">
+          Nueva propiedad
+        </Link>
       </header>
 
       {guardado && (
