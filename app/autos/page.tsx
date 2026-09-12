@@ -27,9 +27,9 @@ export const dynamic = 'force-static';
 export const revalidate = false;
 
 const PATH = '/autos';
-const TITULO = 'Alquiler de Carros en Isla de Margarita';
+const TITULO = 'Alquiler de Carros y Traslados en Isla de Margarita';
 const DESCRIPCION =
-  'Alquiler de carros en la Isla de Margarita con entrega en la zona de tu alojamiento. Precios en dólares, depósito y mínimo de días claros antes de escribir.';
+  'Alquiler de carros en la Isla de Margarita con entrega en la zona de tu alojamiento, y traslado desde el aeropuerto Santiago Mariño o el ferry hasta Pampatar, Porlamar, Costa Azul y el resto de la isla. Precios en dólares.';
 
 export const metadata: Metadata = {
   title: TITULO,
@@ -53,9 +53,26 @@ export const metadata: Metadata = {
 };
 
 /** Las dos preguntas de la FAQ que tratan de carros, leídas de la fuente. */
-const FAQ_CARROS = HOME_FAQ.filter(
-  (f) => f.q.toLowerCase().includes('carro') || f.q.toLowerCase().includes('auto'),
-);
+const FAQ_CARROS = HOME_FAQ.filter((f) => {
+  const q = f.q.toLowerCase();
+  return q.includes('carro') || q.includes('auto') || q.includes('traslado');
+});
+
+/**
+ * Tiempos reales de traslado desde el aeropuerto Santiago Mariño (queda entre
+ * El Yaque y Porlamar, al sur de la isla). Son geografía verificable, no
+ * promesa comercial: por eso van acá y no un precio, que se cierra por WhatsApp.
+ */
+const TRASLADOS = [
+  { destino: 'Playa El Yaque', minutos: '5-10' },
+  { destino: 'Porlamar', minutos: '15-20' },
+  { destino: 'Costa Azul', minutos: '20-25' },
+  { destino: 'Pampatar', minutos: '25-30' },
+  { destino: 'Playa Guacuco', minutos: '35-40' },
+  { destino: 'Playa Parguito', minutos: '40-45' },
+  { destino: 'Juan Griego', minutos: '40-50' },
+  { destino: 'Playa Caribe / Manzanillo', minutos: '50-60' },
+];
 
 export default async function AutosPage() {
   const [vehiculos, zones, contacto] = await Promise.all([
@@ -67,6 +84,11 @@ export default async function AutosPage() {
   const wa = contacto.whatsapp
     ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(
         'Hola, quiero alquilar un carro en Margarita. ¿Qué tienen disponible y cuál es el depósito?',
+      )}`
+    : null;
+  const waTraslado = contacto.whatsapp
+    ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(
+        'Hola, necesito traslado en Margarita. Llego el [fecha] a las [hora] al aeropuerto / ferry, somos [cantidad] personas y vamos a [zona]. ¿Precio y disponibilidad?',
       )}`
     : null;
 
@@ -246,6 +268,52 @@ export default async function AutosPage() {
               )}
             </section>
           )}
+
+          {/* TRASLADOS. Instagram lo ofrece desde el principio ("Traslados y
+              alquiler de autos") y el sitio no lo mencionaba ni una vez. Es la
+              búsqueda con menos competencia seria de todo el rubro ("traslado
+              aeropuerto Margarita") y el gancho natural: quien contrata el
+              traslado pregunta dónde quedarse. Tiempos reales; el precio se
+              cierra por WhatsApp, no se inventa. */}
+          <section aria-labelledby="traslados" className="section-gap">
+            <h2
+              id="traslados"
+              className="font-serif text-headline text-ink font-normal track-headline"
+            >
+              Traslado desde el aeropuerto <em className="headline-italic">o el ferry</em>
+            </h2>
+            <p className="mt-4 max-w-2xl text-body text-ink-soft leading-relaxed">
+              Te esperamos en el aeropuerto Santiago Mariño o en el terminal del
+              ferry de Punta de Piedras y te llevamos directo a tu alojamiento,
+              sin regatear con taxis a la salida. Coordinás la hora de llegada por
+              WhatsApp y el precio queda cerrado antes de viajar. El aeropuerto
+              está al sur de la isla, entre El Yaque y Porlamar: estos son los
+              tiempos reales hasta cada zona con tráfico normal.
+            </p>
+            <ul className="mt-7 grid max-w-2xl gap-2.5 sm:grid-cols-2">
+              {TRASLADOS.map((t) => (
+                <li
+                  key={t.destino}
+                  className="flex items-baseline justify-between gap-4 rounded-card border border-line bg-white px-4 py-3"
+                >
+                  <span className="text-body text-brand-deep">{t.destino}</span>
+                  <span className="mono-data text-meta text-ink-muted">{t.minutos} min</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 max-w-2xl text-meta text-ink-muted">
+              Desde el ferry de Punta de Piedras sumá unos 30-35 minutos hasta
+              Porlamar. También hacemos traslados entre zonas y a las playas del
+              norte.
+            </p>
+            {waTraslado && (
+              <p className="mt-7">
+                <a href={waTraslado} className="btn-solid" rel="noopener">
+                  Cotizar traslado por WhatsApp
+                </a>
+              </p>
+            )}
+          </section>
 
           {/* Contenido real sobre la isla, leído de lib/faq.ts para no tener dos
               versiones del mismo texto. Responde la búsqueda que de verdad hace

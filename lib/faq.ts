@@ -56,4 +56,8 @@ export const HOME_FAQ: FaqItem[] = [
     q: '¿Margarita Renace también alquila autos?',
     a: 'Sí, el proyecto cubre alquiler de apartamentos y de autos en la Isla de Margarita. El catálogo de vehículos se está incorporando al sitio; para consultar disponibilidad de autos conviene escribir directamente.',
   },
+  {
+    q: '¿Ofrecen traslado desde el aeropuerto de Margarita?',
+    a: 'Sí. Te recogemos en el aeropuerto Santiago Mariño o en el terminal del ferry de Punta de Piedras y te llevamos a tu alojamiento, con hora y precio acordados por WhatsApp antes de viajar. El aeropuerto queda al sur de la isla: son 15-20 minutos a Porlamar, 20-25 a Costa Azul, 25-30 a Pampatar y 40-50 a Juan Griego. También hacemos traslados entre zonas y a las playas del norte.',
+  },
 ];
