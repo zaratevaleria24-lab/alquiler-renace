@@ -161,6 +161,15 @@ export function slugProspecto(tituloLimpio: string, fbId: string): string {
   return `${base}-${fbId.slice(-6)}`;
 }
 
+/**
+ * Facebook cuela en «inmuebles en venta» neveras, juegos de dormitorio y carros.
+ * Lo que claramente no es un inmueble nace descartado y oculto; la dueña puede
+ * rescatarlo desde el panel si el filtro se equivocó.
+ */
+const NO_ES_INMUEBLE = /\b(nevera|refrigerador|lavadora|secadora|cocina el[eé]ctrica|colch[oó]n|juego de (dormitorio|comedor|sala|cuarto)|sof[aá]|mueble|escritorio|televisor|tv\b|aire acondicionado|split|moto|carro|camioneta|toyota|chevrolet|ford|bicicleta|celular|iphone|laptop|ropa|zapatos|perro|gato|cachorro)\b/i;
+export const esInmueble = (titulo: string, descripcion: string): boolean =>
+  !NO_ES_INMUEBLE.test(titulo) || /\b(casa|apartamento|apto|terreno|parcela|local|posada|quinta|villa|townhouse|penthouse|oficina|galp[oó]n)\b/i.test(titulo + ' ' + descripcion.slice(0, 200));
+
 /** Zona del sitio más cercana a unas coordenadas (radio máximo 12 km). */
 export function zonaPorCoordenadas(lat: number | null, lng: number | null): string | null {
   if (lat == null || lng == null) return null;
@@ -222,7 +231,11 @@ function normalizar(x: Crudo) {
     url: String(x.itemUrl ?? x.listingUrl ?? `https://www.facebook.com/marketplace/item/${id}/`),
     titulo, tituloLimpio: limpiarTitulo(titulo), descripcion,
     precioFb: Number.isFinite(precioFb) ? precioFb : null, monedaFb,
-    precioUsd: extraerPrecioUSD(texto) ?? (Number.isFinite(precioFb) && precioFb >= 3000 ? Math.round(precioFb) : null),
+    // El precio de Facebook solo vale como dólares dentro del rango de un
+    // inmueble (3.000 – 5.000.000): la gente escribe US$ en el campo de Bs. Por
+    // encima son bolívares de verdad o basura, y publicar «US$ 270.000.000» es
+    // peor que «consultar precio».
+    precioUsd: extraerPrecioUSD(texto) ?? (Number.isFinite(precioFb) && precioFb >= 3000 && precioFb <= 5_000_000 ? Math.round(precioFb) : null),
     telefono: extraerTelefono(texto),
     m2: extraerM2(descripcion), habitaciones: extraerHabitaciones(texto), banos: extraerBanos(texto),
     municipio: String(g(x, 'location', 'reverse_geocode_detailed', 'city') ?? g(x, 'location', 'reverse_geocode', 'city') ?? ''),
@@ -272,8 +285,8 @@ export async function buscarEnMarketplace(limite: number, conDetalle = true): Pr
       const [res] = await rows<{ nuevo: boolean }>(
         `INSERT INTO prospectos_venta (fb_id, url, titulo, titulo_limpio, descripcion, precio_fb, moneda_fb,
            precio_usd, telefono, m2, habitaciones, banos, municipio, ciudad, latitud, longitud, zone_slug,
-           foto_url, fotos, vivo, vendido, slug)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+           foto_url, fotos, vivo, vendido, slug, estado, publicado)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
          ON CONFLICT (fb_id) DO UPDATE SET
            titulo = EXCLUDED.titulo, titulo_limpio = EXCLUDED.titulo_limpio,
            -- una corrida sin detalle no debe borrar la descripción de una con detalle
@@ -297,7 +310,8 @@ export async function buscarEnMarketplace(limite: number, conDetalle = true): Pr
          RETURNING (xmax = 0) AS nuevo`,
         [p.fbId, p.url, p.titulo, p.tituloLimpio, p.descripcion, p.precioFb, p.monedaFb, p.precioUsd, p.telefono,
          p.m2, p.habitaciones, p.banos, p.municipio, p.ciudad, p.latitud, p.longitud, p.zoneSlug, p.fotoUrl, p.fotos, p.vivo, p.vendido,
-         slugProspecto(p.tituloLimpio, p.fbId)],
+         slugProspecto(p.tituloLimpio, p.fbId),
+         esInmueble(p.titulo, p.descripcion) ? 'nuevo' : 'descartado', esInmueble(p.titulo, p.descripcion)],
       );
       if (res?.nuevo) nuevos++;
       await descargarFotosProspecto(p.fbId, p.urlsFotos);
@@ -400,10 +414,17 @@ export async function resumenProspectos() {
 const PUBLICABLE = `p.publicado AND p.vivo AND NOT p.vendido AND p.estado IN ('nuevo','contactado') AND p.slug IS NOT NULL`;
 
 export async function getProspectosPublicados(): Promise<Prospecto[]> {
+  // Un vendedor suele publicar la misma casa dos o tres veces. Con igual
+  // título, precio y zona se muestra una sola: la vista más recientemente.
   return (await rows<Record<string, unknown>>(
-    `SELECT p.*, z.name AS zone_name FROM prospectos_venta p LEFT JOIN zones z ON z.slug = p.zone_slug
-     WHERE ${PUBLICABLE}
-     ORDER BY (cardinality(p.fotos_locales) > 0) DESC, (p.precio_usd IS NOT NULL) DESC, p.visto_ultimo DESC`,
+    `SELECT * FROM (
+       SELECT DISTINCT ON (lower(p.titulo_limpio), coalesce(p.precio_usd, 0), coalesce(p.zone_slug, ''))
+              p.*, z.name AS zone_name
+       FROM prospectos_venta p LEFT JOIN zones z ON z.slug = p.zone_slug
+       WHERE ${PUBLICABLE}
+       ORDER BY lower(p.titulo_limpio), coalesce(p.precio_usd, 0), coalesce(p.zone_slug, ''), p.visto_ultimo DESC
+     ) u
+     ORDER BY (cardinality(u.fotos_locales) > 0) DESC, (u.precio_usd IS NOT NULL) DESC, u.visto_ultimo DESC`,
   )).map(prospectoDesde);
 }
 export async function getProspectoPublicado(slug: string): Promise<Prospecto | undefined> {
