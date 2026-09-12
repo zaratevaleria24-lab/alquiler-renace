@@ -107,7 +107,7 @@ export default async function InmueblePage({ params }: { params: Promise<{ slug:
                   ))}
                 </dl>
               )}
-              <h2 className="mt-10 font-serif text-headline text-ink font-normal track-headline">Sobre este {tipo.toLowerCase()}</h2>
+              <h2 className="mt-10 font-serif text-headline text-ink font-normal track-headline">Sobre este inmueble</h2>
               <p className="mt-5 whitespace-pre-line text-body text-ink/80 leading-relaxed">{i.descripcion}</p>
               <p className="mt-8 text-body">
                 <a href={mapa} target="_blank" rel="noopener noreferrer" className="text-brand-deep underline underline-offset-4">Ver la zona en Google Maps</a>
