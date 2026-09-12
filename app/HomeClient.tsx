@@ -45,6 +45,7 @@ import type { Category, Property, Zone } from '@/lib/types';
 import {
   AboutIslandSection,
   FaqSection,
+  ManifiestoSection,
   ZoneLinksSection,
 } from '@/components/SeoSections';
 
@@ -315,15 +316,17 @@ export default function HomeClient({
                 </p>
                 <h1 className="font-serif text-hero text-ink font-normal leading-[1.02] text-balance track-display rise rise-2 mt-4">
                   Apartamentos y casas en Isla de Margarita,{' '}
-                  <em className="headline-italic">con la luz de las seis</em>
+                  <em className="headline-italic">con tratos justos</em>
                 </h1>
                 <p className="rise rise-3 mt-6 max-w-[44ch] text-pretty text-body md:text-body-lg text-ink-soft">
                   {contenido.heroSubtitulo}
                 </p>
+                {/* Tres hechos, no adjetivos: son la misión de IDENTIDAD.md hecha
+                    promesa concreta. */}
                 <ul className="rise rise-3 mt-8 flex flex-col gap-2 text-ink sm:flex-row sm:gap-0 sm:divide-x sm:divide-line-strong">
-                  <li className="text-ui-lg font-medium sm:pr-5">Estadías cortas y mensuales</li>
-                  <li className="text-ui-lg font-medium sm:px-5">Casas y apartamentos en venta</li>
-                  <li className="text-ui-lg font-medium sm:pl-5">Autos y traslados</li>
+                  <li className="text-ui-lg font-medium sm:pr-5">El precio es el precio</li>
+                  <li className="text-ui-lg font-medium sm:px-5">Te responde una persona</li>
+                  <li className="text-ui-lg font-medium sm:pl-5">Sin comisiones ocultas</li>
                 </ul>
               </div>
               <figure className="rise rise-2 hidden md:block justify-self-center w-[min(100%,440px)] -rotate-[1.5deg] rounded-card border border-line bg-white p-2.5 shadow-lift-lg">
@@ -801,6 +804,7 @@ export default function HomeClient({
             huérfanas), contexto real del destino y preguntas frecuentes con
             FAQPage schema. Ver components/SeoSections.tsx. */}
         <ZoneLinksSection zones={ZONES} />
+        <ManifiestoSection />
         <AboutIslandSection />
         <FaqSection />
 

@@ -154,3 +154,59 @@ export function AboutIslandSection() {
     </section>
   );
 }
+
+/**
+ * «Nuestra manera»: la misión de IDENTIDAD.md dicha con hechos, no con
+ * adjetivos. Es la sección que convierte «somos distintos» en cosas que el
+ * visitante puede comprobar en la misma página (precio en cuatro monedas,
+ * WhatsApp directo, papeles revisados, anuncios de terceros marcados).
+ */
+export function ManifiestoSection() {
+  const principios = [
+    {
+      t: 'El precio es el precio',
+      d: 'En dólares y en bolívares a la tasa de hoy, mercado y BCV, a la vista. No cambia según quién pregunte ni de dónde venga.',
+    },
+    {
+      t: 'Te responde una persona',
+      d: 'Escribís por WhatsApp y del otro lado hay alguien de la isla que conoce el apartamento, la zona y al dueño. Sin robots ni formularios.',
+    },
+    {
+      t: 'Gana el huésped, gana el dueño',
+      d: 'Sin intermediarios que se lleven la mitad. El dueño no paga por adelantado y el huésped no paga de más. Si un trato solo le sirve a uno, no es nuestro trato.',
+    },
+    {
+      t: 'Decimos la verdad, también cuando cuesta',
+      d: 'Si un inmueble no tiene precio publicado decimos «a consultar». Si un anuncio es de un tercero, lo marcamos. Si conviene otra opción, te la decimos.',
+    },
+  ];
+  return (
+    <section
+      id="nuestra-manera"
+      aria-labelledby="manifiesto"
+      className="section-gap reveal"
+    >
+      <p className="label-eyebrow text-brand-deep">Por qué «Renace»</p>
+      <h2
+        id="manifiesto"
+        className="mt-3 max-w-3xl font-serif text-headline text-ink font-normal track-headline text-balance"
+      >
+        Otra manera de hacer negocios en la isla:{' '}
+        <em className="headline-italic">con conciencia, empatía y tratos justos</em>
+      </h2>
+      <p className="mt-5 max-w-2xl text-body-lg text-ink-soft">
+        Somos gente común de Margarita. Queremos que más personas puedan pagar y disfrutar la
+        isla, y que más dueños puedan alquilar y vender sin que un intermediario se quede con
+        todo. Así lo hacemos:
+      </p>
+      <ul className="mt-10 grid gap-5 md:grid-cols-2">
+        {principios.map((p) => (
+          <li key={p.t} className="rounded-card border border-line bg-white p-6 md:p-7">
+            <h3 className="font-serif text-title-sm font-semibold text-brand-deep">{p.t}</h3>
+            <p className="mt-2.5 text-body text-ink-soft leading-relaxed">{p.d}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
