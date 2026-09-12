@@ -5,6 +5,7 @@ import { SITE } from '@/lib/site';
 import { graph, organizationSchema, websiteSchema } from '@/lib/schema';
 import { headers } from 'next/headers';
 import { SiteFooter } from '@/components/SiteFooter';
+import NavBar from '@/components/NavBar';
 import { getContacto } from '@/lib/settings';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { Medidor } from '@/components/Medidor';
@@ -145,7 +146,11 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // el pie del sitio —zonas, FAQ, aviso de tarifas— sería más largo que ella y
   // le quitaría lo único que tiene que hacer, que es que toques un botón.
   // La ruta la pone el middleware; ver el comentario de allá.
-  const esEnlaces = cabeceras.get('x-ruta') === '/enlaces';
+  const ruta = cabeceras.get('x-ruta') ?? '';
+  const esEnlaces = ruta === '/enlaces';
+  // La home trae su propia barra (flotante, con lógica de búsqueda); el resto
+  // de páginas públicas no tenía ninguna hasta el 2026-09-12.
+  const esHome = ruta === '/' || ruta === '';
   // El contacto vive en la base y se edita en /admin/contenido.
   const contacto = await getContacto();
 
@@ -175,6 +180,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {!esPanel && !esEnlaces && <SmoothScroll />}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
+        {!esPanel && !esEnlaces && !esHome && <NavBar whatsapp={contacto.whatsapp} />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las
             9 landings de zona, y su enlazado interno viaja con él. */}

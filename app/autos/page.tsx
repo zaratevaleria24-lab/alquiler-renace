@@ -23,8 +23,9 @@ import { HOME_FAQ } from '@/lib/faq';
 // sale de lib/faq.ts, que es información geográfica verificable y ya estaba
 // escrita y publicada. No se duplica a mano: se lee de la misma fuente.
 
-export const dynamic = 'force-static';
-export const revalidate = false;
+// Antes era force-static: al prerenderizarse sin cabeceras, el layout no sabía
+// la ruta y /autos era la única página sin barra de navegación (2026-09-12).
+export const revalidate = 3600;
 
 const PATH = '/autos';
 const TITULO = 'Alquiler de Carros y Traslados en Isla de Margarita';

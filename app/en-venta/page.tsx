@@ -40,7 +40,10 @@ const PRECIOS = [
 ];
 const ORDENES = [{ v: 'recientes', l: 'Más recientes' }, { v: 'precio-asc', l: 'Precio: menor a mayor' }, { v: 'precio-desc', l: 'Precio: mayor a menor' }];
 
-export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string }> }) {
+const TIPOS_FILTRO = ['Apartamento', 'Casa', 'Terreno', 'Local comercial', 'Posada'];
+const HABS = [{ v: '', l: 'Cualquiera' }, { v: '1', l: '1+' }, { v: '2', l: '2+' }, { v: '3', l: '3+' }, { v: '4', l: '4+' }];
+
+export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string; tipo?: string | string[]; hab?: string }> }) {
   const [sp, inmuebles, prospectos, zonas, contacto, tasas] = await Promise.all([
     searchParams, getInmueblesPublicados(), getProspectosPublicados(), getZonesAll(), getContacto(),
     getTasas().catch(() => null),
@@ -48,15 +51,19 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
   const zonaSel = zonas.find((z) => z.slug === sp.zona)?.name ?? '';
   const tope = Number(sp.precio) || 0;
   const orden = ORDENES.some((o) => o.v === sp.orden) ? sp.orden! : 'recientes';
+  const tiposSel = (Array.isArray(sp.tipo) ? sp.tipo : sp.tipo ? [sp.tipo] : []).filter((t) => TIPOS_FILTRO.includes(t));
+  const habMin = Number(sp.hab) || 0;
 
   let tarjetas: DatosTarjeta[] = [...inmuebles.map(tarjetaDePropio), ...prospectos.map(tarjetaDeProspecto)];
   const totalSinFiltro = tarjetas.length;
   if (zonaSel) tarjetas = tarjetas.filter((t) => t.zona === zonaSel);
+  if (tiposSel.length) tarjetas = tarjetas.filter((t) => t.tipo && tiposSel.includes(t.tipo));
+  if (habMin) tarjetas = tarjetas.filter((t) => (t.habitaciones ?? 0) >= habMin);
   if (tope === 200001) tarjetas = tarjetas.filter((t) => !t.aConsultar && t.precioUsd > 200000);
   else if (tope > 0) tarjetas = tarjetas.filter((t) => !t.aConsultar && t.precioUsd > 0 && t.precioUsd <= tope);
   if (orden === 'precio-asc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || a.precioUsd - b.precioUsd);
   if (orden === 'precio-desc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || b.precioUsd - a.precioUsd);
-  const hayFiltro = Boolean(zonaSel || tope || orden !== 'recientes');
+  const hayFiltro = Boolean(zonaSel || tope || orden !== 'recientes' || tiposSel.length || habMin);
 
   const wa = (texto: string) => contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(texto)}` : null;
   const waVendo = wa('Hola, tengo un inmueble en venta en Margarita y quiero que Margarita Renace lo represente. Es un [apartamento/casa] en [zona].');
@@ -92,61 +99,101 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
         </header>
 
         <main className="max-w-6xl mx-auto px-5 py-12 md:px-8 md:py-16">
-          {/* Filtros: GET, sin JavaScript, URL compartible */}
-          <form method="get" action={PATH} className="rounded-panel border border-line bg-white p-4 md:p-5">
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
-              <label className="block">
-                <span className="label-eyebrow text-ink-subtle">Zona</span>
-                <select name="zona" defaultValue={sp.zona ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
-                  <option value="">Toda la isla</option>
-                  {zonasConInventario.map((z) => <option key={z.slug} value={z.slug}>{z.name}</option>)}
-                </select>
-              </label>
-              <label className="block">
-                <span className="label-eyebrow text-ink-subtle">Precio</span>
-                <select name="precio" defaultValue={sp.precio ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
-                  {PRECIOS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
-                </select>
-              </label>
-              <label className="block">
-                <span className="label-eyebrow text-ink-subtle">Ordenar</span>
-                <select name="orden" defaultValue={orden} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
-                  {ORDENES.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
-                </select>
-              </label>
-              <div className="flex gap-2">
-                <button type="submit" className="btn-solid"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Filtrar</button>
-                {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-control px-3 text-meta text-ink-muted underline-offset-4 hover:underline">Limpiar</Link>}
+          {/* Filtros en barra lateral izquierda (escritorio) o plegable arriba
+              (móvil). Formulario GET: sin JavaScript, y la URL con filtros se
+              comparte por WhatsApp tal cual. */}
+          <div className="grid gap-8 lg:grid-cols-[17rem_1fr] lg:gap-10">
+            <aside className="lg:sticky lg:top-24 lg:h-fit">
+              {/* Siempre visible (la dueña no quiso plegable): a la izquierda en
+                  escritorio, arriba del listado en teléfono. */}
+              <div className="rounded-panel border border-line bg-white">
+                <p className="flex items-center gap-2 px-5 py-4 text-body font-semibold text-ink"><SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />Filtros</p>
+                <form method="get" action={PATH} className="space-y-6 border-t border-line px-5 pb-5 pt-5">
+                  <div>
+                    <p className="label-eyebrow text-ink-subtle">Zona</p>
+                    <select name="zona" defaultValue={sp.zona ?? ''} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                      <option value="">Toda la isla</option>
+                      {zonasConInventario.map((z) => <option key={z.slug} value={z.slug}>{z.name}</option>)}
+                    </select>
+                  </div>
+                  <fieldset>
+                    <legend className="label-eyebrow text-ink-subtle">Tipo</legend>
+                    <ul className="mt-2 space-y-1.5">
+                      {TIPOS_FILTRO.map((t) => (
+                        <li key={t}>
+                          <label className="flex cursor-pointer items-center gap-2.5 text-body text-ink">
+                            <input type="checkbox" name="tipo" value={t} defaultChecked={tiposSel.includes(t)} className="h-4 w-4 rounded-sm border-line accent-brand" />
+                            {t}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </fieldset>
+                  <div>
+                    <p className="label-eyebrow text-ink-subtle">Precio</p>
+                    <select name="precio" defaultValue={sp.precio ?? ''} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                      {PRECIOS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
+                    </select>
+                  </div>
+                  <fieldset>
+                    <legend className="label-eyebrow text-ink-subtle">Habitaciones</legend>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {HABS.map((h) => (
+                        <label key={h.v} className="cursor-pointer">
+                          <input type="radio" name="hab" value={h.v} defaultChecked={String(habMin || '') === h.v} className="peer sr-only" />
+                          <span className="inline-flex min-h-[36px] items-center rounded-chip border border-line bg-paper px-3 text-ui font-medium text-ink transition-colors peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">{h.l}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <div>
+                    <p className="label-eyebrow text-ink-subtle">Ordenar</p>
+                    <select name="orden" defaultValue={orden} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                      {ORDENES.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3 pt-1">
+                    <button type="submit" className="btn-solid">Aplicar</button>
+                    {hayFiltro && <Link href={PATH} className="text-meta text-ink-muted underline-offset-4 hover:underline">Limpiar</Link>}
+                  </div>
+                </form>
               </div>
-            </div>
-          </form>
-
-          <section aria-labelledby="catalogo" className="mt-10">
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
-                {tarjetas.length === 0 ? 'Nada con ese filtro' : `${tarjetas.length} ${tarjetas.length === 1 ? 'inmueble' : 'inmuebles'}`}
-                {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
-              </h2>
-              {inmuebles.length > 0 && <p className="text-meta text-ink-muted">Con «Verificado»: papeles revisados por {SITE.name}</p>}
-            </div>
-
-            {tarjetas.length === 0 ? (
-              <div className="mt-7 rounded-panel border border-line bg-white p-7">
-                <p className="text-body text-ink/80 leading-relaxed">
-                  {hayFiltro ? 'No hay inmuebles con esos filtros ahora mismo. ' : 'Estamos incorporando los primeros inmuebles. '}
-                  Decinos qué buscás y dónde: trabajamos con propietarios de toda la isla y te conseguimos opciones con los papeles en orden.
-                </p>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {waBusco && <a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscás</a>}
-                  {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep hover:border-ink">Ver todos</Link>}
+              {waBusco && (
+                <div className="mt-4 hidden rounded-panel border border-line bg-brand-tint p-5 lg:block">
+                  <p className="text-body font-semibold text-brand-deep">¿No ves lo que buscás?</p>
+                  <p className="mt-1.5 text-meta text-ink-soft">Decinos zona y presupuesto y lo buscamos con los propietarios.</p>
+                  <a href={waBusco} className="btn-solid mt-4" rel="noopener">Escribirnos</a>
                 </div>
+              )}
+            </aside>
+
+            <section aria-labelledby="catalogo" className="min-w-0">
+              <div className="flex flex-wrap items-baseline justify-between gap-3">
+                <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
+                  {tarjetas.length === 0 ? 'Nada con ese filtro' : `${tarjetas.length} ${tarjetas.length === 1 ? 'inmueble' : 'inmuebles'}`}
+                  {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
+                </h2>
+                {inmuebles.length > 0 && <p className="text-meta text-ink-muted">Con «Verificado»: papeles revisados por {SITE.name}</p>}
               </div>
-            ) : (
-              <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {tarjetas.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
-              </ul>
-            )}
-          </section>
+
+              {tarjetas.length === 0 ? (
+                <div className="mt-7 rounded-panel border border-line bg-white p-7">
+                  <p className="text-body text-ink/80 leading-relaxed">
+                    {hayFiltro ? 'No hay inmuebles con esos filtros ahora mismo. ' : 'Estamos incorporando los primeros inmuebles. '}
+                    Decinos qué buscás y dónde: trabajamos con propietarios de toda la isla y te conseguimos opciones con los papeles en orden.
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    {waBusco && <a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscás</a>}
+                    {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep hover:border-ink">Ver todos</Link>}
+                  </div>
+                </div>
+              ) : (
+                <ul className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {tarjetas.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
+                </ul>
+              )}
+            </section>
+          </div>
 
           <section aria-labelledby="vendes" className="section-gap">
             <div className="rounded-panel border border-line bg-brand-deep p-8 text-white md:p-10">

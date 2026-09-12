@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
   // se dicta por teléfono o se teclea de memoria no puede fallar por eso.
   async redirects() {
     return [
+      // 2026-09-12: «Apartamento Costa Azul» pasó a llamarse «Bahía Mágica». La
+      // URL vieja está en Google y en enlaces compartidos: 301 a la nueva.
+      { source: '/propiedad/apartamento-costa-azul', destination: '/propiedad/bahia-magica', permanent: true },
       { source: '/links', destination: '/enlaces', permanent: true },
       { source: '/linktree', destination: '/enlaces', permanent: true },
       { source: '/bio', destination: '/enlaces', permanent: true },

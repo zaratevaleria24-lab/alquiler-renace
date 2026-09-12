@@ -47,10 +47,15 @@ export default function TarjetaVenta({ d, tasas }: { d: DatosTarjeta; tasas?: Ta
         )}
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
 
-        <div className="absolute left-3.5 top-3.5 flex gap-1.5">
-          {d.propio && <span className="label-eyebrow rounded-chip border border-white/40 bg-white/85 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm">Verificado</span>}
-          {d.nuevo && !d.propio && <span className="label-eyebrow rounded-chip border border-white/40 bg-white/85 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm">Nuevo</span>}
-          {d.tipo && <span className="label-eyebrow rounded-chip border border-white/30 bg-ink/40 px-2.5 py-1.5 text-white backdrop-blur-sm">{d.tipo}</span>}
+        {/* Arriba: una sola etiqueta a la izquierda y el contador a la derecha.
+            El tipo va como antetítulo abajo: tres chips arriba se pisaban en
+            tarjetas angostas. */}
+        <div className="absolute left-3.5 top-3.5">
+          {d.propio ? (
+            <span className="label-eyebrow rounded-chip border border-white/40 bg-white/85 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm">Verificado</span>
+          ) : d.nuevo ? (
+            <span className="label-eyebrow rounded-chip border border-white/40 bg-white/85 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm">Nuevo</span>
+          ) : null}
         </div>
         {d.fotos > 1 && (
           <span className="absolute right-3.5 top-3.5 inline-flex items-center gap-1 rounded-chip border border-white/30 bg-ink/40 px-2 py-1 text-ui text-white backdrop-blur-sm">
@@ -58,14 +63,15 @@ export default function TarjetaVenta({ d, tasas }: { d: DatosTarjeta; tasas?: Ta
           </span>
         )}
         <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-end justify-between gap-3 text-white">
-          <span className="label-eyebrow text-white/90">{d.zona}</span>
-          <span className="mono-data rounded-chip border border-white/30 bg-white/15 px-2.5 py-1 text-title-sm backdrop-blur-md">
+          <span className="label-eyebrow min-w-0 truncate text-white/90">{d.zona}</span>
+          <span className="mono-data shrink-0 whitespace-nowrap rounded-chip border border-white/30 bg-white/15 px-2.5 py-1 text-title-sm backdrop-blur-md">
             {d.aConsultar || d.precioUsd <= 0 ? 'Consultar' : `US$ ${d.precioUsd.toLocaleString('es-VE')}`}
           </span>
         </div>
       </Link>
 
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+        {d.tipo && <p className="label-eyebrow -mb-1 text-ink-subtle">{d.tipo}</p>}
         <h3 className="font-serif text-title-sm font-semibold leading-snug text-brand-deep">
           <Link href={d.href} className="hover:underline underline-offset-4">{d.titulo}</Link>
         </h3>

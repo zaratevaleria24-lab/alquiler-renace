@@ -32,10 +32,19 @@ export function tituloBonito(p: Prospecto): string {
   return `${tipo} en ${zona}${hab}`;
 }
 
+export function tipoDeProspecto(p: Prospecto): string {
+  const t = p.tituloLimpio + ' ' + p.descripcion.slice(0, 160);
+  if (/posada|hotel/i.test(p.tituloLimpio)) return 'Posada';
+  if (/terreno|parcela|lote/i.test(p.tituloLimpio)) return 'Terreno';
+  if (/local|oficina|galp[oó]n/i.test(p.tituloLimpio)) return 'Local comercial';
+  if (/casa|villa|quinta|townhouse|town house/i.test(t)) return 'Casa';
+  return 'Apartamento';
+}
+
 export function tarjetaDeProspecto(p: Prospecto): DatosTarjeta {
   return {
     href: `/en-venta/${p.slug}`, titulo: tituloBonito(p), foto: p.fotosLocales[0] ?? null, fotos: p.fotosLocales.length,
-    zona: p.zoneName ?? p.ciudad ?? 'Isla de Margarita', precioUsd: p.precioUsd ?? 0, aConsultar: !p.precioUsd,
+    zona: p.zoneName ?? p.ciudad ?? 'Isla de Margarita', tipo: tipoDeProspecto(p), precioUsd: p.precioUsd ?? 0, aConsultar: !p.precioUsd,
     habitaciones: p.habitaciones, banos: p.banos, m2: p.m2, nuevo: dias(p.vistoPrimero) <= 7,
   };
 }
