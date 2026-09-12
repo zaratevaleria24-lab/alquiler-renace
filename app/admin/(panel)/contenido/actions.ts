@@ -9,7 +9,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { usuarioActual } from '@/lib/auth';
-import { CAMPOS, type ClaveAjuste, guardarAjustes } from '@/lib/settings';
+import { CAMPOS, camposDe, type ClaveAjuste, guardarAjustes } from '@/lib/settings';
 import { FotoInvalidaError, guardarImagenSitio } from '@/lib/uploads';
 
 async function exigirSesion(): Promise<void> {
@@ -23,8 +23,16 @@ function regenerarSitio(): void {
   revalidatePath('/', 'layout');
 }
 
-/** Claves de texto: las de tipo imagen se cambian con su propio formulario. */
-const CLAVES_TEXTO = CAMPOS.filter((c) => c.tipo === 'texto').map((c) => c.key);
+/**
+ * Claves de texto de ESTA pantalla. Dos filtros, y los dos importan:
+ *   · las de tipo imagen se cambian con su propio formulario;
+ *   · las de otra pantalla no vienen en este formulario, y una clave ausente se
+ *     guardaría como vacía, o sea BORRADA. Ver la nota de `pantalla` en
+ *     lib/settings.ts.
+ */
+const CLAVES_TEXTO = camposDe('contenido')
+  .filter((c) => c.tipo === 'texto')
+  .map((c) => c.key);
 
 export async function guardarContenidoAction(formData: FormData): Promise<void> {
   await exigirSesion();

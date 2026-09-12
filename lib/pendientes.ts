@@ -15,6 +15,7 @@
 import { query, rows } from './db';
 import { getAjustes } from './settings';
 import { getInventoryHealth } from './queries';
+import { contarEnlacesSinDestino } from './enlaces';
 
 export type Urgencia = 'bloquea' | 'importa' | 'cuando-puedas';
 
@@ -86,12 +87,13 @@ export const ETIQUETA_URGENCIA: Record<Urgencia, string> = {
 };
 
 export async function getPendientes(): Promise<Pendiente[]> {
-  const [ajustes, health, hechos] = await Promise.all([
+  const [ajustes, health, hechos, enlacesSinDestino] = await Promise.all([
     getAjustes(),
     getInventoryHealth(),
     rows<{ key: string }>(
       `SELECT key FROM site_settings WHERE key LIKE 'hecho_%'`,
     ).then((rs) => new Set(rs.map((r) => r.key.slice('hecho_'.length)))),
+    contarEnlacesSinDestino(),
   ]);
 
   const lista: Pendiente[] = [];
@@ -125,6 +127,19 @@ export async function getPendientes(): Promise<Pendiente[]> {
         'Refuerza tu identidad ante Google (se emite como `sameAs`) y la antigüedad del perfil es una prueba de confianza que no se puede falsificar.',
       urgencia: 'importa',
       donde: '/admin/contenido',
+    });
+  }
+  if (enlacesSinDestino > 0) {
+    lista.push({
+      clave: 'enlaces',
+      titulo:
+        enlacesSinDestino === 1
+          ? 'Falta la dirección de un enlace de la bio'
+          : `Faltan las direcciones de ${enlacesSinDestino} enlaces de la bio`,
+      motivo:
+        'Los botones se ven en la página, pero al tocarlos no pasa nada. Pega la dirección de tu perfil o de tu anuncio y quedan encendidos.',
+      urgencia: 'cuando-puedas',
+      donde: '/admin/enlaces',
     });
   }
   if (health.relleno > 0) {

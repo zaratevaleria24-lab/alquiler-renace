@@ -126,6 +126,108 @@ es solo client-side y no tiene URL propia, así que declararla sería falso.
 
 ---
 
+## 2026-08-11 — inventario reducido a 4 alojamientos
+
+Decisión del cliente: dejar solo 4 apartamentos publicados. Ejecutado así:
+
+- **Se usó `is_published = false`, no `DELETE`.** El esquema previó exactamente
+  esto ("esconder sin borrar"), así que los 8 listados retirados son
+  recuperables. Respaldo previo de la base en
+  `/root/backups/margarita/pre-limpieza-listados-20260811-150447.sql`.
+- **Se publicó `Los Geranios A`**, que es el único inventario real y estaba
+  **despublicado mientras los 11 de relleno estaban en vivo** — la situación
+  estaba invertida.
+- Los otros 3 publicados se eligieron en **zonas distintas** (Porlamar, Costa
+  Azul, Playa El Yaque) para no dejar todas las landings de zona vacías. Siguen
+  siendo listados de relleno: hay que reemplazarlos por inventario real.
+
+Consecuencias, todas correctas y verificadas:
+
+| | Antes | Ahora |
+|---|---|---|
+| Propiedades publicadas | 12 (11 de relleno) | **4** (1 real + 3 de relleno) |
+| URLs en el sitemap | 22 | **10** |
+| Landings de zona | 10 | **4** (las 6 sin alojamientos dan 404) |
+
+Las 6 zonas sin listados dan 404 y **el sitemap las quitó solo**, porque se
+genera desde los datos. Eso evita el error "Enviada pero devuelve 404" en Search
+Console. No hubo pérdida de posiciones: se comprobó que Google todavía no había
+leído el sitemap ("Última lectura" vacía).
+
+### Rediseño de la tarjeta
+
+Con 4 alojamientos en vez de 12, la retícula pasó de 4 columnas estrechas a
+**2×2 con fotos grandes** (`aspect-[3/2]` en vez de 4:3). La tarjeta ahora
+muestra zona sobre un degradado, capacidad, descripción y el precio en serif
+grande. Se limpiaron además dos colisiones de clases que traía: un
+`transition-all` duplicado y un `hover:shadow-hard` que peleaba con un
+`hover:shadow-[...]` arbitrario.
+
+**Cambio con criterio propio:** la valoración ahora se muestra **solo si
+`isReal`**. Los listados de relleno llevan ratings inventados (4.6–5.0) y
+enseñárselos al visitante es pedirle que confíe en un dato falso — el mismo
+motivo por el que `lib/schema.ts` no emite `aggregateRating`. Hoy se renderiza
+una sola estrella en toda la home, la de Los Geranios A.
+
+### Autos: la tabla está vacía
+
+`vehicles` tiene **0 filas**, así que no había nada que reducir. `/autos` sirve
+su estado vacío (292 palabras). Para publicar 4 vehículos hacen falta datos que
+no se pueden inventar: marca, modelo, año, transmisión, plazas, precio por día y
+fotos.
+
+---
+
+## Auditoría técnica del 2026-08-11 — el código ya está al día
+
+Se midió todo contra producción buscando qué más se podía optimizar. **No se
+encontró nada roto.** Queda registrado para no repetir el trabajo:
+
+| Aspecto | Medición |
+|---|---|
+| TTFB | 271 ms |
+| Protocolo y compresión | HTTP/2 + Brotli |
+| Imágenes | WebP autohospedado, 34–96 KB, 12/13 con `width`/`height` |
+| Ruta del LCP | primera imagen en `eager` + 2 `preload as=image` |
+| Caché de assets | `max-age=31536000, immutable` |
+| Las 22 URLs del sitemap | todas 200, ninguna con `noindex` |
+| Schema | `Accommodation`, `BreadcrumbList`, `ItemList`, `FAQPage`, `LocalBusiness` |
+| Enlazado interno | zonas entre sí, propiedades → su zona + relacionadas, home → 9 zonas |
+| `robots.txt` | accesible a Googlebot, declara `Sitemap:` |
+| `admin` | `x-robots-tag: noindex, nofollow, noarchive` |
+
+Profundidad de contenido: home 1120 palabras · zonas ~465 · `/autos` 310 ·
+propiedades 249.
+
+### La única optimización que queda, y por qué no se hizo
+
+Las imágenes **no llevan `srcset`**, así que un teléfono descarga las mismas
+~600 KB de fotos que un escritorio; con imágenes responsivas se ahorrarían unos
+350 KB en móvil. Implica convertir los `<img>` a `next/image` dentro de
+`HomeClient.tsx` (72 KB) y recompilar Next.js en un servidor de 3.7 GB donde los
+builds pesados pueden quedarse sin memoria (regla #2 del README del servidor).
+
+Se decidió **no hacerlo por ahora**: es una mejora de Core Web Vitals que vale
+décimas de segundo, y el sitio no está frenado por rendimiento. Está frenado por
+lo de la lista de abajo. Refactorizar código que funciona para ganar décimas,
+mientras faltan la ficha de Google y los listados reales, es movimiento sin
+avance.
+
+### Panorama competitivo (comprobado el 2026-08-11)
+
+La primera página orgánica de "alquiler apartamentos Isla Margarita" y de
+"alquiler apartamento Pampatar por días" está ocupada por MercadoLibre, Airbnb,
+Booking, RE/MAX, Mitula, Vrbo, Tripadvisor y Likibu. Son dominios con millones
+de enlaces y más de una década de historia.
+
+**Conclusión estratégica: no se gana ahí, se gana en el paquete local.** Ninguno
+de esos marketplaces aparece en el bloque de mapa, porque no son negocios con
+dirección en Margarita. Y el paquete local se muestra **encima** de los
+resultados orgánicos. Esa es la vía realista al primer resultado, y depende de la
+ficha de Google Business y de las reseñas, no del código.
+
+---
+
 ## Pendientes que necesitan decisión o datos de la dueña
 
 Ordenados por impacto.
@@ -138,10 +240,34 @@ Ordenados por impacto.
    listados a medida que existan. Un sitio con una propiedad real posiciona
    mejor que uno con doce inventadas.
 
-2. **Datos de contacto reales** (`CONTACT` en `lib/site.ts`, hoy todo en
-   `null`): teléfono, WhatsApp, correo y dirección. El SEO local depende de un
-   NAP consistente entre el sitio, Google y los directorios. No se inventaron a
-   propósito. Al llenarlos se propagan solos al JSON-LD.
+   **Depende de esto una mejora concreta** (hallazgo del 2026-08-11): el
+   `Accommodation` de cada propiedad **no declara `offers` ni `priceCurrency`**,
+   así que Google no puede mostrar el precio en los resultados — algo de mucho
+   valor en alquileres, donde el precio decide el clic. Pero marcar precios de
+   propiedades inventadas amplifica el problema en vez de arreglarlo: primero se
+   limpia el inventario, después se le pone precio estructurado a lo real.
+
+   Nota tranquilizadora: se verificó que **no hay `aggregateRating` ni `review`
+   en el JSON-LD**. Los ratings de relleno son solo visuales, no están marcados,
+   así que no hay riesgo de acción manual por reseñas falsas — que es el
+   escenario grave de este tipo de contenido.
+
+2. **Datos de contacto reales.** El SEO local depende de un NAP consistente
+   entre el sitio, Google y los directorios. No se inventaron a propósito.
+
+   **Ya no se editan en código.** Desde el 2026-08-03 viven en la base
+   (`site_settings`) y se cambian desde **`/admin/contenido`**; de ahí se
+   propagan solos al JSON-LD. `lib/site.ts` solo conserva lo que es constante
+   del sitio. Esta descripción decía "`CONTACT` en `lib/site.ts`, hoy todo en
+   `null`" y quedó desactualizada.
+
+   Comprobado en producción el 2026-08-11: la entidad `LocalBusiness` del
+   JSON-LD **sigue sin `telephone`**, y su `address` solo lleva
+   `addressRegion: Nueva Esparta` y `addressCountry: VE` — **falta
+   `addressLocality`**, o sea la ciudad. Para Google el negocio está "en algún
+   lugar de Nueva Esparta", que es lo peor que puede pasarle a un negocio que
+   compite en búsqueda local. Es lo de mayor retorno por minuto invertido de
+   toda esta lista: llenar un formulario en el panel.
 
 3. **Google Business Profile.** Es lo que mete un negocio local en el mapa y en
    el paquete local, y no se puede hacer desde el código. Para un alquiler
@@ -149,9 +275,25 @@ Ordenados por impacto.
    esta lista.
 
 4. **Google Search Console y Bing Webmaster Tools.** Verificar el dominio y
-   enviar el sitemap. El hueco para los códigos está comentado en
-   `app/layout.tsx`. Search Console además es la única forma de ver qué
-   búsquedas traen tráfico de verdad.
+   enviar el sitemap. Search Console es la única forma de ver qué búsquedas
+   traen tráfico de verdad.
+
+   **En curso el 2026-08-11.** Se eligió propiedad de tipo **Dominio** (no
+   "Prefijo de URL"): cubre el apex, `www` y `admin`, y http y https, en una
+   sola propiedad, en vez de una propiedad por variante con los datos partidos.
+   Se verifica por TXT en Cloudflare, que es donde vive el DNS
+   (`stanley/penny.ns.cloudflare.com`), así que no hace falta el hueco de
+   `app/layout.tsx` — la verificación por meta tag solo sirve para propiedades
+   de tipo prefijo.
+
+   Antes de elegir Dominio se comprobó que el subdominio del CMS no se filtre:
+   `admin.margaritarenace.com.ve` responde con
+   `x-robots-tag: noindex, nofollow, noarchive`, así que no va a aparecer en los
+   informes ni en Google. (Contraste: `form.brandia.eqnio.com`, del proyecto
+   Leiros, sí está abierto a todos los rastreadores.)
+
+   Tras verificar: **Sitemaps** → enviar
+   `https://margaritarenace.com.ve/sitemap.xml` (22 URLs).
 
 5. **Pasar Cloudflare a SSL "Full (strict)".** No es SEO, pero ya es seguro:
    el origen tiene certificado válido de Let's Encrypt.

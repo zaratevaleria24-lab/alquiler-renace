@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   BarChart3,
+  CalendarDays,
   Car,
   Home,
   Image as ImageIcon,
   LayoutDashboard,
+  Link2,
   MapPin,
   Settings,
+  TrendingUp,
 } from 'lucide-react';
 
 // Navegación del panel: una tira de iconos, sin texto.
@@ -28,7 +31,10 @@ import {
 const NAV = [
   { href: '/admin', label: 'Herramientas', icono: LayoutDashboard, listo: true },
   { href: '/admin/propiedades', label: 'Propiedades', icono: Home, listo: true },
+  { href: '/admin/calendario', label: 'Calendario', icono: CalendarDays, listo: true },
+  { href: '/admin/crecimiento', label: 'Crecimiento', icono: TrendingUp, listo: true },
   { href: '/admin/contenido', label: 'Contenido', icono: ImageIcon, listo: true },
+  { href: '/admin/enlaces', label: 'Enlaces de la bio', icono: Link2, listo: true },
   { href: '/admin/vehiculos', label: 'Vehículos', icono: Car, listo: false },
   { href: '/admin/zonas', label: 'Zonas', icono: MapPin, listo: false },
   { href: '/admin/metricas', label: 'Métricas', icono: BarChart3, listo: true },

@@ -138,8 +138,14 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // El footer es del sitio PÚBLICO y se estaba colando en el panel, que vive en
   // su propio subdominio. Se decide por Host: el panel no debe mostrar las zonas
   // ni el aviso de tarifas, que son contenido de cara al visitante.
-  const host = (await headers()).get('host') ?? '';
+  const cabeceras = await headers();
+  const host = cabeceras.get('host') ?? '';
   const esPanel = host.startsWith('admin.');
+  // La página de enlaces es una tarjeta de presentación de una sola pantalla:
+  // el pie del sitio —zonas, FAQ, aviso de tarifas— sería más largo que ella y
+  // le quitaría lo único que tiene que hacer, que es que toques un botón.
+  // La ruta la pone el middleware; ver el comentario de allá.
+  const esEnlaces = cabeceras.get('x-ruta') === '/enlaces';
   // El contacto vive en la base y se edita en /admin/contenido.
   const contacto = await getContacto();
 
@@ -165,13 +171,14 @@ export default async function RootLayout({children}: {children: React.ReactNode}
       <body className="bg-paper text-ink font-sans antialiased" suppressHydrationWarning>
         {/* El scroll suave es para el sitio público; en un panel de gestión
             estorba al desplazarse por tablas largas. */}
-        {!esPanel && <SmoothScroll />}
+        {/* Y tampoco en /enlaces: es una pantalla, no hay scroll que suavizar. */}
+        {!esPanel && !esEnlaces && <SmoothScroll />}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las
             9 landings de zona, y su enlazado interno viaja con él. */}
-        {!esPanel && <SiteFooter />}
+        {!esPanel && !esEnlaces && <SiteFooter />}
       </body>
     </html>
   );

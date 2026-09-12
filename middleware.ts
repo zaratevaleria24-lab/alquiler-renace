@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { CUERPO_410, FICHAS_RETIRADAS } from '@/lib/retiradas';
+
 // Separación entre el sitio público y el panel, por subdominio.
 //
 // ═══════════════════════════════════════════════════════════════════════════
@@ -38,9 +40,44 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── Dominio público ───────────────────────────────────────────────────────
-  // No se toca. Su vhost ya devuelve 404 para /admin, así que el panel no es
-  // alcanzable por ahí.
-  if (host !== HOST_PANEL) return NextResponse.next();
+  // No se reescribe nada. Su vhost ya devuelve 404 para /admin, así que el
+  // panel no es alcanzable por ahí.
+  //
+  // Lo único que se hace es PASAR LA RUTA en una cabecera, porque el layout
+  // raíz la necesita y no puede leerla: un layout no recibe el pathname (Next
+  // no se lo da a propósito, para poder reutilizarlo entre navegaciones). El
+  // layout ya lee cabeceras para distinguir el panel del sitio, así que esto no
+  // le cuesta un render dinámico que no estuviera pagando.
+  //
+  // Para qué: /enlaces —la página de la bio de Instagram— va sin el pie del
+  // sitio, que ahí sería más largo que la propia página.
+  if (host !== HOST_PANEL) {
+    // ── Fichas eliminadas → 410 Gone ────────────────────────────────────────
+    // El por qué está en lib/retiradas.ts. Se responde ACÁ y no en la página
+    // porque notFound() de Next solo sabe emitir 404: el 410 hay que
+    // escribirlo a mano y el middleware es la única capa que puede hacerlo.
+    //
+    // Se recorta la barra final por si acaso: el redirect de trailingSlash de
+    // Next no ha corrido todavía a esta altura.
+    const ficha = pathname.startsWith('/propiedad/')
+      ? pathname.slice('/propiedad/'.length).replace(/\/$/, '')
+      : '';
+    if (ficha && FICHAS_RETIRADAS.has(ficha)) {
+      return new NextResponse(CUERPO_410, {
+        status: 410,
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          // Que no se cachee un 410 en Cloudflare más de lo necesario: si
+          // algún día se republicara un slug, no queremos la lápida pegada.
+          'cache-control': 'public, max-age=3600',
+        },
+      });
+    }
+
+    const cabeceras = new Headers(request.headers);
+    cabeceras.set('x-ruta', pathname);
+    return NextResponse.next({ request: { headers: cabeceras } });
+  }
 
   // ── Subdominio del panel ──────────────────────────────────────────────────
   // Solo existe el panel. Todo lo demás se manda a /admin en vez de servir el

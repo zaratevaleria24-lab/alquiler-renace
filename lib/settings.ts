@@ -20,6 +20,16 @@ interface Campo<K extends string = string> {
   ayuda?: string;
   /** Lo que muestra el sitio si no hay fila en la base. */
   porDefecto: string;
+  /**
+   * En qué pantalla del panel se edita. Por defecto, /admin/contenido.
+   *
+   * NO ES COSMÉTICO. guardarContenidoAction recorre las claves de texto y
+   * guarda lo que venga en el formulario, y una clave AUSENTE se guarda como
+   * vacía —que en guardarAjustes significa BORRAR la fila—. Sin esta marca, un
+   * campo que se edita en otra pantalla se restablecería solo cada vez que
+   * alguien guardara Contenido, sin tocarlo y sin avisar.
+   */
+  pantalla?: 'contenido' | 'enlaces';
 }
 
 /**
@@ -98,6 +108,17 @@ export const CAMPOS = [
     ayuda: 'URL completa. Refuerza la identidad de la marca ante Google.',
     porDefecto: '',
   },
+  // Se edita en /admin/enlaces, junto a los botones que acompaña: un campo
+  // suelto bajo «Textos de la portada» no diría de qué página habla.
+  {
+    key: 'enlaces_frase',
+    label: 'Frase bajo el nombre',
+    tipo: 'texto',
+    ayuda:
+      'Es lo primero que lee quien llega desde Instagram. Di qué ofreces y dónde, en una línea.',
+    porDefecto: 'Apartamentos y autos en Isla de Margarita.',
+    pantalla: 'enlaces',
+  },
 ] as const satisfies readonly Campo[];
 
 export type ClaveAjuste = (typeof CAMPOS)[number]['key'];
@@ -111,6 +132,14 @@ export type ClaveAjuste = (typeof CAMPOS)[number]['key'];
  * `key` sigue siendo la unión concreta — así indexar Ajustes con ella es válido.
  */
 export const CAMPOS_UI: readonly Campo<ClaveAjuste>[] = CAMPOS;
+
+/** Los campos de UNA pantalla del panel. Cada pantalla dibuja y guarda solo los
+ *  suyos; ver la nota de `pantalla` en Campo para el porqué. */
+export function camposDe(
+  pantalla: 'contenido' | 'enlaces',
+): readonly Campo<ClaveAjuste>[] {
+  return CAMPOS_UI.filter((c) => (c.pantalla ?? 'contenido') === pantalla);
+}
 
 export type Ajustes = Record<ClaveAjuste, string>;
 

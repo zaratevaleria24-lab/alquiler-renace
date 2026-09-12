@@ -251,6 +251,7 @@ export default async function PropiedadPage({
             {/* Calculadora de reserva: el único trozo cliente de esta página.
                 Vino del panel lateral del home, que se retiró. */}
             <ReservaPanel
+              slug={property.slug}
               nombre={property.name}
               ubicacion={property.location}
               precioTexto={property.priceText}
@@ -259,6 +260,7 @@ export default async function PropiedadPage({
               maxHuespedes={
                 property.guestsAllowed.adults + property.guestsAllowed.children
               }
+              minNoches={property.nightsCount}
               capacidadTexto={capacidad}
               whatsapp={contacto.whatsapp}
             />

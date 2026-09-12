@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { getZone, getZones } from '@/lib/queries';
+import { ZONE_COPY } from '@/lib/zones-content';
 import { SITE, absoluteUrl } from '@/lib/site';
 
 import {
@@ -78,7 +79,29 @@ export default async function ZonaPage({
 }) {
   const { zona } = await params;
   const zone = await getZone(zona);
-  if (!zone) notFound();
+
+  // Zona conocida pero sin inventario publicado → 308 a la home, no 404.
+  //
+  // getZones() filtra a propósito las zonas vacías (una landing sin
+  // alojamientos es contenido pobre y Google la castiga). El efecto colateral
+  // era que las 5 zonas sin inventario —Juan Griego, Manzanillo, Playa Caribe,
+  // Playa Parguito y Playa Guacuco— devolvían 404 a los buscadores y a
+  // cualquiera que llegara por un enlace viejo. Mandarlas a la home conserva
+  // la visita y le dice al buscador que la URL se consolidó, no que se rompió.
+  //
+  // SE AUTOMANTIENE: esta rama solo se alcanza cuando la zona NO tiene
+  // inventario. El día que se publique un apartamento en Manzanillo,
+  // getZone() la devuelve, se renderiza su landing y el redirect desaparece
+  // sin que nadie toque este archivo.
+  //
+  // ZONE_COPY es la lista de las 9 zonas con texto propio escrito. Estaba sin
+  // usar desde que el contenido pasó a la base de datos del CMS; acá vuelve a
+  // tener una función: distinguir "zona que existe pero está vacía" de
+  // "zona que no existe", que sí merece 404.
+  if (!zone) {
+    if (zona in ZONE_COPY) permanentRedirect('/');
+    notFound();
+  }
 
   
   const path = `/alquiler/${zone.slug}`;

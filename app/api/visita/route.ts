@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
         propertyId:
           typeof body.propertyId === 'string' ? body.propertyId : null,
         // Se acota lo que se guarda en meta: es un campo libre expuesto a
-        // internet. Solo `q` (lo que se buscó) y recortado.
+        // internet. Solo `q` —lo que se buscó, o el slug del enlace tocado— y
+        // recortado.
         meta:
           body.meta && typeof body.meta === 'object'
             ? { q: String((body.meta as { q?: unknown }).q ?? '').slice(0, 120) }

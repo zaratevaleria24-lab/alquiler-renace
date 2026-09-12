@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // La página de la bio se llama /enlaces —el sitio está en español— pero
+  // «linktree» y «links» es como la nombra todo el mundo, y una dirección que
+  // se dicta por teléfono o se teclea de memoria no puede fallar por eso.
+  async redirects() {
+    return [
+      { source: '/links', destination: '/enlaces', permanent: true },
+      { source: '/linktree', destination: '/enlaces', permanent: true },
+      { source: '/bio', destination: '/enlaces', permanent: true },
+    ];
+  },
   output: 'standalone',
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {

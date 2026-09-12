@@ -25,7 +25,15 @@ import { query, rows } from './db';
 
 /** Tipos de evento aceptados. Lista cerrada: el endpoint está abierto a
  *  internet y sin esto cualquiera podría llenar la tabla de basura. */
-export const EVENTOS = ['whatsapp', 'busqueda', 'ver_propiedad'] as const;
+export const EVENTOS = [
+  'whatsapp',
+  'busqueda',
+  'ver_propiedad',
+  // Toque en un botón de /enlaces. El slug del enlace viaja en meta->>'q', la
+  // misma columna que usa 'busqueda' para el texto buscado: es un campo libre
+  // de una sola clave y no hacía falta inventar otro.
+  'enlace',
+] as const;
 export type Evento = (typeof EVENTOS)[number];
 
 // ── Huella del visitante ────────────────────────────────────────────────────

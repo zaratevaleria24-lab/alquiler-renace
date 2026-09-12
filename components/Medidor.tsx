@@ -25,7 +25,7 @@ import { usePathname } from 'next/navigation';
 /** Aviso suelto, para los clics. Exportado para que lo usen los botones. */
 export function avisar(datos: {
   path?: string;
-  kind?: 'whatsapp' | 'busqueda' | 'ver_propiedad';
+  kind?: 'whatsapp' | 'busqueda' | 'ver_propiedad' | 'enlace';
   propertyId?: string;
   meta?: { q?: string };
 }): void {

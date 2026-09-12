@@ -1,5 +1,5 @@
 import { RotateCcw } from 'lucide-react';
-import { CAMPOS_UI, getAjustes } from '@/lib/settings';
+import { camposDe, getAjustes } from '@/lib/settings';
 import { Aviso, Campo, Seccion, Tarjeta, ZonaSubida } from '../_ui';
 import {
   guardarContenidoAction,
@@ -38,9 +38,11 @@ export default async function ContenidoPage({
     getAjustes(),
   ]);
 
-  const imagenes = CAMPOS_UI.filter((c) => c.tipo === 'imagen');
-  const contacto = CAMPOS_UI.filter((c) => CLAVES_CONTACTO.includes(c.key));
-  const textos = CAMPOS_UI.filter(
+  // Solo los campos de ESTA pantalla: los de otras se guardan donde se editan.
+  const mios = camposDe('contenido');
+  const imagenes = mios.filter((c) => c.tipo === 'imagen');
+  const contacto = mios.filter((c) => CLAVES_CONTACTO.includes(c.key));
+  const textos = mios.filter(
     (c) => c.tipo === 'texto' && !CLAVES_CONTACTO.includes(c.key),
   );
 

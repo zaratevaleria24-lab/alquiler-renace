@@ -120,6 +120,26 @@ export default function HomeClient({
   ];
 
   // Navigation active links
+  // Tasa BCV para mostrar los precios en bolívares. Se pide UNA vez acá y baja
+  // a todas las tarjetas: si cada tarjeta hiciera su propio fetch, cuatro
+  // tarjetas serían cuatro peticiones idénticas. La home es estática, así que
+  // la tasa no puede viajar en el HTML sin quedar vieja — ver app/api/tasa.
+  const [tasaBcv, setTasaBcv] = useState<number | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/tasa')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { bcv: number | null } | null) => {
+        if (vivo && d?.bcv) setTasaBcv(d.bcv);
+      })
+      .catch(() => {
+        /* sin tasa: las tarjetas muestran solo dólares */
+      });
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
   const [activeNavLink, setActiveNavLink] = useState('Inicio');
 
   // Menú de teléfono. La fila de enlaces del centro es `hidden md:flex`, así
@@ -153,6 +173,13 @@ export default function HomeClient({
   // van dentro del mensaje precargado de WhatsApp, que es donde se cierra la
   // reserva de verdad. Ver urlReservaWhatsApp().
   const [bookingNights, setBookingNights] = useState(2);
+
+  /** Abre el panel de una propiedad con las noches en SU mínimo de estadía. */
+  const abrirPropiedad = (p: Property) => {
+    setBookingNights(Math.max(1, p.nightsCount));
+    setSelectedProperty(p);
+    setIsDetailOpen(true);
+  };
   const [bookingGuests, setBookingGuests] = useState(1);
 
   const waReserva = selectedProperty
@@ -823,32 +850,26 @@ export default function HomeClient({
             <>
               {/* Section 1: Destacados en Margarita */}
               <CarouselSection
+                tasaBcv={tasaBcv}
                 title="Destacados en Margarita"
                 properties={getCuratedSection1()} 
-                onSelectProperty={(p) => {
-                  setSelectedProperty(p);
-                  setIsDetailOpen(true);
-                }}
+                onSelectProperty={(p) => abrirPropiedad(p)}
               />
 
               {/* Section 2: Selección Premium */}
               <CarouselSection
+                tasaBcv={tasaBcv}
                 title="Selección Premium"
                 properties={getCuratedSection2()} 
-                onSelectProperty={(p) => {
-                  setSelectedProperty(p);
-                  setIsDetailOpen(true);
-                }}
+                onSelectProperty={(p) => abrirPropiedad(p)}
               />
 
               {/* Section 3: Escapadas Frente al Mar */}
               <CarouselSection
+                tasaBcv={tasaBcv}
                 title="Escapadas Frente al Mar"
                 properties={getCuratedSection3()} 
-                onSelectProperty={(p) => {
-                  setSelectedProperty(p);
-                  setIsDetailOpen(true);
-                }}
+                onSelectProperty={(p) => abrirPropiedad(p)}
               />
             </>
           ) : (
@@ -891,15 +912,17 @@ export default function HomeClient({
               </div>
 
               {filteredProperties.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                /* Dos columnas, no cuatro: con cuatro alojamientos una fila de
+                   tarjetas estrechas se ve pobre, mientras que una retícula 2×2
+                   con fotos grandes ocupa bien el ancho y luce. Si el inventario
+                   vuelve a crecer, subir a md:grid-cols-2 lg:grid-cols-3. */
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
                   {filteredProperties.map((property) => (
-                    <PropertyCard 
-                      key={property.id} 
-                      property={property} 
-                      onSelect={() => {
-                        setSelectedProperty(property);
-                        setIsDetailOpen(true);
-                      }}
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      tasaBcv={tasaBcv}
+                      onSelect={() => abrirPropiedad(property)}
                     />
                   ))}
                 </div>
@@ -1112,8 +1135,22 @@ export default function HomeClient({
                   <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
                     <div className="flex justify-between items-baseline border-b border-line pb-3">
                       <div>
-                        <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
-                        <span className="text-meta text-gray-500 font-medium"> / noche</span>
+                        {tasaBcv ? (
+                          <>
+                            <span className="text-title-sm font-semibold text-accent">
+                              {bolivares(selectedProperty.pricePerNight * tasaBcv, 0)}
+                            </span>
+                            <span className="text-meta text-gray-500 font-medium"> / noche</span>
+                            <span className="mono-data block text-meta text-ink-muted">
+                              Ref. US${selectedProperty.pricePerNight.toLocaleString()} · dólar BCV
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
+                            <span className="text-meta text-gray-500 font-medium"> / noche</span>
+                          </>
+                        )}
                       </div>
                       <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
@@ -1126,9 +1163,13 @@ export default function HomeClient({
                           onChange={(e) => setBookingNights(Number(e.target.value))}
                           className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
                         >
-                          {[1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => (
-                            <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
-                          ))}
+                          {/* Solo estadías válidas: antes ofrecía 1 noche
+                              aunque la propiedad exigiera un mínimo mayor. */}
+                          {[1, 2, 3, 4, 5, 6, 7, 10, 14]
+                            .filter(n => n >= Math.max(1, selectedProperty.nightsCount))
+                            .map(n => (
+                              <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
+                            ))}
                         </select>
                       </div>
                       <div>
@@ -1149,15 +1190,38 @@ export default function HomeClient({
                         eran montos inventados que nadie decidió cobrar. El
                         total es noches × precio, y cualquier costo extra se
                         conversa por WhatsApp antes de confirmar. */}
-                    <div className="space-y-2 text-meta text-gray-600 pt-2">
+                    <div className="space-y-2 pt-2 text-body text-ink-muted">
                       <div className="flex justify-between">
                         <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
-                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                        <span className="mono-data">Ref. US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                       </div>
-                      <div className="flex justify-between font-semibold text-brand border-t border-line pt-3 text-body">
-                        <span>Total estimado</span>
-                        <span>US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
-                      </div>
+
+                      {/* El BOLÍVAR es el total a pagar: es la moneda de curso
+                          legal y lo que el huésped entrega. El dólar queda como
+                          subtotal del catálogo. Si no hay tasa, el dólar vuelve
+                          a ser el total — mejor eso que un bolívar equivocado. */}
+                      {tasaBcv ? (
+                        <>
+                          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand">
+                            <span className="text-body-lg">Total a pagar en bolívares</span>
+                            <span className="mono-data text-title">
+                              {bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv)}
+                            </span>
+                          </div>
+                          {/* `text-meta`, no `text-micro`: globals.css reserva
+                              micro para etiquetas en versalitas, y esto es texto
+                              corrido que el huésped tiene que poder leer. */}
+                          <p className="text-meta text-ink-muted">
+                            Calculado al dólar BCV: {bolivares(tasaBcv, 4)} por US$. El
+                            monto final se ajusta a la tasa BCV del día de pago.
+                          </p>
+                        </>
+                      ) : (
+                        <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand">
+                          <span className="text-body-lg">Total estimado</span>
+                          <span className="mono-data text-title">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                        </div>
+                      )}
                     </div>
 
                     {waReserva ? (
@@ -1330,10 +1394,13 @@ export default function HomeClient({
 interface CarouselSectionProps {
   title: string;
   properties: Property[];
+  /** Se recibe y se reenvía: las tarjetas del carrusel muestran el mismo
+   *  precio en bolívares que las de la retícula. */
+  tasaBcv: number | null;
   onSelectProperty: (property: Property) => void;
 }
 
-function CarouselSection({ title, properties, onSelectProperty }: CarouselSectionProps) {
+function CarouselSection({ title, properties, tasaBcv, onSelectProperty }: CarouselSectionProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: false,
@@ -1384,7 +1451,11 @@ function CarouselSection({ title, properties, onSelectProperty }: CarouselSectio
               key={property.id} 
               className="flex-none w-full sm:w-1/2 lg:w-1/4"
             >
-              <PropertyCard property={property} onSelect={() => onSelectProperty(property)} />
+              <PropertyCard
+                property={property}
+                tasaBcv={tasaBcv}
+                onSelect={() => onSelectProperty(property)}
+              />
             </div>
           ))}
         </div>
@@ -1394,88 +1465,151 @@ function CarouselSection({ title, properties, onSelectProperty }: CarouselSectio
 }
 
 // === COMPONENTE CARD DE PROPIEDAD ===
+/** «Bs. 121.794,67» — separadores de Venezuela: punto para miles, coma decimal. */
+function bolivares(n: number, decimales = 2): string {
+  return `Bs. ${n.toLocaleString('es-VE', {
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales,
+  })}`;
+}
+
 interface PropertyCardProps {
   property: Property;
+  /** Bolívares por dólar (BCV). Null mientras no llega o si la consulta falló. */
+  tasaBcv: number | null;
   onSelect: () => void;
 }
 
-function PropertyCard({ property, onSelect }: PropertyCardProps) {
+function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(false);
+  const capacidad = property.guestsAllowed.adults + property.guestsAllowed.children;
+
+  // Solo se convierte cuando hay un precio de verdad: en las propiedades con
+  // «Consultar precio» el número es 0 y mostrar «Bs. 0,00» sería peor que no
+  // mostrar nada.
+  const precioBs =
+    tasaBcv && !property.priceOnRequest && property.pricePerNight > 0
+      ? property.pricePerNight * tasaBcv
+      : null;
 
   return (
-    <div 
+    <article
       onClick={onSelect}
-      className="group bg-white border border-line rounded-card overflow-hidden cursor-pointer flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:border-ink hover:shadow-hard h-full transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,115,128,0.15)] hover:border-brand/40 hover:-translate-y-0.5"
+      /* Antes había dos `transition-all` y un `hover:shadow-hard` peleando con un
+         `hover:shadow-[...]` arbitrario: la última clase ganaba y la otra era
+         ruido. Ahora una sola transición, sobre las tres propiedades que de
+         verdad cambian. */
+      className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-card border border-line bg-white transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-brand/40 hover:shadow-lift-lg"
     >
-      
-      {/* Imagen arriba con border-radius 16px y ratio 4:3 */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-[16px]">
+      {/* Con cuatro alojamientos en vez de doce la foto puede ocupar mucho más,
+          y es lo que de verdad vende un alquiler. 3:2 en lugar de 4:3 da un
+          encuadre más editorial y menos de catálogo. */}
+      <div className="relative aspect-[3/2] w-full overflow-hidden">
         {/* El alt lleva zona e isla, no solo el nombre: es lo que posiciona
-            estas fotos en Google Imágenes, que en viajes es una fuente de
-            tráfico real. lazy + dimensiones para no bloquear la carga ni
-            provocar salto de layout con 12 tarjetas en pantalla. */}
+            estas fotos en Google Imágenes, que en viajes es tráfico real.
+            Dimensiones explícitas para no provocar salto de layout. */}
         <img
           src={property.image}
           alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
-          width={800}
-          height={600}
+          width={1200}
+          height={800}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           referrerPolicy="no-referrer"
         />
 
-        {/* Favorite Icon */}
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsLiked(!isLiked);
-          }}
-          aria-label={isLiked ? "Quitar de favoritos" : "Guardar en favoritos"}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-paper transition-all shadow-sm z-10 cursor-pointer border border-line"
-        >
-          <Heart className={`w-4 h-4 transition-colors ${isLiked ? 'fill-coral text-coral' : 'text-gray-600'}`} />
-        </button>
+        {/* Degradado solo en el tercio inferior: da contraste a la zona sin
+            apagar la foto, que es el activo de la tarjeta. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent"
+        />
 
-        {/* Category Tag Overlay */}
-        <div className="absolute bottom-3 left-3 flex gap-1">
+        {/* Categoría arriba a la izquierda, en vidrio como el resto del sitio */}
+        <div className="absolute left-4 top-4 flex gap-1.5">
           {property.categories.slice(0, 1).map((cat) => (
-            <span key={cat} className="label-eyebrow bg-ink/80 text-white px-2.5 py-1.5 rounded-chip">
+            <span
+              key={cat}
+              className="label-eyebrow rounded-chip border border-white/40 bg-white/80 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm"
+            >
               {cat}
             </span>
           ))}
         </div>
-      </div>
 
-      {/* Franja inferior con los datos del alojamiento */}
-      <div className="px-4 py-3.5 bg-white flex items-center justify-between gap-3 relative border-t border-line">
-        <div className="flex-1 min-w-0">
-          {/* Nombre: 15px serif elegante negro */}
-          <h4 className="font-serif text-body font-normal text-ink track-title truncate group-hover:text-black transition-colors">{property.name}</h4>
-          
-          {/* Precio + estadía + rating en 12px gris */}
-          <p className="mono-data text-ink-muted mt-1.5 truncate">
-            {property.priceText} · ★ {property.rating ?? '—'}
-          </p>
-        </div>
-
-        {/* Botón circular negro con flecha "→" blanca, esquina inferior derecha */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onSelect();
+            setIsLiked(!isLiked);
           }}
-          aria-label={`Ver detalles de ${property.name}`}
-          /* Sin anillo de tinta en reposo: son 12 tarjetas en pantalla y doce
-             círculos con borde oscuro dejan de ser un acento para volverse el
-             estilo. El borde aparece con el hover de la tarjeta, junto al resto
-             del tratamiento. */
-          className="w-10 h-10 rounded-full bg-brand hover:bg-brand-deep text-white flex items-center justify-center border border-transparent group-hover:border-ink transition-all shrink-0 cursor-pointer"
+          aria-label={isLiked ? 'Quitar de favoritos' : 'Guardar en favoritos'}
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-white/40 bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
         >
-          <ArrowRight className="w-[17px] h-[17px]" />
+          <Heart className={`h-4 w-4 transition-colors ${isLiked ? 'fill-coral text-coral' : 'text-ink-muted'}`} />
         </button>
+
+        {/* Zona sobre el degradado: ubica el alojamiento antes de leer el nombre */}
+        <p className="absolute bottom-4 left-4 flex items-center gap-1.5 text-white">
+          <MapPin className="h-3.5 w-3.5 stroke-[1.6]" aria-hidden="true" />
+          <span className="label-eyebrow text-white">{property.zone}</span>
+        </p>
       </div>
 
-    </div>
+      <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
+        <div className="flex items-start justify-between gap-3">
+          <h4 className="font-serif text-title-sm font-semibold text-brand track-title">
+            {property.name}
+          </h4>
+
+          {/* La valoración se muestra SOLO en inventario real. Los listados de
+              relleno llevan ratings inventados (4.6–5.0) y enseñárselos al
+              visitante es pedirle que confíe en un dato falso — el mismo motivo
+              por el que lib/schema.ts no emite aggregateRating. */}
+          {property.isReal && property.rating !== null && (
+            <span className="mono-data flex shrink-0 items-center gap-1 text-ink-muted">
+              <Star className="h-3.5 w-3.5 fill-brand text-brand" aria-hidden="true" />
+              {property.rating.toFixed(1)}
+            </span>
+          )}
+        </div>
+
+        <p className="text-meta text-ink-soft line-clamp-2">{property.description}</p>
+
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-4">
+          <div className="min-w-0">
+            <p className="label-eyebrow flex items-center gap-1.5 text-ink-faint">
+              <Users className="h-3.5 w-3.5 stroke-[1.6]" aria-hidden="true" />
+              Hasta {capacidad} huéspedes
+            </p>
+            {/* El bolívar manda: es la moneda de curso legal y lo que se paga.
+                El dólar queda como referencia del catálogo. */}
+            {precioBs !== null ? (
+              <>
+                <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
+                  Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })}
+                </p>
+                <p className="mono-data text-ink-muted">Ref. {property.priceText} · BCV</p>
+              </>
+            ) : (
+              <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
+                {property.priceText}
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            aria-label={`Ver detalles de ${property.name}`}
+            className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-deep"
+          >
+            <ArrowRight className="h-[18px] w-[18px]" />
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
