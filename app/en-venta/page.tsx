@@ -98,41 +98,25 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
       <div className="min-h-screen bg-paper">
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-6xl mx-auto px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-36">
-            <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
-              <ol className="flex flex-wrap items-center gap-2 text-white/80">
-                <li><Link href="/" className="underline hover:text-white">Inicio</Link></li>
-                <li aria-hidden="true">/</li>
-                <li className="text-white">En venta</li>
-              </ol>
-            </nav>
-            <p className="label-eyebrow mb-4 text-accent">Comprar en {SITE.region.island}</p>
-            <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
-              Apartamentos y casas <em className="headline-italic">en venta</em>
-            </h1>
-            <p className="mt-6 max-w-2xl text-body-lg text-white/85">
-              {totalSinFiltro} inmuebles en venta en la isla, con todas sus fotos y el precio en dólares,
-              bolívares, USDT y euros a la tasa del día. Vos elegís; nosotros gestionamos el contacto y
-              revisamos los papeles.
-            </p>
+          <div className="max-w-6xl mx-auto px-5 pb-7 pt-24 md:px-8 md:pb-9 md:pt-28">
+            {/* Cabecera corta a propósito: la dueña quiere llegar a los filtros y
+                a las casas sin desplazarse. Una línea de título, una de contexto. */}
+            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+              <div>
+                <p className="label-eyebrow text-accent">Comprar en {SITE.region.island}</p>
+                <h1 className="mt-1.5 font-serif text-headline font-normal leading-[1.05] track-headline">
+                  Apartamentos y casas <em className="headline-italic">en venta</em>
+                </h1>
+              </div>
+              <p className="max-w-xl text-meta text-white/80 md:text-body">
+                {totalSinFiltro} inmuebles con todas sus fotos y el precio en US$, Bs, USDT y € a la tasa del día.
+              </p>
+            </div>
           </div>
         </header>
 
-        <main className="max-w-6xl mx-auto px-5 py-12 md:px-8 md:py-16">
-          {/* Confianza antes que catálogo: quien compra a distancia necesita
-              saber quién responde, qué se verifica y cómo se paga. */}
-          <ul className="-mt-4 mb-10 grid gap-3 sm:grid-cols-3">
-            {[
-              { I: MessageCircle, t: 'Contacto directo', d: `Respondemos nosotros por WhatsApp${contacto.phone ? ` · ${contacto.phone}` : ''}. Sin formularios que nadie lee.` },
-              { I: FileCheck2, t: 'Papeles antes de la visita', d: 'Documento de propiedad, catastro y solvencias se revisan con el propietario antes de mostrar.' },
-              { I: ShieldCheck, t: 'Precio claro, en 4 monedas', d: 'US$, USDT, bolívares a tasa de mercado y BCV, con la tasa del día. Sin comisiones ocultas.' },
-            ].map(({ I, t, d }) => (
-              <li key={t} className="flex gap-3 rounded-card border border-line bg-white p-4">
-                <I className="mt-0.5 h-5 w-5 shrink-0 stroke-[1.6] text-brand" aria-hidden="true" />
-                <div><p className="text-body font-semibold text-ink">{t}</p><p className="mt-1 text-meta text-ink-muted">{d}</p></div>
-              </li>
-            ))}
-          </ul>
+        <main className="max-w-6xl mx-auto px-5 py-7 md:px-8 md:py-9">
+
           {/* Filtros en barra lateral izquierda (escritorio) o plegable arriba
               (móvil). Formulario GET: sin JavaScript, y la URL con filtros se
               comparte por WhatsApp tal cual. */}
@@ -143,7 +127,52 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
             <aside className="lg:sticky lg:top-24 lg:self-start">
               {/* Siempre visible (la dueña no quiso plegable): a la izquierda en
                   escritorio, arriba del listado en teléfono. */}
-              <div className="rounded-panel border border-line bg-white">
+              {/* Móvil: una fila con lo que más se usa (zona y precio) y el resto
+                  detrás de «Más filtros», para que la primera casa se vea sin
+                  bajar. Escritorio: el panel completo, fijo a la izquierda. */}
+              <form method="get" action={PATH} className="rounded-panel border border-line bg-white p-3 lg:hidden">
+                <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
+                  <select name="zona" defaultValue={sp.zona ?? ''} aria-label="Zona" className="block w-full rounded-control border border-line bg-paper px-2.5 py-2 text-meta text-ink">
+                    <option value="">Toda la isla</option>
+                    {zonasConInventario.map((z) => <option key={z.slug} value={z.slug}>{z.name}</option>)}
+                  </select>
+                  <select name="precio" defaultValue={sp.precio ?? ''} aria-label="Precio" className="block w-full rounded-control border border-line bg-paper px-2.5 py-2 text-meta text-ink">
+                    {PRECIOS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
+                  </select>
+                  <button type="submit" className="btn-solid px-3.5" aria-label="Aplicar filtros"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" /></button>
+                </div>
+                <details className="mt-2" {...(tiposSel.length || habMin || orden !== 'recientes' ? { open: true } : {})}>
+                  <summary className="cursor-pointer py-1 text-ui font-medium text-brand-deep [&::-webkit-details-marker]:hidden">Más filtros{hayFiltro ? ' · activos' : ''}</summary>
+                  <div className="mt-2 space-y-3 border-t border-line pt-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {TIPOS_FILTRO.map((t) => (
+                        <label key={t} className="cursor-pointer">
+                          <input type="checkbox" name="tipo" value={t} defaultChecked={tiposSel.includes(t)} className="peer sr-only" />
+                          <span className="inline-flex min-h-[32px] items-center rounded-chip border border-line bg-paper px-3 text-ui font-medium text-ink transition-colors peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="label-eyebrow mr-1 text-ink-subtle">Hab.</span>
+                      {HABS.map((h) => (
+                        <label key={h.v} className="cursor-pointer">
+                          <input type="radio" name="hab" value={h.v} defaultChecked={String(habMin || '') === h.v} className="peer sr-only" />
+                          <span className="inline-flex min-h-[32px] items-center rounded-chip border border-line bg-paper px-3 text-ui font-medium text-ink transition-colors peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">{h.l}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <select name="orden" defaultValue={orden} aria-label="Ordenar" className="block flex-1 rounded-control border border-line bg-paper px-2.5 py-2 text-meta text-ink">
+                        {ORDENES.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                      </select>
+                      <button type="submit" className="btn-solid">Aplicar</button>
+                      {hayFiltro && <Link href={PATH} className="text-ui text-ink-muted underline-offset-4 hover:underline">Limpiar</Link>}
+                    </div>
+                  </div>
+                </details>
+              </form>
+
+              <div className="hidden rounded-panel border border-line bg-white lg:block">
                 <p className="flex items-center gap-2 px-5 py-3.5 text-body font-semibold text-ink"><SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />Filtros</p>
                 <form method="get" action={PATH} className="space-y-4 border-t border-line px-5 pb-5 pt-4">
                   <div>
@@ -204,8 +233,8 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
             </aside>
 
             <section aria-labelledby="catalogo" className="min-w-0">
-              <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
+              <div className="mt-1 flex flex-wrap items-baseline justify-between gap-3 lg:mt-0">
+                <h2 id="catalogo" className="font-serif text-title-sm font-semibold text-ink">
                   {totalFiltrado === 0 ? 'Nada con ese filtro' : `${totalFiltrado} ${totalFiltrado === 1 ? 'inmueble' : 'inmuebles'}`}
                   {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
                 </h2>
@@ -225,7 +254,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                 </div>
               ) : (
                 <>
-                  <ul id="grid-venta" className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  <ul id="grid-venta" className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {visibles.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: pagina === 1 && k < 3 }} tasas={tasas} />)}
                   </ul>
                   {/* Scroll infinito: carga la página siguiente al acercarse al
@@ -240,6 +269,22 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
               )}
             </section>
           </div>
+
+          {/* Confianza: quien compra a distancia necesita saber quién responde,
+              qué se verifica y cómo se paga. Va después del catálogo, que es lo
+              que se viene a ver. */}
+          <ul className="section-gap grid gap-3 sm:grid-cols-3">
+            {[
+              { I: MessageCircle, t: 'Contacto directo', d: `Respondemos nosotros por WhatsApp${contacto.phone ? ` · ${contacto.phone}` : ''}. Sin formularios que nadie lee.` },
+              { I: FileCheck2, t: 'Papeles antes de la visita', d: 'Documento de propiedad, catastro y solvencias se revisan con el propietario antes de mostrar.' },
+              { I: ShieldCheck, t: 'Precio claro, en 4 monedas', d: 'US$, USDT, bolívares a tasa de mercado y BCV, con la tasa del día. Sin comisiones ocultas.' },
+            ].map(({ I, t, d }) => (
+              <li key={t} className="flex gap-3 rounded-card border border-line bg-white p-4">
+                <I className="mt-0.5 h-5 w-5 shrink-0 stroke-[1.6] text-brand" aria-hidden="true" />
+                <div><p className="text-body font-semibold text-ink">{t}</p><p className="mt-1 text-meta text-ink-muted">{d}</p></div>
+              </li>
+            ))}
+          </ul>
 
           <section aria-labelledby="vendes" className="section-gap">
             <div className="rounded-panel border border-line bg-brand-deep p-8 text-white md:p-10">
