@@ -22,7 +22,10 @@ export function tarjetaDePropio(i: InmuebleVenta): DatosTarjeta {
  * compone uno con lo que sí sabemos: tipo + zona + habitaciones.
  */
 export function tituloBonito(p: Prospecto): string {
-  const t = p.tituloLimpio.trim();
+  // «Apartamento 4 de mayo / 2 Habitaciones / 2 Baños / …»: el vendedor mete la
+  // ficha entera en el título. Se queda el primer tramo; el resto ya está en los
+  // datos con icono.
+  const t = p.tituloLimpio.trim().split(/\s+[\/|•·–—-]\s+/)[0].trim().slice(0, 70);
   const sinLugar = t.replace(/\b(isla de margarita|margarita|isla)\b/gi, '').trim();
   const vago = sinLugar.split(' ').filter(Boolean).length <= 3 && /^(casa|apartamento|apto|venta|vendo|se vende|en venta|oportunidad|bajo de precio|inmueble|propiedad|remodelad[oa]|[\s.]|de|la|el|en)+\.?$/i.test(sinLugar);
   if (!vago) return t;

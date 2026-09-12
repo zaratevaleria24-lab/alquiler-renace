@@ -72,7 +72,7 @@ export default function TarjetaVenta({ d, tasas }: { d: DatosTarjeta; tasas?: Ta
 
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
         {d.tipo && <p className="label-eyebrow -mb-1 text-ink-subtle">{d.tipo}</p>}
-        <h3 className="font-serif text-title-sm font-semibold leading-snug text-brand-deep">
+        <h3 className="line-clamp-2 font-serif text-title-sm font-semibold leading-snug text-brand-deep">
           <Link href={d.href} className="hover:underline underline-offset-4">{d.titulo}</Link>
         </h3>
         {(d.habitaciones != null || d.banos != null || d.m2 != null) && (
