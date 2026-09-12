@@ -12,7 +12,7 @@ import { query, rows } from '@/lib/db';
 import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
 import { slugify } from '@/lib/listings';
 import {
-  buscarEnMarketplace, cambiarEstadoProspecto, captarProspecto,
+  alternarPublicadoProspecto, buscarEnMarketplace, cambiarEstadoProspecto, captarProspecto,
   type EstadoProspecto, type TipoInmueble,
 } from '@/lib/ventas';
 
@@ -65,6 +65,16 @@ export async function estadoProspectoAction(formData: FormData): Promise<void> {
     redirect(`/admin/ventas/inmuebles/${id}?creada=1`);
   }
   await cambiarEstadoProspecto(fbId, estado, notas);
+  redirect(`/admin/ventas?estado=${filtro}&guardado=1#p-${fbId}`);
+}
+
+export async function publicadoProspectoAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+  const fbId = String(formData.get('fb_id') ?? '');
+  const filtro = String(formData.get('filtro') ?? 'todos');
+  if (!fbId) redirect('/admin/ventas');
+  await alternarPublicadoProspecto(fbId, asBool(formData.get('publicar')));
+  regenerar();
   redirect(`/admin/ventas?estado=${filtro}&guardado=1#p-${fbId}`);
 }
 

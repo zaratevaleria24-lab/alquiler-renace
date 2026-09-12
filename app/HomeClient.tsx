@@ -305,8 +305,11 @@ export default function HomeClient({
 
           {/* Izquierda: Logo + Nombre */}
           <div className="flex items-center gap-2.5 cursor-pointer" onClick={handleResetSearch}>
-            <div className="w-9 h-9 flex items-center justify-center shrink-0">
-              <img src="/logo-mark-white.svg" alt="Margarita Renace" className="w-full h-full object-contain" />
+            {/* Emblema (sol, palma, montaña y ola) desde el 2026-09-12; el
+                monograma anterior quedó en git. Un emblema necesita algo más de
+                caja que una letra para leerse: 40 px en vez de 36. */}
+            <div className="w-10 h-10 flex items-center justify-center shrink-0">
+              <img src="/logo-mark-white.svg" alt="Margarita Renace" width={40} height={40} className="w-full h-full object-contain" />
             </div>
             <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide text-white leading-none whitespace-nowrap">Margarita<span className="text-accent"> Renace</span></span>
           </div>

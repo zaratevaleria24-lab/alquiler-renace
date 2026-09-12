@@ -5,7 +5,7 @@ import {
   resumenProspectos, saldoApify, type EstadoProspecto,
 } from '@/lib/ventas';
 import { Aviso, Cifra, Insignia, Seccion, Tarjeta } from '../_ui';
-import { buscarProspectosAction, estadoProspectoAction } from './actions';
+import { buscarProspectosAction, estadoProspectoAction, publicadoProspectoAction } from './actions';
 
 // PROSPECTOS EN VENTA — material privado.
 //
@@ -43,8 +43,9 @@ export default async function VentasPage({
           <p className="text-meta font-semibold text-ink-subtle">En venta</p>
           <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">Prospectos</h1>
           <p className="mt-2 max-w-2xl text-meta text-ink-muted">
-            Anuncios de Facebook Marketplace en la isla. Son de terceros: se usan para
-            llamar al dueño y ofrecerle representar la propiedad, nunca se publican.
+            Anuncios de Facebook Marketplace en la isla. Se publican en /en-venta con
+            precio y fotos; <b>el teléfono del vendedor solo se ve acá</b>: el público
+            te escribe a vos. Podés ocultar cualquiera con un clic.
           </p>
         </div>
         <Link href="/admin/ventas/inmuebles" className="btn-solid">
@@ -160,6 +161,10 @@ export default async function VentasPage({
                             {ESTADOS.find((e) => e.key === p.estado)?.label}
                           </Insignia>
                           {p.vendido && <Insignia tono="neutro">vendido</Insignia>}
+                          {p.publicado && p.vivo && !p.vendido && (p.estado === 'nuevo' || p.estado === 'contactado') && p.slug
+                            ? <Insignia tono="ok">en la web</Insignia>
+                            : <Insignia tono="neutro">oculto</Insignia>}
+                          {p.fotosLocales.length > 0 && <span className="text-ui text-ink-faint">{p.fotosLocales.length} foto{p.fotosLocales.length === 1 ? '' : 's'} guardada{p.fotosLocales.length === 1 ? '' : 's'}</span>}
                           {!p.vivo && <Insignia tono="neutro">retirado</Insignia>}
                           <span className="text-ui text-ink-faint">visto {hace(p.vistoUltimo)}</span>
                         </div>
@@ -198,6 +203,19 @@ export default async function VentasPage({
                       <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-chip border border-line bg-white px-3 py-1.5 text-ui font-medium text-ink-muted hover:border-ink">
                         Ver en Facebook <ArrowUpRight className="h-3.5 w-3.5" />
                       </a>
+                      {p.slug && (
+                        <a href={`https://margaritarenace.com.ve/en-venta/${p.slug}`} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 rounded-chip border border-line bg-white px-3 py-1.5 text-ui font-medium text-ink-muted hover:border-ink">
+                          Ver en la web <ArrowUpRight className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      <form action={publicadoProspectoAction}>
+                        <input type="hidden" name="fb_id" value={p.fbId} />
+                        <input type="hidden" name="filtro" value={filtro} />
+                        <input type="hidden" name="publicar" value={p.publicado ? '' : 'true'} />
+                        <button type="submit" className="rounded-chip border border-line bg-white px-3 py-1.5 text-ui font-medium text-ink-muted hover:border-ink">
+                          {p.publicado ? 'Ocultar de la web' : 'Publicar en la web'}
+                        </button>
+                      </form>
                       <form action={estadoProspectoAction} className="ml-auto flex flex-wrap items-center gap-2">
                         <input type="hidden" name="fb_id" value={p.fbId} />
                         <input type="hidden" name="filtro" value={filtro} />
@@ -216,7 +234,7 @@ export default async function VentasPage({
                       </form>
                     </div>
                     <p className="mt-2 text-ui text-ink-faint">
-                      Marcar «Captado» crea el inmueble en borrador con estos datos para que le cargues tus fotos.
+                      «Captado» crea tu ficha propia (con tus fotos, indexable en Google) y quita esta del listado automático. «Descartado» la oculta.
                     </p>
                   </Tarjeta>
                 </li>

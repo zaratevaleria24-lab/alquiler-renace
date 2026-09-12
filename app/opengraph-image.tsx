@@ -28,7 +28,7 @@ export default function OpengraphImage() {
           padding: '80px',
           // Degradado teal de la identidad del sitio (ver CLAUDE.md).
           backgroundImage:
-            'linear-gradient(135deg, #0C4A5A 0%, #0E7490 55%, #21BBBB 100%)',
+            'linear-gradient(135deg, #0B4A5C 0%, #126E8B 55%, #6FADC1 100%)',
           color: 'white',
         }}
       >

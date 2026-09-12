@@ -73,17 +73,17 @@
      anterior (#3d7370, que quedaba claro y sin peso). Más oscuro = más rango
      tonal contra el hueso del fondo, que es de donde sale la sensación de
      contraste. */
-  --color-brand: #22565d;
-  --color-brand-deep: #143b41;
-  --color-brand-soft: #d5e3e4;
-  --color-brand-tint: #ecf2f2;
+  --color-brand: #126e8b;        /* el teal del emblema (2026-09-12) */
+  --color-brand-deep: #0b4a5c;
+  --color-brand-soft: #cfe3ea;
+  --color-brand-tint: #eaf3f6;
 
   /* Cursiva de los titulares: el tono cálido intermedio de la referencia
      (#6B5F52 en su variante clara). Es el color del "sello" romana/cursiva. */
   --color-italic: #6b5f52;
 
   /* Superficie oscura del chrome (navbar): teal casi neutro, muy profundo. */
-  --color-earth: #24393a;
+  --color-earth: #0f3a47;        /* barra: teal profundo, mismo tono que el logo */
 
   /* Acento CÁLIDO de ocre para destellos mínimos: el nombre en la barra,
      filetes, versalitas. Es el contrapunto que evita el look monocromo frío. */
@@ -91,7 +91,7 @@
 
   /* Apoyos secundarios, solo en detalles. */
   --color-sage: #8a9578;
-  --color-sea: #6e9b98;
+  --color-sea: #6fadc1;          /* tinte claro del emblema */
   --color-coral: #c0563c;
 
   /* Superficies cálidas: hueso y arena. Esto es la mitad del efecto. */

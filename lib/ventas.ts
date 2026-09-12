@@ -17,6 +17,7 @@
 
 import { readFileSync } from 'fs';
 import { query, rows, withTransaction } from './db';
+import { guardarFotoRemota } from './uploads';
 import { ZONE_GEO } from './schema';
 import { slugify } from './listings';
 
@@ -39,6 +40,11 @@ export interface Prospecto {
   fotoUrl: string | null; fotos: number; vivo: boolean; vendido: boolean;
   estado: EstadoProspecto; notas: string;
   vistoPrimero: Date; vistoUltimo: Date;
+  /** Sale en /en-venta (además tiene que estar vivo, no vendido y no descartado). */
+  publicado: boolean;
+  slug: string | null;
+  /** Fotos copiadas al servidor: las de Facebook caducan en horas. */
+  fotosLocales: string[];
 }
 
 export type TipoInmueble = 'apartamento' | 'casa' | 'terreno' | 'local';
@@ -132,6 +138,29 @@ export const extraerHabitaciones = (t: string) =>
   num(t, /(\d{1,2})\s*(?:hab|habitaci|cuartos?|dormitorios?|rec[aá]maras?)/i);
 export const extraerBanos = (t: string) => num(t, /(\d{1,2})\s*(?:ba[ñn]os?)/i);
 
+/**
+ * El texto del anuncio tal como se muestra al público: SIN el teléfono, correo
+ * ni enlaces del vendedor. Ese contacto es el activo del negocio y queda solo
+ * en el panel; el visitante escribe a Margarita Renace.
+ */
+export function textoPublico(texto: string): string {
+  return texto
+    .replace(/(?:\+?58[\s.-]?)?0?(?:4(?:12|14|16|24|26|22)|2\d\d)[\s./-]*\d{3}[\s./-]*\d{2}[\s./-]*\d{2}/g, '')
+    .replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '')
+    .replace(/https?:\/\/\S+|www\.\S+|wa\.me\S*/gi, '')
+    .replace(/^\s*(?:contacto|contáctanos|llamar|llama|escríbenos|whatsapp|wsp|tel[eé]fono|cel)\b[^\n]*$/gim, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/** Slug público de un prospecto: título limpio + cola del id, para que dos
+ *  "Casa en venta" no choquen. */
+export function slugProspecto(tituloLimpio: string, fbId: string): string {
+  const base = slugify(tituloLimpio).slice(0, 50).replace(/-+$/, '') || 'inmueble';
+  return `${base}-${fbId.slice(-6)}`;
+}
+
 /** Zona del sitio más cercana a unas coordenadas (radio máximo 12 km). */
 export function zonaPorCoordenadas(lat: number | null, lng: number | null): string | null {
   if (lat == null || lng == null) return null;
@@ -203,6 +232,10 @@ function normalizar(x: Crudo) {
     fotoUrl: (g(x, 'primaryListingPhoto', 'photo_image_url') ?? g(x, 'primary_listing_photo', 'photo_image_url') ?? g(fotosDet[0], 'image', 'uri') ?? null) as string | null,
     fotos: fotosDet.length || (g(x, 'primary_listing_photo', 'photo_image_url') ? 1 : 0),
     vivo: Boolean(x.isLive ?? x.is_live ?? true), vendido: Boolean(x.isSold ?? x.is_sold ?? false),
+    urlsFotos: [
+      ...fotosDet.map((f) => g(f, 'image', 'uri') as string | undefined),
+      (g(x, 'primaryListingPhoto', 'photo_image_url') ?? g(x, 'primary_listing_photo', 'photo_image_url')) as string | undefined,
+    ].filter((u): u is string => typeof u === 'string' && u.startsWith('http')),
   };
 }
 
@@ -239,8 +272,8 @@ export async function buscarEnMarketplace(limite: number, conDetalle = true): Pr
       const [res] = await rows<{ nuevo: boolean }>(
         `INSERT INTO prospectos_venta (fb_id, url, titulo, titulo_limpio, descripcion, precio_fb, moneda_fb,
            precio_usd, telefono, m2, habitaciones, banos, municipio, ciudad, latitud, longitud, zone_slug,
-           foto_url, fotos, vivo, vendido)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+           foto_url, fotos, vivo, vendido, slug)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
          ON CONFLICT (fb_id) DO UPDATE SET
            titulo = EXCLUDED.titulo, titulo_limpio = EXCLUDED.titulo_limpio,
            -- una corrida sin detalle no debe borrar la descripción de una con detalle
@@ -259,12 +292,15 @@ export async function buscarEnMarketplace(limite: number, conDetalle = true): Pr
            foto_url = COALESCE(EXCLUDED.foto_url, prospectos_venta.foto_url),
            fotos = GREATEST(EXCLUDED.fotos, prospectos_venta.fotos),
            vivo = EXCLUDED.vivo, vendido = EXCLUDED.vendido,
+           slug = COALESCE(prospectos_venta.slug, EXCLUDED.slug),
            visto_ultimo = now(), updated_at = now()
          RETURNING (xmax = 0) AS nuevo`,
         [p.fbId, p.url, p.titulo, p.tituloLimpio, p.descripcion, p.precioFb, p.monedaFb, p.precioUsd, p.telefono,
-         p.m2, p.habitaciones, p.banos, p.municipio, p.ciudad, p.latitud, p.longitud, p.zoneSlug, p.fotoUrl, p.fotos, p.vivo, p.vendido],
+         p.m2, p.habitaciones, p.banos, p.municipio, p.ciudad, p.latitud, p.longitud, p.zoneSlug, p.fotoUrl, p.fotos, p.vivo, p.vendido,
+         slugProspecto(p.tituloLimpio, p.fbId)],
       );
       if (res?.nuevo) nuevos++;
+      await descargarFotosProspecto(p.fbId, p.urlsFotos);
     }
 
     // Costo real: la última corrida del actor en la cuenta.
@@ -285,6 +321,29 @@ export async function buscarEnMarketplace(limite: number, conDetalle = true): Pr
   }
   const [c] = await rows<Record<string, unknown>>(`SELECT * FROM ventas_corridas WHERE id = $1`, [fila.id]);
   return corridaDesde(c);
+}
+
+/**
+ * Copia al servidor las fotos del anuncio que aún no tengamos. Se hace en el
+ * mismo momento de la búsqueda porque las URLs de Facebook caducan en menos
+ * de dos horas (verificado: 403 al rato) y Venezuela bloquea ese CDN.
+ * Máximo 8 por anuncio: es lo que pide Google para un alojamiento y de sobra
+ * para una ficha.
+ */
+export async function descargarFotosProspecto(fbId: string, urls: string[]): Promise<number> {
+  const [fila] = await rows<{ fotos_locales: string[] }>(`SELECT fotos_locales FROM prospectos_venta WHERE fb_id = $1`, [fbId]);
+  const tengo = fila?.fotos_locales ?? [];
+  const faltan = Math.max(0, 8 - tengo.length);
+  if (!faltan || !urls.length) return 0;
+  const nuevas: string[] = [];
+  for (const [i, u] of [...new Set(urls)].slice(0, faltan).entries()) {
+    const ruta = await guardarFotoRemota(u, fbId, tengo.length + i);
+    if (ruta) nuevas.push(ruta);
+  }
+  if (nuevas.length) {
+    await query(`UPDATE prospectos_venta SET fotos_locales = fotos_locales || $2::text[], updated_at = now() WHERE fb_id = $1`, [fbId, nuevas]);
+  }
+  return nuevas.length;
 }
 
 const corridaDesde = (c: Record<string, unknown>): Corrida => ({
@@ -313,6 +372,8 @@ const prospectoDesde = (r: Record<string, unknown>): Prospecto => ({
   vivo: Boolean(r.vivo), vendido: Boolean(r.vendido),
   estado: r.estado as EstadoProspecto, notas: String(r.notas ?? ''),
   vistoPrimero: new Date(r.visto_primero as string), vistoUltimo: new Date(r.visto_ultimo as string),
+  publicado: Boolean(r.publicado), slug: (r.slug as string) ?? null,
+  fotosLocales: (r.fotos_locales as string[]) ?? [],
 });
 
 export async function listarProspectos(estado?: EstadoProspecto | 'todos'): Promise<Prospecto[]> {
@@ -332,6 +393,27 @@ export async function resumenProspectos() {
             count(*) FILTER (WHERE telefono IS NOT NULL) con_telefono,
             count(*) FILTER (WHERE estado='captado') captados FROM prospectos_venta`);
   return { total: +r.total, nuevos: +r.nuevos, conTelefono: +r.con_telefono, captados: +r.captados };
+}
+
+/** Condición para salir en la web. Lo descartado y lo captado no salen: lo
+ *  captado ya tiene su ficha propia con fotos de la dueña. */
+const PUBLICABLE = `p.publicado AND p.vivo AND NOT p.vendido AND p.estado IN ('nuevo','contactado') AND p.slug IS NOT NULL`;
+
+export async function getProspectosPublicados(): Promise<Prospecto[]> {
+  return (await rows<Record<string, unknown>>(
+    `SELECT p.*, z.name AS zone_name FROM prospectos_venta p LEFT JOIN zones z ON z.slug = p.zone_slug
+     WHERE ${PUBLICABLE}
+     ORDER BY (cardinality(p.fotos_locales) > 0) DESC, (p.precio_usd IS NOT NULL) DESC, p.visto_ultimo DESC`,
+  )).map(prospectoDesde);
+}
+export async function getProspectoPublicado(slug: string): Promise<Prospecto | undefined> {
+  const [r] = await rows<Record<string, unknown>>(
+    `SELECT p.*, z.name AS zone_name FROM prospectos_venta p LEFT JOIN zones z ON z.slug = p.zone_slug
+     WHERE p.slug = $1 AND ${PUBLICABLE}`, [slug]);
+  return r ? prospectoDesde(r) : undefined;
+}
+export async function alternarPublicadoProspecto(fbId: string, publicado: boolean): Promise<void> {
+  await query(`UPDATE prospectos_venta SET publicado = $2, updated_at = now() WHERE fb_id = $1`, [fbId, publicado]);
 }
 
 export async function cambiarEstadoProspecto(fbId: string, estado: EstadoProspecto, notas?: string): Promise<void> {

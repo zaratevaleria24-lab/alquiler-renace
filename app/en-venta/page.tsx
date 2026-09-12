@@ -4,7 +4,7 @@ import { getZonesAll } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, faqSchema, graph } from '@/lib/schema';
-import { getInmueblesPublicados, TIPOS } from '@/lib/ventas';
+import { getInmueblesPublicados, getProspectosPublicados, TIPOS } from '@/lib/ventas';
 import { FAQ_VENTA } from '@/lib/faq';
 import PrecioVenta from '@/components/PrecioVenta';
 
@@ -36,7 +36,8 @@ export const metadata: Metadata = {
 
 
 export default async function EnVentaPage() {
-  const [inmuebles, zonas, contacto] = await Promise.all([getInmueblesPublicados(), getZonesAll(), getContacto()]);
+  const [inmuebles, prospectos, zonas, contacto] = await Promise.all([getInmueblesPublicados(), getProspectosPublicados(), getZonesAll(), getContacto()]);
+  const total = inmuebles.length + prospectos.length;
   const wa = (texto: string) => contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(texto)}` : null;
   const waVendo = wa('Hola, tengo un inmueble en venta en Margarita y quiero que Margarita Renace lo represente. Es un [apartamento/casa] en [zona].');
   const waBusco = wa('Hola, busco comprar en Margarita: [apartamento/casa], en [zona], presupuesto aprox. US$ [monto]. ¿Qué tienen o qué me pueden conseguir?');
@@ -65,8 +66,9 @@ export default async function EnVentaPage() {
               Apartamentos y casas <em className="headline-italic">en venta</em>
             </h1>
             <p className="mt-6 max-w-2xl text-body-lg text-white/85">
-              Inmuebles que representamos nosotros, con papeles revisados, fotos propias y el
-              precio en dólares, bolívares, USDT y euros con la tasa del día. Trato directo.
+              Lo que está en venta hoy en la isla, en un solo lugar, con el precio en dólares,
+              bolívares, USDT y euros a la tasa del día. Vos elegís, nosotros gestionamos el
+              contacto y revisamos los papeles.
             </p>
           </div>
         </header>
@@ -74,9 +76,9 @@ export default async function EnVentaPage() {
         <main className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-24">
           <section aria-labelledby="catalogo">
             <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
-              {inmuebles.length ? `${inmuebles.length} ${inmuebles.length === 1 ? 'inmueble' : 'inmuebles'} disponibles` : 'Catálogo'}
+              {total ? `${total} ${total === 1 ? 'inmueble' : 'inmuebles'} en venta` : 'Catálogo'}
             </h2>
-            {inmuebles.length === 0 ? (
+            {total === 0 ? (
               <div className="mt-7 rounded-card border border-line bg-white p-7">
                 <p className="text-body text-ink/80 leading-relaxed">
                   Estamos incorporando los primeros inmuebles. Si buscás comprar en la isla,
@@ -113,6 +115,43 @@ export default async function EnVentaPage() {
               </ul>
             )}
           </section>
+
+          {prospectos.length > 0 && (
+            <section aria-labelledby="en-la-isla" className={inmuebles.length ? 'section-gap' : 'mt-8'}>
+              {inmuebles.length > 0 && (
+                <h2 id="en-la-isla" className="font-serif text-headline text-ink font-normal track-headline">
+                  Más inmuebles <em className="headline-italic">en la isla</em>
+                </h2>
+              )}
+              <ul className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {prospectos.map((p) => {
+                  const foto = p.fotosLocales[0];
+                  const ficha = [p.habitaciones && `${p.habitaciones} hab`, p.banos && `${p.banos} baños`, p.m2 && `${p.m2} m²`].filter(Boolean).join(' · ');
+                  return (
+                    <li key={p.fbId} className="group overflow-hidden rounded-card border border-line bg-white transition-all hover:border-ink hover:shadow-hard-sm">
+                      <Link href={`${PATH}/${p.slug}`} className="block overflow-hidden">
+                        {foto ? (
+                          <img src={foto} alt={`${p.tituloLimpio} — en venta en ${p.zoneName ?? p.municipio}, Isla de Margarita`} width={800} height={600} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                        ) : (
+                          <div className="flex aspect-[4/3] w-full items-center justify-center bg-brand-tint text-ui text-brand-deep">Foto al consultar</div>
+                        )}
+                      </Link>
+                      <div className="p-5">
+                        <p className="label-eyebrow text-ink-subtle">{p.zoneName ?? p.ciudad ?? 'Isla de Margarita'}{p.municipio ? ` · mun. ${p.municipio}` : ''}</p>
+                        <h3 className="mt-2 font-serif text-title-sm text-brand-deep font-semibold">
+                          <Link href={`${PATH}/${p.slug}`} className="hover:underline underline-offset-4">{p.tituloLimpio}</Link>
+                        </h3>
+                        {ficha && <p className="mt-1 text-meta text-ink-muted">{ficha}</p>}
+                        <div className="mt-4 border-t border-line pt-4">
+                          <PrecioVenta usd={p.precioUsd ?? 0} aConsultar={!p.precioUsd} compacto />
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
 
           <section aria-labelledby="vendes" className="section-gap">
             <div className="rounded-card border border-line bg-brand-deep p-8 text-white md:p-10">

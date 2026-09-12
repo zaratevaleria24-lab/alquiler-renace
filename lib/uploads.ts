@@ -130,3 +130,39 @@ export async function borrarArchivoFoto(publicPath: string): Promise<void> {
     // Si el archivo ya no existe, borrar la fila igual es lo correcto.
   });
 }
+
+/**
+ * Descarga una foto de una URL, la reencodea a WebP y la guarda bajo
+ * prospectos/<carpeta>/. Para los anuncios de Marketplace: sus URLs de
+ * Facebook caducan en menos de dos horas y Venezuela bloquea ese CDN, así que
+ * si no se copia al servidor en el momento, la foto se pierde. Devuelve la
+ * ruta pública, o null si la URL ya no sirve (no es error: es lo esperable).
+ */
+export async function guardarFotoRemota(
+  url: string,
+  carpeta: string,
+  indice: number,
+): Promise<string | null> {
+  try {
+    const r = await fetch(url, {
+      signal: AbortSignal.timeout(15000),
+      headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36' },
+    });
+    if (!r.ok) return null;
+    const buffer = Buffer.from(await r.arrayBuffer());
+    if (buffer.length === 0 || buffer.length > MAX_FOTO_BYTES) return null;
+    const webp = await sharp(buffer)
+      .rotate()
+      .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer();
+    const dir = carpeta.replace(/[^a-z0-9-]/gi, '');
+    const nombre = `${indice}.webp`;
+    const dirFisico = path.join(UPLOADS_DIR, 'prospectos', dir);
+    await mkdir(dirFisico, { recursive: true });
+    await sharp(webp).toFile(path.join(dirFisico, nombre));
+    return `${PUBLIC_PREFIX}/prospectos/${dir}/${nombre}`;
+  } catch {
+    return null;
+  }
+}

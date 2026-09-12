@@ -4,7 +4,8 @@ import { notFound } from 'next/navigation';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, graph, ventaSchema } from '@/lib/schema';
-import { getInmueblePublicado, TIPOS } from '@/lib/ventas';
+import { getInmueblePublicado, getProspectoPublicado, textoPublico, TIPOS } from '@/lib/ventas';
+import FichaProspecto from './FichaProspecto';
 import PrecioVenta from '@/components/PrecioVenta';
 
 // Ficha de un inmueble en venta propio. Misma estructura que /propiedad/<slug>.
@@ -18,7 +19,20 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const i = await getInmueblePublicado(slug);
-  if (!i) return { title: 'Inmueble no disponible' };
+  if (!i) {
+    // Anuncio de Marketplace: se muestra y se comparte, pero NO se indexa
+    // (texto y fotos de terceros). Solo lo propio compite en Google.
+    const p = await getProspectoPublicado(slug);
+    if (!p) return { title: 'Inmueble no disponible' };
+    const t = `${p.tituloLimpio} — en venta en ${p.zoneName ?? p.municipio ?? 'Isla de Margarita'}`;
+    const d = textoPublico(p.descripcion).replace(/\s+/g, ' ').slice(0, 155) || t;
+    const img = p.fotosLocales[0] ? absoluteUrl(p.fotosLocales[0]) : '/opengraph-image';
+    return {
+      title: t, description: d, robots: { index: false, follow: true },
+      openGraph: { type: 'website', url: absoluteUrl(`/en-venta/${slug}`), siteName: SITE.name, title: t, description: d, images: [{ url: img, alt: t }] },
+      twitter: { card: 'summary_large_image', title: t, description: d, images: [img] },
+    };
+  }
   const path = `/en-venta/${i.slug}`;
   const title = `${i.titulo} — ${TIPOS.find((t) => t.key === i.tipo)?.label} en venta en ${i.zone}, Isla de Margarita`;
   const description = (i.descripcion || `${i.titulo} en venta en ${i.zone}, Isla de Margarita.`).replace(/\s+/g, ' ').slice(0, 155);
@@ -33,7 +47,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function InmueblePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [i, contacto] = await Promise.all([getInmueblePublicado(slug), getContacto()]);
-  if (!i) notFound();
+  if (!i) {
+    const p = await getProspectoPublicado(slug);
+    if (!p) notFound();
+    return <FichaProspecto p={p} whatsapp={contacto.whatsapp} />;
+  }
   const path = `/en-venta/${i.slug}`;
   const tipo = TIPOS.find((t) => t.key === i.tipo)?.label ?? 'Inmueble';
   const wa = contacto.whatsapp

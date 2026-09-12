@@ -3,19 +3,33 @@
 Creado el 2026-09-12. Sección nueva de Margarita Renace: **/en-venta** en la web y
 **En venta** en el panel (`/admin/ventas`).
 
-## La regla que ordena todo
+## La regla que ordena todo (revisada el mismo 2026-09-12)
 
 | | Prospectos (`prospectos_venta`) | Inmuebles propios (`inmuebles_venta`) |
 |---|---|---|
 | De dónde salen | Scraper de Facebook Marketplace (Apify) | La dueña, a mano o "captando" un prospecto |
-| De quién son | **De terceros** | De Margarita Renace, con permiso del propietario |
-| Se publican | **Nunca** | Sí, en `/en-venta` y `/en-venta/<slug>` |
-| Para qué | Llamar al vendedor y ofrecerle representar la propiedad | Vender |
+| Se publican en `/en-venta` | **Sí**, con precio y fotos copiadas al servidor, **con `noindex`** | Sí, indexables |
+| Contacto que ve el público | **Ninguno del vendedor**: el botón escribe a Margarita Renace | WhatsApp de Margarita Renace |
+| Contacto que ve el panel | Teléfono del vendedor (leído del texto) + enlace a Facebook | — |
 
-Publicar lo scrapeado se descartó a conciencia (2026-09-12): es contenido copiado
-(Google lo ignora o castiga), las fotos son enlaces a Facebook que caducan en
-horas **y que Venezuela bloquea**, los precios que pone la gente son falsos la
-mitad de las veces ("VEF1") y es material de terceros sin permiso.
+Decisión de la dueña: lo que está en venta en la isla se muestra en la web, y
+el contacto queda en el panel — el negocio es gestionar ese contacto. Lo que se
+hizo para que eso no dañe el sitio:
+
+- **`noindex, follow`** en las fichas de Marketplace: se ven y se comparten por
+  WhatsApp/Instagram, pero no compiten en Google con texto y fotos de terceros.
+  Tampoco entran al sitemap. Solo lo propio (captado, con fotos de la dueña) se
+  indexa.
+- **`textoPublico()`** quita del anuncio teléfonos, correos y enlaces antes de
+  mostrarlo.
+- **Las fotos se copian al servidor en el momento de la búsqueda**
+  (`descargarFotosProspecto` → `/var/www/margarita-uploads/prospectos/<fb_id>/`),
+  máximo 8 por anuncio. Verificado: las URLs de galería de Facebook devuelven
+  403 en menos de dos horas; la de portada dura más. Si una búsqueda no se hace
+  con detalle, solo se salva la portada.
+- Se puede **ocultar** cualquier anuncio desde el panel («Ocultar de la web»);
+  «Descartado» y «Captado» también lo sacan del listado automático.
+- Slug público: título limpio + últimos 6 dígitos del id (`casa-en-venta-092457`).
 
 ## El hallazgo que hace útil el scraper
 
