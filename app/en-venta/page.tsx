@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, FileCheck2, MessageCircle, ShieldCheck, SlidersHorizontal } from 'lucide-react';
+import { FileCheck2, MessageCircle, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { getZonesAll } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
@@ -9,6 +9,7 @@ import { getInmueblesPublicados, getProspectosPublicados } from '@/lib/ventas';
 import { getTasas } from '@/lib/tasas';
 import { FAQ_VENTA } from '@/lib/faq';
 import TarjetaVenta, { type DatosTarjeta } from '@/components/TarjetaVenta';
+import CargaAutomatica from '@/components/CargaAutomatica';
 import { tarjetaDePropio, tarjetaDeProspecto } from '@/lib/ventas-vista';
 
 // EN VENTA — /en-venta
@@ -43,17 +44,6 @@ const ORDENES = [{ v: 'recientes', l: 'Más recientes' }, { v: 'precio-asc', l: 
 const TIPOS_FILTRO = ['Apartamento', 'Casa', 'Terreno', 'Local comercial', 'Posada'];
 const POR_PAGINA = 12;
 
-/** 1 … 4 [5] 6 … 20: siempre la primera, la última y las vecinas de la actual. */
-function paginasVisibles(actual: number, total: number): (number | '…')[] {
-  const set = new Set<number>([1, total, actual - 1, actual, actual + 1].filter((n) => n >= 1 && n <= total));
-  const lista = [...set].sort((a, b) => a - b);
-  const out: (number | '…')[] = [];
-  for (const [k, n] of lista.entries()) {
-    if (k > 0 && n - lista[k - 1] > 1) out.push('…');
-    out.push(n);
-  }
-  return out;
-}
 const HABS = [{ v: '', l: 'Cualquiera' }, { v: '1', l: '1+' }, { v: '2', l: '2+' }, { v: '3', l: '3+' }, { v: '4', l: '4+' }];
 
 export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string; tipo?: string | string[]; hab?: string; pagina?: string }> }) {
@@ -150,22 +140,22 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
               izquierda (sticky bajo la navbar, con su propio scroll interno si
               no cabe) y solo el listado se desplaza. */}
           <div className="grid gap-8 lg:grid-cols-[16.5rem_1fr] lg:gap-10">
-            <aside className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1 [scrollbar-width:thin]">
+            <aside className="lg:sticky lg:top-24 lg:self-start">
               {/* Siempre visible (la dueña no quiso plegable): a la izquierda en
                   escritorio, arriba del listado en teléfono. */}
               <div className="rounded-panel border border-line bg-white">
                 <p className="flex items-center gap-2 px-5 py-3.5 text-body font-semibold text-ink"><SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />Filtros</p>
-                <form method="get" action={PATH} className="space-y-5 border-t border-line px-5 pb-5 pt-4">
+                <form method="get" action={PATH} className="space-y-4 border-t border-line px-5 pb-5 pt-4">
                   <div>
                     <p className="label-eyebrow text-ink-subtle">Zona</p>
-                    <select name="zona" defaultValue={sp.zona ?? ''} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                    <select name="zona" defaultValue={sp.zona ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2 text-body text-ink">
                       <option value="">Toda la isla</option>
                       {zonasConInventario.map((z) => <option key={z.slug} value={z.slug}>{z.name}</option>)}
                     </select>
                   </div>
                   <fieldset>
                     <legend className="label-eyebrow text-ink-subtle">Tipo</legend>
-                    <ul className="mt-2 space-y-1.5">
+                    <ul className="mt-2 space-y-1">
                       {TIPOS_FILTRO.map((t) => (
                         <li key={t}>
                           <label className="flex cursor-pointer items-center gap-2.5 text-body text-ink">
@@ -178,7 +168,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                   </fieldset>
                   <div>
                     <p className="label-eyebrow text-ink-subtle">Precio</p>
-                    <select name="precio" defaultValue={sp.precio ?? ''} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                    <select name="precio" defaultValue={sp.precio ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2 text-body text-ink">
                       {PRECIOS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
                     </select>
                   </div>
@@ -188,14 +178,14 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                       {HABS.map((h) => (
                         <label key={h.v} className="cursor-pointer">
                           <input type="radio" name="hab" value={h.v} defaultChecked={String(habMin || '') === h.v} className="peer sr-only" />
-                          <span className="inline-flex min-h-[36px] items-center rounded-chip border border-line bg-paper px-3 text-ui font-medium text-ink transition-colors peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">{h.l}</span>
+                          <span className="inline-flex min-h-[32px] items-center rounded-chip border border-line bg-paper px-3 text-ui font-medium text-ink transition-colors peer-checked:border-brand peer-checked:bg-brand peer-checked:text-white">{h.l}</span>
                         </label>
                       ))}
                     </div>
                   </fieldset>
                   <div>
                     <p className="label-eyebrow text-ink-subtle">Ordenar</p>
-                    <select name="orden" defaultValue={orden} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                    <select name="orden" defaultValue={orden} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2 text-body text-ink">
                       {ORDENES.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
                     </select>
                   </div>
@@ -203,15 +193,14 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                     <button type="submit" className="btn-solid">Aplicar</button>
                     {hayFiltro && <Link href={PATH} className="text-meta text-ink-muted underline-offset-4 hover:underline">Limpiar</Link>}
                   </div>
+                  {waBusco && (
+                    <p className="border-t border-line pt-4 text-meta text-ink-muted">
+                      ¿No ves lo que buscás? <a href={waBusco} className="font-medium text-brand-deep underline-offset-4 hover:underline" rel="noopener">Escribinos</a> con zona y presupuesto.
+                    </p>
+                  )}
                 </form>
               </div>
-              {waBusco && (
-                <div className="mt-4 hidden rounded-panel border border-line bg-brand-tint p-5 lg:block">
-                  <p className="text-body font-semibold text-brand-deep">¿No ves lo que buscás?</p>
-                  <p className="mt-1.5 text-meta text-ink-soft">Decinos zona y presupuesto y lo buscamos con los propietarios.</p>
-                  <a href={waBusco} className="btn-solid mt-4" rel="noopener">Escribirnos</a>
-                </div>
-              )}
+
             </aside>
 
             <section aria-labelledby="catalogo" className="min-w-0">
@@ -220,9 +209,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                   {totalFiltrado === 0 ? 'Nada con ese filtro' : `${totalFiltrado} ${totalFiltrado === 1 ? 'inmueble' : 'inmuebles'}`}
                   {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
                 </h2>
-                {totalFiltrado > POR_PAGINA && (
-                  <p className="text-meta text-ink-muted">Mostrando {desde + 1}–{Math.min(desde + POR_PAGINA, totalFiltrado)} de {totalFiltrado}</p>
-                )}
+                {inmuebles.length > 0 && <p className="text-meta text-ink-muted">Con «Verificado»: papeles revisados por {SITE.name}</p>}
               </div>
 
               {tarjetas.length === 0 ? (
@@ -238,39 +225,17 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                 </div>
               ) : (
                 <>
-                  <ul className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {visibles.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
+                  <ul id="grid-venta" className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    {visibles.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: pagina === 1 && k < 3 }} tasas={tasas} />)}
                   </ul>
-                  {paginas > 1 && (
-                    <nav aria-label="Páginas" className="mt-10 flex flex-wrap items-center justify-center gap-1.5">
-                      {pagina > 1 ? (
-                        <Link href={urlPagina(pagina - 1)} className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm">
-                          <ChevronLeft className="h-4 w-4" aria-hidden="true" />Anterior
-                        </Link>
-                      ) : <span className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line/60 px-3.5 text-ui text-ink-faint"><ChevronLeft className="h-4 w-4" aria-hidden="true" />Anterior</span>}
-                      {paginasVisibles(pagina, paginas).map((n, k) =>
-                        n === '…' ? (
-                          <span key={`e${k}`} className="px-1.5 text-ink-faint">…</span>
-                        ) : (
-                          <Link
-                            key={n}
-                            href={urlPagina(n)}
-                            aria-current={n === pagina ? 'page' : undefined}
-                            className={`inline-flex h-10 min-w-10 items-center justify-center rounded-chip border px-3 text-ui font-medium transition-all ${
-                              n === pagina ? 'border-brand bg-brand text-white' : 'border-line bg-white text-brand-deep hover:border-ink hover:shadow-hard-sm'
-                            }`}
-                          >
-                            {n}
-                          </Link>
-                        ),
-                      )}
-                      {pagina < paginas ? (
-                        <Link href={urlPagina(pagina + 1)} className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm">
-                          Siguiente<ChevronRight className="h-4 w-4" aria-hidden="true" />
-                        </Link>
-                      ) : <span className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line/60 px-3.5 text-ui text-ink-faint">Siguiente<ChevronRight className="h-4 w-4" aria-hidden="true" /></span>}
-                    </nav>
-                  )}
+                  {/* Scroll infinito: carga la página siguiente al acercarse al
+                      final. La paginación por URL sigue existiendo debajo. */}
+                  <CargaAutomatica
+                    siguiente={pagina < paginas ? urlPagina(pagina + 1) : null}
+                    total={totalFiltrado}
+                    cargados={desde + visibles.length}
+                    idGrid="grid-venta"
+                  />
                 </>
               )}
             </section>
