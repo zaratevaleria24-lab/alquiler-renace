@@ -22,6 +22,7 @@
 import { SITE, absoluteUrl } from './site';
 import type { Contacto } from './settings';
 import type { Property, Zone } from './types';
+import type { InmuebleVenta } from './ventas';
 
 type Json = Record<string, unknown>;
 
@@ -240,3 +241,54 @@ export function graph(...nodes: Json[]): string {
 }
 
 export type { Property };
+
+/**
+ * Inmueble EN VENTA propio (representado por Margarita Renace). Acá sí va
+ * `Offer` con precio: es nuestro anuncio, con permiso del dueño, no material
+ * copiado. El tipo de schema.org depende del tipo de inmueble.
+ */
+export function ventaSchema(i: InmuebleVenta, path: string): Json {
+  const tipo = { apartamento: 'Apartment', casa: 'House', terreno: 'LandParcel' as string, local: 'Place' }[i.tipo] ?? 'Accommodation';
+  const geo = i.latitud != null && i.longitud != null
+    ? { '@type': 'GeoCoordinates', latitude: i.latitud, longitude: i.longitud }
+    : geoDe(i.zoneSlug);
+  const item: Json = {
+    '@type': tipo,
+    '@id': absoluteUrl(`${path}#inmueble`),
+    name: i.titulo,
+    description: i.descripcion,
+    url: absoluteUrl(path),
+    image: i.images.map((im) => absoluteUrl(im.path)),
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: i.ubicacion || undefined,
+      addressLocality: i.zone,
+      addressRegion: SITE.region.state,
+      addressCountry: SITE.region.country,
+    },
+    geo,
+  };
+  if (i.habitaciones != null) item.numberOfRooms = i.habitaciones;
+  if (i.banos != null) item.numberOfBathroomsTotal = i.banos;
+  if (i.m2Construccion != null) item.floorSize = { '@type': 'QuantitativeValue', value: i.m2Construccion, unitCode: 'MTK' };
+  const listing: Json = {
+    '@type': 'RealEstateListing',
+    '@id': absoluteUrl(`${path}#anuncio`),
+    name: i.titulo,
+    url: absoluteUrl(path),
+    datePosted: i.updatedAt.toISOString().slice(0, 10),
+    about: item,
+  };
+  if (!i.precioAConsultar && i.precioUsd > 0) {
+    listing.offers = {
+      '@type': 'Offer',
+      price: i.precioUsd,
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+      businessFunction: 'http://purl.org/goodrelations/v1#Sell',
+      seller: { '@id': absoluteUrl('/#organizacion') },
+      url: absoluteUrl(path),
+    };
+  }
+  return listing;
+}

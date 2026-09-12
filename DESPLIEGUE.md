@@ -107,3 +107,9 @@ foto real en `public/properties/los-geranios-a/`, así que la dirección es esa.
   No afecta build ni runtime; se puede quitar.
 - `CLAUDE.md` dice que las fuentes son `Cormorant_Garamond`, pero
   `app/layout.tsx` carga `Fraunces`. La doc del repo quedó desactualizada ahí.
+
+## Secretos fuera del repo (2026-09-12)
+
+- `/etc/margarita-renace/apify.env` (600, root): `APIFY_TOKEN=…` para el
+  scraper de prospectos en venta. Lo lee `lib/ventas.ts` directamente del
+  archivo, así que **no hace falta `pm2 delete/start`** al cambiarlo. Ver `VENTAS.md`.

@@ -75,6 +75,7 @@ const NAV_LINKS = [
   { label: 'Inicio', href: '#hero-frame' },
   { label: 'Apartamentos', href: '#listings-container' },
   { label: 'Autos', href: '/autos' },
+  { label: 'En venta', href: '/en-venta' },
   { label: 'Zonas', href: '#zonas-de-la-isla' },
 ] as const;
 

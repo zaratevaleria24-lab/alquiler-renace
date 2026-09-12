@@ -64,6 +64,9 @@ export async function SiteFooter() {
               <Link href="/autos" className={enlace}>
                 Alquiler de carros
               </Link>
+              <Link href="/en-venta" className={enlace}>
+                En venta
+              </Link>
             </nav>
 
             <span aria-hidden="true" className="hidden h-3 w-px bg-line-strong sm:block" />

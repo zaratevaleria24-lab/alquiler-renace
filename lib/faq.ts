@@ -61,3 +61,23 @@ export const HOME_FAQ: FaqItem[] = [
     a: 'Sí. Te recogemos en el aeropuerto Santiago Mariño o en el terminal del ferry de Punta de Piedras y te llevamos a tu alojamiento, con hora y precio acordados por WhatsApp antes de viajar. El aeropuerto queda al sur de la isla: son 15-20 minutos a Porlamar, 20-25 a Costa Azul, 25-30 a Pampatar y 40-50 a Juan Griego. También hacemos traslados entre zonas y a las playas del norte.',
   },
 ];
+
+/** Respuestas verificables sobre comprar en la isla. Se citan en buscadores e IA. */
+export const FAQ_VENTA: FaqItem[] = [
+  {
+    q: '¿En qué moneda se compran los inmuebles en la Isla de Margarita?',
+    a: 'El precio se pacta en dólares estadounidenses, que es la referencia del mercado inmobiliario venezolano. El pago puede hacerse en dólares, en USDT o en bolívares a la tasa de mercado del día; el documento de compraventa se protocoliza en bolívares al cambio oficial vigente. En cada inmueble mostramos las cuatro cifras con la tasa del día.',
+  },
+  {
+    q: '¿Puede comprar un extranjero o un venezolano que vive afuera?',
+    a: 'Sí. En Venezuela no hay restricción para que un extranjero o un venezolano residente en el exterior compre un inmueble. Hace falta pasaporte o cédula vigente, RIF (se tramita en el SENIAT, también desde afuera con un representante) y, si no puede viajar a firmar, un poder notariado y apostillado a favor de alguien de confianza.',
+  },
+  {
+    q: '¿Qué documentos debe tener un inmueble antes de comprarlo?',
+    a: 'Documento de propiedad registrado, cédula catastral vigente, solvencia municipal, ficha del Registro Inmobiliario que confirme que no tiene hipotecas ni prohibiciones de enajenar, y las solvencias de servicios (agua, luz, condominio). Antes de mostrar un inmueble revisamos que estos papeles existan; es lo primero que le pedimos al propietario.',
+  },
+  {
+    q: '¿Cuánto cuesta un apartamento en la Isla de Margarita?',
+    a: 'Depende de la zona, el estado y si es frente al mar. En 2026 los apartamentos de dos habitaciones en Porlamar y Costa Azul se anuncian mayormente entre US$ 35.000 y US$ 90.000; en conjuntos frente al mar de Pampatar y Costa Azul, entre US$ 90.000 y US$ 200.000; y las casas en urbanizaciones cerradas de Maneiro y Mariño, desde unos US$ 45.000. Son rangos de anuncios publicados, no tasaciones.',
+  },
+];
