@@ -6,7 +6,8 @@
 import type { DatosTarjeta } from '@/components/TarjetaVenta';
 import { TIPOS, type InmuebleVenta, type Prospecto } from './ventas';
 
-export const dias = (desde: Date) => Math.max(1, Math.round((Date.now() - desde.getTime()) / 86400e3));
+// Los objetos pueden venir de unstable_cache (JSON): la fecha llega como string.
+export const dias = (desde: Date | string) => Math.max(1, Math.round((Date.now() - new Date(desde).getTime()) / 86400e3));
 export const tipoLabel = (t: string) => TIPOS.find((x) => x.key === t)?.label ?? 'Inmueble';
 
 export function tarjetaDePropio(i: InmuebleVenta): DatosTarjeta {

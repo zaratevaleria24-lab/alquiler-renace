@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/en-venta'), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.8 },
     ...VENTAS.map((i) => ({
       url: absoluteUrl(`/en-venta/${i.slug}`),
-      lastModified: i.updatedAt,
+      lastModified: new Date(i.updatedAt),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })),

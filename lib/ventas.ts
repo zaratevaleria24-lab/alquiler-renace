@@ -16,6 +16,7 @@
 // título y un precio de "VEF1".
 
 import { readFileSync } from 'fs';
+import { unstable_cache } from 'next/cache';
 import { query, rows, withTransaction } from './db';
 import { guardarFotoRemota } from './uploads';
 import { ZONE_GEO } from './schema';
@@ -428,7 +429,18 @@ export async function resumenProspectos() {
  *  captado ya tiene su ficha propia con fotos de la dueña. */
 const PUBLICABLE = `p.publicado AND p.vivo AND NOT p.vendido AND p.estado IN ('nuevo','contactado') AND p.slug IS NOT NULL`;
 
-export async function getProspectosPublicados(): Promise<Prospecto[]> {
+/** Etiqueta de caché de todo lo público de «En venta»: el panel la invalida
+ *  con revalidateTag al buscar, ocultar, captar o editar. Mientras, cada
+ *  visita se sirve de memoria y no toca la base. */
+export const TAG_VENTAS = 'ventas-publico';
+
+export const getProspectosPublicados = unstable_cache(
+  async (): Promise<Prospecto[]> => _getProspectosPublicados(),
+  ['prospectos-publicados'],
+  { tags: [TAG_VENTAS], revalidate: 300 },
+);
+
+async function _getProspectosPublicados(): Promise<Prospecto[]> {
   // Un vendedor suele publicar la misma casa dos o tres veces. Con igual
   // título, precio y zona se muestra una sola: la vista más recientemente.
   return (await rows<Record<string, unknown>>(
@@ -513,9 +525,12 @@ const inmuebleDesde = (r: Record<string, unknown>): InmuebleVenta => {
   };
 };
 
-export async function getInmueblesPublicados(): Promise<InmuebleVenta[]> {
-  return (await rows<Record<string, unknown>>(`${SELECT_INMUEBLE} WHERE i.is_published GROUP BY i.id, z.name ORDER BY i.sort_order, i.created_at DESC`)).map(inmuebleDesde);
-}
+export const getInmueblesPublicados = unstable_cache(
+  async (): Promise<InmuebleVenta[]> =>
+    (await rows<Record<string, unknown>>(`${SELECT_INMUEBLE} WHERE i.is_published GROUP BY i.id, z.name ORDER BY i.sort_order, i.created_at DESC`)).map(inmuebleDesde),
+  ['inmuebles-publicados'],
+  { tags: [TAG_VENTAS], revalidate: 300 },
+);
 export async function getInmueblePublicado(slug: string): Promise<InmuebleVenta | undefined> {
   const [r] = await rows<Record<string, unknown>>(`${SELECT_INMUEBLE} WHERE i.is_published AND i.slug = $1 GROUP BY i.id, z.name`, [slug]);
   return r ? inmuebleDesde(r) : undefined;

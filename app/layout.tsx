@@ -177,7 +177,11 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {/* El scroll suave es para el sitio público; en un panel de gestión
             estorba al desplazarse por tablas largas. */}
         {/* Y tampoco en /enlaces: es una pantalla, no hay scroll que suavizar. */}
-        {!esPanel && !esEnlaces && <SmoothScroll />}
+        {/* En /en-venta el scroll es NATIVO: el listado tiene un panel sticky y
+            carga infinita, y la interpolación de Lenis ahí se siente pegada
+            (la rueda va por delante de la página). En una lista se busca
+            precisión, no inercia. */}
+        {!esPanel && !esEnlaces && !ruta.startsWith('/en-venta') && <SmoothScroll />}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
         {!esPanel && !esEnlaces && !esHome && <NavBar whatsapp={contacto.whatsapp} />}

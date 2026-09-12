@@ -5,14 +5,14 @@
 // cuenta, porque una Server Action es un endpoint HTTP que se puede invocar
 // sin pasar por la página.
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { usuarioActual } from '@/lib/auth';
 import { query, rows } from '@/lib/db';
 import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
 import { slugify } from '@/lib/listings';
 import {
-  alternarPublicadoProspecto, buscarEnMarketplace, cambiarEstadoProspecto, captarProspecto,
+  alternarPublicadoProspecto, buscarEnMarketplace, cambiarEstadoProspecto, captarProspecto, TAG_VENTAS,
   type EstadoProspecto, type TipoInmueble,
 } from '@/lib/ventas';
 
@@ -20,6 +20,7 @@ async function exigirSesion(): Promise<void> {
   if (!(await usuarioActual())) redirect('/admin/login');
 }
 function regenerar(): void {
+  revalidateTag(TAG_VENTAS);
   revalidatePath('/en-venta', 'layout');
   revalidatePath('/', 'layout');
   revalidatePath('/sitemap.xml');
@@ -45,6 +46,7 @@ export async function buscarProspectosAction(formData: FormData): Promise<void> 
   const limite = Math.min(60, Math.max(5, Number(formData.get('limite')) || 20));
   try {
     const c = await buscarEnMarketplace(limite, true);
+    regenerar();
     redirect(`/admin/ventas?corrida=${c.traidos}:${c.nuevos}:${c.costoUsd ?? ''}`);
   } catch (e) {
     // redirect() lanza internamente: hay que dejarlo pasar.
@@ -65,6 +67,7 @@ export async function estadoProspectoAction(formData: FormData): Promise<void> {
     redirect(`/admin/ventas/inmuebles/${id}?creada=1`);
   }
   await cambiarEstadoProspecto(fbId, estado, notas);
+  regenerar();
   redirect(`/admin/ventas?estado=${filtro}&guardado=1#p-${fbId}`);
 }
 

@@ -10,6 +10,7 @@ import { getTasas } from '@/lib/tasas';
 import { FAQ_VENTA } from '@/lib/faq';
 import TarjetaVenta, { type DatosTarjeta } from '@/components/TarjetaVenta';
 import CargaAutomatica from '@/components/CargaAutomatica';
+import FiltrosFluidos from '@/components/FiltrosFluidos';
 import { tarjetaDePropio, tarjetaDeProspecto } from '@/lib/ventas-vista';
 
 // EN VENTA — /en-venta
@@ -125,6 +126,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
               no cabe) y solo el listado se desplaza. */}
           <div className="grid gap-8 lg:grid-cols-[16.5rem_1fr] lg:gap-10">
             <aside className="lg:sticky lg:top-24 lg:self-start">
+              <FiltrosFluidos action={PATH}>
               {/* Siempre visible (la dueña no quiso plegable): a la izquierda en
                   escritorio, arriba del listado en teléfono. */}
               {/* Móvil: una fila con lo que más se usa (zona y precio) y el resto
@@ -229,7 +231,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                   )}
                 </form>
               </div>
-
+              </FiltrosFluidos>
             </aside>
 
             <section aria-labelledby="catalogo" className="min-w-0">

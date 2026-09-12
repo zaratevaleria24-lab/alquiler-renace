@@ -276,7 +276,7 @@ export function ventaSchema(i: InmuebleVenta, path: string): Json {
     '@id': absoluteUrl(`${path}#anuncio`),
     name: i.titulo,
     url: absoluteUrl(path),
-    datePosted: i.updatedAt.toISOString().slice(0, 10),
+    datePosted: new Date(i.updatedAt).toISOString().slice(0, 10),
     about: item,
   };
   if (!i.precioAConsultar && i.precioUsd > 0) {
