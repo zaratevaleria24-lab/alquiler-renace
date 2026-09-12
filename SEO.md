@@ -323,3 +323,128 @@ curl -sI $B/opengraph-image | head -1
 
 Validadores externos: Rich Results Test de Google, validator.schema.org, y el
 depurador de enlaces compartidos de WhatsApp o Facebook para la tarjeta OG.
+
+---
+
+## 2026-09-12 — Auditoría a fondo y plan (apartamentos vacacionales)
+
+Datos de partida: Search Console del 13-jun al 3-sep (244 impresiones, 5 clics,
+CTR 2 %; 8 «no encontrado», 1 «con redirección», 6 «rastreada sin indexar») y
+las métricas propias (36 visitantes en 30 días, 47 vistas, todos sin referrer).
+
+### Lectura honesta de los números
+
+- **Los 8 «404» son los 8 listados retirados el 11-ago**, que responden 410 a
+  propósito. Correcto: Google los está sacando del índice. Van a desaparecer
+  solos del informe.
+- **La «página con redirección» y parte de las «sin indexar» eran las 5 zonas
+  sin inventario**, que redirigían a la home (308). Cinco URLs con 300-400
+  palabras de geografía real desperdiciadas. **Corregido hoy** (abajo).
+- **Las «rastreadas sin indexar» que quedan son los 3 listados de relleno**
+  (Penthouse Porlamar, Apartamento Costa Azul, Loft El Yaque): 190-230
+  caracteres de descripción, 3 fotos de stock, anfitrión inventado. Google los
+  lee y decide que no valen un lugar. Ninguna optimización compensa esto.
+- **Todo el tráfico real llega sin referrer** = enlaces compartidos por
+  WhatsApp e Instagram (las apps no mandan origen). Google todavía no manda
+  gente. Es lo esperable a los 3 meses con 4 páginas de zona.
+- **La única búsqueda con clic fue «apartamentos en alquiler en margarita
+  porlamar 4 de mayo»**: la gente busca por avenida/sector, no por «Margarita
+  Renace». Nadie busca la marca todavía.
+- **El clic de Australia es real**: Search Console solo cuenta clics en
+  resultados de Google, nunca de Instagram ni WhatsApp. Diáspora.
+
+### 🔴 Lo más grave no es SEO: no hay número de WhatsApp
+
+`site_settings` está vacío. El botón de reservar dice literalmente
+**«WhatsApp — muy pronto»** y en todo el HTML del sitio no aparece ni un
+`wa.me/`. 36 visitantes al mes y **ninguno puede reservar**. Se arregla en
+`/admin/contenido` (WhatsApp, teléfono, Instagram) en dos minutos, sin
+desplegar nada. Hasta que no esté, todo lo demás es decorativo.
+
+### Hecho hoy (código, desplegado)
+
+| Cambio | Por qué |
+|---|---|
+| Las tarjetas de la portada enlazan con `<a>` real a `/propiedad/<slug>` | En el HTML que recibe Google la portada no enlazaba a **ningún** apartamento (solo `onClick`). Eran huérfanos, conocidos solo por el sitemap |
+| Las 9 zonas tienen landing, con o sin inventario (`getZonesAll`) | Se recuperan 5 URLs con contenido real. Sin apartamentos muestran aviso honesto + WhatsApp + enlaces a zonas con inventario. Sin `ItemList` vacío |
+| Sitemap con las 9 zonas (prioridad 0.6 las vacías) | |
+| `GeoCoordinates` por zona en `Place` y `containedInPlace`; `hasMap`; `additionalType: Apartment` | «Pampatar» pasa de ser una palabra a ser un punto del mapa para buscadores y motores de IA |
+| ISR (`revalidate = 3600`) en zona y propiedad (● SSG en el build) | Estáticas y regeneradas por hora; el panel las invalida al guardar. La home siguió saliendo ƒ dinámica: algo en `HomeClient` la fuerza; con TTFB de 130 ms no vale la pena perseguirlo hoy |
+| FAQ nueva: «¿Cómo se reserva?» | Es la pregunta de intención más alta; los motores de IA citan respuestas directas |
+| Trabajo de agosto (36 archivos) commiteado y en GitHub | Estaba en producción sin respaldo desde el 3-ago |
+
+### Lo que solo puede hacer la dueña — en este orden
+
+1. **WhatsApp + Instagram en `/admin/contenido`.** Hoy. Sin esto no hay negocio.
+2. **Los 4 apartamentos reales** (`DATOS-PENDIENTES.md`), cada uno con
+   **mínimo 8 fotos propias** (dormitorio, baño, área común — es el mínimo que
+   pide Google para alojamientos), descripción de 150+ palabras con lo que se
+   ve desde la ventana y a cuántos minutos queda la playa, **precio publicado**
+   (la competencia en Booking/Airbnb muestra US$35-220; «consultar precio» hace
+   que Google no pueda comparar y la gente cierre la pestaña), coordenadas del
+   edificio, y retirar los 3 de relleno. Un sitio con 4 reales posiciona
+   mejor que uno con 12 inventados.
+3. **Perfil de Empresa en Google (Google Maps) para «Margarita Renace» como
+   agencia de alquiler vacacional**, no para cada apartamento (los alquileres
+   individuales no son elegibles; una empresa que gestiona alquileres, sí, como
+   negocio de área de servicio). Ahí caen las reseñas reales, que es el factor
+   local #1 en 2026, y es la vía a «alquiler apartamento Margarita» en el mapa.
+4. **Pedir reseña por WhatsApp a cada huésped al salir**, con el enlace del
+   perfil de Google. Con 5-10 reseñas reales ya se puede emitir
+   `aggregateRating` en el JSON-LD (hoy está prohibido por ser ficticio).
+5. **Instagram/TikTok con el enlace al sitio en la bio** y, en cada
+   publicación de apartamento, el enlace a SU página `/propiedad/…`, no a la
+   home. Cada visita compartida es una señal.
+
+### Plan 30 / 60 / 90 días (después de lo anterior)
+
+**30 días — inventario real y conversión**
+- Cargar los 4 reales; retirar relleno; `aggregateRating` cuando haya reseñas.
+- Página de propiedad: sección «Cómo llegar y qué hay a 5 minutos» con
+  distancias reales (playa, supermercado, farmacia, Sambil), «Reglas y
+  check-in» y «Qué incluye». Son las secciones que Airbnb tiene y nosotros no,
+  y las que los motores de IA citan.
+- Botón de WhatsApp visible en el hero de la home (hoy solo en el drawer).
+
+**60 días — contenido que responde lo que la gente busca**
+- **Guías por sector, no solo por zona**: «Alquiler en la Av. 4 de Mayo»,
+  «Costa Azul frente al mar», «Urb. Maneiro / Pampatar». La única búsqueda con
+  clic fue de sector. 600-900 palabras, mapa, qué hay cerca, enlace a los
+  apartamentos.
+- **Guías de temporada**: «Carnaval en Margarita: cuándo reservar y precios»,
+  «Semana Santa», «Temporada baja (mayo-junio): la más barata». La
+  estacionalidad es el patrón de búsqueda #1 en vacacional.
+- **Precios**: «¿Cuánto cuesta alquilar un apartamento en Margarita en 2026?»
+  con una tabla real por zona y temporada. Contenido que nadie más publica →
+  es lo que los motores de IA citan (dato propio).
+- **Versión en inglés de home + zonas** (`/en/`) con `hreflang`: 20 % de los
+  clics vienen de EE. UU. y Australia; parte es diáspora que busca en español,
+  parte no.
+
+**90 días — visibilidad fuera del sitio**
+- **Google Vacation Rentals**: salir con calendario y precio dentro de Google
+  es gratis y de alta intención, pero requiere un *connectivity partner*
+  aprobado (Lodgify, Hostaway, etc., US$15-40/mes) o el programa de Hotel
+  Center. Evaluar cuando haya 4+ reales con calendario; el iCal ya existe.
+- Directorios y menciones: Mitula/Properati (indexan alquileres en Venezuela),
+  guías de turismo de la isla, posadas/agencias aliadas. NAP idéntico en todos.
+- Medir: Search Console (clics, no impresiones), WhatsApp abiertos desde el
+  sitio (evento propio), reseñas en Google. Objetivo a 90 días: 30 clics/mes,
+  10 reseñas, 4 reales publicados.
+
+### GEO (aparecer en ChatGPT, Perplexity, AI Overviews)
+
+Ya resuelto: robots abierto a 16 bots de IA (Cloudflare desbloqueado),
+`llms.txt`, FAQ con `FAQPage`, respuestas autocontenidas. Lo que falta es lo
+mismo que para Google: **datos propios verificables** (precios reales, fotos
+reales, reseñas reales). En 2026 los AI Overviews aparecen en ~42 % de las
+búsquedas y citan páginas que responden en la primera frase con un dato
+concreto. Cada guía nueva debe abrir con la respuesta, no con introducción.
+
+### Fuentes consultadas (2026)
+
+- Google — [VacationRental structured data](https://developers.google.com/search/docs/appearance/structured-data/vacation-rental): 8 fotos mínimo, geo con 5 decimales, `containsPlace.occupancy`; el rich result exige Hotel Center.
+- Google — [Elegibilidad de Perfil de Empresa](https://support.google.com/business/answer/13763036): propiedades en alquiler no son elegibles; la empresa gestora sí.
+- Google — [Vacation rentals partners](https://support.google.com/hotelprices/answer/11946834); [Lodgify: Google Vacation Rentals guía 2026](https://www.lodgify.com/blog/google-vacation-rentals-guide/); [Rental Scale-Up: conexión directa vs. partner](https://www.rentalscaleup.com/how-to-list-on-google-vacation-rentals-part-3-direct-connection-or-connectivity-providers/).
+- [CraftedStays: Vacation Rental SEO + AI Search 2026](https://craftedstays.co/vacation-rental-seo/); [VillaMarketers: guía completa 2026](https://villamarketers.com/vacation-rental-seo-guide); [Boostly: 7 tácticas para reserva directa](https://boostly.co.uk/vacation-rental-seo-tips/); [Houfy: Google Business Profile para vacacionales 2026](https://www.houfy.com/blog/google-business-profile-for-vacation-rentals-2026).
+- [Search Engine Land: GEO 2026](https://searchengineland.com/mastering-generative-engine-optimization-in-2026-full-guide-469142); [HubSpot: GEO para pequeños negocios](https://blog.hubspot.com/marketing/generative-engine-optimization-small-business); [Megabant: factores de SEO local 2026](https://www.megabant.com/local-seo-ranking-factors-what-matters-most-in-2026/).

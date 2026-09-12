@@ -25,6 +25,7 @@ import ReservaPanel from '@/components/ReservaPanel';
 // desde el panel) se renderiza a demanda en la primera visita y queda cacheado
 // como estático. Sin esto, todo alta nueva exigiría un rebuild manual.
 export const dynamicParams = true;
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const properties = await getProperties();

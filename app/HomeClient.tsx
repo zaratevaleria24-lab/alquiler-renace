@@ -1558,8 +1558,20 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
 
       <div className="flex flex-1 flex-col gap-3 px-5 pb-5 pt-4">
         <div className="flex items-start justify-between gap-3">
+          {/* SEO: el nombre es un enlace <a> real a la página de la propiedad.
+              Antes la tarjeta solo tenía onClick, y en el HTML que recibe Google
+              la portada no enlazaba a NINGÚN apartamento: los /propiedad/ eran
+              huérfanos, solo conocidos por el sitemap. El drawer sigue abriendo
+              al tocar el resto de la tarjeta; el título lleva a la página
+              canónica, que es lo que queremos que se indexe y se comparta. */}
           <h4 className="font-serif text-title-sm font-semibold text-brand track-title">
-            {property.name}
+            <Link
+              href={`/propiedad/${property.slug}`}
+              onClick={(e) => e.stopPropagation()}
+              className="hover:underline underline-offset-4"
+            >
+              {property.name}
+            </Link>
           </h4>
 
           {/* La valoración se muestra SOLO en inventario real. Los listados de

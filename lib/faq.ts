@@ -49,6 +49,10 @@ export const HOME_FAQ: FaqItem[] = [
     a: 'La Isla de Margarita es la principal del estado Nueva Esparta, en el Caribe venezolano, frente a la costa nororiental de Venezuela. Su ciudad más grande es Porlamar y su capital administrativa es La Asunción. Se llega por vía aérea al Aeropuerto Internacional Santiago Mariño o por ferry desde Puerto La Cruz y Cumaná.',
   },
   {
+    q: '¿Cómo se reserva un apartamento en Margarita Renace?',
+    a: 'Directo con el anfitrión, por WhatsApp y sin comisiones de plataforma. En la página de cada apartamento elegís fechas y cantidad de huéspedes y el botón de reservar abre un mensaje ya escrito con esos datos; el anfitrión confirma disponibilidad, tarifa y forma de pago por el mismo chat. Cada apartamento tiene su calendario de disponibilidad publicado, así que antes de escribir ya sabés si las fechas están libres.',
+  },
+  {
     q: '¿Margarita Renace también alquila autos?',
     a: 'Sí, el proyecto cubre alquiler de apartamentos y de autos en la Isla de Margarita. El catálogo de vehículos se está incorporando al sitio; para consultar disponibilidad de autos conviene escribir directamente.',
   },

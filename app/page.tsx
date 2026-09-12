@@ -17,6 +17,10 @@ import HomeClient from './HomeClient';
 import { getCategories, getProperties, getZones } from '@/lib/queries';
 import { contactoDesde, getAjustes } from '@/lib/settings';
 
+// ISR: estática, regenerada como mucho cada hora; el panel la invalida al
+// guardar (revalidatePath). Antes cada visita consultaba la base.
+export const revalidate = 3600;
+
 export default async function Home() {
   // En paralelo: son consultas independientes y encadenarlas solo sumaría
   // latencia al build.

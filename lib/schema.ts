@@ -25,6 +25,30 @@ import type { Property, Zone } from './types';
 
 type Json = Record<string, unknown>;
 
+/**
+ * Coordenadas aproximadas del centro de cada zona (4 decimales ≈ 10 m).
+ * Sirven para anclar geográficamente las landings y las propiedades en el
+ * JSON-LD: sin geo, para un buscador "Pampatar" es una palabra; con geo, es
+ * un punto del mapa. Son de zona, no del edificio: la propiedad llevará las
+ * suyas (5 decimales, como pide VacationRental) cuando estén en la base.
+ */
+export const ZONE_GEO: Record<string, { lat: number; lng: number }> = {
+  pampatar: { lat: 10.9977, lng: -63.7939 },
+  porlamar: { lat: 10.9577, lng: -63.8608 },
+  'costa-azul': { lat: 10.9665, lng: -63.8248 },
+  'playa-el-yaque': { lat: 10.8970, lng: -63.9640 },
+  'juan-griego': { lat: 11.0826, lng: -63.9669 },
+  'playa-caribe': { lat: 11.1383, lng: -63.9083 },
+  'playa-parguito': { lat: 11.1080, lng: -63.8300 },
+  'playa-guacuco': { lat: 11.0550, lng: -63.8050 },
+  manzanillo: { lat: 11.1590, lng: -63.8770 },
+};
+
+function geoDe(zoneSlug: string): Json | undefined {
+  const g = ZONE_GEO[zoneSlug];
+  return g ? { '@type': 'GeoCoordinates', latitude: g.lat, longitude: g.lng } : undefined;
+}
+
 /** Organización + negocio local. Base de la identidad de entidad del sitio.
  *  El contacto llega como parámetro: vive en la base (site_settings), editable
  *  desde /admin/contenido. Antes era una constante en null en lib/site.ts. */
@@ -167,7 +191,12 @@ export function propertySchema(p: Property, path: string): Json {
     containedInPlace: {
       '@type': 'Place',
       name: `${p.zone}, ${SITE.region.island}`,
+      geo: geoDe(p.zoneSlug),
     },
+    // Apartamento turístico: el subtipo más preciso que schema.org tiene para
+    // esto sin afirmar cosas que no sabemos (habitaciones, m²).
+    additionalType: 'https://schema.org/Apartment',
+    tourBookingPage: absoluteUrl(path),
   };
 }
 
@@ -177,6 +206,10 @@ export function zonePlaceSchema(zone: Zone, copy: { coast: string }): Json {
     '@type': 'Place',
     name: `${zone.name}, ${SITE.region.island}`,
     description: copy.coast,
+    geo: geoDe(zone.slug),
+    hasMap: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      `${zone.name}, Isla de Margarita, Nueva Esparta, Venezuela`,
+    )}`,
     address: {
       '@type': 'PostalAddress',
       addressLocality: zone.name,

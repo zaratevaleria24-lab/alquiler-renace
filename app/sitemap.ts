@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getProperties, getZones } from '@/lib/queries';
+import { getProperties, getZonesAll } from '@/lib/queries';
 import { absoluteUrl } from '@/lib/site';
 
 // Genera /sitemap.xml en build, a partir de las mismas zonas que producen las
@@ -10,7 +10,7 @@ import { absoluteUrl } from '@/lib/site';
 // es estático y todas las páginas se regeneran en el mismo build.
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [ZONES, PROPERTIES] = await Promise.all([getZones(), getProperties()]);
+  const [ZONES, PROPERTIES] = await Promise.all([getZonesAll(), getProperties()]);
   const buildDate = new Date();
 
   return [
@@ -30,8 +30,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(`/alquiler/${zone.slug}`),
       lastModified: buildDate,
       changeFrequency: 'weekly' as const,
-      // Las zonas con más inventario son las que más conviene rastrear.
-      priority: zone.properties.length > 1 ? 0.9 : 0.8,
+      // Las zonas con más inventario son las que más conviene rastrear; las
+      // que aún no tienen apartamentos entran igual (tienen contenido propio),
+      // pero con menos prioridad.
+      priority: zone.properties.length > 1 ? 0.9 : zone.properties.length === 1 ? 0.8 : 0.6,
     })),
     ...PROPERTIES.map((p) => ({
       url: absoluteUrl(`/propiedad/${p.slug}`),

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound, permanentRedirect } from 'next/navigation';
-import { getZone, getZones } from '@/lib/queries';
-import { ZONE_COPY } from '@/lib/zones-content';
+import { notFound } from 'next/navigation';
+import { getZone, getZonesAll } from '@/lib/queries';
+import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 
 import {
@@ -28,12 +28,14 @@ import {
 // dynamicParams=true: si una zona estrena inventario publicado desde el panel,
 // su landing se renderiza a demanda en la primera visita, sin rebuild.
 export const dynamicParams = true;
+// ISR: la página se sirve como estática y se regenera como mucho cada hora.
+// El panel además llama revalidatePath('/', 'layout') al guardar, así que un
+// cambio en el CMS se ve al instante; esto solo cubre lo que nadie tocó.
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  // Consulta en build: las rutas estáticas salen de las zonas que TIENEN
-  // inventario publicado (getZones filtra las vacías). Si se publica una
-  // propiedad en una zona nueva, aparece su landing al revalidar.
-  const zones = await getZones();
+  // Las 9 zonas, con o sin inventario: todas tienen texto propio y URL propia.
+  const zones = await getZonesAll();
   return zones.map((zone) => ({ zona: zone.slug }));
 }
 
@@ -80,32 +82,26 @@ export default async function ZonaPage({
   const { zona } = await params;
   const zone = await getZone(zona);
 
-  // Zona conocida pero sin inventario publicado → 308 a la home, no 404.
-  //
-  // getZones() filtra a propósito las zonas vacías (una landing sin
-  // alojamientos es contenido pobre y Google la castiga). El efecto colateral
-  // era que las 5 zonas sin inventario —Juan Griego, Manzanillo, Playa Caribe,
-  // Playa Parguito y Playa Guacuco— devolvían 404 a los buscadores y a
-  // cualquiera que llegara por un enlace viejo. Mandarlas a la home conserva
-  // la visita y le dice al buscador que la URL se consolidó, no que se rompió.
-  //
-  // SE AUTOMANTIENE: esta rama solo se alcanza cuando la zona NO tiene
-  // inventario. El día que se publique un apartamento en Manzanillo,
-  // getZone() la devuelve, se renderiza su landing y el redirect desaparece
-  // sin que nadie toque este archivo.
-  //
-  // ZONE_COPY es la lista de las 9 zonas con texto propio escrito. Estaba sin
-  // usar desde que el contenido pasó a la base de datos del CMS; acá vuelve a
-  // tener una función: distinguir "zona que existe pero está vacía" de
-  // "zona que no existe", que sí merece 404.
-  if (!zone) {
-    if (zona in ZONE_COPY) permanentRedirect('/');
-    notFound();
-  }
+  // Solo una zona que NO existe merece 404. Una zona sin inventario publicado
+  // (Juan Griego, Manzanillo, Playa Caribe, Parguito, Guacuco) se renderiza
+  // igual: tiene 300-400 palabras de geografía real y es exactamente lo que
+  // busca alguien que escribe "alquiler en Juan Griego". Hasta 2026-09-12 esas
+  // cinco redirigían a la home y Search Console las reportaba como "página
+  // con redirección"; se perdían cinco URLs con contenido ya escrito. Cuando
+  // no hay apartamentos se muestra un aviso honesto con el WhatsApp y las
+  // zonas que sí tienen, en lugar de una lista vacía.
+  if (!zone) notFound();
 
-  
   const path = `/alquiler/${zone.slug}`;
-  const otherZones = (await getZones()).filter((z) => z.slug !== zone.slug);
+  const [allZones, contacto] = await Promise.all([getZonesAll(), getContacto()]);
+  const otherZones = allZones.filter((z) => z.slug !== zone.slug);
+  const conInventario = otherZones.filter((z) => z.properties.length > 0);
+  const sinInventario = zone.properties.length === 0;
+  const waConsulta = contacto.whatsapp
+    ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(
+        `Hola, busco apartamento en ${zone.name}, Isla de Margarita. Vi margaritarenace.com.ve — ¿tienen algo disponible o próximo?`,
+      )}`
+    : null;
 
   const jsonLd = graph(
     breadcrumbSchema([
@@ -113,7 +109,8 @@ export default async function ZonaPage({
       { name: `Alquiler en ${zone.name}`, path },
     ]),
     zonePlaceSchema(zone, { coast: zone.coast }),
-    zoneItemListSchema(zone, path),
+    // Un ItemList vacío es markup sin sentido: solo se emite con inventario.
+    ...(sinInventario ? [] : [zoneItemListSchema(zone, path)]),
   );
 
   return (
@@ -226,6 +223,33 @@ export default async function ZonaPage({
               Alojamientos en {zone.name}
             </h2>
 
+            {sinInventario && (
+              <div className="block-gap rounded-card border border-line bg-white p-7">
+                <p className="text-body text-ink/80 leading-relaxed">
+                  Todavía no tenemos apartamentos publicados en {zone.name}. Estamos
+                  incorporando alojamientos zona por zona; si buscás en esta parte de
+                  la isla, escribinos y te avisamos apenas haya uno, o te orientamos
+                  a la zona vecina más parecida.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {waConsulta && (
+                    <a href={waConsulta} className="btn-solid" rel="noopener">
+                      Consultar por WhatsApp
+                    </a>
+                  )}
+                  {conInventario.slice(0, 3).map((z) => (
+                    <Link
+                      key={z.slug}
+                      href={`/alquiler/${z.slug}`}
+                      className="inline-flex min-h-[44px] items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm"
+                    >
+                      Ver alojamientos en {z.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <ul className="block-gap grid gap-8 md:gap-10 sm:grid-cols-2">
               {zone.properties.map((property) => (
                 <li
@@ -310,9 +334,11 @@ export default async function ZonaPage({
                     className="inline-flex min-h-[44px] items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm"
                   >
                     {other.name}
-                    <span className="ml-2 text-ink/50">
-                      {other.properties.length}
-                    </span>
+                    {other.properties.length > 0 && (
+                      <span className="ml-2 text-ink/50">
+                        {other.properties.length}
+                      </span>
+                    )}
                   </Link>
                 </li>
               ))}

@@ -118,7 +118,15 @@ type ZoneRow = {
  * agrupa en memoria: hacerlo en una sola con json_agg anidado duplicaría todo
  * el bloque de propiedades por zona y sería más difícil de leer que de mantener.
  */
-export async function getZones(): Promise<Zone[]> {
+/**
+ * TODAS las zonas, tengan o no inventario publicado. Para las landings de zona,
+ * su sitemap y el enlazado entre zonas: una zona sin apartamentos igual tiene
+ * 300-400 palabras de geografía real escritas y merece URL propia — antes esas
+ * 5 zonas redirigían a la home y Google las contaba como "página con
+ * redirección". La home, el footer y /autos siguen usando getZones(), que
+ * filtra las vacías: ahí sí sería una lista de zonas sin nada que mostrar.
+ */
+export async function getZonesAll(): Promise<Zone[]> {
   const [zoneRows, properties] = await Promise.all([
     rows<ZoneRow>(
       `SELECT slug, name, coast, summary, body, nearby, best_for
@@ -152,16 +160,19 @@ export async function getZones(): Promise<Zone[]> {
         minPrice: prices.length ? Math.min(...prices) : null,
       };
     })
-    // Zonas sin inventario publicado no se muestran: una landing vacía es
-    // contenido pobre y Google la penaliza. Vuelven solas al publicar algo.
-    .filter((z) => z.properties.length > 0)
     .sort(
       (a, b) => b.properties.length - a.properties.length || a.name.localeCompare(b.name),
     );
 }
 
+/** Solo las zonas con inventario publicado: para listados donde una zona vacía
+ *  sería un enlace a nada (home, footer, /autos). */
+export async function getZones(): Promise<Zone[]> {
+  return (await getZonesAll()).filter((z) => z.properties.length > 0);
+}
+
 export async function getZone(slug: string): Promise<Zone | undefined> {
-  return (await getZones()).find((z) => z.slug === slug);
+  return (await getZonesAll()).find((z) => z.slug === slug);
 }
 
 // ── Catálogos ───────────────────────────────────────────────────────────────
