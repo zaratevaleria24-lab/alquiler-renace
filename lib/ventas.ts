@@ -85,11 +85,26 @@ export function limpiarTitulo(t: string): string {
     .replace(/[|•·*_~]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  // Todo en mayúsculas → Título Con Mayúsculas Iniciales; si no, se respeta.
-  if (plano.length > 3 && plano === plano.toUpperCase()) {
-    return plano.toLowerCase().replace(/(^|\s)(\p{L})/gu, (m, sp, l) => sp + l.toUpperCase());
-  }
-  return plano;
+  // Gritado en mayúsculas o Con Cada Palabra En Mayúscula → frase normal:
+  // «Casa en venta Sabana de Guacuco». Se respetan los nombres propios que ya
+  // venían con mayúscula inicial y se bajan las palabras pequeñas.
+  const chicas = new Set(['de', 'del', 'en', 'la', 'el', 'los', 'las', 'y', 'con', 'a', 'al', 'por', 'para', 'un', 'una']);
+  const palabras = plano.split(' ');
+  const gritado = plano.length > 3 && plano === plano.toUpperCase();
+  const titleCase = palabras.length > 2 && palabras.every((w) => /^\p{Lu}/u.test(w) || chicas.has(w.toLowerCase()));
+  if (!gritado && !titleCase) return plano;
+  return palabras
+    .map((w, k) => {
+      const bajo = w.toLowerCase();
+      if (k === 0) return bajo.charAt(0).toUpperCase() + bajo.slice(1);
+      if (chicas.has(bajo)) return bajo;
+      if (/^(i{1,3}|iv|v|vi{1,3})$/.test(bajo)) return bajo.toUpperCase(); // Paraíso II, Torre IV
+      // Palabras comunes del rubro van en minúscula; lo demás (nombres de
+      // urbanizaciones, playas) conserva la mayúscula inicial.
+      if (/^(casa|apartamento|apto|venta|vendo|se|vende|oportunidad|residencial|penthouse|remodelad[oa]|amoblad[oa]|hermos[oa]|conj|resd|urb|terreno|local|posada|tur[ií]stica|habitaciones?|ba[ñn]os?|refugio|monta[ñn]a)\.?$/i.test(bajo)) return bajo;
+      return bajo.charAt(0).toUpperCase() + bajo.slice(1);
+    })
+    .join(' ');
 }
 
 /** Teléfonos venezolanos como los escribe la gente: 0424/8839740, 0424-883.97.40,

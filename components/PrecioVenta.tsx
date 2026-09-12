@@ -1,4 +1,4 @@
-import { getTasas } from '@/lib/tasas';
+import { getTasas, type TasasDerivadas } from '@/lib/tasas';
 import { fmtBs, fmtEUR, fmtUSD, precioEnMonedas } from '@/lib/ventas';
 
 // El precio de un inmueble en las monedas que la gente de verdad usa. El dato
@@ -14,12 +14,25 @@ import { fmtBs, fmtEUR, fmtUSD, precioEnMonedas } from '@/lib/ventas';
 // y que ningún portal le da.
 
 export default async function PrecioVenta({
-  usd, aConsultar, compacto = false,
-}: { usd: number; aConsultar: boolean; compacto?: boolean }) {
+  usd, aConsultar, compacto = false, tasas,
+}: { usd: number; aConsultar: boolean; compacto?: boolean;
+  /** En un listado de 20 tarjetas se pasa UNA consulta de tasas para todas;
+   *  sin esto cada tarjeta consultaba por su cuenta (0,7 s de página). */
+  tasas?: TasasDerivadas | null }) {
   if (aConsultar || usd <= 0) {
-    return <p className="mono-data text-title-sm text-brand-deep">Consultar precio</p>;
+    if (compacto) return <p className="mono-data text-title-sm text-brand-deep">Consultar precio</p>;
+    return (
+      <div className="rounded-card border border-line bg-white p-6">
+        <p className="label-eyebrow text-ink-subtle">Precio</p>
+        <p className="mono-data mt-2 text-title-sm text-brand-deep">A consultar</p>
+        <p className="mt-3 text-meta text-ink-muted">
+          El propietario no publicó el precio. Escribinos y te lo confirmamos en el día, en dólares y
+          en bolívares a la tasa del momento.
+        </p>
+      </div>
+    );
   }
-  const t = await getTasas().catch(() => null);
+  const t = tasas !== undefined ? tasas : await getTasas().catch(() => null);
   const p = precioEnMonedas(usd, t ?? { bcvUsd: null, bcvEur: null, mercado: null, brecha: null });
 
   if (compacto) {

@@ -1,51 +1,69 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SlidersHorizontal } from 'lucide-react';
 import { getZonesAll } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, faqSchema, graph } from '@/lib/schema';
-import { getInmueblesPublicados, getProspectosPublicados, TIPOS } from '@/lib/ventas';
+import { getInmueblesPublicados, getProspectosPublicados } from '@/lib/ventas';
+import { getTasas } from '@/lib/tasas';
 import { FAQ_VENTA } from '@/lib/faq';
-import PrecioVenta from '@/components/PrecioVenta';
+import TarjetaVenta, { type DatosTarjeta } from '@/components/TarjetaVenta';
+import { tarjetaDePropio, tarjetaDeProspecto } from '@/lib/ventas-vista';
 
 // EN VENTA — /en-venta
 //
-// Solo inmuebles que Margarita Renace representa de verdad, con fotos propias
-// y permiso del dueño. Los anuncios ajenos de Marketplace viven en el panel
-// (prospectos) y jamás llegan acá: ver lib/ventas.ts.
+// Todo lo que está en venta en la isla en un solo lugar: lo que Margarita
+// Renace representa (verificado, indexable) y los anuncios publicados en la
+// isla (fotos copiadas al servidor, sin datos del vendedor, noindex). El
+// contacto siempre pasa por Margarita Renace: ese es el negocio.
 //
-// La página también CAPTA VENDEDORES: el bloque «¿Vendés en Margarita?» es la
-// otra mitad del negocio, y funciona aunque el catálogo esté vacío.
+// Los filtros son un formulario GET: funcionan sin JavaScript, la URL con
+// filtros se puede compartir por WhatsApp, y no hay estado que se pierda.
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const PATH = '/en-venta';
 const TITULO = 'Apartamentos y Casas en Venta en Isla de Margarita';
 const DESCRIPCION =
-  'Inmuebles en venta en la Isla de Margarita: apartamentos y casas en Pampatar, Porlamar, Costa Azul y más zonas, con precio en dólares, bolívares (tasa de mercado y BCV), USDT y euros. Trato directo, sin comisiones ocultas.';
+  'Inmuebles en venta en la Isla de Margarita: apartamentos y casas en Pampatar, Porlamar, Costa Azul y más zonas, con precio en dólares, bolívares (tasa de mercado y BCV), USDT y euros. Fotos completas y trato directo.';
 
 export const metadata: Metadata = {
-  title: TITULO,
-  description: DESCRIPCION,
-  alternates: { canonical: PATH },
-  openGraph: { type: 'website', url: absoluteUrl(PATH), siteName: SITE.name, title: TITULO, description: DESCRIPCION,
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: TITULO }] },
+  title: TITULO, description: DESCRIPCION, alternates: { canonical: PATH },
+  openGraph: { type: 'website', url: absoluteUrl(PATH), siteName: SITE.name, title: TITULO, description: DESCRIPCION, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: TITULO }] },
   twitter: { card: 'summary_large_image', title: TITULO, description: DESCRIPCION, images: ['/opengraph-image'] },
 };
 
+const PRECIOS = [
+  { v: '', l: 'Cualquier precio' }, { v: '50000', l: 'Hasta US$ 50.000' }, { v: '100000', l: 'Hasta US$ 100.000' },
+  { v: '200000', l: 'Hasta US$ 200.000' }, { v: '200001', l: 'Más de US$ 200.000' },
+];
+const ORDENES = [{ v: 'recientes', l: 'Más recientes' }, { v: 'precio-asc', l: 'Precio: menor a mayor' }, { v: 'precio-desc', l: 'Precio: mayor a menor' }];
 
+export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string }> }) {
+  const [sp, inmuebles, prospectos, zonas, contacto, tasas] = await Promise.all([
+    searchParams, getInmueblesPublicados(), getProspectosPublicados(), getZonesAll(), getContacto(),
+    getTasas().catch(() => null),
+  ]);
+  const zonaSel = zonas.find((z) => z.slug === sp.zona)?.name ?? '';
+  const tope = Number(sp.precio) || 0;
+  const orden = ORDENES.some((o) => o.v === sp.orden) ? sp.orden! : 'recientes';
 
-export default async function EnVentaPage() {
-  const [inmuebles, prospectos, zonas, contacto] = await Promise.all([getInmueblesPublicados(), getProspectosPublicados(), getZonesAll(), getContacto()]);
-  const total = inmuebles.length + prospectos.length;
+  let tarjetas: DatosTarjeta[] = [...inmuebles.map(tarjetaDePropio), ...prospectos.map(tarjetaDeProspecto)];
+  const totalSinFiltro = tarjetas.length;
+  if (zonaSel) tarjetas = tarjetas.filter((t) => t.zona === zonaSel);
+  if (tope === 200001) tarjetas = tarjetas.filter((t) => !t.aConsultar && t.precioUsd > 200000);
+  else if (tope > 0) tarjetas = tarjetas.filter((t) => !t.aConsultar && t.precioUsd > 0 && t.precioUsd <= tope);
+  if (orden === 'precio-asc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || a.precioUsd - b.precioUsd);
+  if (orden === 'precio-desc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || b.precioUsd - a.precioUsd);
+  const hayFiltro = Boolean(zonaSel || tope || orden !== 'recientes');
+
   const wa = (texto: string) => contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(texto)}` : null;
   const waVendo = wa('Hola, tengo un inmueble en venta en Margarita y quiero que Margarita Renace lo represente. Es un [apartamento/casa] en [zona].');
   const waBusco = wa('Hola, busco comprar en Margarita: [apartamento/casa], en [zona], presupuesto aprox. US$ [monto]. ¿Qué tienen o qué me pueden conseguir?');
+  const zonasConInventario = zonas.filter((z) => [...inmuebles.map(tarjetaDePropio), ...prospectos.map(tarjetaDeProspecto)].some((t) => t.zona === z.name));
 
-  const jsonLd = graph(
-    breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'En venta', path: PATH }]),
-    faqSchema(FAQ_VENTA),
-  );
+  const jsonLd = graph(breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'En venta', path: PATH }]), faqSchema(FAQ_VENTA));
 
   return (
     <>
@@ -53,7 +71,7 @@ export default async function EnVentaPage() {
       <div className="min-h-screen bg-paper">
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-24">
+          <div className="max-w-6xl mx-auto px-5 py-14 md:px-8 md:py-20">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li><Link href="/" className="underline hover:text-white">Inicio</Link></li>
@@ -66,100 +84,77 @@ export default async function EnVentaPage() {
               Apartamentos y casas <em className="headline-italic">en venta</em>
             </h1>
             <p className="mt-6 max-w-2xl text-body-lg text-white/85">
-              Lo que está en venta hoy en la isla, en un solo lugar, con el precio en dólares,
-              bolívares, USDT y euros a la tasa del día. Vos elegís, nosotros gestionamos el
-              contacto y revisamos los papeles.
+              {totalSinFiltro} inmuebles en venta en la isla, con todas sus fotos y el precio en dólares,
+              bolívares, USDT y euros a la tasa del día. Vos elegís; nosotros gestionamos el contacto y
+              revisamos los papeles.
             </p>
           </div>
         </header>
 
-        <main className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-24">
-          <section aria-labelledby="catalogo">
-            <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
-              {total ? `${total} ${total === 1 ? 'inmueble' : 'inmuebles'} en venta` : 'Catálogo'}
-            </h2>
-            {total === 0 ? (
-              <div className="mt-7 rounded-card border border-line bg-white p-7">
+        <main className="max-w-6xl mx-auto px-5 py-12 md:px-8 md:py-16">
+          {/* Filtros: GET, sin JavaScript, URL compartible */}
+          <form method="get" action={PATH} className="rounded-panel border border-line bg-white p-4 md:p-5">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
+              <label className="block">
+                <span className="label-eyebrow text-ink-subtle">Zona</span>
+                <select name="zona" defaultValue={sp.zona ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                  <option value="">Toda la isla</option>
+                  {zonasConInventario.map((z) => <option key={z.slug} value={z.slug}>{z.name}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="label-eyebrow text-ink-subtle">Precio</span>
+                <select name="precio" defaultValue={sp.precio ?? ''} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                  {PRECIOS.map((p) => <option key={p.v} value={p.v}>{p.l}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="label-eyebrow text-ink-subtle">Ordenar</span>
+                <select name="orden" defaultValue={orden} className="mt-1.5 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
+                  {ORDENES.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
+              </label>
+              <div className="flex gap-2">
+                <button type="submit" className="btn-solid"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Filtrar</button>
+                {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-control px-3 text-meta text-ink-muted underline-offset-4 hover:underline">Limpiar</Link>}
+              </div>
+            </div>
+          </form>
+
+          <section aria-labelledby="catalogo" className="mt-10">
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
+                {tarjetas.length === 0 ? 'Nada con ese filtro' : `${tarjetas.length} ${tarjetas.length === 1 ? 'inmueble' : 'inmuebles'}`}
+                {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
+              </h2>
+              {inmuebles.length > 0 && <p className="text-meta text-ink-muted">Con «Verificado»: papeles revisados por {SITE.name}</p>}
+            </div>
+
+            {tarjetas.length === 0 ? (
+              <div className="mt-7 rounded-panel border border-line bg-white p-7">
                 <p className="text-body text-ink/80 leading-relaxed">
-                  Estamos incorporando los primeros inmuebles. Si buscás comprar en la isla,
-                  decinos qué y dónde: trabajamos con propietarios de Pampatar, Porlamar y
-                  Costa Azul y te conseguimos opciones con los papeles en orden.
+                  {hayFiltro ? 'No hay inmuebles con esos filtros ahora mismo. ' : 'Estamos incorporando los primeros inmuebles. '}
+                  Decinos qué buscás y dónde: trabajamos con propietarios de toda la isla y te conseguimos opciones con los papeles en orden.
                 </p>
-                {waBusco && <p className="mt-5"><a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscás</a></p>}
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {waBusco && <a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscás</a>}
+                  {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep hover:border-ink">Ver todos</Link>}
+                </div>
               </div>
             ) : (
-              <ul className="mt-8 grid gap-8 sm:grid-cols-2">
-                {inmuebles.map((i) => (
-                  <li key={i.id} className="group overflow-hidden rounded-card border border-line bg-white transition-all hover:border-ink hover:shadow-hard-sm">
-                    <Link href={`${PATH}/${i.slug}`}>
-                      {i.image ? (
-                        <img src={i.image} alt={`${i.titulo} — en venta en ${i.zone}, Isla de Margarita`} width={800} height={533} loading="lazy" decoding="async" className="aspect-[3/2] w-full object-cover" />
-                      ) : (
-                        <div className="aspect-[3/2] w-full bg-paper-warm" />
-                      )}
-                    </Link>
-                    <div className="p-5">
-                      <p className="label-eyebrow text-ink-subtle">{TIPOS.find((t) => t.key === i.tipo)?.label} · {i.zone}</p>
-                      <h3 className="mt-2 font-serif text-title-sm text-brand-deep font-semibold">
-                        <Link href={`${PATH}/${i.slug}`} className="hover:underline underline-offset-4">{i.titulo}</Link>
-                      </h3>
-                      <p className="mt-1 text-meta text-ink-muted">
-                        {[i.habitaciones && `${i.habitaciones} hab`, i.banos && `${i.banos} baños`, i.m2Construccion && `${i.m2Construccion} m²`].filter(Boolean).join(' · ')}
-                      </p>
-                      <div className="mt-4 border-t border-line pt-4">
-                        <PrecioVenta usd={i.precioUsd} aConsultar={i.precioAConsultar} compacto />
-                      </div>
-                    </div>
-                  </li>
-                ))}
+              <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {tarjetas.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
               </ul>
             )}
           </section>
 
-          {prospectos.length > 0 && (
-            <section aria-labelledby="en-la-isla" className={inmuebles.length ? 'section-gap' : 'mt-8'}>
-              {inmuebles.length > 0 && (
-                <h2 id="en-la-isla" className="font-serif text-headline text-ink font-normal track-headline">
-                  Más inmuebles <em className="headline-italic">en la isla</em>
-                </h2>
-              )}
-              <ul className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {prospectos.map((p) => {
-                  const foto = p.fotosLocales[0];
-                  const ficha = [p.habitaciones && `${p.habitaciones} hab`, p.banos && `${p.banos} baños`, p.m2 && `${p.m2} m²`].filter(Boolean).join(' · ');
-                  return (
-                    <li key={p.fbId} className="group overflow-hidden rounded-card border border-line bg-white transition-all hover:border-ink hover:shadow-hard-sm">
-                      <Link href={`${PATH}/${p.slug}`} className="block overflow-hidden">
-                        {foto ? (
-                          <img src={foto} alt={`${p.tituloLimpio} — en venta en ${p.zoneName ?? p.municipio}, Isla de Margarita`} width={800} height={600} loading="lazy" decoding="async" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                        ) : (
-                          <div className="flex aspect-[4/3] w-full items-center justify-center bg-brand-tint text-ui text-brand-deep">Foto al consultar</div>
-                        )}
-                      </Link>
-                      <div className="p-5">
-                        <p className="label-eyebrow text-ink-subtle">{p.zoneName ?? p.ciudad ?? 'Isla de Margarita'}{p.municipio ? ` · mun. ${p.municipio}` : ''}</p>
-                        <h3 className="mt-2 font-serif text-title-sm text-brand-deep font-semibold">
-                          <Link href={`${PATH}/${p.slug}`} className="hover:underline underline-offset-4">{p.tituloLimpio}</Link>
-                        </h3>
-                        {ficha && <p className="mt-1 text-meta text-ink-muted">{ficha}</p>}
-                        <div className="mt-4 border-t border-line pt-4">
-                          <PrecioVenta usd={p.precioUsd ?? 0} aConsultar={!p.precioUsd} compacto />
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          )}
-
           <section aria-labelledby="vendes" className="section-gap">
-            <div className="rounded-card border border-line bg-brand-deep p-8 text-white md:p-10">
+            <div className="rounded-panel border border-line bg-brand-deep p-8 text-white md:p-10">
               <h2 id="vendes" className="font-serif text-headline font-normal track-headline">¿Vendés en Margarita?</h2>
               <p className="mt-4 max-w-2xl text-body-lg text-white/85">
-                Lo publicamos con fotos profesionales, precio en las monedas que usa el comprador
-                y el respaldo de un sitio que Google ya conoce. Vos ponés el inmueble y los papeles;
-                nosotros, los compradores. Sin exclusividad forzada ni costos por adelantado.
+                Lo publicamos con fotos profesionales, precio en las monedas que usa el comprador y el respaldo
+                de un sitio que Google ya conoce. Vos ponés el inmueble y los papeles; nosotros, los compradores.
+                Sin exclusividad forzada ni costos por adelantado.
               </p>
               {waVendo && <p className="mt-6"><a href={waVendo} className="btn-solid bg-white text-brand-deep" rel="noopener">Quiero vender mi inmueble</a></p>}
             </div>
@@ -167,9 +162,9 @@ export default async function EnVentaPage() {
 
           <section aria-labelledby="faq-venta" className="section-gap">
             <h2 id="faq-venta" className="font-serif text-headline text-ink font-normal track-headline">Comprar en la isla, <em className="headline-italic">sin sorpresas</em></h2>
-            <div className="mt-7 max-w-2xl space-y-7">
+            <div className="mt-7 grid gap-7 md:grid-cols-2">
               {FAQ_VENTA.map((f) => (
-                <div key={f.q}>
+                <div key={f.q} className="rounded-card border border-line bg-white p-6">
                   <h3 className="text-body font-semibold text-brand-deep">{f.q}</h3>
                   <p className="mt-2 text-body text-ink-soft leading-relaxed">{f.a}</p>
                 </div>
