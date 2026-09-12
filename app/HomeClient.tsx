@@ -306,7 +306,7 @@ export default function HomeClient({
               contenido, no por pantalla. */}
           <section
             id="hero-banner"
-            className="relative w-full overflow-hidden bg-luz border-b border-line pt-28 pb-16 md:pt-44 md:pb-32"
+            className="relative w-full overflow-hidden bg-luz border-b border-line pt-28 pb-52 md:pt-44 md:pb-32"
           >
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 md:grid-cols-[1.1fr_.9fr] md:px-8">
               <div>
