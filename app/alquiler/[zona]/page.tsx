@@ -127,7 +127,7 @@ export default async function ZonaPage({
             profundo con un filete de acento arriba se lee más editorial. */}
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-5xl mx-auto px-5 py-16 md:px-8 md:py-28">
+          <div className="max-w-5xl mx-auto px-5 pb-16 pt-28 md:px-8 md:pb-28 md:pt-40">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li>

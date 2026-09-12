@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SlidersHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileCheck2, MessageCircle, ShieldCheck, SlidersHorizontal } from 'lucide-react';
 import { getZonesAll } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
@@ -41,9 +41,22 @@ const PRECIOS = [
 const ORDENES = [{ v: 'recientes', l: 'Más recientes' }, { v: 'precio-asc', l: 'Precio: menor a mayor' }, { v: 'precio-desc', l: 'Precio: mayor a menor' }];
 
 const TIPOS_FILTRO = ['Apartamento', 'Casa', 'Terreno', 'Local comercial', 'Posada'];
+const POR_PAGINA = 12;
+
+/** 1 … 4 [5] 6 … 20: siempre la primera, la última y las vecinas de la actual. */
+function paginasVisibles(actual: number, total: number): (number | '…')[] {
+  const set = new Set<number>([1, total, actual - 1, actual, actual + 1].filter((n) => n >= 1 && n <= total));
+  const lista = [...set].sort((a, b) => a - b);
+  const out: (number | '…')[] = [];
+  for (const [k, n] of lista.entries()) {
+    if (k > 0 && n - lista[k - 1] > 1) out.push('…');
+    out.push(n);
+  }
+  return out;
+}
 const HABS = [{ v: '', l: 'Cualquiera' }, { v: '1', l: '1+' }, { v: '2', l: '2+' }, { v: '3', l: '3+' }, { v: '4', l: '4+' }];
 
-export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string; tipo?: string | string[]; hab?: string }> }) {
+export default async function EnVentaPage({ searchParams }: { searchParams: Promise<{ zona?: string; precio?: string; orden?: string; tipo?: string | string[]; hab?: string; pagina?: string }> }) {
   const [sp, inmuebles, prospectos, zonas, contacto, tasas] = await Promise.all([
     searchParams, getInmueblesPublicados(), getProspectosPublicados(), getZonesAll(), getContacto(),
     getTasas().catch(() => null),
@@ -64,6 +77,23 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
   if (orden === 'precio-asc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || a.precioUsd - b.precioUsd);
   if (orden === 'precio-desc') tarjetas.sort((a, b) => (a.aConsultar ? 1 : 0) - (b.aConsultar ? 1 : 0) || b.precioUsd - a.precioUsd);
   const hayFiltro = Boolean(zonaSel || tope || orden !== 'recientes' || tiposSel.length || habMin);
+  const totalFiltrado = tarjetas.length;
+  const paginas = Math.max(1, Math.ceil(totalFiltrado / POR_PAGINA));
+  const pagina = Math.min(paginas, Math.max(1, Math.trunc(Number(sp.pagina)) || 1));
+  const desde = (pagina - 1) * POR_PAGINA;
+  const visibles = tarjetas.slice(desde, desde + POR_PAGINA);
+  // Enlace de página conservando los filtros: se comparte tal cual.
+  const urlPagina = (n: number) => {
+    const q = new URLSearchParams();
+    if (sp.zona) q.set('zona', sp.zona);
+    if (sp.precio) q.set('precio', sp.precio);
+    if (orden !== 'recientes') q.set('orden', orden);
+    for (const t of tiposSel) q.append('tipo', t);
+    if (habMin) q.set('hab', String(habMin));
+    if (n > 1) q.set('pagina', String(n));
+    const qs = q.toString();
+    return qs ? `${PATH}?${qs}` : PATH;
+  };
 
   const wa = (texto: string) => contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(texto)}` : null;
   const waVendo = wa('Hola, tengo un inmueble en venta en Margarita y quiero que Margarita Renace lo represente. Es un [apartamento/casa] en [zona].');
@@ -78,7 +108,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
       <div className="min-h-screen bg-paper">
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-6xl mx-auto px-5 py-14 md:px-8 md:py-20">
+          <div className="max-w-6xl mx-auto px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-36">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li><Link href="/" className="underline hover:text-white">Inicio</Link></li>
@@ -99,16 +129,33 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
         </header>
 
         <main className="max-w-6xl mx-auto px-5 py-12 md:px-8 md:py-16">
+          {/* Confianza antes que catálogo: quien compra a distancia necesita
+              saber quién responde, qué se verifica y cómo se paga. */}
+          <ul className="-mt-4 mb-10 grid gap-3 sm:grid-cols-3">
+            {[
+              { I: MessageCircle, t: 'Contacto directo', d: `Respondemos nosotros por WhatsApp${contacto.phone ? ` · ${contacto.phone}` : ''}. Sin formularios que nadie lee.` },
+              { I: FileCheck2, t: 'Papeles antes de la visita', d: 'Documento de propiedad, catastro y solvencias se revisan con el propietario antes de mostrar.' },
+              { I: ShieldCheck, t: 'Precio claro, en 4 monedas', d: 'US$, USDT, bolívares a tasa de mercado y BCV, con la tasa del día. Sin comisiones ocultas.' },
+            ].map(({ I, t, d }) => (
+              <li key={t} className="flex gap-3 rounded-card border border-line bg-white p-4">
+                <I className="mt-0.5 h-5 w-5 shrink-0 stroke-[1.6] text-brand" aria-hidden="true" />
+                <div><p className="text-body font-semibold text-ink">{t}</p><p className="mt-1 text-meta text-ink-muted">{d}</p></div>
+              </li>
+            ))}
+          </ul>
           {/* Filtros en barra lateral izquierda (escritorio) o plegable arriba
               (móvil). Formulario GET: sin JavaScript, y la URL con filtros se
               comparte por WhatsApp tal cual. */}
-          <div className="grid gap-8 lg:grid-cols-[17rem_1fr] lg:gap-10">
-            <aside className="lg:sticky lg:top-24 lg:h-fit">
+          {/* Patrón Airbnb/Idealista: la barra de filtros queda FIJA a la
+              izquierda (sticky bajo la navbar, con su propio scroll interno si
+              no cabe) y solo el listado se desplaza. */}
+          <div className="grid gap-8 lg:grid-cols-[16.5rem_1fr] lg:gap-10">
+            <aside className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1 [scrollbar-width:thin]">
               {/* Siempre visible (la dueña no quiso plegable): a la izquierda en
                   escritorio, arriba del listado en teléfono. */}
               <div className="rounded-panel border border-line bg-white">
-                <p className="flex items-center gap-2 px-5 py-4 text-body font-semibold text-ink"><SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />Filtros</p>
-                <form method="get" action={PATH} className="space-y-6 border-t border-line px-5 pb-5 pt-5">
+                <p className="flex items-center gap-2 px-5 py-3.5 text-body font-semibold text-ink"><SlidersHorizontal className="h-4 w-4 text-brand" aria-hidden="true" />Filtros</p>
+                <form method="get" action={PATH} className="space-y-5 border-t border-line px-5 pb-5 pt-4">
                   <div>
                     <p className="label-eyebrow text-ink-subtle">Zona</p>
                     <select name="zona" defaultValue={sp.zona ?? ''} className="mt-2 block w-full rounded-control border border-line bg-paper px-3 py-2.5 text-body text-ink">
@@ -170,10 +217,12 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
             <section aria-labelledby="catalogo" className="min-w-0">
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <h2 id="catalogo" className="font-serif text-headline text-ink font-normal track-headline">
-                  {tarjetas.length === 0 ? 'Nada con ese filtro' : `${tarjetas.length} ${tarjetas.length === 1 ? 'inmueble' : 'inmuebles'}`}
+                  {totalFiltrado === 0 ? 'Nada con ese filtro' : `${totalFiltrado} ${totalFiltrado === 1 ? 'inmueble' : 'inmuebles'}`}
                   {zonaSel && <> en <em className="headline-italic">{zonaSel}</em></>}
                 </h2>
-                {inmuebles.length > 0 && <p className="text-meta text-ink-muted">Con «Verificado»: papeles revisados por {SITE.name}</p>}
+                {totalFiltrado > POR_PAGINA && (
+                  <p className="text-meta text-ink-muted">Mostrando {desde + 1}–{Math.min(desde + POR_PAGINA, totalFiltrado)} de {totalFiltrado}</p>
+                )}
               </div>
 
               {tarjetas.length === 0 ? (
@@ -188,9 +237,41 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                   </div>
                 </div>
               ) : (
-                <ul className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                  {tarjetas.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
-                </ul>
+                <>
+                  <ul className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                    {visibles.map((t, k) => <TarjetaVenta key={t.href} d={{ ...t, prioridad: k < 3 }} tasas={tasas} />)}
+                  </ul>
+                  {paginas > 1 && (
+                    <nav aria-label="Páginas" className="mt-10 flex flex-wrap items-center justify-center gap-1.5">
+                      {pagina > 1 ? (
+                        <Link href={urlPagina(pagina - 1)} className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm">
+                          <ChevronLeft className="h-4 w-4" aria-hidden="true" />Anterior
+                        </Link>
+                      ) : <span className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line/60 px-3.5 text-ui text-ink-faint"><ChevronLeft className="h-4 w-4" aria-hidden="true" />Anterior</span>}
+                      {paginasVisibles(pagina, paginas).map((n, k) =>
+                        n === '…' ? (
+                          <span key={`e${k}`} className="px-1.5 text-ink-faint">…</span>
+                        ) : (
+                          <Link
+                            key={n}
+                            href={urlPagina(n)}
+                            aria-current={n === pagina ? 'page' : undefined}
+                            className={`inline-flex h-10 min-w-10 items-center justify-center rounded-chip border px-3 text-ui font-medium transition-all ${
+                              n === pagina ? 'border-brand bg-brand text-white' : 'border-line bg-white text-brand-deep hover:border-ink hover:shadow-hard-sm'
+                            }`}
+                          >
+                            {n}
+                          </Link>
+                        ),
+                      )}
+                      {pagina < paginas ? (
+                        <Link href={urlPagina(pagina + 1)} className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm">
+                          Siguiente<ChevronRight className="h-4 w-4" aria-hidden="true" />
+                        </Link>
+                      ) : <span className="inline-flex min-h-[40px] items-center gap-1 rounded-chip border border-line/60 px-3.5 text-ui text-ink-faint">Siguiente<ChevronRight className="h-4 w-4" aria-hidden="true" /></span>}
+                    </nav>
+                  )}
+                </>
               )}
             </section>
           </div>

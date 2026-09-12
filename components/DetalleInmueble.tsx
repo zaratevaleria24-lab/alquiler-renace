@@ -59,7 +59,7 @@ export default async function DetalleInmueble({ d }: { d: DatosDetalle }) {
 
   return (
     <div className="min-h-screen bg-paper pb-24 md:pb-0">
-      <header className="max-w-6xl mx-auto px-5 pt-8 md:px-8 md:pt-12">
+      <header className="max-w-6xl mx-auto px-5 pt-28 md:px-8 md:pt-32">
         <nav aria-label="Ruta de navegación" className="text-ui">
           <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
             <li><Link href="/" className="hover:text-brand hover:underline underline-offset-4">Inicio</Link></li>
@@ -96,7 +96,7 @@ export default async function DetalleInmueble({ d }: { d: DatosDetalle }) {
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                 {datos.map(({ icono: Icono, k, v }) => (
                   <li key={k} className="rounded-card border border-line bg-white p-4">
-                    <Icono className="h-5 w-5 stroke-[1.6] text-brand" aria-hidden="true" />
+                    <Icono className="h-4 w-4 stroke-[1.5] text-brand" aria-hidden="true" />
                     <p className="mono-data mt-3 text-title-sm text-ink">{v}</p>
                     <p className="text-ui text-ink-muted">{k}</p>
                   </li>

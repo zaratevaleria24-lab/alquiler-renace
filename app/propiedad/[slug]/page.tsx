@@ -116,7 +116,7 @@ export default async function PropiedadPage({
       <div className="min-h-screen bg-paper">
         <header className="relative bg-brand-deep text-white">
           <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
-          <div className="max-w-5xl mx-auto px-5 py-14 md:px-8 md:py-20">
+          <div className="max-w-5xl mx-auto px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-36">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
               <ol className="flex flex-wrap items-center gap-2 text-white/80">
                 <li>

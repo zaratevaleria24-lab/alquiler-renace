@@ -59,7 +59,7 @@ export default function TarjetaVenta({ d, tasas }: { d: DatosTarjeta; tasas?: Ta
         </div>
         {d.fotos > 1 && (
           <span className="absolute right-3.5 top-3.5 inline-flex items-center gap-1 rounded-chip border border-white/30 bg-ink/40 px-2 py-1 text-ui text-white backdrop-blur-sm">
-            <Camera className="h-3.5 w-3.5" aria-hidden="true" />{d.fotos}
+            <Camera className="h-3 w-3" aria-hidden="true" />{d.fotos}
           </span>
         )}
         <div className="absolute bottom-3.5 left-3.5 right-3.5 flex items-end justify-between gap-3 text-white">
@@ -76,10 +76,10 @@ export default function TarjetaVenta({ d, tasas }: { d: DatosTarjeta; tasas?: Ta
           <Link href={d.href} className="hover:underline underline-offset-4">{d.titulo}</Link>
         </h3>
         {(d.habitaciones != null || d.banos != null || d.m2 != null) && (
-          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-ink-muted">
-            {d.habitaciones != null && <li className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4 stroke-[1.6]" aria-hidden="true" />{d.habitaciones} hab</li>}
-            {d.banos != null && <li className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4 stroke-[1.6]" aria-hidden="true" />{d.banos} baños</li>}
-            {d.m2 != null && <li className="inline-flex items-center gap-1.5"><Ruler className="h-4 w-4 stroke-[1.6]" aria-hidden="true" />{d.m2} m²</li>}
+          <ul className="flex flex-wrap gap-x-3.5 gap-y-1 text-ui text-ink-muted">
+            {d.habitaciones != null && <li className="inline-flex items-center gap-1.5"><BedDouble className="h-3.5 w-3.5 stroke-[1.5]" aria-hidden="true" />{d.habitaciones} hab</li>}
+            {d.banos != null && <li className="inline-flex items-center gap-1.5"><Bath className="h-3.5 w-3.5 stroke-[1.5]" aria-hidden="true" />{d.banos} baños</li>}
+            {d.m2 != null && <li className="inline-flex items-center gap-1.5"><Ruler className="h-3.5 w-3.5 stroke-[1.5]" aria-hidden="true" />{d.m2} m²</li>}
           </ul>
         )}
         <div className="mt-auto border-t border-line pt-3">

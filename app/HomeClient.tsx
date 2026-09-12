@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import NavBar from '@/components/NavBar';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Menu, 
@@ -141,11 +142,7 @@ export default function HomeClient({
     };
   }, []);
 
-  const [activeNavLink, setActiveNavLink] = useState('Inicio');
 
-  // Menú de teléfono. La fila de enlaces del centro es `hidden md:flex`, así
-  // que en móvil esto es la ÚNICA navegación que hay.
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Interactive categories navigation state
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -194,7 +191,6 @@ export default function HomeClient({
       if (event.key !== 'Escape') return;
       setIsFilterOpen(false);
       setIsDetailOpen(false);
-      setIsMenuOpen(false);
       setActivePopover(null);
     }
     document.addEventListener('keydown', onKeyDown);
@@ -288,114 +284,8 @@ export default function HomeClient({
   return (
     <div className="min-h-screen bg-paper text-ink pb-24 relative overflow-x-hidden">
 
-      {/* 1. NAVBAR (Fija Arriba) */}
-      <nav id="navbar-floating" className="fixed top-0 left-0 right-0 z-40 px-4 pt-4 md:px-8 md:pt-6">
-        {/* La navbar usa la escala de INTERFAZ (text-ui), no la de contenido.
-            En la primera pasada de rediseño se le aplicó tipografía de cuerpo y
-            objetivos táctiles de 46px, y creció de ~62px a ~82px: quedó
-            gruesa. Una barra fija compite con el contenido por espacio
-            vertical, así que acá manda la densidad. Los 44px táctiles siguen
-            valiendo para las acciones del contenido, no para el chrome de
-            escritorio. */}
-        {/* Fondo `earth` (tierra profunda), no `brand`: la terracota es el color
-            de ACCIÓN del sitio. Usarla en una barra a todo lo ancho la gasta y
-            deja de señalar "esto se pulsa". La tierra sostiene el mismo aire
-            cálido sin competir con los botones. */}
-        <div className="bg-earth text-white rounded-panel px-5 py-3 md:px-7 md:py-3 shadow-[0_6px_24px_-8px_rgba(43,33,27,0.4)] max-w-7xl mx-auto flex items-center justify-between border border-white/10">
-
-          {/* Izquierda: Logo + Nombre */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={handleResetSearch}>
-            {/* Emblema (sol, palma, montaña y ola) desde el 2026-09-12; el
-                monograma anterior quedó en git. Un emblema necesita algo más de
-                caja que una letra para leerse: 40 px en vez de 36. */}
-            <div className="w-10 h-10 flex items-center justify-center shrink-0">
-              <img src="/logo-mark-white.svg" alt="Margarita Renace" width={40} height={40} className="w-full h-full object-contain" />
-            </div>
-            <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide text-white leading-none whitespace-nowrap">Margarita<span className="text-accent"> Renace</span></span>
-          </div>
-
-          {/* Centro: Links de Navegación.
-              Eran <button> que solo cambiaban su propio color: al pulsarlos no
-              pasaba NADA porque activeNavLink no se usaba para nada más. Ahora
-              son enlaces a destinos que existen de verdad.
-
-              OJO CON EL `hidden md:flex`: en móvil esta fila NO se ve, así que
-              la navegación de teléfono depende por completo del botón de menú
-              de abajo. Estuvo sin acción hasta el 2026-08-03: en un teléfono la
-              navbar era decoración. Si algún día se toca uno, revisar el otro. */}
-          <div className="hidden md:flex items-center gap-0.5 bg-white/10 rounded-control p-1 border border-white/10">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setActiveNavLink(link.label)}
-                className={`px-4 py-2 rounded-chip text-ui font-medium tracking-wide transition-all ${
-                  activeNavLink === link.label
-                    ? 'bg-white text-brand'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Derecha: Become a Host + Íconos */}
-          <div className="flex items-center gap-1.5 md:gap-3">
-            <span className="hidden lg:inline text-ui font-medium text-white/75 tracking-wide hover:text-white transition-colors cursor-pointer">
-              Publica tu Propiedad
-            </span>
-
-            {/* El selector de idioma se retiró: era un botón sin acción y el
-                sitio solo existe en español. Vuelve cuando haya una versión en
-                inglés de verdad (está anotado en SEO.md como pendiente). */}
-
-            <button
-              onClick={() => setIsMenuOpen((abierto) => !abierto)}
-              aria-label={isMenuOpen ? 'Cerrar menú' : 'Menú de navegación'}
-              aria-expanded={isMenuOpen}
-              aria-controls="menu-movil"
-              className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white hover:bg-white/10 hover:border-white/35 transition-all cursor-pointer"
-            >
-              {isMenuOpen ? (
-                <X className="w-[17px] h-[17px]" />
-              ) : (
-                <Menu className="w-[17px] h-[17px]" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Menú desplegable de teléfono.
-            Va DENTRO del <nav> fijo para heredar su posición, y solo se muestra
-            por debajo de md: en escritorio la fila del centro ya hace el trabajo
-            y tener las dos sería duplicar la navegación. */}
-        {isMenuOpen && (
-          <div
-            id="menu-movil"
-            className="md:hidden mt-2 rounded-control border border-white/15 bg-earth/95 p-2 shadow-hard backdrop-blur-xl"
-          >
-            <ul className="flex flex-col">
-              {NAV_LINKS.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    onClick={() => {
-                      setActiveNavLink(link.label);
-                      // Cerrar al elegir: si no, el menú tapa justo la sección
-                      // a la que se acaba de saltar.
-                      setIsMenuOpen(false);
-                    }}
-                    className="flex min-h-[48px] items-center rounded-chip px-4 text-body font-medium text-white/85 transition-colors hover:bg-white/10 hover:text-white"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </nav>
+      {/* 1. NAVBAR: el mismo componente que usan todas las páginas. */}
+      <NavBar whatsapp={whatsapp} onInicio={handleResetSearch} />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
         

@@ -148,8 +148,8 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // La ruta la pone el middleware; ver el comentario de allá.
   const ruta = cabeceras.get('x-ruta') ?? '';
   const esEnlaces = ruta === '/enlaces';
-  // La home trae su propia barra (flotante, con lógica de búsqueda); el resto
-  // de páginas públicas no tenía ninguna hasta el 2026-09-12.
+  // La home pinta la barra ella misma (le pasa el reinicio de búsqueda); el
+  // resto la recibe desde acá. Mismo componente: components/NavBar.
   const esHome = ruta === '/' || ruta === '';
   // El contacto vive en la base y se edita en /admin/contenido.
   const contacto = await getContacto();
