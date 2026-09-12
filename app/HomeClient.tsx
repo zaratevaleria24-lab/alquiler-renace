@@ -290,7 +290,7 @@ export default function HomeClient({
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
         
         {/* 2. HERO a pantalla completa, de borde a borde */}
-        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-44 md:mb-24">
+        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-56 md:mb-24">
           {/* Altura de pantalla completa. Se usa `svh` (small viewport height)
               y no `vh` ni `dvh`: en móvil, `100vh` mide como si la barra del
               navegador no existiera —el hero queda cortado— y `100dvh` provoca
@@ -298,88 +298,48 @@ export default function HomeClient({
               toma la ventana con la barra visible: nunca se corta y nunca
               salta. Tope de 900px para que en monitores altos el hero no se
               vuelva un desierto vertical. */}
+          {/* HERO «Amanecer» (2026-09-12). Antes: foto de playa a pantalla
+              completa con velo oscuro y el texto encima. Ahora: el amanecer de
+              Playa El Agua como degradado (durazno → agua), el titular a la
+              izquierda y UNA foto en un marco de papel apenas inclinado, como
+              una postal pegada a mano. Trazo fino, sombras suaves. Altura por
+              contenido, no por pantalla. */}
           <section
             id="hero-banner"
-            className="relative w-full overflow-hidden h-[100svh] max-h-[900px] min-h-[620px]"
+            className="relative w-full overflow-hidden bg-luz border-b border-line pt-28 pb-16 md:pt-44 md:pb-32"
           >
-            {/* Hero background image: playa de Margarita */}
-            {/* Esta imagen es la LCP de la página. Va con fetchPriority alto y
-                sin lazy para que el navegador la pida de inmediato: en
-                Venezuela, donde la conexión es lenta, la LCP es la métrica que
-                decide si la página se siente rápida o no. width/height fijan la
-                relación de aspecto y eliminan el salto de layout (CLS). */}
-            <img
-              src={contenido.heroImage}
-              alt={contenido.heroImageAlt}
-              width={1600}
-              height={900}
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              className="w-full h-full object-cover transition-transform duration-[2000ms] ease-out hover:scale-[1.03]"
-              referrerPolicy="no-referrer"
-            />
-            {/* Velo de legibilidad, no de color. El overlay anterior era un
-                degradado de marca (teal/50 + ocre/30 + teal/60) que teñía la
-                foto entera: la dejaba lavada y descolorida, y aun así el texto
-                quedaba con poco contraste sobre la arena clara. Un velo de
-                tinta, más denso abajo, hace lo contrario: la foto conserva su
-                color y el texto se lee. */}
-            <div className="absolute inset-0 bg-gradient-to-b from-ink/55 via-ink/45 to-ink/60 flex flex-col items-center justify-center text-center px-5 pt-28 pb-44 md:pt-20 md:pb-24">
-              <p className="label-eyebrow rise rise-1 text-white/90 mb-4 tracking-[0.2em]">
-                {contenido.heroKicker}
-              </p>
-              <h1
-                /* max-w-4xl en vez de 3xl: a 68px la frase se partía en dos
-                   líneas gigantes y el título se comía el hero. Con más ancho
-                   respira en una sola línea en escritorio. */
-                className="font-serif text-hero text-white font-normal leading-[1.03] max-w-4xl text-balance track-display rise rise-2 drop-shadow-[0_2px_14px_rgba(35,38,36,0.55)]"
-              >
-                {/* Titular FUNCIONAL, no frase de marca. La versión anterior
-                    decía "Vive la Isla como en Casa": bonita y sin una sola
-                    palabra por la que alguien busque, con la keyword relegada a
-                    un subtítulo. Ahora el h1 —la señal de tema más fuerte de la
-                    página— dice qué se alquila y dónde, y la frase de marca
-                    baja a kicker. */}
-                Apartamentos y carros{' '}
-                <em className="headline-italic-light">en Isla de Margarita</em>
-              </h1>
-
-              {/* Propuesta concreta. Sale de investigar el mercado: los dos
-                  segmentos reales son la estadía corta y la MENSUAL (Airbnb
-                  tiene categoría propia de larga duración para Margarita), y a
-                  los viajeros se les recomienda reservar el carro con
-                  antelación en temporada alta. Resolver alojamiento y carro
-                  junto es la diferencia frente a las plataformas de solo
-                  alojamiento. */}
-              <p className="rise rise-3 mt-7 max-w-[38rem] text-pretty text-body md:text-body-lg text-white [text-shadow:0_1px_10px_rgba(31,26,22,0.55)]">
-                {contenido.heroSubtitulo}
-              </p>
-              {/* Tres datos, no adjetivos. Sustituye a la lista de zonas
-                  enumeradas —que repetía lo que ya dicen los chips y las
-                  landings— por lo que un viajero necesita saber para decidir.
-                  Minimalismo: separadores finos, sin iconos, sin tarjetas. */}
-              <ul className="mt-12 flex flex-col items-center gap-2.5 text-white sm:flex-row sm:gap-0 sm:divide-x sm:divide-white/40 [text-shadow:0_1px_3px_rgba(35,38,36,0.7),0_2px_18px_rgba(35,38,36,0.6)]">
-                <li className="text-ui-lg font-medium sm:px-5">Estadías cortas y mensuales</li>
-                <li className="text-ui-lg font-medium sm:px-5">Zonas con piscina y seguridad</li>
-                <li className="text-ui-lg font-medium sm:px-5">Sin intermediarios</li>
-              </ul>
+            <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 md:grid-cols-[1.1fr_.9fr] md:px-8">
+              <div>
+                <p className="label-eyebrow rise rise-1 text-brand-deep tracking-[0.14em]">
+                  {contenido.heroKicker}
+                </p>
+                <h1 className="font-serif text-hero text-ink font-normal leading-[1.02] text-balance track-display rise rise-2 mt-4">
+                  Apartamentos y casas en Isla de Margarita,{' '}
+                  <em className="headline-italic">con la luz de las seis</em>
+                </h1>
+                <p className="rise rise-3 mt-6 max-w-[44ch] text-pretty text-body md:text-body-lg text-ink-soft">
+                  {contenido.heroSubtitulo}
+                </p>
+                <ul className="rise rise-3 mt-8 flex flex-col gap-2 text-ink sm:flex-row sm:gap-0 sm:divide-x sm:divide-line-strong">
+                  <li className="text-ui-lg font-medium sm:pr-5">Estadías cortas y mensuales</li>
+                  <li className="text-ui-lg font-medium sm:px-5">Casas y apartamentos en venta</li>
+                  <li className="text-ui-lg font-medium sm:pl-5">Autos y traslados</li>
+                </ul>
+              </div>
+              <figure className="rise rise-2 hidden md:block justify-self-center w-[min(100%,440px)] -rotate-[1.5deg] rounded-card border border-line bg-white p-2.5 shadow-lift-lg">
+                <img
+                  src={contenido.heroImage}
+                  alt={contenido.heroImageAlt}
+                  width={880}
+                  height={660}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="aspect-[4/3] w-full rounded-control object-cover"
+                  referrerPolicy="no-referrer"
+                />
+                <figcaption className="mono-data px-1 pt-2.5 text-ink-muted">{contenido.heroImageAlt || 'Isla de Margarita'}</figcaption>
+              </figure>
             </div>
-
-            {/* Curva de transición hacia el contenido.
-                Iba en blanco puro mientras el fondo de la página es hueso
-                (#F7F2EA): se veía un corte de color justo debajo del hero.
-                Ahora usa el mismo hueso, así la curva funde de verdad. */}
-            <svg
-              className="absolute bottom-0 left-0 w-full h-[90px] md:h-[130px]"
-              viewBox="0 0 1440 130"
-              fill="none"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-            >
-              <path d="M0,85 C480,20 960,20 1440,95 L1440,130 L0,130 Z" fill="#F7F2EA" fillOpacity="0.4" />
-              <path d="M0,105 C480,45 960,45 1440,115 L1440,130 L0,130 Z" fill="#F7F2EA" />
-            </svg>
           </section>
 
           {/* SEARCH BAR Flotante sobre el borde inferior */}

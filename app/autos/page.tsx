@@ -108,29 +108,29 @@ export default async function AutosPage() {
       />
 
       <div className="min-h-screen bg-paper">
-        <header className="relative bg-brand-deep text-white">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
+        <header className="relative bg-luz text-ink border-b border-line">
+          
           <div className="max-w-5xl mx-auto px-5 pb-16 pt-28 md:px-8 md:pb-24 md:pt-36">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
-              <ol className="flex flex-wrap items-center gap-2 text-white/80">
+              <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
                 <li>
-                  <Link href="/" className="underline hover:text-white">
+                  <Link href="/" className="underline hover:text-brand">
                     Inicio
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
-                <li className="text-white">Alquiler de carros</li>
+                <li className="text-ink">Alquiler de carros</li>
               </ol>
             </nav>
 
-            <p className="label-eyebrow mb-4 text-accent">
+            <p className="label-eyebrow mb-4 text-brand-deep">
               {SITE.region.island} · {SITE.region.state}
             </p>
             <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
               Alquiler de carros{' '}
-              <em className="headline-italic-light">en Isla de Margarita</em>
+              <em className="headline-italic">en Isla de Margarita</em>
             </h1>
-            <p className="mt-6 max-w-2xl text-body-lg text-white/85">
+            <p className="mt-6 max-w-2xl text-body-lg text-ink-soft">
               Resolver alojamiento y carro con la misma persona es la diferencia
               frente a las plataformas de solo alojamiento.
             </p>

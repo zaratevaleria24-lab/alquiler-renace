@@ -125,35 +125,35 @@ export default async function ZonaPage({
             (brand-deep → brand → accent). Un degradado ancho y saturado es una
             de las firmas más reconocibles de plantilla generada; un plano
             profundo con un filete de acento arriba se lee más editorial. */}
-        <header className="relative bg-brand-deep text-white">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
+        <header className="relative bg-luz text-ink border-b border-line">
+          
           <div className="max-w-5xl mx-auto px-5 pb-16 pt-28 md:px-8 md:pb-28 md:pt-40">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
-              <ol className="flex flex-wrap items-center gap-2 text-white/80">
+              <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
                 <li>
-                  <Link href="/" className="underline hover:text-white">
+                  <Link href="/" className="underline hover:text-brand">
                     Inicio
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
-                <li className="text-white">Alquiler en {zone.name}</li>
+                <li className="text-ink">Alquiler en {zone.name}</li>
               </ol>
             </nav>
 
-            <p className="label-eyebrow mb-4 text-accent">
+            <p className="label-eyebrow mb-4 text-brand-deep">
               {SITE.region.island} · {SITE.region.state}
             </p>
             <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
               Alquiler de apartamentos en {zone.name},{' '}
-              <em className="headline-italic-light">Isla de Margarita</em>
+              <em className="headline-italic">Isla de Margarita</em>
             </h1>
-            <p className="mt-6 max-w-2xl text-body-lg text-white/85">
+            <p className="mt-6 max-w-2xl text-body-lg text-ink-soft">
               {zone.summary}
             </p>
 
             <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
               <div>
-                <dt className="label-eyebrow text-accent">
+                <dt className="label-eyebrow text-brand-deep">
                   Alojamientos
                 </dt>
                 <dd className="mono-data mt-2 text-title-sm">
@@ -163,14 +163,14 @@ export default async function ZonaPage({
               </div>
               {zone.minPrice !== null && (
                 <div>
-                  <dt className="label-eyebrow text-accent">
+                  <dt className="label-eyebrow text-brand-deep">
                     Desde
                   </dt>
                   <dd className="mono-data mt-2 text-title-sm">US${zone.minPrice} / noche</dd>
                 </div>
               )}
               <div>
-                <dt className="label-eyebrow text-accent">
+                <dt className="label-eyebrow text-brand-deep">
                   Ubicación
                 </dt>
                 <dd className="mono-data mt-2 text-title-sm">{zone.coast}</dd>

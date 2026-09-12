@@ -28,8 +28,8 @@ export default function OpengraphImage() {
           padding: '80px',
           // Degradado teal de la identidad del sitio (ver CLAUDE.md).
           backgroundImage:
-            'linear-gradient(135deg, #0B4A5C 0%, #126E8B 55%, #6FADC1 100%)',
-          color: 'white',
+            'linear-gradient(120deg, #FFE7D4 0%, #FFF3E6 42%, #D6EFF0 100%)',
+          color: '#2b2622',
         }}
       >
         <div
@@ -37,7 +37,7 @@ export default function OpengraphImage() {
             fontSize: 30,
             letterSpacing: 8,
             textTransform: 'uppercase',
-            color: '#5EEAD4',
+            color: '#0b4a5c',
             marginBottom: 28,
           }}
         >
@@ -74,7 +74,7 @@ export default function OpengraphImage() {
             style={{
               width: 14,
               height: 56,
-              background: '#5EEAD4',
+              background: '#c0563c',
               borderRadius: 8,
             }}
           />

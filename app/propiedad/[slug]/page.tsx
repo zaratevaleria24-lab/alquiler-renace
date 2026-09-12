@@ -114,44 +114,44 @@ export default async function PropiedadPage({
       />
 
       <div className="min-h-screen bg-paper">
-        <header className="relative bg-brand-deep text-white">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
+        <header className="relative bg-luz text-ink border-b border-line">
+          
           <div className="max-w-5xl mx-auto px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-36">
             <nav aria-label="Ruta de navegación" className="mb-8 text-ui">
-              <ol className="flex flex-wrap items-center gap-2 text-white/80">
+              <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
                 <li>
-                  <Link href="/" className="underline hover:text-white">
+                  <Link href="/" className="underline hover:text-brand">
                     Inicio
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
                 <li>
-                  <Link href={zonePath} className="underline hover:text-white">
+                  <Link href={zonePath} className="underline hover:text-brand">
                     {property.zone}
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
-                <li className="text-white">{property.name}</li>
+                <li className="text-ink">{property.name}</li>
               </ol>
             </nav>
 
-            <p className="label-eyebrow mb-4 text-accent">
+            <p className="label-eyebrow mb-4 text-brand-deep">
               {property.zone} · {SITE.region.island}
             </p>
             <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
               {property.name}
             </h1>
-            <p className="mt-4 max-w-2xl text-body-lg text-white/85">
+            <p className="mt-4 max-w-2xl text-body-lg text-ink-soft">
               {property.location}
             </p>
 
             <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
               <div>
-                <dt className="label-eyebrow text-accent">Tarifa</dt>
+                <dt className="label-eyebrow text-brand-deep">Tarifa</dt>
                 <dd className="mono-data mt-2 text-title-sm">{property.priceText}</dd>
               </div>
               <div>
-                <dt className="label-eyebrow text-accent">Capacidad</dt>
+                <dt className="label-eyebrow text-brand-deep">Capacidad</dt>
                 <dd className="mono-data mt-2 text-title-sm">
                   {capacidad}
                 </dd>

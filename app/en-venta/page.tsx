@@ -96,19 +96,19 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="min-h-screen bg-paper">
-        <header className="relative bg-brand-deep text-white">
-          <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-accent" />
+        <header className="relative bg-luz text-ink border-b border-line">
+          
           <div className="max-w-6xl mx-auto px-5 pb-7 pt-24 md:px-8 md:pb-9 md:pt-28">
             {/* Cabecera corta a propósito: la dueña quiere llegar a los filtros y
                 a las casas sin desplazarse. Una línea de título, una de contexto. */}
             <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
               <div>
-                <p className="label-eyebrow text-accent">Comprar en {SITE.region.island}</p>
+                <p className="label-eyebrow text-brand-deep">Comprar en {SITE.region.island}</p>
                 <h1 className="mt-1.5 font-serif text-headline font-normal leading-[1.05] track-headline">
                   Apartamentos y casas <em className="headline-italic">en venta</em>
                 </h1>
               </div>
-              <p className="max-w-xl text-meta text-white/80 md:text-body">
+              <p className="max-w-xl text-meta text-ink-muted md:text-body">
                 {totalSinFiltro} inmuebles con todas sus fotos y el precio en US$, Bs, USDT y € a la tasa del día.
               </p>
             </div>
@@ -289,7 +289,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
           <section aria-labelledby="vendes" className="section-gap">
             <div className="rounded-panel border border-line bg-brand-deep p-8 text-white md:p-10">
               <h2 id="vendes" className="font-serif text-headline font-normal track-headline">¿Vendés en Margarita?</h2>
-              <p className="mt-4 max-w-2xl text-body-lg text-white/85">
+              <p className="mt-4 max-w-2xl text-body-lg text-ink-soft">
                 Lo publicamos con fotos profesionales, precio en las monedas que usa el comprador y el respaldo
                 de un sitio que Google ya conoce. Vos ponés el inmueble y los papeles; nosotros, los compradores.
                 Sin exclusividad forzada ni costos por adelantado.

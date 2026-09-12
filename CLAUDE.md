@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Margarita Renace** is a rental marketplace for apartments and cars in Isla de Margarita, Venezuela. It originated as a Google AI Studio applet (`ai-studio-applet`, see `metadata.json`) built with Next.js. The site is Spanish-language, prices are in US$, and the design language is a Caribbean/coastal glassmorphism aesthetic (teal/cyan gradients, sand background, frosted-glass panels) layered over an editorial serif+sans type system.
+**Margarita Renace** is a rental marketplace for apartments and cars in Isla de Margarita, Venezuela. It originated as a Google AI Studio applet (`ai-studio-applet`, see `metadata.json`) built with Next.js. The site is Spanish-language, prices are in US$, and the design language (since 2026-09-12, direction «Amanecer» chosen by the owner) is light and artisanal: a peach→aqua gradient (`.bg-luz`) for the home hero and inner-page headers, warm off-white paper, thin 1px warm lines, soft shadows (no hard black offsets — the owner rejected them), moderate radii, deep teal `#0b4a5c` for actions and the italic half of headlines, terracotta `#c0563c` only for the wordmark and tiny accents; editorial serif+sans+mono type system unchanged. One shared floating navbar (`components/NavBar.tsx`). Check the live palette in `app/globals.css` before adding colors.
 
 A second surface — an admin dashboard for managing listings/reservations — is planned on a separate subdomain, sharing this codebase's stack and conventions.
 
