@@ -361,6 +361,12 @@ las métricas propias (36 visitantes en 30 días, 47 vistas, todos sin referrer)
 `/admin/contenido` (WhatsApp, teléfono, Instagram) en dos minutos, sin
 desplegar nada. Hasta que no esté, todo lo demás es decorativo.
 
+**Resuelto el mismo día:** la dueña pasó el número (+58 422 1161238) y el
+Instagram (@margaritarenace.ve); quedaron en `site_settings`. Verificado: el
+botón de reservar abre WhatsApp en las 4 propiedades, las zonas vacías tienen
+CTA, `/enlaces` resuelve WhatsApp e Instagram, y el JSON-LD lleva `telephone` y
+`sameAs`. Se editan desde `/admin/contenido`.
+
 ### Hecho hoy (código, desplegado)
 
 | Cambio | Por qué |
