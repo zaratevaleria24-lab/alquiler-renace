@@ -23,6 +23,7 @@ import {
   BedDouble,
   Building2,
   CalendarCheck,
+  Compass,
   Globe,
   Instagram,
   Mail,
@@ -82,6 +83,12 @@ export const TIPOS = {
     icono: Building2,
     color: '#003580',
     ayuda: 'El enlace de tu alojamiento en Booking.com.',
+  },
+  guia: {
+    nombre: 'Guía turística',
+    icono: Compass,
+    color: '#126e8b',
+    ayuda: 'La guía del sitio: /guia. Es la misma que abre el QR de los apartamentos.',
   },
   reserva: {
     nombre: 'Reservar aquí',

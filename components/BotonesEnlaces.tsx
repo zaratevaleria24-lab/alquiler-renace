@@ -42,28 +42,31 @@ function BotonAncho({ enlace }: { enlace: EnlacePublico }) {
   // que se hunde al pulsar—; los demás van en vidrio sobre la arena. Si todos
   // fueran iguales, la fila entera pesaría lo mismo y el visitante tendría que
   // leerlos uno por uno para decidir.
-  const clases = `group flex w-full items-center gap-4 rounded-full py-2.5 pl-2.5 pr-5 text-left transition duration-150 ${
+  // El destacado va lleno del azul profundo de la casa (es el botón que no
+  // paga comisión); los demás en blanco con línea fina y sombra suave, como el
+  // resto del sitio desde «Amanecer». Nada de sombras duras.
+  const clases = `group flex w-full items-center gap-4 rounded-full py-2.5 pl-2.5 pr-5 text-left transition duration-200 ${
     enlace.destacado
-      ? 'border-[1.5px] border-ink bg-white shadow-hard hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_var(--color-ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'
-      : 'border border-line bg-white/70 shadow-lift backdrop-blur-sm hover:border-line-strong hover:bg-white'
+      ? 'border border-brand-deep bg-brand-deep text-white shadow-lift-lg hover:-translate-y-0.5 active:translate-y-0'
+      : 'border border-line bg-white shadow-lift hover:-translate-y-0.5 hover:shadow-lift-lg active:translate-y-0'
   }`;
 
   const contenido = (
     <>
       <span
         aria-hidden="true"
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-white"
-        style={{ backgroundColor: color }}
+        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${enlace.destacado ? 'bg-white/15 text-white' : 'text-white'}`}
+        style={enlace.destacado ? undefined : { backgroundColor: color }}
       >
         <Icono className="h-[22px] w-[22px]" strokeWidth={1.75} />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-body font-medium text-ink">
+        <span className={`block text-body font-medium ${enlace.destacado ? 'text-white' : 'text-ink'}`}>
           {enlace.etiqueta}
         </span>
         {enlace.descripcion && (
-          <span className="mt-0.5 block text-meta leading-snug text-ink-muted">
+          <span className={`mt-0.5 block text-meta leading-snug ${enlace.destacado ? 'text-white/80' : 'text-ink-muted'}`}>
             {enlace.descripcion}
           </span>
         )}
@@ -71,7 +74,7 @@ function BotonAncho({ enlace }: { enlace: EnlacePublico }) {
 
       <ArrowUpRight
         aria-hidden="true"
-        className="h-[18px] w-[18px] shrink-0 text-ink-faint transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand"
+        className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${enlace.destacado ? 'text-white/80' : 'text-ink-faint group-hover:text-brand'}`}
       />
     </>
   );
@@ -109,7 +112,7 @@ function BotonRedondo({ enlace }: { enlace: EnlacePublico }) {
   const { icono: Icono, color } = tipoDe(enlace.tipo);
 
   const clases =
-    'flex h-14 w-14 items-center justify-center rounded-full border border-line bg-white/70 shadow-lift backdrop-blur-sm transition duration-150 hover:-translate-y-0.5 hover:border-line-strong hover:bg-white';
+    'flex h-14 w-14 items-center justify-center rounded-full border border-line bg-white shadow-lift transition duration-200 hover:-translate-y-0.5 hover:shadow-lift-lg';
 
   const contenido = (
     <>

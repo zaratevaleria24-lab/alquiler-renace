@@ -74,3 +74,19 @@ Lucide —el juego de iconos del sitio— retiró las marcas por licencia. El co
 de cada plataforma hace el trabajo de reconocimiento, y cada botón lleva su
 nombre al lado. Si algún día se quieren los originales, se cambian en
 `lib/tipos-enlace.ts` y en ningún sitio más.
+
+
+## Rediseño Amanecer (2026-09-13)
+
+Fondo `.bg-luz`, emblema nuevo en azulejo (`/logo-mark-teal.svg`) sin anillos,
+«Renace» en terracota, botones con línea fina y sombra suave; el destacado
+(WhatsApp) va lleno de azul profundo. Se retiró la sombra dura.
+
+Botones actuales: **Reserva directa por WhatsApp** (destacado) · **Guía turística**
+(tipo nuevo `guia`, /guia) · **Alquilar por Airbnb** · redondos Instagram y TikTok.
+«Reservar con nosotros» (/) quedó apagado a pedido del dueño: en la bio no se
+enlaza el inicio. Airbnb y TikTok siguen **pendientes de URL** (se ven sin enlace
+hasta que se peguen en /admin/enlaces).
+
+Pendientes que pidió el dueño y NO están hechas: correo corporativo con plantilla
+de contrato/cláusulas para firma del cliente (dos features aparte).
