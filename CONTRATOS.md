@@ -33,7 +33,7 @@ y queda constancia. Panel: **/admin/contratos**.
 4. Si hay SMTP, sale copia al correo corporativo y al huésped. La página firmada
    sirve de copia: «Imprimir» → PDF del navegador (CSS de impresión, A4).
 
-## Correo saliente — Resend (PENDIENTE: falta la API key)
+## Correo saliente — Resend (CONFIGURADO 2026-09-13; prueba enviada OK)
 
 El dominio ya está verificado en Resend: en Cloudflare existen `resend._domainkey`
 (DKIM), `send.margaritarenace.com.ve` MX → amazonses y su SPF. La recepción es
