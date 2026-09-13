@@ -144,7 +144,10 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // ni el aviso de tarifas, que son contenido de cara al visitante.
   const cabeceras = await headers();
   const host = cabeceras.get('host') ?? '';
-  const esPanel = host.startsWith('admin.');
+  // El panel también se abre desde margaritarenace.com.ve/admin (así lo usa el
+  // dueño): la barra pública no tiene sentido ahí, se decide por Host O por ruta.
+  const rutaTemprana = cabeceras.get('x-ruta') ?? '';
+  const esPanel = host.startsWith('admin.') || rutaTemprana.startsWith('/admin');
   // La página de enlaces es una tarjeta de presentación de una sola pantalla:
   // el pie del sitio —zonas, FAQ, aviso de tarifas— sería más largo que ella y
   // le quitaría lo único que tiene que hacer, que es que toques un botón.
