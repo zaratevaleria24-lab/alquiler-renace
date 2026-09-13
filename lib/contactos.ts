@@ -2,13 +2,15 @@
 import { randomInt } from 'node:crypto';
 import { query, rows } from './db';
 
-export interface Contacto { id: string; nombre: string; email: string; telefono: string; cupon: string; descuentoPct: number; origen: string; pagina: string; utm: Record<string, string>; consentimiento: boolean; correoEnviadoAt: string | null; cuponUsadoAt: string | null; createdAt: string }
+export type TipoContacto = 'huesped' | 'aliado' | 'prospecto';
+export interface Contacto { id: string; nombre: string; email: string; telefono: string; cupon: string; descuentoPct: number; origen: string; pagina: string; utm: Record<string, string>; consentimiento: boolean; correoEnviadoAt: string | null; cuponUsadoAt: string | null; createdAt: string; tipo: TipoContacto; comercio: string; notas: string }
 
 const desde = (r: Record<string, unknown>): Contacto => ({
   id: String(r.id), nombre: String(r.nombre ?? ''), email: String(r.email), telefono: String(r.telefono ?? ''), cupon: String(r.cupon), descuentoPct: Number(r.descuento_pct ?? 5),
   origen: String(r.origen ?? ''), pagina: String(r.pagina ?? ''), utm: (r.utm as Record<string, string>) ?? {}, consentimiento: Boolean(r.consentimiento),
   correoEnviadoAt: r.correo_enviado_at ? new Date(r.correo_enviado_at as string).toISOString() : null, cuponUsadoAt: r.cupon_usado_at ? new Date(r.cupon_usado_at as string).toISOString() : null,
   createdAt: new Date(r.created_at as string).toISOString(),
+  tipo: (String(r.tipo ?? 'huesped') as TipoContacto), comercio: String(r.comercio ?? ''), notas: String(r.notas ?? ''),
 });
 
 /** Código legible para dictar por WhatsApp: RENACE-5-7K3M. */
@@ -56,3 +58,15 @@ export async function descuentoDe(cupon: string): Promise<EstadoCupon> {
 }
 export async function borrarContacto(id: string) { await query(`DELETE FROM contactos WHERE id = $1`, [id]); }
 export async function marcarCuponUsado(id: string, usado: boolean) { await query(`UPDATE contactos SET cupon_usado_at = ${usado ? 'now()' : 'NULL'} WHERE id = $1`, [id]); }
+
+/** Alta manual desde el panel (aliados, prospectos, huéspedes de WhatsApp). Sin correo se genera uno interno. */
+export async function crearContactoManual(v: { nombre: string; email: string; telefono: string; tipo: TipoContacto; comercio: string; notas: string }): Promise<void> {
+  const email = v.email.trim().toLowerCase() || `sin-correo+${Date.now()}@margaritarenace.local`;
+  const [prev] = await rows<{ id: string }>(`SELECT id FROM contactos WHERE lower(email) = $1`, [email]);
+  if (prev) { await query(`UPDATE contactos SET nombre = COALESCE(NULLIF($2,''), nombre), telefono = COALESCE(NULLIF($3,''), telefono), tipo = $4, comercio = $5, notas = $6 WHERE id = $1`, [prev.id, v.nombre, v.telefono, v.tipo, v.comercio, v.notas]); return; }
+  for (let i = 0; i < 5; i++) {
+    try { await query(`INSERT INTO contactos (nombre, email, telefono, cupon, origen, tipo, comercio, notas, consentimiento) VALUES ($1,$2,$3,$4,'panel',$5,$6,$7,false)`, [v.nombre.trim().slice(0, 80), email, v.telefono.trim().slice(0, 40), nuevoCupon(), v.tipo, v.comercio.trim().slice(0, 120), v.notas.trim().slice(0, 1000)]); return; }
+    catch (e) { if (!/contactos_cupon_key/.test((e as Error).message)) throw e; }
+  }
+}
+export async function actualizarTipo(id: string, tipo: TipoContacto, comercio: string) { await query(`UPDATE contactos SET tipo = $2, comercio = $3 WHERE id = $1`, [id, tipo, comercio]); }

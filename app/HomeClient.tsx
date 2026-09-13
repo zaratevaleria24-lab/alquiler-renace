@@ -111,8 +111,8 @@ function urlReservaWhatsApp(
         `Estadía: ${noches}, ${huespedes}`,
         `Precio: US$${property.pricePerNight} por noche (dólar BCV)`,
         `*Total: US$${total.toLocaleString('es-VE')}*`,
-        bcv ? `En bolívares: ${bolivares(total * bcv, 0)} (BCV ${bolivares(bcv, 2)})` : '',
-        bcv && usdt ? `Referencia USDT: ${(total * bcv / usdt).toFixed(1)} USDT` : '',
+        bcv ? `En bolívares: ${bolivares(total * bcv, 0)} (tasa BCV de hoy: ${bolivares(bcv, 2)} por dólar)` : '',
+        bcv && usdt ? `Si pagas en USDT: ${(total * bcv / usdt).toFixed(1)} USDT (referencia, Binance de hoy)` : '',
         `Puedo pagar por: pago móvil (Bs) · Zelle (US$) · efectivo (US$) · USDT por Binance.`,
         `¿Está disponible?`,
         `https://margaritarenace.com.ve/propiedad/${property.slug}`,
@@ -1090,7 +1090,7 @@ export default function HomeClient({
                             <span className="mono-data text-[30px] leading-none">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                           </div>
                           <div className="flex items-baseline justify-between gap-3 text-meta text-ink">
-                            <span className="text-ink-muted">En bolívares</span>
+                            <span className="text-ink-muted">En bolívares · tasa BCV de hoy</span>
                             <span className="mono-data">{bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv, 0)}</span>
                           </div>
                           {tasaUsdt && (
@@ -1103,7 +1103,7 @@ export default function HomeClient({
                               micro para etiquetas en versalitas, y esto es texto
                               corrido que el huésped tiene que poder leer. */}
                           <p className="text-ui text-ink-muted">
-                            Pagas en dólares, en bolívares al BCV del día ({bolivares(tasaBcv, 2)}/US$) o en USDT.
+                            Pagas en dólares, en bolívares (tasa BCV de hoy: {bolivares(tasaBcv, 2)}) o en USDT.
                           </p>
                         </>
                       ) : (

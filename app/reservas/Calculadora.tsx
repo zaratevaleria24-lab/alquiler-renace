@@ -60,8 +60,8 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
     `Precio: ${usd(apto?.precio ?? 0)} por noche (dólar BCV) × ${noches} = ${usd(bruto)}`,
     descuento ? `Cupón ${cupon}: −${descuento.pct} % (−${usd(rebaja)})` : '',
     `*Total: ${usd(total)}*`,
-    tasa ? `En bolívares: ${bs(total * tasa)} (BCV ${bs(tasa)})` : '',
-    enUsdt ? `Referencia USDT: ${enUsdt.toFixed(1)} USDT` : '',
+    tasa ? `En bolívares: ${bs(total * tasa)} (tasa BCV de hoy: ${bs(tasa)} por dólar)` : '',
+    enUsdt ? `Si pagas en USDT: ${enUsdt.toFixed(1)} USDT (referencia, Binance de hoy)` : '',
     `Forma de pago: ${pagoElegido.t} (${pagoElegido.d}).`,
     '¿Está disponible?',
     `https://margaritarenace.com.ve/propiedad/${apto?.slug}`,
@@ -96,7 +96,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           {descuento && <div className="flex justify-between py-2 text-brand-deep"><dt>Cupón {cupon} · {descuento.pct} %</dt><dd className="mono-data">− {usd(rebaja)}</dd></div>}
           <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
           <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total <span className="text-ui font-normal text-ink-muted">· dólar BCV</span></dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
-          {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares ({bs(tasa)}/US$)</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
+          {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares (tasa BCV de hoy {bs(tasa)})</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
           {enUsdt != null && <div className="flex justify-between py-2"><dt className="text-ink-muted">USDT · referencia alternativa</dt><dd className="mono-data">≈ {enUsdt.toFixed(1)} USDT</dd></div>}
         </dl>
         {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
