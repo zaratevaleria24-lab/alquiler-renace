@@ -50,8 +50,8 @@ export async function SiteFooter() {
           </div>
 
           {/* Alojamiento */}
-          <nav aria-label="Alojamiento">
-            <p className={titulo}>Alojamiento</p>
+          <nav aria-label="Hospedajes">
+            <p className={titulo}>Hospedajes</p>
             <ul className="mt-4 space-y-2.5">
               <li><Link href="/" className={enlace}>Apartamentos</Link></li>
               <li><Link href="/reservas" className={enlace}>Calcular y reservar</Link></li>
