@@ -181,7 +181,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
                 <div className="rounded-card border border-line bg-white p-4">
                   <p className="label-eyebrow text-ink-subtle">Duerme cerca</p>
                   <p className="mt-1.5 text-meta text-ink-soft">{zonaCercana.properties.length === 1 ? 'Un apartamento nuestro' : `${zonaCercana.properties.length} apartamentos nuestros`} en {zonaCercana.name}{zonaCercana.minPrice ? `, desde US$ ${zonaCercana.minPrice}/noche` : ''}.</p>
-                  <Link href={`/alquiler/${zonaCercana.slug}`} className="mt-2 inline-block text-meta font-medium text-brand-deep underline-offset-4 hover:underline">Ver alojamientos en {zonaCercana.name} →</Link>
+                  <Link href={`/alquiler/${zonaCercana.slug}`} className="mt-2 inline-block text-meta font-medium text-brand-deep underline-offset-4 hover:underline">Ver hospedajes en {zonaCercana.name} →</Link>
                 </div>
               )}
               <p className="px-1 text-ui text-ink-faint">Valoración, horario y teléfono: Google. El texto y el consejo son nuestros. Si algo cambió, avísanos.</p>
@@ -236,7 +236,7 @@ async function PaginaHub({ slug }: { slug: string }) {
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
             <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar, Costa Azul y Porlamar desde US$60 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>
-            <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="btn-solid">Ver alojamientos</Link>{wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Reservar por WhatsApp</a>}</div>
+            <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="btn-solid">Ver hospedajes</Link>{wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Reservar por WhatsApp</a>}</div>
           </section>
         </main>
       </div>

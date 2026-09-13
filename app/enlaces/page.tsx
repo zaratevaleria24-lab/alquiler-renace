@@ -95,7 +95,7 @@ export default async function EnlacesPage() {
           // tabla. Antes que una página en blanco, la puerta del sitio.
           <p className="mt-10 text-center text-meta text-ink-muted">
             <Link href="/" className="underline underline-offset-4">
-              Ver los alojamientos
+              Ver los hospedajes
             </Link>
           </p>
         )}

@@ -158,7 +158,7 @@ export default async function ZonaPage({
             <dl className="mt-10 flex flex-wrap gap-x-12 gap-y-5">
               <div>
                 <dt className="label-eyebrow text-brand-deep">
-                  Alojamientos
+                  Hospedajes
                 </dt>
                 <dd className="mono-data mt-2 text-title-sm">
                   {zone.properties.length}{' '}
@@ -233,14 +233,14 @@ export default async function ZonaPage({
               id="alojamientos"
               className="font-serif text-headline text-ink font-normal track-headline"
             >
-              Alojamientos en {zone.name}
+              Hospedajes en {zone.name}
             </h2>
 
             {sinInventario && (
               <div className="block-gap rounded-card border border-line bg-white p-7">
                 <p className="text-body text-ink/80 leading-relaxed">
                   Todavía no tenemos apartamentos publicados en {zone.name}. Estamos
-                  incorporando alojamientos zona por zona; si buscas en esta parte de
+                  incorporando hospedajes zona por zona; si buscas en esta parte de
                   la isla, escríbenos y te avisamos apenas haya uno, o te orientamos
                   a la zona vecina más parecida.
                 </p>
@@ -256,7 +256,7 @@ export default async function ZonaPage({
                       href={`/alquiler/${z.slug}`}
                       className="inline-flex min-h-[44px] items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm"
                     >
-                      Ver alojamientos en {z.name}
+                      Ver hospedajes en {z.name}
                     </Link>
                   ))}
                 </div>
@@ -325,7 +325,7 @@ export default async function ZonaPage({
                 href="/"
                 className="btn-solid"
               >
-                Ver todos los alojamientos de la isla
+                Ver todos los hospedajes de la isla
               </Link>
             </p>
           </section>

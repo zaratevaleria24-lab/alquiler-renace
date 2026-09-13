@@ -363,7 +363,7 @@ export default async function AutosPage() {
             </ul>
             <p className="mt-10">
               <Link href="/" className="btn-solid">
-                Ver los alojamientos
+                Ver los hospedajes
               </Link>
             </p>
           </nav>

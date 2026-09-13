@@ -746,7 +746,7 @@ export default function HomeClient({
                       </>
                     ) : (
                       <>
-                        Alojamientos{' '}
+                        Hospedajes{' '}
                         <em className="headline-italic">en toda la isla</em>
                       </>
                     )}
@@ -756,7 +756,7 @@ export default function HomeClient({
                       referencia pide frases secas y declarativas. */}
                   <p className="mono-data text-ink-muted mt-2">
                     {filteredProperties.length}{' '}
-                    {filteredProperties.length === 1 ? 'alojamiento' : 'alojamientos'}
+                    {filteredProperties.length === 1 ? 'hospedaje' : 'hospedajes'}
                   </p>
                 </div>
                 {searchWhere.trim() && (
@@ -788,7 +788,7 @@ export default function HomeClient({
                 <div className="py-20 text-center max-w-md mx-auto">
                   <Smile className="w-12 h-12 text-gray-300 mx-auto mb-4 stroke-[1.2]" />
                   <h3 className="font-serif text-title-sm text-brand font-semibold mb-1">Sin resultados exactos</h3>
-                  <p className="text-meta text-ink-muted mb-6">No encontramos alojamientos disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
+                  <p className="text-meta text-ink-muted mb-6">No encontramos hospedajes disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
                   <button 
                     onClick={handleResetSearch}
                     className="btn-solid"

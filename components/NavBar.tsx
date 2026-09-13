@@ -16,10 +16,11 @@ import { Menu, X } from 'lucide-react';
 
 const ENLACES = [
   { label: 'Inicio', href: '/', enHome: '#hero-frame' },
-  { label: 'Apartamentos', href: '/#listings-container', enHome: '#listings-container' },
+  { label: 'Hospedajes', href: '/#listings-container', enHome: '#listings-container' },
   { label: 'Autos', href: '/autos', enHome: '/autos' },
   { label: 'En venta', href: '/en-venta', enHome: '/en-venta' },
-  { label: 'Guía', href: '/guia', enHome: '/guia' },
+  { label: 'Guía turística', href: '/guia', enHome: '/guia' },
+  { label: 'Reservar', href: '/reservas', enHome: '/reservas' },
 ] as const;
 
 export default function NavBar({
