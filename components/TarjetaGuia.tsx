@@ -1,6 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { Instagram, MapPin, MessageCircle, Navigation, Phone, Star } from 'lucide-react';
-import { CATEGORIAS, categoriaLabel, categoriasDe, esServicio, horarioHoy, miniatura, portadaDe, type Lugar } from '@/lib/guia';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esServicio, horarioHoy, miniatura, portadaDe, type Lugar } from '@/lib/guia-comun';
 import IconoCategoria from '@/components/IconosGuia';
 
 // LA tarjeta de la guía: la misma para una playa, un restaurante o el camión
@@ -53,7 +55,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
           {foto ? (
             <picture>
               <source media="(min-width: 768px)" srcSet={foto.src} />
-              <img src={miniatura(foto.src)} alt="" width={96} height={96} loading={prioridad ? 'eager' : 'lazy'} fetchPriority={prioridad ? 'high' : undefined} decoding="async" className="h-full w-full object-cover" />
+              <img src={miniatura(foto.src)} alt={`${l.nombre}, Isla de Margarita`} width={96} height={96} loading={prioridad ? 'eager' : 'lazy'} fetchPriority={prioridad ? 'high' : undefined} decoding="async" className="h-full w-full object-cover" />
             </picture>
           ) : (
             <span className="flex h-full w-full items-center justify-center text-brand"><IconoCategoria cat={l.categoria} className="h-9 w-9 md:h-14 md:w-14" /></span>

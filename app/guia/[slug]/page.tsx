@@ -24,7 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const l = await getLugar(slug);
   if (!l) return { title: 'Lugar no disponible' };
   const path = `/guia/${l.slug}`;
-  const title = `${l.nombre} — ${categoriaLabel(l.categoria)} en Isla de Margarita: cómo llegar, horario y consejos`;
+  // Corto: la plantilla del sitio antepone «Margarita Renace · ».
+  const title = `${l.nombre} · ${categoriaLabel(l.categoria)} en Isla de Margarita`;
   const description = l.descripcion.replace(/\s+/g, ' ').slice(0, 155);
   const img = portadaDe(l)?.src;
   const imgAbs = img ? (img.startsWith('/api/') ? absoluteUrl(img) : absoluteUrl(img)) : '/opengraph-image';

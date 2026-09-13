@@ -30,7 +30,7 @@ export const revalidate = 3600;
 const PATH = '/autos';
 const TITULO = 'Alquiler de Carros y Traslados en Isla de Margarita';
 const DESCRIPCION =
-  'Alquiler de carros en la Isla de Margarita con entrega en la zona de tu alojamiento, y traslado desde el aeropuerto Santiago Mariño o el ferry hasta Pampatar, Porlamar, Costa Azul y el resto de la isla. Precios en dólares.';
+  'Alquiler de carros en Isla de Margarita con entrega en tu alojamiento y traslado desde el aeropuerto o el ferry a Pampatar, Porlamar y Costa Azul. Precios en dólares.';
 
 export const metadata: Metadata = {
   title: TITULO,

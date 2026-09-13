@@ -10,7 +10,7 @@ export const SITE = {
   shortDescription:
     'Alquiler de apartamentos, autos y traslados en Isla de Margarita, Venezuela.',
   description:
-    'Alquila apartamentos y autos en Isla de Margarita, Venezuela, con traslado desde el aeropuerto. Alojamientos en Pampatar, Porlamar, Costa Azul, Playa El Yaque y más zonas de la isla, con precios en dólares y reserva directa por WhatsApp.',
+    'Apartamentos y autos en Isla de Margarita con traslado desde el aeropuerto. Pampatar, Porlamar, Costa Azul y más, en dólares y con reserva directa por WhatsApp.',
   currency: 'USD',
   /** Centro de la Isla de Margarita (Nueva Esparta). */
   geo: { lat: 11.0, lng: -63.9167 },

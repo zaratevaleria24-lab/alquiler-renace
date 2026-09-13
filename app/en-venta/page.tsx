@@ -28,7 +28,7 @@ export const dynamic = 'force-dynamic';
 const PATH = '/en-venta';
 const TITULO = 'Apartamentos y Casas en Venta en Isla de Margarita';
 const DESCRIPCION =
-  'Inmuebles en venta en la Isla de Margarita: apartamentos y casas en Pampatar, Porlamar, Costa Azul y más zonas, con precio en dólares, bolívares (tasa de mercado y BCV), USDT y euros. Fotos completas y trato directo.';
+  'Apartamentos y casas en venta en Isla de Margarita: Pampatar, Porlamar, Costa Azul y más, con precio en dólares, bolívares y USDT. Fotos completas y trato directo.';
 
 export const metadata: Metadata = {
   title: TITULO, description: DESCRIPCION, alternates: { canonical: PATH },

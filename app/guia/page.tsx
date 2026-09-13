@@ -4,7 +4,7 @@ import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
 import { CATEGORIAS, POR_PAGINA, claveMaps, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
-import TarjetaGuia from '@/components/TarjetaGuia';
+import ListaGuia from '@/components/ListaGuia';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
@@ -22,8 +22,8 @@ import Bienvenida from '@/components/Bienvenida';
 
 export const revalidate = 3600;
 const PATH = '/guia';
-const TITULO = 'Guía de Isla de Margarita: playas, qué hacer, dónde comer y servicios a domicilio';
-const DESCRIPCION = 'Los mejores sitios de la Isla de Margarita explicados por gente de la isla: playas, castillos, La Restinga, kitesurf en El Yaque, dónde comer y consejos reales de dinero, transporte y seguridad.';
+const TITULO = 'Guía de Isla de Margarita: playas, comida y servicios';
+const DESCRIPCION = 'Playas, castillos, dónde comer, aventura y servicios a domicilio en la Isla de Margarita, con horarios, cómo llegar y consejos de gente de la isla.';
 
 export const metadata: Metadata = {
   title: TITULO, description: DESCRIPCION, alternates: { canonical: PATH },
@@ -58,11 +58,9 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
                 <p className="label-eyebrow text-brand-deep">Guía turística · {SITE.region.island}</p>
                 {/* En teléfono la cabecera es de app: una pregunta y a los botones.
                     En escritorio queda el titular editorial de siempre. */}
-                <h1 className="mt-1.5 font-serif text-[28px] font-normal leading-[1.05] track-headline text-ink md:hidden">
-                  ¿Qué necesitas <em className="headline-italic">hoy</em>?
-                </h1>
-                <h1 className="mt-1.5 hidden font-serif text-headline font-normal leading-[1.05] track-headline text-ink md:block">
-                  Lo mejor de la isla, <em className="headline-italic">contado por gente de acá</em>
+                <h1 className="mt-1.5 font-serif font-normal leading-[1.05] track-headline text-ink">
+                  <span className="text-[28px] md:hidden">¿Qué necesitas <em className="headline-italic">hoy</em>?</span>
+                  <span className="hidden text-headline md:inline">Lo mejor de la isla, <em className="headline-italic">contado por gente de acá</em></span>
                 </h1>
                 <p className="mt-2 text-[13px] text-ink-muted md:hidden">{lugares.length} lugares y servicios · contado por gente de acá</p>
                 <p className="mt-3 hidden max-w-xl text-meta text-ink-soft md:block md:text-body">
@@ -97,16 +95,12 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
               desde el servidor, así el enlace compartido abre bien sin JS. */}
-          <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-            {(() => { let n = 0; return lugares.map((l, k) => {
-              const coincide = cat ? enCategoria(l, cat) : true;
-              if (coincide) n++;
-              // Las que coinciden pero pasan de la primera tanda salen ocultas
-              // con la clase «paginada»: FiltroGuia las va soltando al bajar y
-              // <noscript> las muestra todas si no hay JavaScript.
-              return <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={!coincide} paginada={coincide && n > POR_PAGINA} />;
-            }); })()}
-          </ul>
+          {/* Solo lo que la tarjeta necesita: descripción y consejo recortados,
+              una foto, sin horario completo ni resumen de Google. */}
+          <ListaGuia cat={cat ?? ''} lugares={lugares.map((l) => ({
+            ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, direccion: (l.direccion ?? '').slice(0, 90),
+            fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })), horario: l.horario,
+          }))} />
           <div id="mas-guia" aria-hidden="true" className="h-10" hidden={visibles.length <= POR_PAGINA} />
           <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
 
