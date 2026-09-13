@@ -21,7 +21,7 @@ const esWa = (u: string | null) => !!u && /wa\.(me|link)|whatsapp\.com/.test(u);
 // Google antepone plus codes («2624+5CG, Pampatar»): no le dicen nada a nadie.
 const sinPlusCode = (d: string | null) => (d ?? '').replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '');
 
-export default function TarjetaGuia({ l, prioridad = false, oculta = false }: { l: Lugar; prioridad?: boolean; oculta?: boolean }) {
+export default function TarjetaGuia({ l, prioridad = false, oculta = false, paginada = false }: { l: Lugar; prioridad?: boolean; oculta?: boolean; paginada?: boolean }) {
   const foto = portadaDe(l);
   const cat = CATEGORIAS.find((c) => c.key === l.categoria);
   const hoy = horarioHoy(l);
@@ -42,7 +42,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false }: { 
   const href = `/guia/${l.slug}`;
 
   return (
-    <li data-cat={categoriasDe(l).join(' ')} hidden={oculta} className={`flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'borde-brillo border-transparent' : 'border-line'}`}>
+    <li data-cat={categoriasDe(l).join(' ')} hidden={oculta || paginada} className={`${paginada ? 'paginada ' : ''}flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'borde-brillo border-transparent' : 'border-line'}`}>
       {l.aliado && (
         <p className="flex items-center gap-1.5 bg-brand-deep px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">
           <Star className="h-3 w-3 fill-current" aria-hidden="true" />Recomendado por Margarita Renace

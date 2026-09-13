@@ -41,6 +41,10 @@ export const CATEGORIAS: { key: Categoria; label: string; plural: string; emoji:
   { key: 'transporte', label: 'Moverse', plural: 'Moverse', emoji: '🚕', grupo: 'resolver', sub: 'Taxis, apps, alquiler de carros' },
   { key: 'practico', label: 'Prácticos', plural: 'Servicios prácticos', emoji: '🧺', grupo: 'resolver', sub: 'Lavandería, cambio, SIM, gasolina' },
 ];
+// Tarjetas por tanda en la lista de la guía (paginación automática al bajar).
+// Vive acá y no en FiltroGuia: un 'use client' no exporta constantes a un
+// componente de servidor —llega un proxy, no el número.
+export const POR_PAGINA = 18;
 export const esServicio = (c: string) => CATEGORIAS.find((x) => x.key === c)?.grupo === 'resolver';
 // Todas las categorías de un lugar (principal + extras), para filtrar y contar.
 export const categoriasDe = (l: { categoria: string; categoriasExtra: string[] }) => [l.categoria, ...l.categoriasExtra];

@@ -42,6 +42,8 @@ const NOCHES = [1, 2, 3, 4, 5, 6, 7, 10, 14, 21, 30];
 /** Tasa BCV tal como la sirve /api/tasa. */
 interface Tasa {
   bcv: number | null;
+  /** Tasa USDT (mercado), la que se cobra. */
+  usdt?: number | null;
   /** Cuándo la publicó el BCV. Hoy la fuente no siempre lo trae. */
   bcvAt: string | null;
   /** Cuándo la consultamos nosotros. Siempre existe. */
@@ -107,7 +109,7 @@ export default function ReservaPanel({
     fetch('/api/tasa')
       .then((r) => (r.ok ? r.json() : null))
       .then((d: Tasa | null) => {
-        if (vivo && d?.bcv) setTasa(d);
+        if (vivo && (d?.usdt ?? d?.bcv)) setTasa({ ...d, bcv: d.usdt ?? d.bcv });
       })
       .catch(() => {
         /* sin tasa: se muestra solo el dólar */
@@ -138,7 +140,7 @@ export default function ReservaPanel({
       <p className="mono-data text-title-sm text-brand-deep">{precioTexto}</p>
       {!precioAConsultar && tasa?.bcv && (
         <p className="mt-1 text-meta text-ink-muted">
-          {bolivares(precioPorNoche * tasa.bcv)} / noche · al dólar BCV
+          {bolivares(precioPorNoche * tasa.bcv)} / noche · a la tasa USDT
         </p>
       )}
       <p className="mt-2 text-meta text-ink-muted">
@@ -251,13 +253,13 @@ export default function ReservaPanel({
                     es un dato que sí tenemos — nunca "de hoy" a secas, que sería
                     afirmar algo que no podemos verificar. */}
                 <p className="mt-2 text-meta text-ink-muted">
-                  Calculado al dólar BCV: {bolivares(tasa.bcv)} por US$
+                  Calculado a la tasa USDT: {bolivares(tasa.bcv)} por US$
                   {tasa.bcvAt
                     ? `, publicada el ${fechaCorta(tasa.bcvAt)}`
                     : tasa.obtenidoAt
                       ? `, consultada el ${fechaCorta(tasa.obtenidoAt)}`
                       : ''}
-                  . El monto final se ajusta a la tasa BCV del día de pago.
+                  . El monto final se ajusta a la tasa USDT del día de pago.
                 </p>
               </>
             ) : (

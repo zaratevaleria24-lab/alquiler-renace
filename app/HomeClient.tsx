@@ -123,7 +123,7 @@ export default function HomeClient({
   ];
 
   // Navigation active links
-  // Tasa BCV para mostrar los precios en bolívares. Se pide UNA vez acá y baja
+  // Tasa USDT (BCV de respaldo) para mostrar los precios en bolívares. Se pide UNA vez acá y baja
   // a todas las tarjetas: si cada tarjeta hiciera su propio fetch, cuatro
   // tarjetas serían cuatro peticiones idénticas. La home es estática, así que
   // la tasa no puede viajar en el HTML sin quedar vieja — ver app/api/tasa.
@@ -132,8 +132,9 @@ export default function HomeClient({
     let vivo = true;
     fetch('/api/tasa')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { bcv: number | null } | null) => {
-        if (vivo && d?.bcv) setTasaBcv(d.bcv);
+      .then((d: { bcv: number | null; usdt?: number | null } | null) => {
+        const t = d?.usdt ?? d?.bcv;
+        if (vivo && t) setTasaBcv(t);
       })
       .catch(() => {
         /* sin tasa: las tarjetas muestran solo dólares */
@@ -1000,7 +1001,7 @@ export default function HomeClient({
                             </span>
                             <span className="text-meta text-gray-500 font-medium"> / noche</span>
                             <span className="mono-data block text-meta text-ink-muted">
-                              Ref. US${selectedProperty.pricePerNight.toLocaleString()} · dólar BCV
+                              Ref. US${selectedProperty.pricePerNight.toLocaleString()} · tasa USDT
                             </span>
                           </>
                         ) : (
@@ -1071,7 +1072,7 @@ export default function HomeClient({
                               corrido que el huésped tiene que poder leer. */}
                           <p className="text-meta text-ink-muted">
                             Calculado al dólar BCV: {bolivares(tasaBcv, 4)} por US$. El
-                            monto final se ajusta a la tasa BCV del día de pago.
+                            monto final se ajusta a la tasa USDT del día de pago.
                           </p>
                         </>
                       ) : (
@@ -1333,7 +1334,7 @@ function bolivares(n: number, decimales = 2): string {
 
 interface PropertyCardProps {
   property: Property;
-  /** Bolívares por dólar (BCV). Null mientras no llega o si la consulta falló. */
+  /** Bolívares por dólar (tasa USDT; BCV si falta). Null mientras no llega o si la consulta falló. */
   tasaBcv: number | null;
   onSelect: () => void;
 }
@@ -1459,7 +1460,7 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
                 <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
                   Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })}
                 </p>
-                <p className="mono-data text-ink-muted">Ref. {property.priceText} · BCV</p>
+                <p className="mono-data text-ink-muted">Ref. {property.priceText} · USDT</p>
               </>
             ) : (
               <p className="mt-1.5 truncate font-serif text-title text-ink track-title">

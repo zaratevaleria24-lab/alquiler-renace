@@ -132,3 +132,10 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
   titular editorial queda solo en escritorio.
 - Bienvenida: dura entre 2,2 y 3,4 s (antes se iba antes de verse).
 - Total: 103 entradas.
+
+- **Paginación automática** (2026-09-13): la lista muestra 18 tarjetas por tanda
+  (`POR_PAGINA` en lib/guia.ts, duplicado a mano en FiltroGuia porque ese
+  componente no puede importar lib/guia.ts —abre Postgres—). El servidor manda las
+  que pasan de la tanda con `hidden` + clase `paginada`; un centinela `#mas-guia`
+  con IntersectionObserver va soltando más al bajar; `<noscript>` las muestra todas.
+  Al cambiar de categoría se vuelve a la primera tanda.

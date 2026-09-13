@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, claveMaps, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
+import { CATEGORIAS, POR_PAGINA, claveMaps, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
@@ -98,8 +98,17 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
               desde el servidor, así el enlace compartido abre bien sin JS. */}
           <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-            {lugares.map((l, k) => <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={cat ? !enCategoria(l, cat) : false} />)}
+            {(() => { let n = 0; return lugares.map((l, k) => {
+              const coincide = cat ? enCategoria(l, cat) : true;
+              if (coincide) n++;
+              // Las que coinciden pero pasan de la primera tanda salen ocultas
+              // con la clase «paginada»: FiltroGuia las va soltando al bajar y
+              // <noscript> las muestra todas si no hay JavaScript.
+              return <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={!coincide} paginada={coincide && n > POR_PAGINA} />;
+            }); })()}
           </ul>
+          <div id="mas-guia" aria-hidden="true" className="h-10" hidden={visibles.length <= POR_PAGINA} />
+          <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
 
           <section aria-labelledby="consejos" className="section-gap">
             <p className="label-eyebrow text-brand-deep">Antes de salir</p>

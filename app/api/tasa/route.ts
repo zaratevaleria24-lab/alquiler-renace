@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getTasas } from '@/lib/tasas';
 
-// Tasa BCV pública, para mostrar los precios en bolívares.
+// Tasas públicas para mostrar los precios en bolívares. Desde 2026-09-13 el
+// dueño cobra a la TASA USDT (mercado), así que se publica `usdt` además del
+// BCV; el navegador usa usdt y cae al BCV solo si falta.
 //
 // POR QUÉ UNA API Y NO EL DATO EN LA PÁGINA: `/propiedad/<slug>` es ESTÁTICA y
 // solo se regenera cuando el panel publica algo. La tasa del BCV cambia a
@@ -26,7 +28,7 @@ export async function GET() {
 
     // Sin tasa no se inventa nada: el panel muestra solo dólares. Es preferible
     // a publicar un bolívar equivocado.
-    if (t.bcvUsd === null) {
+    if (t.bcvUsd === null && t.mercado === null) {
       return NextResponse.json(
         { bcv: null, motivo: 'sin tasa disponible' },
         { status: 200, headers: { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' } },
@@ -36,6 +38,8 @@ export async function GET() {
     return NextResponse.json(
       {
         bcv: t.bcvUsd,
+        /** Tasa USDT (promedio Binance P2P): la que usa el dueño para cobrar. */
+        usdt: t.mercado,
         /** Cuándo publicó el BCV esta tasa. Se muestra junto al monto: un
          *  número sin fecha, si el servicio se queda pegado, se convierte en un
          *  precio equivocado publicado. */
