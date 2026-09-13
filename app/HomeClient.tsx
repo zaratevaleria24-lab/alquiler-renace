@@ -193,6 +193,12 @@ export default function HomeClient({
   // van dentro del mensaje precargado de WhatsApp, que es donde se cierra la
   // reserva de verdad. Ver urlReservaWhatsApp().
   const [bookingNights, setBookingNights] = useState(2);
+  // Entrada y salida como en Airbnb; las noches se derivan de las fechas.
+  const hoyIso = new Date().toISOString().slice(0, 10);
+  const sumarDias = (iso: string, d: number) => { const x = new Date(iso + 'T12:00:00'); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+  const [fechaIn, setFechaIn] = useState(sumarDias(hoyIso, 7));
+  const [fechaOut, setFechaOut] = useState(sumarDias(hoyIso, 9));
+  useEffect(() => { const n = Math.round((Date.parse(fechaOut) - Date.parse(fechaIn)) / 86400000); if (n > 0) setBookingNights(n); }, [fechaIn, fechaOut]);
 
   /** Abre el panel de una propiedad con las noches en SU mínimo de estadía. */
   const abrirPropiedad = (p: Property) => {
@@ -888,6 +894,8 @@ export default function HomeClient({
                 className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar"
               >
                 
+                <div className="md:grid md:grid-cols-[1fr_21rem] md:items-start md:gap-8">
+                <div className="space-y-6">
                 {/* Image Gallery (Main + small grid) */}
                 <div className="space-y-2">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden shadow-sm">
@@ -964,7 +972,7 @@ export default function HomeClient({
 
                 {/* Amenities */}
                 <div>
-                  <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400 mb-3">Servicios Premium Incluidos</h4>
+                  <h4 className="text-meta uppercase tracking-wider font-semibold text-gray-400 mb-3">Qué incluye</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedProperty.amenities.map((amenity, idx) => {
                       const Icon = iconFor(amenity.iconKey);
@@ -980,6 +988,9 @@ export default function HomeClient({
                   </div>
                 </div>
 
+                </div>
+                {/* Columna derecha: la tarjeta de reserva, pegada al hacer scroll (como en Airbnb) */}
+                <div className="md:sticky md:top-0">
                 {/* Interactive Booking Calculator */}
                 {selectedProperty.priceOnRequest ? (
                   <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
@@ -1038,23 +1049,13 @@ export default function HomeClient({
                       <span className="text-ui text-ink-muted">Hasta {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Noches</label>
-                        <select 
-                          value={bookingNights} 
-                          onChange={(e) => setBookingNights(Number(e.target.value))}
-                          className="w-full bg-paper border border-line rounded-xl px-3 py-2 text-meta font-semibold focus:outline-none focus:border-ink"
-                        >
-                          {/* Solo estadías válidas: antes ofrecía 1 noche
-                              aunque la propiedad exigiera un mínimo mayor. */}
-                          {[1, 2, 3, 4, 5, 6, 7, 10, 14]
-                            .filter(n => n >= Math.max(1, selectedProperty.nightsCount))
-                            .map(n => (
-                              <option key={n} value={n}>{n} {n === 1 ? 'noche' : 'noches'}</option>
-                            ))}
-                        </select>
-                      </div>
+                    <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-line">
+                      <label className="block border-r border-line p-2.5"><span className="block text-micro font-semibold uppercase text-gray-400">Entrada</span>
+                        <input type="date" value={fechaIn} min={hoyIso} onChange={(e) => { setFechaIn(e.target.value); if (fechaOut <= e.target.value) setFechaOut(sumarDias(e.target.value, Math.max(1, selectedProperty.nightsCount))); }} className="mt-0.5 w-full bg-transparent text-meta font-semibold text-ink focus:outline-none" /></label>
+                      <label className="block p-2.5"><span className="block text-micro font-semibold uppercase text-gray-400">Salida</span>
+                        <input type="date" value={fechaOut} min={sumarDias(fechaIn, Math.max(1, selectedProperty.nightsCount))} onChange={(e) => setFechaOut(e.target.value)} className="mt-0.5 w-full bg-transparent text-meta font-semibold text-ink focus:outline-none" /></label>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3">
                       <div>
                         <label className="block text-micro uppercase font-semibold text-gray-400 mb-1">Huéspedes</label>
                         <select 
@@ -1075,7 +1076,7 @@ export default function HomeClient({
                         conversa por WhatsApp antes de confirmar. */}
                     <div className="space-y-2 pt-2 text-body text-ink-muted">
                       <div className="flex justify-between">
-                        <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
+                        <span>{bookingNights} {bookingNights === 1 ? 'noche' : 'noches'} · {fechaIn.slice(8)}/{fechaIn.slice(5, 7)} → {fechaOut.slice(8)}/{fechaOut.slice(5, 7)}</span>
                       </div>
 
                       {/* El BOLÍVAR es el total a pagar: es la moneda de curso
@@ -1140,8 +1141,11 @@ export default function HomeClient({
                       </button>
                     )}
                     <p className="text-micro text-center text-gray-400 mt-2 font-medium">Sin pagos en línea: confirmas disponibilidad y coordinas directo con quien te recibe</p>
+                    <p className="text-micro text-center text-gray-400 mt-1 font-medium">Cancelación gratis hasta 7 días antes · 50 % hasta 48 h</p>
                   </div>
                 )}
+                </div>
+                </div>
 
               </div>
 
