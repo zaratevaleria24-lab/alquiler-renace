@@ -157,7 +157,7 @@ export const LUGARES: Semilla[] = [
   { nombre: 'Playa Caracola', categoria: 'playa', busqueda: 'Playa Caracola Pampatar', municipio: 'Maneiro',
     descripcion: 'Playa urbana entre Pampatar y Porlamar, con agua calma, arena fina y edificios frente al mar. Cómoda para un rato de playa sin moverse de la ciudad.',
     consejo: 'Buena para el último día antes del vuelo o para bañarse temprano. Hay pocos toldos: llevá sombrilla.', mejorMomento: 'Mañana', duracion: '2 horas', costo: 'Gratis' },
-  { nombre: 'Senderismo por los cerros de la isla', categoria: 'actividad', busqueda: 'Cerro Matasiete La Asunción', municipio: 'Arismendi', instagram: 'espartanostrekkingmgta',
+  { nombre: 'Senderismo por los cerros de la isla', categoria: 'actividad', busqueda: 'Espartanos Trekking Margarita senderismo', municipio: 'Arismendi', instagram: 'espartanostrekkingmgta',
     descripcion: 'Margarita también se camina: Matasiete, el Copey, los cerros de Macanao y senderos al amanecer con vista a las dos costas. Hay grupos locales que salen los fines de semana, para principiantes y para quien ya camina.',
     consejo: 'Sumate a una salida organizada: conocen la ruta, el clima y la hora. Zapatos cerrados, gorra, agua y algo de comer. Nunca solo ni sin avisar.', mejorMomento: 'Amanecer', duracion: 'Medio día', costo: 'Salida por persona' },
 ];

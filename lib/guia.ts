@@ -146,6 +146,11 @@ export async function buscarEnPlaces(texto: string): Promise<Record<string, unkn
 
 /** Vuelca los datos de un lugar de Places en la fila. Se usa al importar y al refrescar. */
 export async function aplicarPlaces(id: string, p: Record<string, unknown>): Promise<void> {
+  // Dos lugares de la guía pueden apuntar al mismo sitio de Google (una
+  // actividad y su cerro): el place_id es único, así que el segundo se queda
+  // sin datos de Google en vez de romper la importación.
+  const [dup] = await rows<{ id: string }>(`SELECT id FROM guia_lugares WHERE google_place_id = $1 AND id <> $2`, [p.id, id]);
+  if (dup) return;
   const g = (o: unknown, ...k: string[]) => k.reduce<unknown>((a, x) => (a && typeof a === 'object' ? (a as Record<string, unknown>)[x] : undefined), o);
   const fotos = ((p.photos as Record<string, unknown>[]) ?? []).slice(0, 8).map((f) => ({
     name: String(f.name), autor: String(g(f, 'authorAttributions', '0', 'displayName') ?? 'Google'),
