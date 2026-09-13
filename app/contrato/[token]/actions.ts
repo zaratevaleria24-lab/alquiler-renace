@@ -2,15 +2,31 @@
 
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { getContratoPorToken, firmar, datosDe, urlContrato } from '@/lib/contratos';
-import { textoPlano, VERSION } from '@/lib/contratos-clausulas';
+import { getContratoPorToken, firmar, datosDe, urlContrato, generarCodigo, verificarCodigo, registrarEvento } from '@/lib/contratos';
 import { correoConfigurado, enviarCorreo } from '@/lib/correo';
+import { correoCodigo, correoFirmado } from '@/lib/correo-plantillas';
 import { getAjustes } from '@/lib/settings';
 
-// Firma del huésped. El token de la URL es la única llave: quien lo tiene es
-// quien recibió el correo o el WhatsApp. Se guarda nombre, documento, trazo y
-// navegador; nunca la IP.
-export async function firmarContratoAction(fd: FormData): Promise<{ ok: boolean; error?: string }> {
+type R = { ok: boolean; error?: string };
+async function evidenciaDe(fd: FormData): Promise<Record<string, unknown>> {
+  const h = await headers();
+  const ip = (h.get('cf-connecting-ip') || h.get('x-forwarded-for') || '').split(',')[0].trim();
+  return { ip, agente: h.get('user-agent') ?? '', idioma: String(fd.get('idioma') ?? ''), zonaHoraria: String(fd.get('zona') ?? ''), pantalla: String(fd.get('pantalla') ?? '') };
+}
+
+/** Paso 1: mandar el código de 6 dígitos al correo del huésped. */
+export async function pedirCodigoAction(fd: FormData): Promise<R> {
+  const c = await getContratoPorToken(String(fd.get('token') ?? ''));
+  if (!c || !c.email) return { ok: false, error: 'Este contrato no tiene correo asociado.' };
+  if (!correoConfigurado()) return { ok: false, error: 'El envío de códigos no está disponible ahora. Escríbenos por WhatsApp.' };
+  const codigo = await generarCodigo(c);
+  const m = correoCodigo(await datosDe(c), codigo);
+  try { await enviarCorreo({ para: c.email, ...m }); } catch (e) { console.error('[contrato] código falló:', (e as Error).message); return { ok: false, error: 'No pudimos enviar el código. Intenta de nuevo en un minuto.' }; }
+  return { ok: true };
+}
+
+/** Paso 2: firmar (con el código si hay correo). */
+export async function firmarContratoAction(fd: FormData): Promise<R> {
   const token = String(fd.get('token') ?? '');
   const c = await getContratoPorToken(token);
   if (!c) return { ok: false, error: 'Este enlace no es válido.' };
@@ -22,23 +38,25 @@ export async function firmarContratoAction(fd: FormData): Promise<{ ok: boolean;
   if (nombre.length < 5 || documento.length < 5) return { ok: false, error: 'Escribe tu nombre completo y tu cédula o pasaporte.' };
   if (!imagen.startsWith('data:image/png;base64,') || imagen.length > 300_000) return { ok: false, error: 'Dibuja tu firma en el recuadro.' };
   if (fd.get('acepto') !== 'on') return { ok: false, error: 'Marca que leíste y aceptas las cláusulas.' };
-  const agente = (await headers()).get('user-agent') ?? '';
-  const ok = await firmar(c, { nombre, documento, imagen, agente });
-  if (!ok) return { ok: false, error: 'No se pudo firmar. Escríbenos por WhatsApp.' };
+  const evidencia = await evidenciaDe(fd);
+  if (c.email && !c.codigoVerificado) {
+    const ok = await verificarCodigo(c, String(fd.get('codigo') ?? ''), evidencia);
+    if (!ok) return { ok: false, error: 'El código no coincide o venció. Pide uno nuevo.' };
+    c.codigoVerificado = true;
+  }
+  if (!(await firmar(c, { nombre, documento, imagen, evidencia }))) return { ok: false, error: 'No se pudo firmar. Escríbenos por WhatsApp.' };
   revalidatePath(`/contrato/${token}`);
-  // Copia para el dueño (y para el huésped si dejó correo). Si falla, la firma
-  // ya quedó guardada: el correo es cortesía, no la prueba.
+  // Copias: al dueño y al huésped. La firma ya quedó guardada; el correo es cortesía.
   try {
     if (correoConfigurado()) {
       const a = await getAjustes() as unknown as Record<string, string>;
-      const firmado = await getContratoPorToken(token);
-      if (firmado) {
-        const d = await datosDe(firmado);
-        const texto = textoPlano(d) + `\n\nFirmado por ${nombre} (${documento}) el ${firmado.firmadoAt}. Verificación ${firmado.firmaHash}.\nVer: ${urlContrato(token)}`;
-        const para = [a.correo_corporativo, firmado.email].filter(Boolean).join(', ');
-        if (para) await enviarCorreo({ para, asunto: `Contrato firmado · ${d.inmueble} · ${d.checkIn} → ${d.checkOut}`, texto, html: `<p>Contrato firmado por <b>${nombre}</b> (${documento}).</p><p><a href="${urlContrato(token)}">Ver e imprimir el contrato</a> · cláusulas v${VERSION}</p><pre style="white-space:pre-wrap;font-family:inherit">${texto.replace(/</g, '&lt;')}</pre>` });
+      const f = await getContratoPorToken(token);
+      if (f) {
+        const m = correoFirmado(await datosDe(f), urlContrato(token), { nombre, documento, fecha: f.firmadoAt!, hash: f.firmaHash });
+        const para = [a.correo_corporativo, f.email].filter(Boolean).join(', ');
+        if (para) { await enviarCorreo({ para, ...m }); await registrarEvento(f.id, 'copia_enviada', { para }); }
       }
     }
-  } catch (e) { console.error('[contrato] aviso de firma falló:', (e as Error).message); }
+  } catch (e) { console.error('[contrato] copia falló:', (e as Error).message); }
   return { ok: true };
 }

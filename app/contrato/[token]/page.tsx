@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { datosDe, getContratoPorToken } from '@/lib/contratos';
+import { datosDe, getContratoPorToken, registrarApertura } from '@/lib/contratos';
 import { getContacto } from '@/lib/settings';
 import ContratoDocumento from '@/components/ContratoDocumento';
 import FirmaContrato from './FirmaContrato';
@@ -13,8 +14,11 @@ export default async function ContratoPage({ params }: { params: Promise<{ token
   const { token } = await params;
   const c = await getContratoPorToken(token);
   if (!c) notFound();
+  const h = await headers();
+  await registrarApertura(c, { ip: (h.get('cf-connecting-ip') || h.get('x-forwarded-for') || '').split(',')[0].trim(), agente: h.get('user-agent') ?? '' });
   const [d, contacto] = await Promise.all([datosDe(c), getContacto()]);
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, tengo una duda sobre el contrato de ${c.inmueble} (${c.checkIn}).`)}` : null;
+  const firma = c.estado === 'firmado' ? { nombre: c.firmaNombre, documento: c.firmaDocumento, imagen: c.firmaImagen, fecha: c.firmadoAt!, hash: c.firmaHash, sello: c.sello, docHash: c.docHash, evidencia: c.evidencia } : null;
   return (
     <div className="min-h-screen bg-paper print:bg-white">
       <style>{`@media print { .no-print { display: none !important } .documento { box-shadow: none !important; border: none !important; padding: 0 !important } @page { size: A4; margin: 16mm } }`}</style>
@@ -23,15 +27,16 @@ export default async function ContratoPage({ params }: { params: Promise<{ token
           <a href="/" className="flex items-center gap-2 font-serif text-[19px] font-semibold text-ink"><img src="/logo-mark-teal.svg" alt="" width={32} height={32} className="h-8 w-8" />Margarita <span className="text-accent">Renace</span></a>
           <div className="flex gap-2">
             {wa && <a href={wa} rel="noopener" className="inline-flex min-h-[40px] items-center rounded-control border border-line bg-white px-3.5 text-ui font-medium text-brand-deep">WhatsApp</a>}
+            {c.estado === 'firmado' && <a href={`/contrato/${token}/verificar`} className="inline-flex min-h-[40px] items-center rounded-control border border-line bg-white px-3.5 text-ui font-medium text-brand-deep">Verificar</a>}
             <a href="javascript:window.print()" className="inline-flex min-h-[40px] items-center rounded-control border border-line bg-white px-3.5 text-ui font-medium text-brand-deep">Imprimir</a>
           </div>
         </div>
-        {c.estado === 'firmado' && <p className="no-print mb-5 rounded-card border border-brand/30 bg-brand-tint px-4 py-3 text-meta text-brand-deep">Contrato firmado. Guarda esta página o imprímela en PDF: es tu copia.</p>}
+        {c.estado === 'firmado' && <p className="no-print mb-5 rounded-card border border-brand/30 bg-brand-tint px-4 py-3 text-meta text-brand-deep">Contrato firmado. Guarda esta página o imprímela en PDF: es tu copia. También te la enviamos por correo.</p>}
         {c.estado === 'anulado' && <p className="no-print mb-5 rounded-card border border-accent/40 bg-accent/5 px-4 py-3 text-meta text-accent">Este contrato fue anulado por el arrendador.</p>}
         <div className="documento rounded-panel border border-line p-6 shadow-lift md:p-10">
-          <ContratoDocumento d={d} version={c.versionClausulas} firma={c.estado === 'firmado' ? { nombre: c.firmaNombre, documento: c.firmaDocumento, imagen: c.firmaImagen, fecha: c.firmadoAt!, hash: c.firmaHash } : null} />
+          <ContratoDocumento d={d} version={c.versionClausulas} firma={firma} token={token} />
         </div>
-        {(c.estado === 'borrador' || c.estado === 'enviado') && <FirmaContrato token={c.token} nombre={c.huesped} documento={c.documento} />}
+        {(c.estado === 'borrador' || c.estado === 'enviado') && <FirmaContrato token={c.token} nombre={c.huesped} documento={c.documento} email={c.email} codigoVerificado={c.codigoVerificado} />}
       </div>
     </div>
   );

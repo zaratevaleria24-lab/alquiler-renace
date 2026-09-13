@@ -64,3 +64,35 @@ WhatsApp/enlace.
 - Voz de IDENTIDAD.md (tú, corto). Montos en US$; bolívares a tasa USDT del día
   de pago (cláusula tercera), igual que el resto del sitio.
 - El token es la llave: no se muestra en listados públicos ni se indexa.
+
+
+## Nivel 2 (2026-09-13, noche): prueba para peritaje, OTP, correo con marca
+
+- **Migración 016**: integrantes (jsonb), tarifa por noche, limpieza, tasa de
+  referencia USDT congelada al crear (Binance P2P), método de pago, `doc_hash`,
+  código OTP (hash), `evidencia` (IP, agente, idioma, zona horaria, pantalla,
+  SHA-256 de la imagen y del texto), `sello` Ed25519 + `sello_clave`; tabla
+  `contratos_eventos` (bitácora: creado, enviado_*, abierto, codigo_*, firmado,
+  copia_enviada, anulado).
+- **Flujo del huésped**: abre el enlace (se registra la apertura) → si hay correo,
+  pide el **código de 6 dígitos** (Resend, vence en 15 min) → nombre, documento,
+  firma a mano (dedo o ratón) → acepta. El servidor guarda la evidencia, calcula
+  `firma_hash = sha256(texto ⏎ hora ⏎ token ⏎ sha256(imagen))` y lo **sella** con la
+  clave Ed25519 de `/etc/margarita-renace/firma.key` (pública en `firma.pub`,
+  guardada también en el contrato). Sin correo (solo WhatsApp) no hay OTP y así
+  consta en el certificado.
+- **/contrato/<token>/verificar**: recalcula huellas, comprueba el sello, muestra
+  datos técnicos y bitácora. Es lo que se le da a un perito o abogado.
+- **Cláusulas v2026-09-13.2**: ocupación indebida (doble tarifa por día), detalle
+  tarifa×noches+limpieza con equivalente en Bs, integrantes con documento, prueba
+  electrónica (Decreto-Ley 1.204, GO 37.148; art. 1.363 CC). Se tomó como base el
+  contrato anterior de «Alquileres Margarita» (Valeria Zarate) y se amplió.
+- **Correos con marca** (`lib/correo-plantillas.ts`): invitación, código y copia
+  firmada; logo PNG en `public/correo-logo.png`, CSS en línea, texto plano al lado.
+  Remitente «Valeria de Margarita Renace <reservas@…>».
+- **Gmail «Promociones»**: es clasificación de Gmail, no spam. Para que caigan en
+  Principal: (1) el dueño arrastra uno a Principal y responde «Sí» a «hacer esto
+  siempre»; (2) agregar **DMARC** en Cloudflare: `_dmarc` TXT
+  `v=DMARC1; p=quarantine; rua=mailto:reservas@margaritarenace.com.ve`
+  (hoy no existe); (3) remitente con nombre de persona, asunto con datos concretos
+  y poco HTML — ya aplicado. La reputación mejora con los envíos reales.

@@ -19,7 +19,7 @@ export default async function ContratosPage({ searchParams }: { searchParams: Pr
       <header>
         <p className="text-meta font-semibold text-ink-subtle">Contratos</p>
         <h1 className="mt-2 font-serif text-headline font-normal track-headline text-ink">Contratos de hospedaje</h1>
-        <p className="mt-2 max-w-2xl text-meta text-ink-muted">Creas el contrato con los datos de la reserva, lo mandas por correo o WhatsApp y el huésped lo firma desde el teléfono. Queda guardado con fecha, firma y código de verificación.</p>
+        <p className="mt-2 max-w-2xl text-meta text-ink-muted">Creas el contrato con los datos de la reserva, lo mandas por correo o WhatsApp y el huésped lo firma desde el teléfono o la computadora: código de verificación al correo, firma a mano, huella SHA-256, sello criptográfico del servidor y bitácora. Todo queda en nuestra base de datos, listo para un peritaje.</p>
       </header>
       {guardado && <Aviso tono="ok">Guardado.</Aviso>}
       {error === 'datos' && <Aviso tono="error">Faltan datos: huésped, inmueble y fechas (la salida debe ser después de la entrada).</Aviso>}
@@ -35,11 +35,15 @@ export default async function ContratosPage({ searchParams }: { searchParams: Pr
             <Campo name="email" label="Correo del huésped" type="email" ayuda="Para mandarle el contrato. Si solo tienes WhatsApp, déjalo vacío." />
             <Campo name="telefono" label="Teléfono / WhatsApp" placeholder="+58 412 0000000" />
             <Campo name="huespedes" label="Personas" type="number" min={1} max={20} defaultValue={2} />
+            <div className="md:col-span-2"><Campo name="integrantes" label="Integrantes del grupo (opcional)" filas={4} placeholder={'Una persona por línea: Nombre Apellido - V-12345678\nOtra Persona - P-AB123456'} ayuda="Salen listados en el contrato con su documento; todos deben presentar cédula o pasaporte al ingresar." /></div>
             <Campo name="check_in" label="Entrada" type="date" required defaultValue={hoy} />
             <Campo name="check_out" label="Salida" type="date" required />
-            <Campo name="total_usd" label="Total (US$)" type="number" min={0} required placeholder="Ej. 300" />
+            <Campo name="tarifa_noche" label="Tarifa por noche (US$)" type="number" min={0} required defaultValue={60} />
+            <Campo name="limpieza_usd" label="Limpieza, pago único (US$)" type="number" min={0} defaultValue={0} />
+            <Campo name="total_usd" label="Total (US$)" type="number" min={0} ayuda="Déjalo vacío y se calcula: tarifa × noches + limpieza." />
             <Campo name="anticipo_usd" label="Anticipo ya pagado (US$)" type="number" min={0} defaultValue={0} />
             <Campo name="deposito_usd" label="Depósito de garantía (US$)" type="number" min={0} defaultValue={a.contrato_deposito || '50'} />
+            <Campo name="metodo_pago" label="Métodos de pago" defaultValue="Zelle / Binance (USDT) / Pago Móvil / Efectivo" ayuda="La tasa USDT del día se congela en el contrato como referencia en bolívares." />
             <div className="md:col-span-2"><Campo name="notas" label="Condiciones particulares (opcional)" filas={3} ayuda="Van como cláusula final. Ej.: «Se autoriza un perro pequeño», «Llegada a las 21:00 acordada»." /></div>
             <div className="md:col-span-2"><button type="submit" className="btn-solid"><Plus className="h-4 w-4" />Crear contrato</button></div>
           </form>
