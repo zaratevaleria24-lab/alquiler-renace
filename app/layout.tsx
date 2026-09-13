@@ -121,10 +121,6 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
-  icons: {
-    icon: '/icon.png',
-    apple: '/icon.png',
-  },
   formatDetection: {
     telephone: true,
     address: true,
