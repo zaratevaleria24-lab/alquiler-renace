@@ -118,3 +118,18 @@ WhatsApp/enlace.
   Decreto-Ley 1.204 (arts. 4, 6, 16) y el art. 1.363 CC, y un perito puede
   verificarla sin confiar en nosotros. Si un día se quiere certificada, se
   integra un PSC; el resto queda igual.
+
+
+## Logo en el correo (avatar del remitente) — 2026-09-13
+
+El remitente no controla su avatar; lo decide el buzón receptor. Tres vías:
+1. **Gmail (la mayoría):** cuenta de Google creada con `reservas@margaritarenace.com.ve`
+   («Usar mi dirección de correo actual»), con foto de perfil = emblema
+   (`/bimi/logo-512.png`). Solo lo puede hacer el dueño (verificación por teléfono).
+2. **Gravatar:** registrar el correo en gravatar.com con el mismo PNG (Outlook, Apple Mail…).
+3. **BIMI:** logo listo en `public/bimi/logo.svg` (SVG Tiny PS, fondo sólido,
+   <title>). Registros para Cloudflare:
+   - `_dmarc` TXT `v=DMARC1; p=quarantine; rua=mailto:reservas@margaritarenace.com.ve`
+   - `default._bimi` TXT `v=BIMI1; l=https://margaritarenace.com.ve/bimi/logo.svg;`
+   Yahoo/Fastmail lo muestran así; Gmail y Apple exigen además un certificado VMC
+   (~US$1.000/año) → no por ahora.
