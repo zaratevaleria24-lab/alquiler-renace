@@ -46,7 +46,6 @@ import {
   AboutIslandSection,
   FaqSection,
   ManifiestoSection,
-  ZoneLinksSection,
 } from '@/components/SeoSections';
 
 export interface HomeClientProps {
@@ -804,7 +803,6 @@ export default function HomeClient({
         {/* Contenido de SEO/GEO: enlaces a las landings de zona (si no, serían
             huérfanas), contexto real del destino y preguntas frecuentes con
             FAQPage schema. Ver components/SeoSections.tsx. */}
-        <ZoneLinksSection zones={ZONES} />
         <ManifiestoSection />
         <AboutIslandSection />
         <FaqSection />

@@ -7,7 +7,7 @@ import { breadcrumbSchema, graph } from '@/lib/schema';
 // Quiénes somos: la misión de IDENTIDAD.md dicha a la cara del visitante, con
 // los datos que dan confianza (quién atiende, dónde estamos, RIF).
 const TITULO = 'Quiénes somos: alquiler con tratos justos en Isla de Margarita';
-const DESCRIPCION = 'Margarita Renace: apartamentos, autos y una guía de la isla, atendidos por Valeria en Pampatar. Precio claro en dólares y bolívares, sin comisiones ocultas.';
+const DESCRIPCION = 'Margarita Renace: apartamentos en Pampatar, autos y una guía de la isla, atendidos por Valeria. Precio claro en dólares y bolívares, sin comisiones ocultas.';
 export const metadata: Metadata = { title: TITULO, description: DESCRIPCION, alternates: { canonical: '/nosotros' }, openGraph: { type: 'website', url: absoluteUrl('/nosotros'), siteName: SITE.name, title: TITULO, description: DESCRIPCION } };
 export const revalidate = 3600;
 
@@ -28,7 +28,7 @@ export default async function NosotrosPage() {
         <header className="bg-luz border-b border-line"><div className="max-w-4xl mx-auto px-5 pb-10 pt-24 md:px-8 md:pt-28">
           <p className="label-eyebrow text-brand-deep">Quiénes somos</p>
           <h1 className="mt-2 font-serif text-headline font-normal leading-[1.05] track-headline text-ink">Cambiar la forma de hacer negocios en Margarita, <em className="headline-italic">con conciencia, empatía y tratos justos</em></h1>
-          <p className="mt-5 max-w-2xl text-body leading-relaxed text-ink-soft">El nombre lo dice: <b>Renace</b>. La isla renace cuando la gente puede volver a alojarse, comprar y moverse sin sentir que la están estafando. Empezamos con cuatro apartamentos nuestros en Pampatar, Costa Azul y Porlamar, traslados desde el aeropuerto, alquiler de carros y una guía de la isla escrita por gente de aquí.</p>
+          <p className="mt-5 max-w-2xl text-body leading-relaxed text-ink-soft">El nombre lo dice: <b>Renace</b>. La isla renace cuando la gente puede volver a alojarse, comprar y moverse sin sentir que la están estafando. Empezamos con cuatro apartamentos nuestros en Pampatar —Los Geranios, La Caranta y Playa El Ángel—, traslados desde el aeropuerto, alquiler de carros y una guía de la isla escrita por gente de aquí.</p>
         </div></header>
         <main className="max-w-4xl mx-auto px-5 py-10 md:px-8 md:py-14">
           <section aria-labelledby="valores"><h2 id="valores" className="font-serif text-title font-semibold text-ink">Lo que creemos</h2>

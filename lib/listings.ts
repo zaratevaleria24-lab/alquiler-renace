@@ -89,7 +89,7 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
   {
     id: '1',
     name: 'Los Geranios A',
-    location: 'Urb. Maneiro, Pampatar, Margarita',
+    location: 'Urb. Los Geranios, Pampatar, Margarita',
     priceText: 'Consultar precio',
     pricePerNight: 0,
     priceOnRequest: true,

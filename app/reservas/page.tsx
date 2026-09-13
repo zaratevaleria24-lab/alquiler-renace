@@ -9,7 +9,7 @@ import Calculadora from './Calculadora';
 // tasa USDT, disponibilidad del calendario y WhatsApp con el mensaje armado.
 // Es la página que enlazan los reels de precio en Instagram.
 const TITULO = 'Reservar apartamento en Isla de Margarita: precio por noche y disponibilidad';
-const DESCRIPCION = 'Calcula tu estadía en Pampatar, Costa Azul o Porlamar: precio por noche en dólares y bolívares a tasa USDT, fechas disponibles y reserva directa por WhatsApp sin comisión.';
+const DESCRIPCION = 'Calcula tu estadía en Pampatar (Los Geranios, La Caranta o Playa El Ángel): precio por noche en dólares y bolívares a tasa USDT, fechas disponibles y reserva directa por WhatsApp sin comisión.';
 export const metadata: Metadata = { title: TITULO, description: DESCRIPCION, alternates: { canonical: '/reservas' }, openGraph: { type: 'website', url: absoluteUrl('/reservas'), siteName: SITE.name, title: TITULO, description: DESCRIPCION, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: TITULO }] } };
 export const revalidate = 3600;
 
@@ -18,7 +18,7 @@ export default async function ReservasPage() {
   const aptos = props.filter((p) => !p.priceOnRequest && p.pricePerNight > 0).map((p) => ({ slug: p.slug, nombre: p.name, zona: p.zone, precio: p.pricePerNight, personas: p.guestsAllowed.adults + p.guestsAllowed.children, portada: p.image }));
   const jsonLd = graph(breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Reservar', path: '/reservas' }]), {
     '@type': 'FAQPage', mainEntity: [
-      { '@type': 'Question', name: '¿Cuánto cuesta un apartamento en Isla de Margarita por noche?', acceptedAnswer: { '@type': 'Answer', text: `Nuestros apartamentos en Pampatar, Costa Azul y Porlamar cuestan desde US$ ${Math.min(...aptos.map((a) => a.precio))} por noche, para hasta 6 personas. En bolívares se calcula a la tasa USDT del día del pago.` } },
+      { '@type': 'Question', name: '¿Cuánto cuesta un apartamento en Isla de Margarita por noche?', acceptedAnswer: { '@type': 'Answer', text: `Nuestros apartamentos en Pampatar (Los Geranios, La Caranta y Playa El Ángel) cuestan desde US$ ${Math.min(...aptos.map((a) => a.precio))} por noche, para hasta 6 personas. En bolívares se calcula a la tasa USDT del día del pago.` } },
       { '@type': 'Question', name: '¿Cómo reservo sin comisión?', acceptedAnswer: { '@type': 'Answer', text: 'Eliges fechas y apartamento, te mostramos el total y nos escribes por WhatsApp. Confirmas con un anticipo del 50 % y firmas un contrato de hospedaje desde tu teléfono. Sin comisión de plataforma.' } },
       { '@type': 'Question', name: '¿Puedo pagar en bolívares?', acceptedAnswer: { '@type': 'Answer', text: 'Sí: pago móvil o efectivo a la tasa USDT (Binance P2P) del día. También Zelle y Binance en dólares.' } },
     ],

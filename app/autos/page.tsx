@@ -127,12 +127,11 @@ export default async function AutosPage() {
               {SITE.region.island} · {SITE.region.state}
             </p>
             <h1 className="font-serif text-display font-normal leading-[1.05] track-display max-w-3xl">
-              Alquiler de carros{' '}
-              <em className="headline-italic">en Isla de Margarita</em>
+              Te buscamos en el aeropuerto{' '}
+              <em className="headline-italic">y te dejamos el carro en la puerta</em>
             </h1>
-            <p className="mt-6 max-w-2xl text-body-lg text-ink-soft">
-              Resolver alojamiento y carro con la misma persona es la diferencia
-              frente a las plataformas de solo alojamiento.
+            <p className="mt-6 max-w-xl text-body-lg text-ink-soft">
+              Traslados y alquiler de carros en Isla de Margarita, con precio cerrado por WhatsApp.
             </p>
           </div>
         </header>

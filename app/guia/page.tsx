@@ -137,7 +137,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
 
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
-            <p className="mt-3 max-w-2xl text-body text-ink-soft">Tenemos apartamentos en Pampatar, Porlamar, Costa Azul y El Yaque, con precio claro y trato directo. Y si algo de esta guía no te cuadra, escríbenos: la corregimos.</p>
+            <p className="mt-3 max-w-2xl text-body text-ink-soft">Tenemos apartamentos en Pampatar —Los Geranios, La Caranta y Playa El Ángel—, con precio claro y trato directo. Y si algo de esta guía no te cuadra, escríbenos: la corregimos.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/" className="btn-solid">Ver hospedajes</Link>
               {wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Preguntar por WhatsApp</a>}

@@ -13,12 +13,12 @@ export const PAGINAS: PaginaIntencion[] = [
   {
     slug: 'apartamentos-con-piscina-en-margarita',
     titulo: 'Apartamentos con piscina en Isla de Margarita para 6 personas',
-    descripcion: 'Cuatro apartamentos en conjuntos cerrados con piscina en Pampatar, Costa Azul y Porlamar: US$60 la noche para hasta 6 personas, reserva directa por WhatsApp.',
+    descripcion: 'Cuatro apartamentos en conjuntos cerrados con piscina en Pampatar —Los Geranios, La Caranta y Playa El Ángel—: US$60 la noche para hasta 6 personas, reserva directa por WhatsApp.',
     h1: ['Apartamentos con piscina', 'para toda la familia'],
     intro: 'En Margarita la piscina no es lujo: es lo que salva la tarde cuando el sol pega a las 2 y los niños ya no quieren arena. Nuestros cuatro apartamentos están en conjuntos cerrados con piscina, vigilancia y estacionamiento, a minutos del Sambil y de las playas del este.',
     secciones: [
       { titulo: 'Qué incluye cada apartamento', parrafos: ['Dos habitaciones, dos baños, cocina equipada, aire acondicionado, Wi-Fi y capacidad para 6 personas (Bahía Mágica admite hasta 9 con niños). Piscina del conjunto, y en Agua Mar piscina en la azotea con vista al mar. Sábanas, toallas y una guía de la isla con QR en la puerta.', 'Los cuatro tienen valoración 4.8–5.0 en Airbnb con reseñas reales; puedes reservar allá o directo con nosotros al mismo precio y sin comisión.'] },
-      { titulo: 'Pampatar, Costa Azul o Porlamar: cuál elegir', parrafos: ['Pampatar (Los Geranios A y Depto de lujo) si viajas con niños pequeños: bahía calmada, cancha y parque infantil dentro del conjunto, Sambil a 5 minutos. Costa Azul (Bahía Mágica) si quieres playa caminando y restaurantes en la avenida. Porlamar (Agua Mar) si prefieres ciudad, compras y no depender del carro.'] },
+      { titulo: 'Los Geranios, La Caranta o Playa El Ángel: cuál elegir', parrafos: ['Los cuatro están en Pampatar. Los Geranios A y el Depto de lujo, en la urbanización Los Geranios, si viajas con niños pequeños: cancha y parque infantil dentro del conjunto, Sambil a 5 minutos. Bahía Mágica, en La Caranta, si quieres el castillo, el malecón y la bahía calmada caminando. Agua Mar, en Playa El Ángel, si prefieres piscina en la azotea con vista al mar y Porlamar a 10 minutos.'] },
       { titulo: 'Cuánto cuesta y cómo se paga', parrafos: ['US$60 la noche en los cuatro, para hasta 6 personas. Se paga en dólares (Zelle, Binance/USDT, efectivo) o en bolívares por pago móvil a la tasa USDT del día. Confirmas con el 50 % y firmas el contrato de hospedaje desde tu teléfono; el saldo, al llegar.'] },
     ],
     faq: [
@@ -31,13 +31,13 @@ export const PAGINAS: PaginaIntencion[] = [
   {
     slug: 'alquiler-por-mes-en-margarita',
     titulo: 'Alquiler de apartamento por mes en Isla de Margarita',
-    descripcion: 'Estadías largas en Pampatar, Costa Azul y Porlamar: apartamentos amoblados con piscina, internet y contrato, para nómadas, familias que vuelven y trabajo remoto. Precio mensual a consultar.',
+    descripcion: 'Estadías largas en Pampatar (Los Geranios, La Caranta y Playa El Ángel): apartamentos amoblados con piscina, internet y contrato, para nómadas, familias que vuelven y trabajo remoto. Precio mensual a consultar.',
     h1: ['Quedarte un mes', 'en la isla'],
     intro: 'Cada vez más gente viene a Margarita por semanas: venezolanos de afuera que visitan a la familia en diciembre, parejas que trabajan remoto frente al mar, personas que vienen a resolver papeles o una venta. Para eso hace falta más que una habitación: cocina de verdad, internet que aguante videollamadas, lavandería cerca y alguien que responda cuando se va el agua.',
     secciones: [
       { titulo: 'Qué cambia en una estadía larga', parrafos: ['Precio: la tarifa por noche es US$60; para 28 noches o más hacemos un precio mensual cerrado, a consultar según fechas y apartamento (no lo publicamos porque depende de la temporada y preferimos decirte un número real que uno de folleto). Incluye agua, luz e internet; la limpieza semanal se acuerda aparte.', 'Contrato: el mismo contrato de hospedaje con firma electrónica, con la cláusula de duración adaptada. No es arrendamiento de vivienda ni genera derecho de permanencia: es hospedaje temporal, con fecha de salida.', 'Servicios: te dejamos conectados con nuestros aliados —agua en botellón a domicilio, lavandería con delivery, alquiler de carro por semanas, farmacia— y la guía con los supermercados y los sitios donde comer barato entre semana.'] },
       { titulo: 'Internet y trabajo remoto', parrafos: ['Los apartamentos tienen Wi-Fi de fibra; te decimos la velocidad real del que elijas antes de reservar. Los cortes de luz existen en la isla: te contamos cómo son en cada zona y qué hacer (Porlamar y Pampatar suelen tener mejor servicio que el norte). Para datos móviles, Digitel es la operadora con mejor cobertura; con el pasaporte compras una línea en el Sambil.'] },
-      { titulo: 'Zonas para vivir un mes', parrafos: ['Pampatar es la más cómoda para el día a día (Sambil, clínicas, farmacias, bahía calmada); Porlamar la más urbana y con todo a pie; Costa Azul el punto medio con playa caminando. Las tres están a menos de 25 minutos del aeropuerto.'] },
+      { titulo: 'Zonas para vivir un mes', parrafos: ['Nuestros cuatro apartamentos están en Pampatar, la zona más cómoda para el día a día (Sambil, clínicas, farmacias, bahía calmada). Los Geranios para familias, La Caranta para vivir frente al castillo y el malecón, Playa El Ángel a mitad de camino de Porlamar. Todos a menos de 25 minutos del aeropuerto.'] },
     ],
     faq: [
       { q: '¿Cuánto cuesta un apartamento por mes en Margarita?', a: 'Nuestra tarifa base es US$60 la noche; para un mes hacemos un precio cerrado según temporada y apartamento, siempre menor que 30 noches sueltas. Escríbenos con las fechas y te respondemos con el número exacto en el día.' },
