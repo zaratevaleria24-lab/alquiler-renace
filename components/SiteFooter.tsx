@@ -26,7 +26,7 @@ export async function SiteFooter() {
   const titulo = 'label-eyebrow text-ink-subtle';
   const redes = [
     { href: 'https://www.instagram.com/margaritarenace.ve/', I: IgIcon, t: 'Instagram' },
-    { href: 'https://www.tiktok.com/@margaritarenace.ve', I: TkIcon, t: 'TikTok' },
+    { href: 'https://www.tiktok.com/@margaritarenace', I: TkIcon, t: 'TikTok' },
     ...(CONTACT.whatsapp ? [{ href: `https://wa.me/${CONTACT.whatsapp}`, I: WaIcon, t: 'WhatsApp' }] : []),
   ];
 
