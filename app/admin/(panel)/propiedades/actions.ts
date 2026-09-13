@@ -326,3 +326,31 @@ export async function alternarPublicacionAction(formData: FormData): Promise<voi
   regenerarSitio();
   redirect('/admin/propiedades');
 }
+
+
+/** Mueve una foto un puesto hacia arriba o abajo dentro de la galería (la
+ *  portada siempre va primera, el orden de las demás es el que se ve en la
+ *  ficha pública). Se renumeran todas para que no queden huecos ni empates. */
+export async function moverFotoAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+  const id = String(formData.get('id') ?? ''); const fotoId = String(formData.get('foto_id') ?? '');
+  const dir = formData.get('dir') === 'arriba' ? -1 : 1;
+  if (!id || !fotoId) redirect('/admin/propiedades');
+  const fotos = await rows<{ id: string }>(`SELECT id FROM property_images WHERE property_id = $1 ORDER BY is_cover DESC, sort_order, id`, [id]);
+  const i = fotos.findIndex((f) => f.id === fotoId); const j = i + dir;
+  if (i >= 0 && j >= 0 && j < fotos.length) {
+    [fotos[i], fotos[j]] = [fotos[j], fotos[i]];
+    for (let k = 0; k < fotos.length; k++) await query(`UPDATE property_images SET sort_order = $3 WHERE id = $1 AND property_id = $2`, [fotos[k].id, id, k]);
+  }
+  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#fotos`);
+}
+
+/** Texto alternativo de una foto: lo lee Google Imágenes y el lector de pantalla. */
+export async function editarAltFotoAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+  const id = String(formData.get('id') ?? ''); const fotoId = String(formData.get('foto_id') ?? '');
+  const alt = String(formData.get('alt') ?? '').trim().slice(0, 200);
+  if (!id || !fotoId) redirect('/admin/propiedades');
+  await query(`UPDATE property_images SET alt = $3 WHERE id = $1 AND property_id = $2`, [fotoId, id, alt]);
+  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#fotos`);
+}

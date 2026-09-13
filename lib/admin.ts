@@ -115,16 +115,17 @@ export interface FotoFila {
   path: string;
   alt: string;
   isCover: boolean;
+  sortOrder: number;
 }
 
 export async function getFotosAdmin(propertyId: string): Promise<FotoFila[]> {
-  const rs = await rows<{ id: string; path: string; alt: string; is_cover: boolean }>(
-    `SELECT id, path, alt, is_cover FROM property_images
+  const rs = await rows<{ id: string; path: string; alt: string; is_cover: boolean; sort_order: number }>(
+    `SELECT id, path, alt, is_cover, sort_order FROM property_images
      WHERE property_id = $1
-     ORDER BY is_cover DESC, sort_order`,
+     ORDER BY is_cover DESC, sort_order, id`,
     [propertyId],
   );
-  return rs.map((r) => ({ id: r.id, path: r.path, alt: r.alt, isCover: r.is_cover }));
+  return rs.map((r) => ({ id: r.id, path: r.path, alt: r.alt, isCover: r.is_cover, sortOrder: Number(r.sort_order) }));
 }
 
 /** Catálogos completos para los selects del formulario. A diferencia del sitio

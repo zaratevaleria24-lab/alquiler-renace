@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCatalogosAdmin, getFotosAdmin, getPropiedadAdmin } from '@/lib/admin';
-import { ArrowUpRight, ChevronLeft, Star, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpRight, Check, ChevronLeft, Star, Trash2 } from 'lucide-react';
 import { Aviso, Insignia, Seccion, ZonaSubida } from '../../_ui';
 import PropiedadForm from '../PropiedadForm';
 import {
   borrarFotoAction,
+  editarAltFotoAction,
+  moverFotoAction,
   guardarPropiedadAction,
   marcarPortadaAction,
   subirFotosAction,
@@ -106,23 +108,35 @@ export default async function EditarPropiedadPage({
         titulo="Fotos"
         descripcion={
           fotos.length > 0
-            ? `${fotos.length} ${fotos.length === 1 ? 'imagen' : 'imágenes'}. La portada es la que se ve en el listado y al compartir el enlace.`
+            ? `${fotos.length} ${fotos.length === 1 ? 'imagen' : 'imágenes'}. La portada es la que se ve en el listado y al compartir el enlace; las flechas cambian el orden de la galería y el texto de cada foto lo lee Google Imágenes.`
             : undefined
         }
       >
         {fotos.length > 0 ? (
           <ul className="grid gap-4 sm:grid-cols-3">
-            {fotos.map((foto) => (
+            {fotos.map((foto, k) => (
               <li key={foto.id} className="group relative">
                 <div className="overflow-hidden rounded-card border border-line bg-white shadow-lift">
-                  <img
-                    src={foto.path}
-                    alt={foto.alt}
-                    width={400}
-                    height={250}
-                    loading="lazy"
-                    className="aspect-video w-full object-cover"
-                  />
+                  <div className="relative">
+                    <img
+                      src={foto.path}
+                      alt={foto.alt}
+                      width={400}
+                      height={250}
+                      loading="lazy"
+                      className="aspect-video w-full object-cover"
+                    />
+                    <span className="mono-data absolute left-2 top-2 rounded-chip bg-white/90 px-2 py-0.5 text-ui text-ink">{k + 1}</span>
+                    <div className="absolute right-2 top-2 flex gap-1">
+                      {k > 0 && <form action={moverFotoAction}><input type="hidden" name="id" value={propiedad.id} /><input type="hidden" name="foto_id" value={foto.id} /><input type="hidden" name="dir" value="arriba" /><button type="submit" title="Mover antes" className="flex h-8 w-8 items-center justify-center rounded-control bg-white/90 text-ink-muted hover:text-brand"><ArrowUp className="h-4 w-4" /><span className="sr-only">Mover antes</span></button></form>}
+                      {k < fotos.length - 1 && <form action={moverFotoAction}><input type="hidden" name="id" value={propiedad.id} /><input type="hidden" name="foto_id" value={foto.id} /><input type="hidden" name="dir" value="abajo" /><button type="submit" title="Mover después" className="flex h-8 w-8 items-center justify-center rounded-control bg-white/90 text-ink-muted hover:text-brand"><ArrowDown className="h-4 w-4" /><span className="sr-only">Mover después</span></button></form>}
+                    </div>
+                  </div>
+                  <form action={editarAltFotoAction} className="flex items-center gap-1.5 border-b border-line px-3 py-2">
+                    <input type="hidden" name="id" value={propiedad.id} /><input type="hidden" name="foto_id" value={foto.id} />
+                    <input name="alt" defaultValue={foto.alt} maxLength={200} placeholder="Qué se ve en la foto (zona, isla)" aria-label="Texto de la foto" className="min-w-0 flex-1 rounded-control border border-line bg-paper px-2 py-1 text-ui" />
+                    <button type="submit" title="Guardar texto" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-control text-ink-muted hover:bg-brand-tint hover:text-brand-deep"><Check className="h-4 w-4" /><span className="sr-only">Guardar texto</span></button>
+                  </form>
                   <div className="flex items-center justify-between gap-2 px-3 py-2.5">
                     {foto.isCover ? (
                       <span className="inline-flex items-center gap-1.5 rounded-chip bg-brand-tint px-2.5 py-1 text-ui font-medium text-brand-deep">

@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { getContratoPorToken, firmar, datosDe, urlContrato, generarCodigo, verificarCodigo, registrarEvento } from '@/lib/contratos';
+import { getContratoPorToken, firmar, datosDe, urlContrato, generarCodigo, verificarCodigo, registrarEvento, listarEventos } from '@/lib/contratos';
 import { correoConfigurado, enviarCorreo } from '@/lib/correo';
 import { correoCodigo, correoFirmado } from '@/lib/correo-plantillas';
 import { getAjustes } from '@/lib/settings';
@@ -19,6 +19,12 @@ export async function pedirCodigoAction(fd: FormData): Promise<R> {
   const c = await getContratoPorToken(String(fd.get('token') ?? ''));
   if (!c || !c.email) return { ok: false, error: 'Este contrato no tiene correo asociado.' };
   if (!correoConfigurado()) return { ok: false, error: 'El envío de códigos no está disponible ahora. Escríbenos por WhatsApp.' };
+  // Freno: alguien con el enlace no puede usar nuestro correo para bombardear
+  // al huésped. Máximo 5 códigos por hora y 60 s entre uno y otro.
+  const ahora = Date.now();
+  const enviados = (await listarEventos(c.id)).filter((e) => e.tipo === 'codigo_enviado' && ahora - Date.parse(e.at) < 3600_000);
+  if (enviados.length >= 5) return { ok: false, error: 'Ya se enviaron varios códigos. Espera una hora o escríbenos por WhatsApp.' };
+  if (enviados.some((e) => ahora - Date.parse(e.at) < 60_000)) return { ok: false, error: 'Acabamos de enviarte un código. Revisa tu correo (y la carpeta de spam) antes de pedir otro.' };
   const codigo = await generarCodigo(c);
   const m = correoCodigo(await datosDe(c), codigo);
   try { await enviarCorreo({ para: c.email, ...m }); } catch (e) { console.error('[contrato] código falló:', (e as Error).message); return { ok: false, error: 'No pudimos enviar el código. Intenta de nuevo en un minuto.' }; }
@@ -31,6 +37,8 @@ export async function firmarContratoAction(fd: FormData): Promise<R> {
   const c = await getContratoPorToken(token);
   if (!c) return { ok: false, error: 'Este enlace no es válido.' };
   if (c.estado === 'firmado') return { ok: true };
+  // Freno a la fuerza bruta del código: 10 intentos fallidos por hora y se bloquea.
+  if ((await listarEventos(c.id)).filter((e) => e.tipo === 'codigo_fallido' && Date.now() - Date.parse(e.at) < 3600_000).length >= 10) return { ok: false, error: 'Demasiados intentos. Espera una hora o escríbenos por WhatsApp.' };
   if (c.estado === 'anulado') return { ok: false, error: 'Este contrato fue anulado. Escríbenos por WhatsApp.' };
   const nombre = String(fd.get('nombre') ?? '').trim().slice(0, 120);
   const documento = String(fd.get('documento') ?? '').trim().slice(0, 40);

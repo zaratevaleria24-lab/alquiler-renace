@@ -237,7 +237,9 @@ export function faqSchema(items: { q: string; a: string }[]): Json {
 
 /** Envuelve varios nodos en un solo @graph: un script por página. */
 export function graph(...nodes: Json[]): string {
-  return JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes });
+  // `<` se escapa: el JSON va dentro de un <script> y un texto con «</script>»
+  // (un nombre, una descripción) cerraría la etiqueta e inyectaría HTML.
+  return JSON.stringify({ '@context': 'https://schema.org', '@graph': nodes }).replace(/</g, '\\u003c');
 }
 
 export type { Property };
