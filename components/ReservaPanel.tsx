@@ -109,7 +109,7 @@ export default function ReservaPanel({
     fetch('/api/tasa')
       .then((r) => (r.ok ? r.json() : null))
       .then((d: Tasa | null) => {
-        if (vivo && (d?.usdt ?? d?.bcv)) setTasa({ ...d, bcv: d.usdt ?? d.bcv });
+        if (vivo && d?.bcv) setTasa(d);
       })
       .catch(() => {
         /* sin tasa: se muestra solo el dólar */
@@ -130,7 +130,15 @@ export default function ReservaPanel({
   const conFechas = fechas ? `, ${textoFechas(fechas)}` : '';
   const mensaje = precioAConsultar
     ? `Hola, vi «${nombre}» (${ubicacion}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${textoHuespedes}${fechas ? `, ${textoFechas(fechas)} (${textoNoches})` : ''}?`
-    : `Hola, quiero reservar «${nombre}» (${ubicacion}) que vi en margaritarenace.com.ve: ${textoNoches}${conFechas}, ${textoHuespedes}. ¿Está disponible?`;
+    : [
+        `Hola, quiero reservar *${nombre}* (${ubicacion}).`,
+        `🌙 ${textoNoches}${conFechas} · 👥 ${textoHuespedes}`,
+        `💵 US$${precioPorNoche} × ${nochesElegidas} = *US$${total.toLocaleString('es-VE')}*`,
+        tasa?.bcv ? `   = ${bolivares(total * tasa.bcv)} al BCV (${bolivares(tasa.bcv)}/US$)` : '',
+        tasa?.bcv && tasa.usdt ? `   ≈ ${(total * tasa.bcv / tasa.usdt).toFixed(1)} USDT` : '',
+        '¿Está disponible? Pago por pago móvil (Bs al BCV), Zelle, efectivo o USDT.',
+        `https://margaritarenace.com.ve/propiedad/${slug}`,
+      ].filter(Boolean).join('\n');
   const whatsapp = numero
     ? `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
     : null;
@@ -140,7 +148,7 @@ export default function ReservaPanel({
       <p className="mono-data text-title-sm text-brand-deep">{precioTexto}</p>
       {!precioAConsultar && tasa?.bcv && (
         <p className="mt-1 text-meta text-ink-muted">
-          {bolivares(precioPorNoche * tasa.bcv)} / noche · a la tasa USDT
+          {bolivares(precioPorNoche * tasa.bcv)} / noche al BCV{tasa.usdt ? ` · ≈ ${(precioPorNoche * tasa.bcv / tasa.usdt).toFixed(1)} USDT` : ''}
         </p>
       )}
       <p className="mt-2 text-meta text-ink-muted">
@@ -253,13 +261,13 @@ export default function ReservaPanel({
                     es un dato que sí tenemos — nunca "de hoy" a secas, que sería
                     afirmar algo que no podemos verificar. */}
                 <p className="mt-2 text-meta text-ink-muted">
-                  Calculado a la tasa USDT: {bolivares(tasa.bcv)} por US$
+                  Calculado al dólar BCV: {bolivares(tasa.bcv)} por US$
                   {tasa.bcvAt
                     ? `, publicada el ${fechaCorta(tasa.bcvAt)}`
                     : tasa.obtenidoAt
                       ? `, consultada el ${fechaCorta(tasa.obtenidoAt)}`
                       : ''}
-                  . El monto final se ajusta a la tasa USDT del día de pago.
+                  . Puedes pagar en dólares, en bolívares al BCV del día o en USDT al equivalente del día{tasa.usdt ? ` (hoy ≈ ${(total * tasa.bcv / tasa.usdt).toFixed(1)} USDT)` : ''}.
                 </p>
               </>
             ) : (

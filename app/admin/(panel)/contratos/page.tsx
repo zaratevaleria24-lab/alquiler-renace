@@ -43,7 +43,7 @@ export default async function ContratosPage({ searchParams }: { searchParams: Pr
             <Campo name="total_usd" label="Total (US$)" type="number" min={0} ayuda="Déjalo vacío y se calcula: tarifa × noches + limpieza." />
             <Campo name="anticipo_usd" label="Anticipo ya pagado (US$)" type="number" min={0} defaultValue={0} />
             <Campo name="deposito_usd" label="Depósito de garantía (US$)" type="number" min={0} defaultValue={a.contrato_deposito || '50'} />
-            <Campo name="metodo_pago" label="Métodos de pago" defaultValue="Zelle / Binance (USDT) / Pago Móvil / Efectivo" ayuda="La tasa USDT del día se congela en el contrato como referencia en bolívares." />
+            <Campo name="metodo_pago" label="Métodos de pago" defaultValue="Zelle / Binance (USDT) / Pago Móvil / Efectivo" ayuda="La tasa BCV del día se congela en el contrato como referencia en bolívares; el USDT se calcula el día del pago." />
             <div className="md:col-span-2"><Campo name="notas" label="Condiciones particulares (opcional)" filas={3} ayuda="Van como cláusula final. Ej.: «Se autoriza un perro pequeño», «Llegada a las 21:00 acordada»." /></div>
             <div className="md:col-span-2"><button type="submit" className="btn-solid"><Plus className="h-4 w-4" />Crear contrato</button></div>
           </form>

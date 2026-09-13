@@ -28,7 +28,7 @@ export async function crearContratoAction(fd: FormData) {
   });
   // Tasa de referencia del día (USDT), congelada en el contrato.
   let tasaBs: number | null = null, tasaFuente = '';
-  try { const t = await getTasas(); if (t.mercado) { tasaBs = Math.round(t.mercado * 100) / 100; tasaFuente = 'Binance P2P (USDT)'; } } catch {}
+  try { const t = await getTasas(); if (t.bcvUsd) { tasaBs = Math.round(t.bcvUsd * 100) / 100; tasaFuente = 'BCV'; } } catch {}
   const id = await crearContrato({
     propertyId, huesped, documento: txt(fd.get('documento'), 40), email: txt(fd.get('email'), 120).toLowerCase(), telefono: txt(fd.get('telefono'), 40),
     huespedes: Math.max(1, Math.trunc(num(fd.get('huespedes'), integrantes.length || 2))), integrantes, checkIn, checkOut,

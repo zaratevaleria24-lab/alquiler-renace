@@ -19,7 +19,8 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [entrada, setEntrada] = useState(mas(hoy(), 7));
   const [salida, setSalida] = useState(mas(hoy(), 10));
   const [personas, setPersonas] = useState(2);
-  const [tasa, setTasa] = useState<number | null>(null);
+  const [tasa, setTasa] = useState<number | null>(null); // Bs por US$ al BCV
+  const [usdt, setUsdt] = useState<number | null>(null); // Bs por USDT (Binance)
   const [ocupado, setOcupado] = useState<Ocupado[] | null>(null);
   const apto = aptos.find((a) => a.slug === slug) ?? aptos[0];
   const [cupon, setCupon] = useState('');
@@ -28,7 +29,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const aplicarCupon = async (c: string) => { const v = await validarCuponAction(c); setDescuento(v); setCuponError(v ? null : 'Ese código no existe o ya se usó.'); };
   useEffect(() => { const q = new URLSearchParams(location.search); const c = q.get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } const a = q.get('apto'); if (a && aptos.some((x) => x.slug === a)) setSlug(a); }, []);
 
-  useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => setTasa(d.usdt ?? d.bcv ?? null)).catch(() => {}); }, []);
+  useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => { setTasa(d.bcv ?? null); setUsdt(d.usdt ?? null); }).catch(() => {}); }, []);
   useEffect(() => { if (!slug) return; setOcupado(null); fetch(`/api/disponibilidad/${slug}`).then((r) => r.json()).then((d) => setOcupado(d.ocupado ?? [])).catch(() => setOcupado([])); }, [slug]);
 
   const noches = Math.max(0, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86400000));
@@ -36,7 +37,18 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const rebaja = descuento ? Math.round(bruto * descuento.pct) / 100 : 0;
   const total = bruto - rebaja;
   const choque = useMemo(() => (ocupado ?? []).some((o) => entrada < o.hasta && salida > o.desde), [ocupado, entrada, salida]);
-  const mensaje = `Hola, quiero reservar ${apto?.nombre} (${apto?.zona}) del ${entrada} al ${salida}, ${noches} ${noches === 1 ? 'noche' : 'noches'} para ${personas} ${personas === 1 ? 'persona' : 'personas'}. Total estimado ${usd(total)}${descuento ? ` con cupón ${cupon} (${descuento.pct} %)` : ''}${tasa ? ` (${bs(total * tasa)} a tasa USDT)` : ''}. ¿Está disponible?`;
+  // El «objeto de la compra» completo va al WhatsApp: el anfitrión no tiene
+  // que preguntar nada y el huésped ve el precio en las tres formas de pago.
+  const enUsdt = tasa && usdt ? total * tasa / usdt : null;
+  const mensaje = [
+    `Hola, quiero reservar *${apto?.nombre}* (${apto?.zona}).`,
+    `📅 Entrada ${entrada} · Salida ${salida} · ${noches} ${noches === 1 ? 'noche' : 'noches'}`,
+    `👥 ${personas} ${personas === 1 ? 'persona' : 'personas'}`,
+    `💵 ${usd(apto?.precio ?? 0)} × ${noches} = ${usd(bruto)}${descuento ? `\n🎟️ Cupón ${cupon} (−${descuento.pct} %): −${usd(rebaja)}` : ''}`,
+    `*Total: ${usd(total)}*${tasa ? `\n   = ${bs(total * tasa)} al BCV (${bs(tasa)}/US$)` : ''}${enUsdt ? `\n   ≈ ${enUsdt.toFixed(1)} USDT` : ''}`,
+    `¿Está disponible? Pago por ${tasa ? 'pago móvil (Bs al BCV), ' : ''}Zelle, efectivo o USDT.`,
+    `${location.origin}/propiedad/${apto?.slug}`,
+  ].join('\n');
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
 
   return (
@@ -67,7 +79,8 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           {descuento && <div className="flex justify-between py-2 text-brand-deep"><dt>Cupón {cupon} · {descuento.pct} %</dt><dd className="mono-data">− {usd(rebaja)}</dd></div>}
           <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
           <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total</dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
-          {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares (tasa USDT {bs(tasa)})</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
+          {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares al BCV ({bs(tasa)}/US$)</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
+          {enUsdt != null && <div className="flex justify-between py-2"><dt className="text-ink-muted">Si pagas en USDT</dt><dd className="mono-data">≈ {enUsdt.toFixed(1)} USDT</dd></div>}
         </dl>
         {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
           : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>
@@ -79,7 +92,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
         {cuponError && <p className="mt-1 text-ui text-accent">{cuponError}</p>}
         {wa && noches > 0 && <a href={wa} rel="noopener" className="btn-solid mt-4 w-full justify-center"><MessageCircle className="h-4 w-4" />Reservar por WhatsApp</a>}
         <p className="mt-3 text-ui text-ink-muted">Confirmas con el 50 % y firmas el contrato desde tu teléfono. <Link href="/politicas" className="text-brand-deep underline underline-offset-4">Políticas</Link> · <Link href={`/propiedad/${apto?.slug}`} className="text-brand-deep underline underline-offset-4">Ver el apartamento</Link></p>
-        <p className="mt-2 text-ui text-ink-faint">El monto en bolívares es referencia: se ajusta a la tasa del día de pago.</p>
+        <p className="mt-2 text-ui text-ink-faint">Precio en dólares a tasa BCV. Pagas en dólares (efectivo, Zelle), en bolívares al BCV del día (pago móvil) o en USDT al equivalente del día. Bs y USDT se ajustan el día del pago.</p>
       </aside>
     </div>
   );

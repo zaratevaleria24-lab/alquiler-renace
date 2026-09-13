@@ -94,12 +94,27 @@ function urlReservaWhatsApp(
   nights: number,
   guests: number,
   whatsapp: string | null,
+  tasas?: { bcv: number | null; usdt: number | null },
 ): string | null {
   if (!whatsapp) return null;
   const huespedes = `${guests} ${guests === 1 ? 'huésped' : 'huéspedes'}`;
+  const noches = `${nights} ${nights === 1 ? 'noche' : 'noches'}`;
+  // El «objeto de la compra» completo: apartamento, noches, personas y el
+  // total en dólares (BCV), bolívares al BCV y equivalente en USDT. El
+  // anfitrión no pregunta nada; el huésped ve las tres formas de pago.
+  const total = property.pricePerNight * nights;
+  const bcv = tasas?.bcv ?? null, usdt = tasas?.usdt ?? null;
   const texto = property.priceOnRequest
     ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
-    : `Hola, quiero reservar «${property.name}» (${property.location}) que vi en margaritarenace.com.ve: ${nights} ${nights === 1 ? 'noche' : 'noches'}, ${huespedes}. ¿Está disponible?`;
+    : [
+        `Hola, quiero reservar *${property.name}* (${property.location}).`,
+        `🌙 ${noches} · 👥 ${huespedes}`,
+        `💵 US$${property.pricePerNight} × ${nights} = *US$${total.toLocaleString('es-VE')}*`,
+        bcv ? `   = ${bolivares(total * bcv, 0)} al BCV (${bolivares(bcv, 2)}/US$)` : '',
+        bcv && usdt ? `   ≈ ${(total * bcv / usdt).toFixed(1)} USDT` : '',
+        `¿Está disponible? Pago por pago móvil (Bs al BCV), Zelle, efectivo o USDT.`,
+        `https://margaritarenace.com.ve/propiedad/${property.slug}`,
+      ].filter(Boolean).join('\n');
   return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
 }
 
@@ -122,18 +137,22 @@ export default function HomeClient({
   ];
 
   // Navigation active links
-  // Tasa USDT (BCV de respaldo) para mostrar los precios en bolívares. Se pide UNA vez acá y baja
+  // Tasas para mostrar el precio: el dólar a tasa BCV es la referencia oficial
+  // del precio; el USDT se muestra para quien paga en USDT (equivale a menos
+  // USDT que dólares, porque el USDT cotiza por encima del BCV). Se pide UNA vez acá y baja
   // a todas las tarjetas: si cada tarjeta hiciera su propio fetch, cuatro
   // tarjetas serían cuatro peticiones idénticas. La home es estática, así que
   // la tasa no puede viajar en el HTML sin quedar vieja — ver app/api/tasa.
   const [tasaBcv, setTasaBcv] = useState<number | null>(null);
+  const [tasaUsdt, setTasaUsdt] = useState<number | null>(null);
   useEffect(() => {
     let vivo = true;
     fetch('/api/tasa')
       .then((r) => (r.ok ? r.json() : null))
       .then((d: { bcv: number | null; usdt?: number | null } | null) => {
-        const t = d?.usdt ?? d?.bcv;
-        if (vivo && t) setTasaBcv(t);
+        if (!vivo || !d) return;
+        if (d.bcv) setTasaBcv(d.bcv);
+        if (d.usdt) setTasaUsdt(d.usdt);
       })
       .catch(() => {
         /* sin tasa: las tarjetas muestran solo dólares */
@@ -182,7 +201,7 @@ export default function HomeClient({
   const [bookingGuests, setBookingGuests] = useState(1);
 
   const waReserva = selectedProperty
-    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp)
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp, { bcv: tasaBcv, usdt: tasaUsdt })
     : null;
 
   // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
@@ -708,6 +727,7 @@ export default function HomeClient({
               {/* Section 1: Destacados en Margarita */}
               <CarouselSection
                 tasaBcv={tasaBcv}
+                tasaUsdt={tasaUsdt}
                 title="Destacados en Margarita"
                 properties={getCuratedSection1()} 
                 onSelectProperty={(p) => abrirPropiedad(p)}
@@ -716,6 +736,7 @@ export default function HomeClient({
               {/* Section 2: Selección Premium */}
               <CarouselSection
                 tasaBcv={tasaBcv}
+                tasaUsdt={tasaUsdt}
                 title="Selección Premium"
                 properties={getCuratedSection2()} 
                 onSelectProperty={(p) => abrirPropiedad(p)}
@@ -724,6 +745,7 @@ export default function HomeClient({
               {/* Section 3: Escapadas Frente al Mar */}
               <CarouselSection
                 tasaBcv={tasaBcv}
+                tasaUsdt={tasaUsdt}
                 title="Escapadas Frente al Mar"
                 properties={getCuratedSection3()} 
                 onSelectProperty={(p) => abrirPropiedad(p)}
@@ -779,6 +801,7 @@ export default function HomeClient({
                       key={property.id}
                       property={property}
                       tasaBcv={tasaBcv}
+                tasaUsdt={tasaUsdt}
                       onSelect={() => abrirPropiedad(property)}
                     />
                   ))}
@@ -996,12 +1019,10 @@ export default function HomeClient({
                       <div>
                         {tasaBcv ? (
                           <>
-                            <span className="text-title-sm font-semibold text-accent">
-                              {bolivares(selectedProperty.pricePerNight * tasaBcv, 0)}
-                            </span>
+                            <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
                             <span className="text-meta text-gray-500 font-medium"> / noche</span>
                             <span className="mono-data block text-meta text-ink-muted">
-                              Ref. US${selectedProperty.pricePerNight.toLocaleString()} · tasa USDT
+                              {bolivares(selectedProperty.pricePerNight * tasaBcv, 0)} al BCV{tasaUsdt ? ` · ≈ ${(selectedProperty.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT` : ''}
                             </span>
                           </>
                         ) : (
@@ -1062,17 +1083,25 @@ export default function HomeClient({
                       {tasaBcv ? (
                         <>
                           <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand">
-                            <span className="text-body-lg">Total a pagar en bolívares</span>
-                            <span className="mono-data text-title">
-                              {bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv)}
-                            </span>
+                            <span className="text-body-lg">Total</span>
+                            <span className="mono-data text-title">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                           </div>
+                          <div className="flex items-baseline justify-between gap-3 text-meta text-ink-soft">
+                            <span>En bolívares al BCV</span>
+                            <span className="mono-data">{bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv, 0)}</span>
+                          </div>
+                          {tasaUsdt && (
+                            <div className="flex items-baseline justify-between gap-3 text-meta text-ink-soft">
+                              <span>Si pagas en USDT</span>
+                              <span className="mono-data">≈ {(selectedProperty.pricePerNight * bookingNights * tasaBcv / tasaUsdt).toFixed(1)} USDT</span>
+                            </div>
+                          )}
                           {/* `text-meta`, no `text-micro`: globals.css reserva
                               micro para etiquetas en versalitas, y esto es texto
                               corrido que el huésped tiene que poder leer. */}
                           <p className="text-meta text-ink-muted">
-                            Calculado al dólar BCV: {bolivares(tasaBcv, 4)} por US$. El
-                            monto final se ajusta a la tasa USDT del día de pago.
+                            Precio en dólares a tasa BCV ({bolivares(tasaBcv, 2)} por US$). Puedes pagar en dólares, en bolívares al BCV del día o en USDT al equivalente del día (tasa Binance).
+                            El monto final se ajusta a las tasas del día de pago.
                           </p>
                         </>
                       ) : (
@@ -1256,10 +1285,11 @@ interface CarouselSectionProps {
   /** Se recibe y se reenvía: las tarjetas del carrusel muestran el mismo
    *  precio en bolívares que las de la retícula. */
   tasaBcv: number | null;
+  tasaUsdt?: number | null;
   onSelectProperty: (property: Property) => void;
 }
 
-function CarouselSection({ title, properties, tasaBcv, onSelectProperty }: CarouselSectionProps) {
+function CarouselSection({ title, properties, tasaBcv, tasaUsdt, onSelectProperty }: CarouselSectionProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     loop: false,
@@ -1313,6 +1343,7 @@ function CarouselSection({ title, properties, tasaBcv, onSelectProperty }: Carou
               <PropertyCard
                 property={property}
                 tasaBcv={tasaBcv}
+                tasaUsdt={tasaUsdt}
                 onSelect={() => onSelectProperty(property)}
               />
             </div>
@@ -1334,12 +1365,14 @@ function bolivares(n: number, decimales = 2): string {
 
 interface PropertyCardProps {
   property: Property;
-  /** Bolívares por dólar (tasa USDT; BCV si falta). Null mientras no llega o si la consulta falló. */
+  /** Bolívares por dólar al BCV. Null mientras no llega o si la consulta falló. */
   tasaBcv: number | null;
+  /** Bolívares por USDT (Binance), para la referencia en USDT. */
+  tasaUsdt?: number | null;
   onSelect: () => void;
 }
 
-function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
+function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const capacidad = property.guestsAllowed.adults + property.guestsAllowed.children;
 
@@ -1451,18 +1484,16 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
               <Users className="h-3.5 w-3.5 stroke-[1.6]" aria-hidden="true" />
               Hasta {capacidad} huéspedes
             </p>
-            {/* El bolívar manda: es la moneda de curso legal y lo que se paga.
-                El dólar queda como referencia del catálogo. */}
-            {precioBs !== null ? (
-              <>
-                <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
-                  Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })}
-                </p>
-                <p className="mono-data text-ink-muted">Ref. {property.priceText} · USDT</p>
-              </>
-            ) : (
-              <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
-                {property.priceText}
+            {/* El precio es en dólares a tasa BCV (la referencia oficial). Debajo,
+                cuánto es en bolívares al BCV y, para quien paga en USDT, a cuántos
+                USDT equivale (menos, porque el USDT cotiza por encima). */}
+            <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
+              {property.priceText}
+            </p>
+            {precioBs !== null && (
+              <p className="mono-data text-ink-muted">
+                Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })} al BCV
+                {tasaBcv && tasaUsdt ? ` · ≈ ${(property.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT` : ''}
               </p>
             )}
           </div>

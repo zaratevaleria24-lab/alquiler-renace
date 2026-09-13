@@ -46,7 +46,7 @@ export default function ContratoDocumento({ d, version, firma, token }: { d: Dat
               ['Total', `${usd(d.totalUsd)}${enBs(d.totalUsd)}`],
               ...(d.anticipoUsd > 0 ? [['Anticipo', `${usd(d.anticipoUsd)}${enBs(d.anticipoUsd)}`], ['Saldo al ingresar', `${usd(saldo)}${enBs(saldo)}`]] : []),
               ...(d.depositoUsd > 0 ? [['Depósito de garantía', usd(d.depositoUsd)]] : []),
-              ...(d.tasaBs ? [['Tasa de referencia', `${bs(d.tasaBs)} / US$ · ${d.tasaFuente || 'Binance'}`]] : []),
+              ...(d.tasaBs ? [['Tasa BCV de referencia', `${bs(d.tasaBs)} / US$ · ${d.tasaFuente || 'Binance'}`]] : []),
               ['Método de pago', d.metodoPago]].map(([k, v]) => (
               <div key={k} className={`flex justify-between gap-3 px-3 py-2 ${k === 'Total' ? 'bg-paper font-semibold' : ''}`}><dt className="text-ink-muted">{k}</dt><dd className="mono-data text-right text-ink">{v}</dd></div>))}
           </dl>
