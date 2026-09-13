@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import BotonCookies from './BotonCookies';
 import { getZones } from '@/lib/queries';
 import { SITE } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
@@ -76,6 +77,7 @@ export async function SiteFooter() {
               <Link href="/politicas" className={enlace}>
                 Políticas
               </Link>
+              <BotonCookies className={enlace} />
               <Link href="/guia" className={enlace}>
                 Guía turística
               </Link>

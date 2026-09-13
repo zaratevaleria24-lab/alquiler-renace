@@ -9,6 +9,8 @@
 // Al agregar una zona nueva a los listados, agregar su entrada acá. Si falta,
 // la página se genera igual pero con texto genérico (ver DEFAULT_ZONE_COPY).
 
+import { ZONE_EXTRA } from './zones-content-extra';
+
 export interface ZoneCopy {
   /** Cómo llamar a la zona en un título. */
   headline: string;
@@ -201,5 +203,8 @@ export const DEFAULT_ZONE_COPY: Omit<ZoneCopy, 'headline'> = {
 };
 
 export function getZoneCopy(slug: string, name: string): ZoneCopy {
-  return ZONE_COPY[slug] ?? { headline: name, ...DEFAULT_ZONE_COPY };
+  const base = ZONE_COPY[slug] ?? { headline: name, ...DEFAULT_ZONE_COPY };
+  // Párrafos ampliados por zona (lib/zones-content-extra.ts): distancias, qué
+  // hay cerca según la guía, cuándo ir, cuánto cuesta.
+  return { ...base, body: [...base.body, ...(ZONE_EXTRA[slug] ?? [])] };
 }

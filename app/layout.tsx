@@ -9,6 +9,8 @@ import NavBar from '@/components/NavBar';
 import { getContacto } from '@/lib/settings';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { Medidor } from '@/components/Medidor';
+import Consentimiento from '@/components/Consentimiento';
+import { marketing } from '@/lib/marketing';
 
 // Sistema de TRES tipografías con roles separados (ver REFERENCIA-DISENO.md).
 // Antes eran dos: Fraunces (una serif decorativa, algo "wonky") y Jost (una sans
@@ -190,6 +192,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {!esPanel && !esEnlaces && !ruta.startsWith('/en-venta') && !ruta.startsWith('/guia') && <SmoothScroll />}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
+        {!esPanel && !esEnlaces && <Consentimiento {...marketing()} />}
         {!esPanel && !esEnlaces && !esHome && <NavBar whatsapp={contacto.whatsapp} />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las

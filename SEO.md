@@ -548,3 +548,15 @@ robots.txt, sitemap (120 URLs con lastmod: 104 de la guía), llms.txt.
   Primer envío: 127 URLs, HTTP 202. Google no usa IndexNow → sitemap + Search Console.
 - Regla operativa: **URL nueva → reenviar sitemap + solicitar indexación en Search
   Console; texto cambiado → nada.** Despliegue estándar: `npm run deploy`.
+
+### Campañas y consentimiento (2026-09-13, noche)
+- **Cookies**: el sitio sigue sin cookies propias. `components/Consentimiento.tsx`
+  (Consent Mode v2) muestra el aviso SOLO si hay IDs en
+  `/etc/margarita-renace/marketing.env` (`GA4_ID=G-…`, `META_PIXEL_ID=…`). Con
+  «Aceptar» carga gtag y el Pixel; con «Solo lo necesario» gtag queda en modo
+  denegado (mediciones anónimas, sin cookies). La decisión vive en localStorage
+  `mr:consentimiento`; «Cookies» en el pie la reabre. Sección «Cookies» en /politicas.
+  **Falta**: que el dueño cree la propiedad GA4 y el Pixel y pase los IDs.
+- **Landings de zona ampliadas** (`lib/zones-content-extra.ts`): 518–907 palabras
+  por zona con distancias, servicios de la guía, precios y cuándo ir; las zonas sin
+  inventario lo dicen con honestidad y remiten a Pampatar/Costa Azul/Porlamar.
