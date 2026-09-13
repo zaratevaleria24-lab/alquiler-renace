@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { CalendarDays, MessageCircle, Users } from 'lucide-react';
+import { CalendarDays, MessageCircle, Ticket, Users } from 'lucide-react';
+import { validarCuponAction } from '@/app/acciones/cupon';
 
 interface Apto { slug: string; nombre: string; zona: string; precio: number; personas: number; portada: string }
 interface Ocupado { desde: string; hasta: string }
@@ -21,14 +22,21 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [tasa, setTasa] = useState<number | null>(null);
   const [ocupado, setOcupado] = useState<Ocupado[] | null>(null);
   const apto = aptos.find((a) => a.slug === slug) ?? aptos[0];
+  const [cupon, setCupon] = useState('');
+  const [descuento, setDescuento] = useState<{ pct: number; nombre: string } | null>(null);
+  const [cuponError, setCuponError] = useState<string | null>(null);
+  const aplicarCupon = async (c: string) => { const v = await validarCuponAction(c); setDescuento(v); setCuponError(v ? null : 'Ese código no existe o ya se usó.'); };
+  useEffect(() => { const c = new URLSearchParams(location.search).get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } }, []);
 
   useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => setTasa(d.usdt ?? d.bcv ?? null)).catch(() => {}); }, []);
   useEffect(() => { if (!slug) return; setOcupado(null); fetch(`/api/disponibilidad/${slug}`).then((r) => r.json()).then((d) => setOcupado(d.ocupado ?? [])).catch(() => setOcupado([])); }, [slug]);
 
   const noches = Math.max(0, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86400000));
-  const total = noches * (apto?.precio ?? 0);
+  const bruto = noches * (apto?.precio ?? 0);
+  const rebaja = descuento ? Math.round(bruto * descuento.pct) / 100 : 0;
+  const total = bruto - rebaja;
   const choque = useMemo(() => (ocupado ?? []).some((o) => entrada < o.hasta && salida > o.desde), [ocupado, entrada, salida]);
-  const mensaje = `Hola, quiero reservar ${apto?.nombre} (${apto?.zona}) del ${entrada} al ${salida}, ${noches} ${noches === 1 ? 'noche' : 'noches'} para ${personas} ${personas === 1 ? 'persona' : 'personas'}. Total estimado ${usd(total)}${tasa ? ` (${bs(total * tasa)} a tasa USDT)` : ''}. ¿Está disponible?`;
+  const mensaje = `Hola, quiero reservar ${apto?.nombre} (${apto?.zona}) del ${entrada} al ${salida}, ${noches} ${noches === 1 ? 'noche' : 'noches'} para ${personas} ${personas === 1 ? 'persona' : 'personas'}. Total estimado ${usd(total)}${descuento ? ` con cupón ${cupon} (${descuento.pct} %)` : ''}${tasa ? ` (${bs(total * tasa)} a tasa USDT)` : ''}. ¿Está disponible?`;
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
 
   return (
@@ -55,14 +63,20 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
         <p className="label-eyebrow text-brand-deep">Tu estadía</p>
         <p className="mt-1 font-serif text-title-sm font-semibold text-ink">{apto?.nombre}</p>
         <dl className="mt-4 divide-y divide-line text-meta">
-          <div className="flex justify-between py-2"><dt className="text-ink-muted">{noches} {noches === 1 ? 'noche' : 'noches'} × {usd(apto?.precio ?? 0)}</dt><dd className="mono-data">{usd(total)}</dd></div>
+          <div className="flex justify-between py-2"><dt className="text-ink-muted">{noches} {noches === 1 ? 'noche' : 'noches'} × {usd(apto?.precio ?? 0)}</dt><dd className="mono-data">{usd(bruto)}</dd></div>
+          {descuento && <div className="flex justify-between py-2 text-brand-deep"><dt>Cupón {cupon} · {descuento.pct} %</dt><dd className="mono-data">− {usd(rebaja)}</dd></div>}
           <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
-          <div className="flex justify-between py-2 text-body font-semibold"><dt>Total</dt><dd className="mono-data">{usd(total)}</dd></div>
+          <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total</dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
           {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares (tasa USDT {bs(tasa)})</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
         </dl>
         {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
           : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>
           : noches > 0 && <p className="mt-3 rounded-card border border-brand/30 bg-brand-tint px-3 py-2 text-meta text-brand-deep">Fechas libres según nuestro calendario (incluye Airbnb).</p>}
+        <form onSubmit={(e) => { e.preventDefault(); aplicarCupon(cupon); }} className="mt-3 flex gap-2">
+          <label className="relative flex-1"><Ticket className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" aria-hidden="true" /><input value={cupon} onChange={(e) => setCupon(e.target.value.toUpperCase())} placeholder="Código de descuento" aria-label="Código de descuento" className="mono-data w-full rounded-control border border-line bg-paper py-2 pl-9 pr-3 text-meta" /></label>
+          <button type="submit" className="rounded-control border border-line bg-white px-3 text-ui font-medium text-brand-deep hover:border-brand/40">Aplicar</button>
+        </form>
+        {cuponError && <p className="mt-1 text-ui text-accent">{cuponError}</p>}
         {wa && noches > 0 && <a href={wa} rel="noopener" className="btn-solid mt-4 w-full justify-center"><MessageCircle className="h-4 w-4" />Reservar por WhatsApp</a>}
         <p className="mt-3 text-ui text-ink-muted">Confirmas con el 50 % y firmas el contrato desde tu teléfono. <Link href="/politicas" className="text-brand-deep underline underline-offset-4">Políticas</Link> · <Link href={`/propiedad/${apto?.slug}`} className="text-brand-deep underline underline-offset-4">Ver el apartamento</Link></p>
         <p className="mt-2 text-ui text-ink-faint">El monto en bolívares es referencia: se ajusta a la tasa del día de pago.</p>

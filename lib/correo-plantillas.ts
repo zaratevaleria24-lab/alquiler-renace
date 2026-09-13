@@ -64,3 +64,19 @@ export function correoFirmado(d: DatosContrato, url: string, firma: { nombre: st
     <p style="margin:0;font-family:Menlo,Consolas,monospace;font-size:11px;color:#8a7f76;word-break:break-all">Huella SHA-256: ${firma.hash}</p>`);
   return { html, texto: `Contrato de ${d.inmueble} firmado por ${firma.nombre} (${firma.documento}) el ${cuando}.\nVer: ${url}\nVerificar integridad: ${url}/verificar\nHuella SHA-256: ${firma.hash}`, asunto: `Contrato firmado · ${d.inmueble} · ${fecha(d.checkIn)}` };
 }
+
+
+/** Cupón de bienvenida: el código, la guía y cómo usarlo. */
+export function correoCupon(nombre: string, cupon: string, pct: number) {
+  const guia = `${SITE.url}/guia`, reservas = `${SITE.url}/reservas?cupon=${encodeURIComponent(cupon)}`;
+  const html = marco('Bienvenida a la isla', `
+    <p style="margin:0 0 14px">Hola ${esc(nombre.split(' ')[0] || '')},</p>
+    <p style="margin:0 0 18px">Gracias por dejarnos tu correo. Este es tu código de <b>${pct} % de descuento</b> en tu primera reserva directa con nosotros, para cualquiera de nuestros apartamentos en Pampatar:</p>
+    <div style="text-align:center;margin:8px 0 18px"><span style="display:inline-block;font-family:Menlo,Consolas,monospace;font-size:30px;letter-spacing:.12em;padding:14px 22px;border:1px dashed #0b4a5c;border-radius:10px;background:#fff8f2;color:#0b4a5c">${esc(cupon)}</span></div>
+    <p style="margin:0 0 6px;font-size:14px;color:#5b524b">Se aplica solo en la calculadora de reservas o dictándolo por WhatsApp. Vale una vez, sin fecha de vencimiento.</p>
+    ${boton(reservas, 'Calcular mi estadía con el descuento')}
+    <p style="margin:0 0 10px">Y el regalo prometido: <a href="${guia}" style="color:#0b4a5c">la guía de la isla</a> — más de 100 playas, restaurantes, servicios a domicilio y aventuras con horario, valoración y cómo llegar. La misma que reciben nuestros huéspedes por QR al entrar al apartamento.</p>
+    <p style="margin:18px 0 0">Valeria<br><span style="color:#8a7f76">${SITE.name}</span></p>`);
+  const texto = `Hola ${nombre},\n\nTu código de ${pct} % de descuento en tu primera reserva directa: ${cupon}\nSe aplica en ${reservas} o dictándolo por WhatsApp. Vale una vez.\n\nTu regalo: la guía de la isla → ${guia}\n\nValeria · ${SITE.name}`;
+  return { html, texto, asunto: `${cupon}: tu ${pct} % de descuento y la guía de la isla` };
+}

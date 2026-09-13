@@ -10,6 +10,7 @@ import { getContacto } from '@/lib/settings';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { Medidor } from '@/components/Medidor';
 import Consentimiento from '@/components/Consentimiento';
+import CuponBienvenida from '@/components/CuponBienvenida';
 import { marketing } from '@/lib/marketing';
 
 // Sistema de TRES tipografías con roles separados (ver REFERENCIA-DISENO.md).
@@ -193,6 +194,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
         {!esPanel && !esEnlaces && <Consentimiento {...marketing()} />}
+        {!esPanel && !esEnlaces && !ruta.startsWith('/reservas') && <CuponBienvenida />}
         {!esPanel && !esEnlaces && !esHome && <NavBar whatsapp={contacto.whatsapp} />}
         {children}
         {/* En el layout, no en cada página: aparece igual en el home y en las

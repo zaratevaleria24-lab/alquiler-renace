@@ -20,7 +20,6 @@ const ENLACES = [
   { label: 'Autos', href: '/autos', enHome: '/autos' },
   { label: 'En venta', href: '/en-venta', enHome: '/en-venta' },
   { label: 'Guía turística', href: '/guia', enHome: '/guia' },
-  { label: 'Reservar', href: '/reservas', enHome: '/reservas' },
 ] as const;
 
 export default function NavBar({
@@ -37,8 +36,10 @@ export default function NavBar({
   const activo = (e: (typeof ENLACES)[number]) =>
     enHome ? activoHome === e.label : !e.href.includes('#') && e.href !== '/' && ruta.startsWith(e.href);
   const destino = (e: (typeof ENLACES)[number]) => (enHome ? e.enHome : e.href);
-  const waPublicar = whatsapp
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, quiero publicar mi propiedad en margaritarenace.com.ve.')}`
+  // Un solo llamado a la acción a la derecha: WhatsApp (en escritorio). La
+  // hamburguesa solo existe en teléfono; en escritorio los enlaces ya están.
+  const waReservar = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, quiero reservar un apartamento en Margarita.')}`
     : null;
 
   return (
@@ -74,9 +75,9 @@ export default function NavBar({
         </div>
 
         <div className="flex items-center gap-1.5 md:gap-3">
-          {waPublicar && (
-            <a href={waPublicar} rel="noopener" className="hidden lg:inline text-ui font-medium tracking-wide text-ink-soft transition-colors hover:text-ink">
-              Publica tu propiedad
+          {waReservar && (
+            <a href={waReservar} rel="noopener" className="hidden md:inline-flex min-h-[38px] items-center rounded-chip bg-brand-deep px-4 text-ui font-medium tracking-wide text-white transition-colors hover:bg-brand">
+              Reservar por WhatsApp
             </a>
           )}
           <button
@@ -85,7 +86,7 @@ export default function NavBar({
             aria-label={abierto ? 'Cerrar menú' : 'Menú de navegación'}
             aria-expanded={abierto}
             aria-controls="menu-movil"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-all hover:bg-paper-warm"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-all hover:bg-paper-warm md:hidden"
           >
             {abierto ? <X className="h-[17px] w-[17px]" /> : <Menu className="h-[17px] w-[17px]" />}
           </button>
@@ -108,8 +109,8 @@ export default function NavBar({
                 </a>
               </li>
             ))}
-            {waPublicar && (
-              <li><a href={waPublicar} rel="noopener" className="flex min-h-[48px] items-center rounded-chip px-4 text-body font-medium text-brand-deep">Publica tu propiedad</a></li>
+            {waReservar && (
+              <li><a href={waReservar} rel="noopener" className="mt-1 flex min-h-[48px] items-center justify-center rounded-chip bg-brand-deep px-4 text-body font-medium text-white">Reservar por WhatsApp</a></li>
             )}
           </ul>
         </div>
