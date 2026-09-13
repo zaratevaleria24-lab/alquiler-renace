@@ -88,7 +88,7 @@ export const AMENITIES_PLAYA = [
 const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
   {
     id: '1',
-    name: 'Los Geranios A',
+    name: 'Los Geranios · Depto de lujo',
     location: 'Urb. Maneiro, Pampatar, Margarita',
     priceText: 'Consultar precio',
     pricePerNight: 0,
@@ -96,8 +96,9 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
     nightsCount: 2,
     rating: 4.9,
     categories: ['Centro', 'Familiar', 'Piscina'],
-    image: '/properties/los-geranios-a/habitacion-principal.webp',
+    image: '/uploads/properties/los-geranios-a/piscina.webp',
     gallery: [
+      '/uploads/properties/los-geranios-a/piscina.webp',
       '/properties/los-geranios-a/habitacion-principal.webp'
     ],
     description: 'Apartamento totalmente equipado en zona céntrica de Pampatar, a solo 5 minutos del C.C. Sambil. Cuenta con seguridad 24/7, piscina, cancha deportiva, zona de parrilla y parque infantil dentro de la urbanización. Ideal para familias: habitación principal con cama queen y baño privado, habitación secundaria con cama queen y gaveta adicional. Todo lo que necesitas cerca, en una de las zonas más cómodas de la isla.',
