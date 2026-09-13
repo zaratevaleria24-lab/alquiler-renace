@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getEnlacesPublicos } from '@/lib/enlaces';
+import { getAnunciosAirbnb, getEnlacesPublicos } from '@/lib/enlaces';
 import { getAjustes } from '@/lib/settings';
 import { SITE } from '@/lib/site';
 import { BotonesEnlaces } from '@/components/BotonesEnlaces';
@@ -51,9 +51,10 @@ export const metadata: Metadata = {
 };
 
 export default async function EnlacesPage() {
-  const [{ botones, circulos }, ajustes] = await Promise.all([
+  const [{ botones, circulos }, ajustes, anuncios] = await Promise.all([
     getEnlacesPublicos(),
     getAjustes(),
+    getAnunciosAirbnb(),
   ]);
 
   return (
@@ -84,7 +85,7 @@ export default async function EnlacesPage() {
           </p>
         </header>
 
-        <BotonesEnlaces botones={botones} circulos={circulos} />
+        <BotonesEnlaces botones={botones} circulos={circulos} anuncios={anuncios} />
 
         {botones.length === 0 && circulos.length === 0 && (
           // Solo se llega acá si alguien desactivó todos los enlaces o borró la

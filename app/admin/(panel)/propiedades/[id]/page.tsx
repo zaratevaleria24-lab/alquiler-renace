@@ -27,6 +27,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 const MENSAJES: Record<string, string> = {
+  airbnb: 'El enlace de Airbnb debe empezar por https://www.airbnb.com/ (o airbnb.com.ve, .es…).',
   'faltan-datos':
     'Faltan datos obligatorios: nombre, zona y dirección no pueden quedar vacíos.',
   'sin-fotos': 'No llegó ningún archivo: elige al menos una foto antes de subir.',

@@ -1,6 +1,9 @@
 'use client';
 
-import { ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { AnuncioAirbnb } from '@/lib/enlaces';
 import { avisar } from './Medidor';
 import { tipoDe } from '@/lib/tipos-enlace';
 import type { EnlacePublico } from '@/lib/enlaces';
@@ -147,12 +150,77 @@ function BotonRedondo({ enlace }: { enlace: EnlacePublico }) {
   );
 }
 
+/** «Reservar por Airbnb» no salta a Airbnb a ciegas: se despliega y muestra los
+ *  apartamentos con su portada en un carrusel horizontal; cada uno lleva a su
+ *  anuncio. Así el visitante elige el que vio en la foto de Instagram. */
+function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: AnuncioAirbnb[] }) {
+  const [abierto, setAbierto] = useState(false);
+  // /enlaces#airbnb abre el carrusel directo (para pegarlo en una historia).
+  useEffect(() => { if (location.hash === '#airbnb') setAbierto(true); }, []);
+  const { icono: Icono, color } = tipoDe(enlace.tipo);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setAbierto((v) => !v)}
+        aria-expanded={abierto}
+        aria-controls="carrusel-airbnb"
+        className={`group flex w-full items-center gap-3.5 rounded-full border py-2 pl-2 pr-4 text-left transition duration-200 ${abierto ? 'border-brand/40 bg-white shadow-lift' : 'border-line bg-white/90 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lift'}`}
+      >
+        <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-white" style={{ color }}><Icono className="h-5 w-5" strokeWidth={1.75} /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[15px] font-medium leading-tight text-ink">{enlace.etiqueta}</span>
+          {enlace.descripcion && <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-muted">{enlace.descripcion}</span>}
+        </span>
+        <ChevronDown aria-hidden="true" className={`h-[18px] w-[18px] shrink-0 text-ink-faint transition-transform duration-300 ${abierto ? 'rotate-180 text-brand' : ''}`} />
+      </button>
+      <AnimatePresence initial={false}>
+        {abierto && (
+          <motion.div
+            id="carrusel-airbnb"
+            key="carrusel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.2, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <ul className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {anuncios.map((a, i) => {
+                const contenido = (
+                  <>
+                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card bg-luz">
+                      {a.portada && <img src={a.portada} alt={a.nombre} width={220} height={275} loading={i < 2 ? 'eager' : 'lazy'} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />}
+                      <span className="absolute left-2 top-2 rounded-chip bg-white/90 px-2 py-0.5 text-[11px] font-medium text-ink">{a.zona}</span>
+                    </div>
+                    <span className="mt-2 block font-serif text-[15px] font-semibold leading-tight text-ink">{a.nombre}</span>
+                    <span className="mt-0.5 block text-[12px]" style={{ color }}>{a.url ? 'Ver en Airbnb ↗' : 'Pronto en Airbnb'}</span>
+                  </>
+                );
+                const clase = 'group block w-[46vw] max-w-[190px] shrink-0 snap-start';
+                return (
+                  <li key={a.slug} className="shrink-0">
+                    {a.url ? <a href={a.url} target="_blank" rel="noopener noreferrer" onClick={() => contar(`airbnb:${a.slug}`)} className={clase}>{contenido}</a> : <div className={clase} aria-disabled="true">{contenido}</div>}
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-1 text-center text-[12px] text-ink-faint">{`Los mismos ${anuncios.length} apartamentos, con la protección de Airbnb.`}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function BotonesEnlaces({
   botones,
   circulos,
+  anuncios = [],
 }: {
   botones: EnlacePublico[];
   circulos: EnlacePublico[];
+  anuncios?: AnuncioAirbnb[];
 }) {
   return (
     <>
@@ -173,7 +241,7 @@ export function BotonesEnlaces({
           <ul className="space-y-3">
             {botones.map((e) => (
               <li key={e.slug}>
-                <BotonAncho enlace={e} />
+                {e.tipo === 'airbnb' && anuncios.length > 0 ? <BotonAirbnb enlace={e} anuncios={anuncios} /> : <BotonAncho enlace={e} />}
               </li>
             ))}
           </ul>

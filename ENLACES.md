@@ -96,3 +96,9 @@ de contrato/cláusulas para firma del cliente (dos features aparte).
   40 px con el logo en su color sobre blanco, sin relleno pesado); orden: Agendar
   por WhatsApp (destacado) · Agendar con nosotros (/) · Guía · Reservar por Airbnb ·
   redondos Instagram/TikTok. Airbnb y TikTok siguen sin URL.
+- «Reservar por Airbnb» ya no salta a ciegas: se despliega (Motion) un carrusel
+  horizontal con los apartamentos publicados —portada, zona, nombre— y cada uno
+  lleva a su anuncio (`properties.airbnb_url`, migración 018, se edita en
+  Propiedades → «Enlace del anuncio en Airbnb»). Sin URL sale «Pronto en Airbnb».
+  `/enlaces#airbnb` abre el carrusel directo. Los clics se cuentan como
+  `airbnb:<slug>`.

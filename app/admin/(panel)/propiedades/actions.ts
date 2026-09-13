@@ -56,6 +56,8 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   const name = String(formData.get('name') ?? '').trim();
   const zoneSlug = String(formData.get('zone_slug') ?? '');
   const location = String(formData.get('location') ?? '').trim();
+  const airbnbUrl = String(formData.get('airbnb_url') ?? '').trim().slice(0, 300);
+  if (airbnbUrl && !/^https:\/\/(www\.)?airbnb\.[a-z.]+\//i.test(airbnbUrl)) redirect(`/propiedades/${id}?error=airbnb`);
   const description = String(formData.get('description') ?? '').trim();
   const priceOnRequest = asBool(formData.get('price_on_request'));
   const pricePerNight = priceOnRequest
@@ -85,12 +87,12 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
            name = $2, zone_slug = $3, location = $4, description = $5,
            price_per_night = $6, price_on_request = $7, price_text = $8,
            guests_adults = $9, guests_children = $10,
-           is_real = $11, is_published = $12, updated_at = now()
+           is_real = $11, is_published = $12, airbnb_url = $13, updated_at = now()
          WHERE id = $1`,
         [
           id, name, zoneSlug, location, description,
           pricePerNight, priceOnRequest, priceText,
-          guestsAdults, guestsChildren, isReal, isPublished,
+          guestsAdults, guestsChildren, isReal, isPublished, airbnbUrl,
         ],
       );
       if (res.rowCount !== 1) throw new Error('propiedad inexistente');

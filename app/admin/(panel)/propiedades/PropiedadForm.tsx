@@ -66,6 +66,13 @@ export default function PropiedadForm({
             />
           </div>
           <Campo
+            name="airbnb_url"
+            label="Enlace del anuncio en Airbnb"
+            defaultValue={propiedad?.airbnbUrl}
+            placeholder="https://www.airbnb.com/rooms/12345678"
+            ayuda="Sale en el carrusel de «Reservar por Airbnb» de la página de enlaces. Vacío = el apartamento aparece sin enlace."
+          />
+          <Campo
             name="description"
             label="Descripción"
             filas={5}
