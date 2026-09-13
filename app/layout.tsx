@@ -49,11 +49,18 @@ export const metadata: Metadata = {
   // Sin esto Next avisa en build y las og:image salen relativas, que ningún
   // scraper de redes sociales resuelve.
   metadataBase: new URL(SITE.url),
+  // La marca va PRIMERO en la pestaña (pedido de la dueña, 2026-09-13): en una
+  // pestaña angosta lo que se lee es «Margarita Renace». Las palabras clave
+  // siguen en el título para Google.
   title: {
-    default:
-      'Alquiler de Apartamentos y Autos en Isla de Margarita | Margarita Renace',
-    // Las páginas de zona ponen su propio título y heredan la marca.
-    template: '%s | Margarita Renace',
+    default: 'Margarita Renace — Apartamentos, casas y autos en Isla de Margarita',
+    template: 'Margarita Renace · %s',
+  },
+  // Favicon con el emblema. La versión en la URL fuerza a los navegadores y a
+  // Cloudflare a soltar el icono viejo que tenían cacheado.
+  icons: {
+    icon: [{ url: '/favicon.ico?v=3', sizes: 'any' }, { url: '/icon.png?v=3', type: 'image/png' }],
+    apple: '/apple-icon.png?v=3',
   },
   description: SITE.description,
   applicationName: SITE.name,
