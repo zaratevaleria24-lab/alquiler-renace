@@ -844,7 +844,7 @@ export default function HomeClient({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsDetailOpen(false)}
-              className="absolute inset-0 bg-black/40 backdrop-blur-xs"
+              className="absolute inset-0 bg-ink/45 backdrop-blur-md"
             />
 
             {/* Drawer Panel */}
@@ -858,7 +858,7 @@ export default function HomeClient({
               role="dialog"
               aria-modal="true"
               aria-label={`Detalles de ${selectedProperty.name}`}
-              className="relative z-10 flex max-h-[94dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-panel bg-white text-ink shadow-lift-lg md:max-h-[88vh] md:rounded-panel"
+              className="relative z-10 flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[22px] border border-white/60 bg-white/95 text-ink shadow-[0_40px_90px_-30px_rgba(11,74,92,.5)] ring-1 ring-brand/10 backdrop-blur-xl md:max-h-[90vh] md:rounded-[22px]"
             >
 
               {/* Header */}

@@ -51,20 +51,18 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
   return (
     <AnimatePresence>
       {abierto && (
-        <motion.div key="cupon" role="dialog" aria-modal="true" aria-label="Cupón de bienvenida" className="fixed inset-0 z-[95] flex items-end justify-center bg-ink/40 p-3 backdrop-blur-md md:items-center md:p-6"
+        <motion.div key="cupon" role="dialog" aria-modal="true" aria-label="Cupón de bienvenida" className="fixed inset-0 z-[95] flex items-end justify-center bg-ink/30 p-3 backdrop-blur-[2px] md:items-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={cerrar}>
-          <motion.div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-lg overflow-hidden rounded-[22px] border border-white/60 bg-white/95 shadow-[0_40px_80px_-30px_rgba(11,74,92,.45)] ring-1 ring-brand/10 backdrop-blur-xl"
+          <motion.div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-md overflow-hidden rounded-panel border border-line bg-white shadow-lift-lg"
             initial={reducido ? false : { y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 40, opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 26 }}>
             <button type="button" onClick={cerrar} aria-label="Cerrar" className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ink-muted hover:text-ink"><X className="h-4 w-4" /></button>
-            <div className="relative bg-luz px-6 pb-6 pt-9 text-center md:px-10">
-              <span aria-hidden="true" className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/60 blur-3xl" />
-              <span aria-hidden="true" className="pointer-events-none absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-sea/30 blur-3xl" />
-              <img src="/logo-mark-teal.svg" alt="" width={72} height={72} className="relative mx-auto h-[72px] w-[72px]" />
+            <div className="bg-luz px-6 pb-5 pt-7 text-center">
+              <img src="/logo-mark-teal.svg" alt="" width={56} height={56} className="mx-auto h-14 w-14" />
               {estado === 'form' ? (
                 <>
                   <p className="label-eyebrow mt-3 text-brand-deep">Bienvenido a la isla</p>
-                  <h2 className="mt-1 font-serif text-[30px] font-semibold leading-tight text-ink md:text-[34px]">{pct} % de descuento <em className="headline-italic font-normal">en tu primera reserva</em></h2>
-                  <p className="mx-auto mt-3 max-w-sm text-body text-ink-soft">Y de regalo, la guía de la isla: playas, dónde comer, servicios a domicilio y aventura, con horarios y cómo llegar.</p>
+                  <h2 className="mt-1 font-serif text-[26px] font-semibold leading-tight text-ink">{pct} % de descuento <em className="headline-italic font-normal">en tu primera reserva</em></h2>
+                  <p className="mt-2 text-meta text-ink-soft">Y de regalo, la guía de la isla: playas, dónde comer, servicios a domicilio y aventura, con horarios y cómo llegar.</p>
                 </>
               ) : (
                 <>
@@ -78,16 +76,16 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
               )}
             </div>
             {estado === 'form' ? (
-              <form onSubmit={enviar} className="space-y-3 px-6 pb-7 pt-6 md:px-10">
+              <form onSubmit={enviar} className="space-y-3 px-6 pb-6 pt-5">
                 <input type="text" name="sitio" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-                <input name="nombre" required placeholder="Tu nombre" autoComplete="given-name" className="w-full rounded-control border border-line bg-paper px-4 py-3.5 text-body text-ink outline-none transition-colors focus:border-brand" />
-                <input name="email" type="email" required placeholder="Tu correo" autoComplete="email" inputMode="email" className="w-full rounded-control border border-line bg-paper px-4 py-3.5 text-body text-ink outline-none transition-colors focus:border-brand" />
+                <input name="nombre" required placeholder="Tu nombre" autoComplete="given-name" className="w-full rounded-control border border-line bg-paper px-4 py-3 text-body text-ink" />
+                <input name="email" type="email" required placeholder="Tu correo" autoComplete="email" inputMode="email" className="w-full rounded-control border border-line bg-paper px-4 py-3 text-body text-ink" />
                 {error && <p className="text-meta text-accent">{error}</p>}
-                <button type="submit" disabled={enviando} className="btn-solid min-h-[52px] w-full justify-center text-body disabled:opacity-60">{enviando ? 'Un momento…' : `Quiero mi ${pct} % y la guía`}</button>
+                <button type="submit" disabled={enviando} className="btn-solid w-full justify-center disabled:opacity-60">{enviando ? 'Un momento…' : `Quiero mi ${pct} % y la guía`}</button>
                 <p className="text-center text-ui text-ink-faint">Sin spam: el código, la guía y, a lo sumo, un correo cuando abra la temporada. <Link href="/politicas#cookies" className="underline underline-offset-4">Datos</Link></p>
               </form>
             ) : (
-              <div className="space-y-3 px-6 pb-7 pt-6 md:px-10">
+              <div className="space-y-3 px-6 pb-6 pt-5">
                 {aptos.length > 0 && (
                   <div>
                     <p className="text-ui font-semibold uppercase tracking-[0.12em] text-ink-subtle">Aplícalo en tu apartamento</p>
