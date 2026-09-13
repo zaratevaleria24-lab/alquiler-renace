@@ -33,9 +33,9 @@ export async function SiteFooter() {
   return (
     <footer className="bg-luz border-t border-line">
       <div className="mx-auto max-w-7xl px-5 pb-8 pt-12 md:px-8 md:pt-16">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-8">
-          {/* Marca */}
-          <div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-8">
+          {/* Marca: en teléfono ocupa las dos columnas; las tres listas van en dos columnas */}
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
               <img src="/logo-mark-teal.svg" alt="" width={44} height={44} className="h-11 w-11" />
               <span className="font-serif text-[22px] font-semibold text-ink">Margarita <span className="text-accent">Renace</span></span>
