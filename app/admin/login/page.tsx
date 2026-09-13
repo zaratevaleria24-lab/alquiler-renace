@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { usuarioActual } from '@/lib/auth';
 import { LoginForm } from './LoginForm';
+import { codigoPanel } from '@/lib/auth';
 
 export default async function LoginPage() {
   // Con sesión abierta no tiene sentido mostrar el login.
@@ -28,7 +29,7 @@ export default async function LoginPage() {
         </div>
 
         <div className="rounded-card border border-line bg-white p-7 md:p-8">
-          <LoginForm />
+          <LoginForm porCodigo={Boolean(codigoPanel())} />
         </div>
 
         <p className="mono-data mt-8 text-center text-ink-subtle">

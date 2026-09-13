@@ -10,11 +10,27 @@ import { iniciarSesionAction, type EstadoLogin } from '../actions';
 // formulario se envía igual como un POST normal. Lo único que se pierde sin JS es
 // el texto "Entrando…".
 
-export function LoginForm() {
+export function LoginForm({ porCodigo = false }: { porCodigo?: boolean }) {
   const [estado, formAction, pendiente] = useActionState<EstadoLogin, FormData>(
     iniciarSesionAction,
     undefined,
   );
+
+  if (porCodigo) {
+    return (
+      <form action={formAction} className="space-y-5">
+        <div>
+          <label htmlFor="codigo" className="label-eyebrow mb-2 block text-ink-muted">Código de acceso</label>
+          <input
+            id="codigo" name="codigo" type="password" inputMode="numeric" autoComplete="one-time-code" required autoFocus maxLength={32}
+            className="mono-data w-full rounded-control border border-line bg-paper px-4 py-3 text-center text-[24px] tracking-[.4em] text-ink outline-none transition-colors focus:border-brand"
+          />
+        </div>
+        {estado?.error && <p role="alert" className="rounded-chip border border-coral/30 bg-coral/5 px-4 py-3 text-meta text-coral">{estado.error}</p>}
+        <button type="submit" disabled={pendiente} className="btn-solid w-full">{pendiente ? 'Entrando…' : 'Entrar'}</button>
+      </form>
+    );
+  }
 
   return (
     <form action={formAction} className="space-y-5">

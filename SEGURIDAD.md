@@ -50,3 +50,14 @@ mejores prácticas»). Qué se revisó, qué estaba bien, qué se corrigió y qu
 - **Actualizaciones**: imagen de Postgres y paquetes npm (`npm audit`) cada mes.
 - Contratos: la IP del firmante se guarda a propósito como prueba (cláusula 12
   lo informa). El resto del sitio sigue sin guardar IPs.
+
+
+## Acceso al panel por código (2026-09-13, a pedido del dueño)
+
+El login pide UN código (`PANEL_CODIGO` en `/etc/margarita-renace/panel.env`,
+hoy **1234**, «por ahora»). Entra como la primera cuenta creada. Protecciones:
+comparación en tiempo constante; 8 fallos por IP / 15 min (login_attempts,
+usuario `__codigo__`); techo global de 30 fallos / 15 min desde cualquier origen.
+Para volver al usuario+contraseña basta borrar el archivo. **Un código de 4
+dígitos es débil**: subirlo a 8+ dígitos o cambiarlo por 2FA cuando el dueño
+lo decida (`printf 'PANEL_CODIGO=…' > /etc/margarita-renace/panel.env && pm2 restart margarita-renace`).

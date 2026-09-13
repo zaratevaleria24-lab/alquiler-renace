@@ -294,3 +294,43 @@ export async function autenticar(
   const ok = await verifyPassword(password, u.password_hash);
   return ok ? { id: u.id, email: u.email } : null;
 }
+
+
+// ── Acceso por código ────────────────────────────────────────────────────────
+// A pedido del dueño (2026-09-13) el panel entra con UN código numérico, que
+// vive en /etc/margarita-renace/panel.env (PANEL_CODIGO). Es cómodo y débil a la
+// vez: por eso el código se compara en tiempo constante, cuenta en
+// login_attempts como los intentos de contraseña (8 por IP / 15 min) y además
+// hay un techo GLOBAL: 30 fallos en 15 minutos desde cualquier origen cierran la
+// puerta a todos por 15 minutos, así un ataque distribuido tampoco prospera.
+// Si el archivo no existe o está vacío, vuelve el formulario de usuario y
+// contraseña de siempre.
+import { readFileSync as leerSync } from 'node:fs';
+
+export function codigoPanel(): string | null {
+  try {
+    const m = leerSync('/etc/margarita-renace/panel.env', 'utf8').match(/^\s*PANEL_CODIGO\s*=\s*"?([^"\n]+)"?/m);
+    return m?.[1]?.trim() || null;
+  } catch { return null; }
+}
+
+export async function codigoBloqueadoGlobal(): Promise<boolean> {
+  const [r] = await rows<{ n: string }>(
+    `SELECT count(*) n FROM login_attempts WHERE email = '__codigo__' AND NOT ok AND created_at > now() - interval '15 minutes'`,
+  );
+  return Number(r?.n ?? 0) >= 30;
+}
+
+/** Compara el código en tiempo constante. */
+export function codigoCorrecto(intento: string): boolean {
+  const real = codigoPanel(); if (!real) return false;
+  const a = Buffer.from(intento.trim().padEnd(64, '\0').slice(0, 64));
+  const b = Buffer.from(real.padEnd(64, '\0').slice(0, 64));
+  return intento.trim().length === real.length && timingSafeEqual(a, b);
+}
+
+/** El usuario dueño del panel: la primera cuenta creada. */
+export async function usuarioPrincipal(): Promise<AdminUser | null> {
+  const [u] = await rows<{ id: string; email: string }>(`SELECT id, email FROM admin_users ORDER BY created_at LIMIT 1`);
+  return u ?? null;
+}

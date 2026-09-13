@@ -15,6 +15,10 @@ import {
   estaBloqueado,
   hashIp,
   registrarIntento,
+  codigoPanel,
+  codigoCorrecto,
+  codigoBloqueadoGlobal,
+  usuarioPrincipal,
 } from '@/lib/auth';
 
 /**
@@ -50,6 +54,22 @@ export async function iniciarSesionAction(
   _prev: EstadoLogin,
   formData: FormData,
 ): Promise<EstadoLogin> {
+  // Modo código (PANEL_CODIGO en el servidor): un solo campo.
+  const codigo = String(formData.get('codigo') ?? '').trim();
+  if (codigoPanel() && codigo) {
+    const ipHash = hashIp(await ipDelVisitante());
+    if ((await estaBloqueado(ipHash, '__codigo__')) || (await codigoBloqueadoGlobal())) {
+      return { error: 'Demasiados intentos. Espera 15 minutos antes de volver a probar.' };
+    }
+    const ok = codigoCorrecto(codigo);
+    await registrarIntento(ipHash, '__codigo__', ok);
+    if (!ok) return { error: 'Código incorrecto.' };
+    const user = await usuarioPrincipal();
+    if (!user) return { error: 'No hay una cuenta de administración creada.' };
+    await crearSesion(user.id);
+    redirect('/admin');
+  }
+
   // El campo se llama `usuario`: puede ser un nombre o un correo.
   const email = String(formData.get('usuario') ?? '').trim();
   const password = String(formData.get('password') ?? '');
