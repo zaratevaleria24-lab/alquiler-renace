@@ -49,7 +49,7 @@ export default async function ContratoAdminPage({ params, searchParams }: { para
       </Tarjeta>
 
       <div className="mt-6 rounded-panel border border-line bg-white p-6 md:p-10">
-        <ContratoDocumento d={d} version={c.versionClausulas} token={c.token} firma={c.estado === 'firmado' ? { nombre: c.firmaNombre, documento: c.firmaDocumento, imagen: c.firmaImagen, fecha: c.firmadoAt!, hash: c.firmaHash, sello: c.sello, docHash: c.docHash, evidencia: c.evidencia } : null} />
+        <ContratoDocumento d={d} version={c.versionClausulas} token={c.token} firma={c.estado === 'firmado' ? { nombre: c.firmaNombre, documento: c.firmaDocumento, imagen: c.firmaImagen, fecha: c.firmadoAt!, hash: c.firmaHash, sello: c.sello, docHash: c.docHash, evidencia: c.evidencia, tsaAutoridad: c.tsaAutoridad, tsaHora: c.tsaHora, otsEstado: c.otsEstado } : null} />
       </div>
     </div>
   );

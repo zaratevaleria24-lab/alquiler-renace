@@ -96,3 +96,25 @@ WhatsApp/enlace.
   `v=DMARC1; p=quarantine; rua=mailto:reservas@margaritarenace.com.ve`
   (hoy no existe); (3) remitente con nombre de persona, asunto con datos concretos
   y poco HTML — ya aplicado. La reputación mejora con los envíos reales.
+
+
+## Nivel 3 (2026-09-13): prueba de tiempo independiente
+
+- **Sello RFC 3161** (`lib/sellado-tiempo.ts`): sobre `firma_hash`, pedido a
+  DigiCert (respaldo Sectigo, FreeTSA) con `openssl ts`. Se guarda el .tsr
+  (base64) y se verifica en /verificar contra la raíz del sistema
+  (`/etc/ssl/certs/ca-certificates.crt`). Es el mismo estándar de DocuSign/Adobe.
+- **Anclaje en Bitcoin** con OpenTimestamps (`ots`, instalado con pip). La prueba
+  nace «pendiente» y `actualizarOts` la mejora (máx. una vez por hora, al abrir
+  /verificar) hasta «anclado» cuando el calendario la mete en un bloque.
+- Descargas para peritaje en `/contrato/<token>/prueba?tipo=hash|tsr|ots|firma`,
+  con los comandos de verificación impresos en /verificar.
+- Migración 017. Eventos nuevos: sello_tiempo, bitcoin_pendiente, bitcoin_anclado.
+- **Marco legal (honesto):** en Venezuela la «firma electrónica certificada» solo
+  la emite un Proveedor de Servicios de Certificación acreditado por SUSCERTE
+  (p. ej. PROCERT). La nuestra es firma electrónica con prueba reforzada (OTP al
+  correo, evidencia del dispositivo, hash, sello Ed25519 propio, sello de tiempo
+  de autoridad externa y anclaje Bitcoin): tiene valor probatorio conforme al
+  Decreto-Ley 1.204 (arts. 4, 6, 16) y el art. 1.363 CC, y un perito puede
+  verificarla sin confiar en nosotros. Si un día se quiere certificada, se
+  integra un PSC; el resto queda igual.

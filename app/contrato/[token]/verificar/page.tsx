@@ -1,20 +1,23 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { CheckCircle2, XCircle } from 'lucide-react';
-import { comprobar, getContratoPorToken, listarEventos } from '@/lib/contratos';
+import { actualizarOts, comprobar, getContratoPorToken, listarEventos } from '@/lib/contratos';
+import { verificarSelloTiempo } from '@/lib/sellado-tiempo';
 
 // Verificación pública de un contrato firmado: recalcula las huellas y
 // comprueba el sello Ed25519 del servidor. Pensada para un perito o un abogado:
 // muestra qué se firmó, cuándo, desde qué dispositivo y la clave pública.
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Verificación de contrato', robots: { index: false, follow: false } };
-const NOMBRES: Record<string, string> = { creado: 'Contrato creado', enviado_correo: 'Enviado por correo', enviado_whatsapp: 'Enviado por WhatsApp', enviado_enlace: 'Enlace copiado', abierto: 'Enlace abierto por el huésped', codigo_enviado: 'Código de verificación enviado', codigo_verificado: 'Código verificado', codigo_fallido: 'Código incorrecto', firmado: 'Firmado', copia_enviada: 'Copia firmada enviada', anulado: 'Anulado' };
+const NOMBRES: Record<string, string> = { creado: 'Contrato creado', enviado_correo: 'Enviado por correo', enviado_whatsapp: 'Enviado por WhatsApp', enviado_enlace: 'Enlace copiado', abierto: 'Enlace abierto por el huésped', codigo_enviado: 'Código de verificación enviado', codigo_verificado: 'Código verificado', codigo_fallido: 'Código incorrecto', firmado: 'Firmado', copia_enviada: 'Copia firmada enviada', anulado: 'Anulado', sello_tiempo: 'Sello de tiempo RFC 3161 obtenido', bitcoin_pendiente: 'Huella enviada a la cadena de Bitcoin (OpenTimestamps)', bitcoin_anclado: 'Huella confirmada en un bloque de Bitcoin' };
 
 export default async function VerificarPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const c = await getContratoPorToken(token); if (!c) notFound();
+  let c = await getContratoPorToken(token); if (!c) notFound();
+  c = await actualizarOts(c);
   const eventos = await listarEventos(c.id);
   const v = c.estado === 'firmado' ? await comprobar(c) : null;
+  const tsa = c.estado === 'firmado' ? await verificarSelloTiempo(c.firmaHash, c.tsaToken) : null;
   const F = ({ ok, t }: { ok: boolean; t: string }) => <li className="flex items-center gap-2 text-body">{ok ? <CheckCircle2 className="h-5 w-5 text-brand" /> : <XCircle className="h-5 w-5 text-accent" />}{t}</li>;
   const hora = (iso: string) => new Date(iso).toLocaleString('es-VE', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'America/Caracas' });
   return (
@@ -31,6 +34,8 @@ export default async function VerificarPage({ params }: { params: Promise<{ toke
             <F ok={v.imagenIntacta} t={v.imagenIntacta ? 'La imagen de la firma no fue alterada.' : 'La imagen de la firma NO coincide.'} />
             <F ok={v.selloValido} t={v.selloValido ? 'El sello criptográfico del servidor (Ed25519) es válido.' : 'El sello del servidor NO se pudo verificar.'} />
             <F ok={Boolean(c.evidencia.codigoVerificado)} t={c.evidencia.codigoVerificado ? 'Identidad confirmada con código enviado al correo del huésped.' : 'Sin verificación por correo (contrato enviado por WhatsApp).'} />
+            <F ok={Boolean(tsa?.ok)} t={tsa?.ok ? `Sello de tiempo RFC 3161 válido, emitido por ${c.tsaAutoridad} (${tsa.detalle}).` : c.tsaToken ? 'El sello de tiempo no se pudo verificar.' : 'Sin sello de tiempo de autoridad externa.'} />
+            <F ok={c.otsEstado === 'anclado'} t={c.otsEstado === 'anclado' ? 'Huella anclada y confirmada en la cadena de bloques de Bitcoin (OpenTimestamps).' : c.otsEstado === 'pendiente' ? 'Huella enviada a la cadena de Bitcoin; la confirmación en bloque llega en horas (OpenTimestamps).' : 'Sin anclaje en Bitcoin.'} />
           </ul>
         ) : <p className="mt-6 rounded-panel border border-line bg-white p-5 text-body text-ink-muted">Este contrato todavía no está firmado; no hay nada que verificar.</p>}
 
@@ -48,8 +53,20 @@ export default async function VerificarPage({ params }: { params: Promise<{ toke
               <dt className="text-ink-muted">IP</dt><dd className="mono-data">{String(c.evidencia.ip ?? '—')}</dd>
               <dt className="text-ink-muted">Navegador</dt><dd className="break-words">{String(c.evidencia.agente ?? '—')}</dd>
               <dt className="text-ink-muted">Pantalla · idioma · zona</dt><dd>{String(c.evidencia.pantalla ?? '—')} · {String(c.evidencia.idioma ?? '—')} · {String(c.evidencia.zonaHoraria ?? '—')}</dd>
+              <dt className="text-ink-muted">Sello de tiempo</dt><dd>{c.tsaAutoridad || '—'}{c.tsaHora ? ` · ${c.tsaHora}` : ''}</dd>
+              <dt className="text-ink-muted">Bitcoin (OTS)</dt><dd>{c.otsEstado || '—'}</dd>
               <dt className="text-ink-muted">Cláusulas</dt><dd>versión {c.versionClausulas}</dd>
             </dl>
+            <p className="mt-4 text-ink-muted">Descargas para verificación independiente:{' '}
+              <a className="text-brand-deep underline underline-offset-4" href={`/contrato/${token}/prueba?tipo=hash`}>huella (.txt)</a> ·{' '}
+              {c.tsaToken && <><a className="text-brand-deep underline underline-offset-4" href={`/contrato/${token}/prueba?tipo=tsr`}>sello RFC 3161 (.tsr)</a> · </>}
+              {c.otsPrueba && <><a className="text-brand-deep underline underline-offset-4" href={`/contrato/${token}/prueba?tipo=ots`}>prueba Bitcoin (.ots)</a> · </>}
+              <a className="text-brand-deep underline underline-offset-4" href={`/contrato/${token}/prueba?tipo=firma`}>firma (.png)</a>
+            </p>
+            <pre className="mt-2 whitespace-pre-wrap rounded-card bg-paper p-3 text-[11px] text-ink-muted">{`# Verificar el sello de tiempo con OpenSSL (cualquier computadora):
+openssl ts -verify -data firma.txt -in contrato.tsr -CAfile /etc/ssl/certs/ca-certificates.crt
+# Verificar el anclaje en Bitcoin (https://opentimestamps.org o cliente ots):
+ots verify firma.txt.ots`}</pre>
           </section>
         )}
 

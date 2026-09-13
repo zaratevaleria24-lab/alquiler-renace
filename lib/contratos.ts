@@ -16,6 +16,7 @@ import { query, rows } from './db';
 import { getAjustes } from './settings';
 import { SITE } from './site';
 import { VERSION, textoPlano, type DatosContrato } from './contratos-clausulas';
+import { anclarOts, mejorarOts, sellarTiempo } from './sellado-tiempo';
 
 export type EstadoContrato = 'borrador' | 'enviado' | 'firmado' | 'anulado';
 export interface Integrante { nombre: string; documento: string }
@@ -28,6 +29,7 @@ export interface Contrato {
   docHash: string; codigoVerificado: boolean;
   firmaNombre: string; firmaDocumento: string; firmaImagen: string; firmaHash: string; firmaAgente: string;
   evidencia: Record<string, unknown>; sello: string; selloClave: string;
+  tsaToken: string; tsaAutoridad: string; tsaHora: string | null; otsPrueba: string; otsEstado: '' | 'pendiente' | 'anclado'; otsIntentoAt: string | null;
   createdAt: string;
   inmueble: string; inmuebleSlug: string; direccionInmueble: string;
 }
@@ -48,6 +50,7 @@ function desde(r: Record<string, unknown>): Contrato {
     docHash: String(r.doc_hash ?? ''), codigoVerificado: Boolean(r.codigo_verificado),
     firmaNombre: String(r.firma_nombre ?? ''), firmaDocumento: String(r.firma_documento ?? ''), firmaImagen: String(r.firma_imagen ?? ''), firmaHash: String(r.firma_hash ?? ''), firmaAgente: String(r.firma_agente ?? ''),
     evidencia: (r.evidencia as Record<string, unknown>) ?? {}, sello: String(r.sello ?? ''), selloClave: String(r.sello_clave ?? ''),
+    tsaToken: String(r.tsa_token ?? ''), tsaAutoridad: String(r.tsa_autoridad ?? ''), tsaHora: iso(r.tsa_hora), otsPrueba: String(r.ots_prueba ?? ''), otsEstado: (String(r.ots_estado ?? '') as '' | 'pendiente' | 'anclado'), otsIntentoAt: iso(r.ots_intento_at),
     createdAt: iso(r.created_at) ?? '',
     inmueble: String(r.inmueble), inmuebleSlug: String(r.inmueble_slug), direccionInmueble: String(r.direccion_inmueble ?? ''),
   };
@@ -87,7 +90,7 @@ export async function datosDe(c: Contrato): Promise<DatosContrato> {
   };
 }
 
-export async function crearContrato(v: Omit<Contrato, 'id' | 'token' | 'reservaId' | 'versionClausulas' | 'estado' | 'enviadoAt' | 'abiertoAt' | 'firmadoAt' | 'docHash' | 'codigoVerificado' | 'firmaNombre' | 'firmaDocumento' | 'firmaImagen' | 'firmaHash' | 'firmaAgente' | 'evidencia' | 'sello' | 'selloClave' | 'createdAt' | 'inmueble' | 'inmuebleSlug' | 'direccionInmueble'>): Promise<string> {
+export async function crearContrato(v: Omit<Contrato, 'id' | 'token' | 'reservaId' | 'versionClausulas' | 'estado' | 'enviadoAt' | 'abiertoAt' | 'firmadoAt' | 'docHash' | 'codigoVerificado' | 'firmaNombre' | 'firmaDocumento' | 'firmaImagen' | 'firmaHash' | 'firmaAgente' | 'evidencia' | 'sello' | 'selloClave' | 'tsaToken' | 'tsaAutoridad' | 'tsaHora' | 'otsPrueba' | 'otsEstado' | 'otsIntentoAt' | 'createdAt' | 'inmueble' | 'inmuebleSlug' | 'direccionInmueble'>): Promise<string> {
   const token = randomBytes(16).toString('hex');
   const [r] = await rows<{ id: string }>(
     `INSERT INTO contratos (token, property_id, huesped, documento, email, telefono, huespedes, integrantes, check_in, check_out, tarifa_noche, limpieza_usd, total_usd, anticipo_usd, deposito_usd, tasa_bs, tasa_fuente, metodo_pago, notas, version_clausulas)
@@ -155,7 +158,25 @@ export async function firmar(c: Contrato, f: { nombre: string; documento: string
     [c.id, ahora, f.nombre, f.documento, f.imagen, hash, String(f.evidencia.agente ?? '').slice(0, 300), JSON.stringify(evidencia), sello, pub]);
   if (!r.rowCount) return false;
   await registrarEvento(c.id, 'firmado', { hash, sello: sello.slice(0, 24) + '…', ip: f.evidencia.ip ?? null });
+  await anclarTiempo(c.id, hash);
   return true;
+}
+
+/** Sello RFC 3161 + anclaje Bitcoin sobre la huella. Se puede reintentar. */
+export async function anclarTiempo(id: string, hash: string): Promise<void> {
+  const [ts, ots] = await Promise.all([sellarTiempo(hash).catch(() => null), anclarOts(hash).catch(() => null)]);
+  if (ts) { await query(`UPDATE contratos SET tsa_token=$2, tsa_autoridad=$3, tsa_hora=$4 WHERE id=$1 AND tsa_token=''`, [id, ts.token, ts.autoridad, ts.hora]); await registrarEvento(id, 'sello_tiempo', { autoridad: ts.autoridad, hora: ts.hora }); }
+  if (ots) { await query(`UPDATE contratos SET ots_prueba=$2, ots_estado='pendiente', ots_intento_at=now() WHERE id=$1 AND ots_prueba=''`, [id, ots]); await registrarEvento(id, 'bitcoin_pendiente', {}); }
+}
+
+/** Si la prueba Bitcoin sigue pendiente y pasó más de una hora, intenta completarla. */
+export async function actualizarOts(c: Contrato): Promise<Contrato> {
+  if (c.otsEstado !== 'pendiente' || !c.otsPrueba || !c.firmaHash) return c;
+  if (c.otsIntentoAt && Date.now() - Date.parse(c.otsIntentoAt) < 3600_000) return c;
+  const r = await mejorarOts(c.firmaHash, c.otsPrueba);
+  await query(`UPDATE contratos SET ots_prueba=$2, ots_estado=$3, ots_intento_at=now() WHERE id=$1`, [c.id, r.prueba, r.estado]);
+  if (r.estado === 'anclado') await registrarEvento(c.id, 'bitcoin_anclado', {});
+  return { ...c, otsPrueba: r.prueba, otsEstado: r.estado, otsIntentoAt: new Date().toISOString() };
 }
 
 /** Recalcula las huellas de un contrato firmado y comprueba el sello. */
