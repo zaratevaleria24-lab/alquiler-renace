@@ -45,28 +45,28 @@ function BotonAncho({ enlace }: { enlace: EnlacePublico }) {
   // El destacado va lleno del azul profundo de la casa (es el botón que no
   // paga comisión); los demás en blanco con línea fina y sombra suave, como el
   // resto del sitio desde «Amanecer». Nada de sombras duras.
-  const clases = `group flex w-full items-center gap-4 rounded-full py-2.5 pl-2.5 pr-5 text-left transition duration-200 ${
+  const clases = `group flex w-full items-center gap-3.5 rounded-full py-2 pl-2 pr-4 text-left transition duration-200 ${
     enlace.destacado
-      ? 'border border-brand-deep bg-brand-deep text-white shadow-lift-lg hover:-translate-y-0.5 active:translate-y-0'
-      : 'border border-line bg-white shadow-lift hover:-translate-y-0.5 hover:shadow-lift-lg active:translate-y-0'
+      ? 'border border-brand-deep bg-brand-deep text-white shadow-lift hover:-translate-y-0.5 active:translate-y-0'
+      : 'border border-line bg-white/90 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lift active:translate-y-0'
   }`;
 
   const contenido = (
     <>
       <span
         aria-hidden="true"
-        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${enlace.destacado ? 'bg-white/15 text-white' : 'text-white'}`}
-        style={enlace.destacado ? undefined : { backgroundColor: color }}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${enlace.destacado ? 'bg-white text-brand-deep' : 'border border-line bg-white'}`}
+        style={enlace.destacado ? undefined : { color }}
       >
-        <Icono className="h-[22px] w-[22px]" strokeWidth={1.75} />
+        <Icono className="h-5 w-5" strokeWidth={1.75} />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className={`block text-body font-medium ${enlace.destacado ? 'text-white' : 'text-ink'}`}>
+        <span className={`block text-[15px] font-medium leading-tight ${enlace.destacado ? 'text-white' : 'text-ink'}`}>
           {enlace.etiqueta}
         </span>
         {enlace.descripcion && (
-          <span className={`mt-0.5 block text-meta leading-snug ${enlace.destacado ? 'text-white/80' : 'text-ink-muted'}`}>
+          <span className={`mt-0.5 block text-[12.5px] leading-snug ${enlace.destacado ? 'text-white/80' : 'text-ink-muted'}`}>
             {enlace.descripcion}
           </span>
         )}
@@ -112,13 +112,13 @@ function BotonRedondo({ enlace }: { enlace: EnlacePublico }) {
   const { icono: Icono, color } = tipoDe(enlace.tipo);
 
   const clases =
-    'flex h-14 w-14 items-center justify-center rounded-full border border-line bg-white shadow-lift transition duration-200 hover:-translate-y-0.5 hover:shadow-lift-lg';
+    'flex h-12 w-12 items-center justify-center rounded-full border border-line bg-white transition duration-200 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-lift';
 
   const contenido = (
     <>
       <Icono
         aria-hidden="true"
-        className="h-[22px] w-[22px]"
+        className="h-5 w-5"
         strokeWidth={1.75}
         style={{ color }}
       />

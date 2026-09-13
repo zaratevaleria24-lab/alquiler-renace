@@ -90,3 +90,9 @@ hasta que se peguen en /admin/enlaces).
 
 Pendientes que pidió el dueño y NO están hechas: correo corporativo con plantilla
 de contrato/cláusulas para firma del cliente (dos features aparte).
+
+- 2026-09-13 (noche): logotipos reales de WhatsApp, Airbnb, Instagram y TikTok
+  (Simple Icons, CC0, en `lib/tipos-enlace.tsx`); botones más finos (medallón de
+  40 px con el logo en su color sobre blanco, sin relleno pesado); orden: Agendar
+  por WhatsApp (destacado) · Agendar con nosotros (/) · Guía · Reservar por Airbnb ·
+  redondos Instagram/TikTok. Airbnb y TikTok siguen sin URL.

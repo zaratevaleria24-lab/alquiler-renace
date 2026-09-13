@@ -7,7 +7,9 @@
 // Es el mismo reparto que lib/icons.ts hace para las amenidades.
 //
 // ── SOBRE LOS ICONOS DE MARCA ───────────────────────────────────────────────
-// Estos NO son los logotipos oficiales de WhatsApp, TikTok ni Airbnb. Lucide
+// Desde 2026-09-13 WhatsApp, Airbnb, Instagram y TikTok usan su logotipo real
+// (trazados de Simple Icons, CC0). El resto sigue con Lucide. Nota histórica:
+// antes NO eran los logotipos oficiales de WhatsApp, TikTok ni Airbnb. Lucide
 // —el juego de iconos del sitio— retiró casi todas las marcas por licencia, y
 // pegar los originales significaría meter SVG ajenos con sus reglas de uso.
 //
@@ -19,6 +21,8 @@
 // Si algún día se quieren los logotipos exactos, se sustituyen acá y nada más:
 // el resto del código solo pide `TIPOS[tipo].icono`.
 
+import type { ComponentType, SVGProps } from 'react';
+import { siAirbnb, siInstagram, siTiktok, siWhatsapp } from 'simple-icons';
 import {
   BedDouble,
   Building2,
@@ -34,10 +38,21 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+// Logotipos oficiales (trazado de Simple Icons, dominio público). Reciben las
+// mismas props que un icono de Lucide para que BotonesEnlaces no distinga.
+function marca(path: string) {
+  const M = (p: SVGProps<SVGSVGElement> & { strokeWidth?: number }) => {
+    const { strokeWidth: _s, ...rest } = p; void _s;
+    return <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...rest}><path d={path} /></svg>;
+  };
+  return M;
+}
+const LogoAirbnb = marca(siAirbnb.path), LogoWhatsapp = marca(siWhatsapp.path), LogoInstagram = marca(siInstagram.path), LogoTiktok = marca(siTiktok.path);
+
 export interface TipoEnlace {
   /** Nombre del tipo en el selector del panel. */
   nombre: string;
-  icono: LucideIcon;
+  icono: LucideIcon | ComponentType<SVGProps<SVGSVGElement> & { strokeWidth?: number }>;
   /** Color del medallón. Los de marca son el oficial de cada plataforma. */
   color: string;
   /**
@@ -52,28 +67,28 @@ export interface TipoEnlace {
 export const TIPOS = {
   whatsapp: {
     nombre: 'WhatsApp',
-    icono: MessageCircle,
-    color: '#1FA855',
+    icono: LogoWhatsapp,
+    color: '#25D366',
     desde: 'whatsapp',
     ayuda:
       'Déjalo vacío y usa el número de la sección Contenido; se abre el chat con un saludo ya escrito.',
   },
   instagram: {
     nombre: 'Instagram',
-    icono: Instagram,
-    color: '#C13584',
+    icono: LogoInstagram,
+    color: '#E1306C',
     desde: 'instagram',
     ayuda: 'Déjalo vacío y usa el Instagram de la sección Contenido.',
   },
   tiktok: {
     nombre: 'TikTok',
-    icono: Music2,
+    icono: LogoTiktok,
     color: '#111111',
     ayuda: 'La URL de tu perfil: https://www.tiktok.com/@tucuenta',
   },
   airbnb: {
     nombre: 'Airbnb',
-    icono: BedDouble,
+    icono: LogoAirbnb,
     color: '#FF5A5F',
     ayuda:
       'El enlace de tu anuncio o de tu perfil de anfitriona en Airbnb.',
