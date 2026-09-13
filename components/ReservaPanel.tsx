@@ -148,7 +148,7 @@ export default function ReservaPanel({
       <p className="mono-data text-title-sm text-brand-deep">{precioTexto}</p>
       {!precioAConsultar && tasa?.bcv && (
         <p className="mt-1 text-meta text-ink-muted">
-          {bolivares(precioPorNoche * tasa.bcv)} / noche al BCV{tasa.usdt ? ` · ≈ ${(precioPorNoche * tasa.bcv / tasa.usdt).toFixed(1)} USDT` : ''}
+          {bolivares(precioPorNoche * tasa.bcv)} / noche{tasa.usdt ? ` · ≈ ${(precioPorNoche * tasa.bcv / tasa.usdt).toFixed(1)} USDT (referencia alternativa)` : ''}
         </p>
       )}
       <p className="mt-2 text-meta text-ink-muted">
@@ -249,7 +249,7 @@ export default function ReservaPanel({
               <>
                 <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-line pt-4">
                   <span className="text-body-lg font-semibold text-brand-deep">
-                    Total a pagar en bolívares
+                    En bolívares
                   </span>
                   <span className="mono-data text-title font-semibold text-brand-deep">
                     {bolivares(totalBs)}

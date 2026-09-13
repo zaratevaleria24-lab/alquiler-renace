@@ -1022,9 +1022,9 @@ export default function HomeClient({
                         {tasaBcv ? (
                           <>
                             <span className="text-title font-semibold text-brand-deep">US${selectedProperty.pricePerNight.toLocaleString()}</span>
-                            <span className="text-meta text-gray-500 font-medium"> / noche</span>
-                            <span className="mono-data block text-meta text-ink">{bolivares(selectedProperty.pricePerNight * tasaBcv, 0)} <span className="text-ink-muted">al BCV</span></span>
-                            {tasaUsdt && <span className="mono-data block text-ui text-ink-muted">≈ {(selectedProperty.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT <span className="text-ink-faint">referencia</span></span>}
+                            <span className="text-meta text-gray-500 font-medium"> / noche · dólar BCV</span>
+                            <span className="mono-data block text-meta text-ink">{bolivares(selectedProperty.pricePerNight * tasaBcv, 0)}</span>
+                            {tasaUsdt && <span className="mono-data block text-ui text-ink-muted">≈ {(selectedProperty.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT <span className="text-ink-faint">· referencia alternativa</span></span>}
                           </>
                         ) : (
                           <>
@@ -1083,16 +1083,16 @@ export default function HomeClient({
                       {tasaBcv ? (
                         <>
                           <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand-deep">
-                            <span className="text-body-lg">Total</span>
+                            <span className="text-body-lg">Total <span className="text-meta font-normal text-ink-muted">· dólar BCV</span></span>
                             <span className="mono-data text-[30px] leading-none">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                           </div>
                           <div className="flex items-baseline justify-between gap-3 text-meta text-ink">
-                            <span className="text-ink-muted">En bolívares al BCV</span>
+                            <span className="text-ink-muted">En bolívares</span>
                             <span className="mono-data">{bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv, 0)}</span>
                           </div>
                           {tasaUsdt && (
                             <div className="flex items-baseline justify-between gap-3 text-ui text-ink-muted">
-                              <span>Referencia en USDT</span>
+                              <span>Referencia alternativa en USDT</span>
                               <span className="mono-data">≈ {(selectedProperty.pricePerNight * bookingNights * tasaBcv / tasaUsdt).toFixed(1)} USDT</span>
                             </div>
                           )}
@@ -1487,11 +1487,11 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
                 cuánto es en bolívares al BCV y, para quien paga en USDT, a cuántos
                 USDT equivale (menos, porque el USDT cotiza por encima). */}
             <p className="mt-1.5 truncate font-serif text-title text-ink track-title">
-              {property.priceText}
+              {property.priceText}<span className="ml-1.5 font-sans text-ui font-normal text-ink-muted">dólar BCV</span>
             </p>
             {precioBs !== null && (
               <p className="mono-data text-ink-muted">
-                Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })} al BCV
+                Bs. {precioBs.toLocaleString('es-VE', { maximumFractionDigits: 0 })}
                 {tasaBcv && tasaUsdt ? ` · ≈ ${(property.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT` : ''}
               </p>
             )}
