@@ -417,3 +417,40 @@ body {
     to   { opacity: 1; transform: none; }
   }
 }
+
+/* ── Borde con brillo que recorre el contorno ───────────────────────────────
+   Para los ALIADOS de la guía (tarjeta y «El consejo de Margarita Renace»):
+   un haz de luz —azulejo, oro y blanco— que gira por el borde del bloque, como
+   un anuncio premium. Solo el borde: la máscara recorta el interior, así el
+   contenido no cambia. El ángulo se anima con @property; donde no existe
+   (Firefox viejo) queda un borde degradado quieto, que también se ve bien. Con
+   «menos movimiento» no gira. */
+@property --brillo-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.borde-brillo { position: relative; isolation: isolate; }
+.borde-brillo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  pointer-events: none;
+  z-index: 1;
+  --brillo-ang: 0deg;
+  background:
+    conic-gradient(from var(--brillo-ang),
+      rgba(18, 110, 139, .35) 0deg,
+      rgba(18, 110, 139, .35) 250deg,
+      #126e8b 290deg,
+      #e8c07a 320deg,
+      #ffffff 335deg,
+      #e8c07a 350deg,
+      rgba(18, 110, 139, .35) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: brillo-girar 3.6s linear infinite;
+}
+.borde-brillo-grueso::before { padding: 2px; }
+@keyframes brillo-girar { to { --brillo-ang: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .borde-brillo::before { animation: none; } }

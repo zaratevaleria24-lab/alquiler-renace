@@ -34,7 +34,7 @@ function saltoExterno(externo: boolean) {
 }
 
 /** Botón ancho: medallón circular, nombre y —si la tiene— una línea que dice
- *  qué gana el visitante tocándolo. */
+ *  qué gana el visitante tocandolo. */
 function BotonAncho({ enlace }: { enlace: EnlacePublico }) {
   const { icono: Icono, color } = tipoDe(enlace.tipo);
 

@@ -113,7 +113,7 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
             <Images className="h-4 w-4" aria-hidden="true" />
             Ver las {n} fotos
           </button>
-          <p className="text-ui text-ink-faint">Tocá una foto para verla en grande</p>
+          <p className="text-ui text-ink-faint">Toca una foto para verla en grande</p>
         </div>
       </section>
 
