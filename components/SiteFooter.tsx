@@ -48,7 +48,7 @@ export async function SiteFooter() {
         {/* Fila 1: marca a la izquierda, todos los enlaces a la derecha */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-10">
           <p className="text-meta text-ink-muted">
-            <span className="font-serif text-ink">Margarita Renace</span>
+            <span className="font-serif text-ink">Margarita <span className="italic font-light text-accent">Renace</span></span>
             <span className="mx-2 text-ink-faint">·</span>
             {SITE.shortDescription}
           </p>

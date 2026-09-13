@@ -50,10 +50,10 @@ export default function NavBar({
           aria-label="Margarita Renace, inicio"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center">
-            <img src="/logo-mark-coral.svg" alt="" width={40} height={40} className="h-full w-full object-contain" />
+            <img src="/logo-mark-teal.svg" alt="" width={40} height={40} className="h-full w-full object-contain" />
           </span>
           <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide leading-none whitespace-nowrap">
-            Margarita<span className="text-accent"> Renace</span>
+            Margarita <em className="not-italic"><span className="font-serif italic font-light text-accent">Renace</span></em>
           </span>
         </Link>
 
