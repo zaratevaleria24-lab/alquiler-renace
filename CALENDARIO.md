@@ -17,6 +17,12 @@ de disponibilidad de cada página de propiedad.
 | API export | `app/api/ical/[token]` | El .ics de reservas manuales que Airbnb importa |
 | Widget | `components/CalendarioDisponibilidad.tsx` | Calendario de la página de propiedad, integrado en `ReservaPanel` |
 
+El calendario público (`components/CalendarioDisponibilidad.tsx`) también vive
+dentro del modal «Detalles de la Reserva» de la portada (`app/HomeClient.tsx`):
+dos meses lado a lado en escritorio, uno en teléfono, con `siempre` para que se
+pueda elegir fechas aunque la API no responda; los días tomados salen de
+`/api/disponibilidad/<slug>`. Las fechas elegidas viajan al mensaje de WhatsApp.
+
 No hay demonio ni cron: los feeds se refrescan al abrir el calendario del
 panel o al consultar disponibilidad pública, solo si llevan más de una hora
 sin refrescar. El botón «Sincronizar ahora» del panel fuerza todos.

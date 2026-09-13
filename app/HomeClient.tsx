@@ -41,6 +41,7 @@ import { motion, AnimatePresence } from 'motion/react';
 // y un navegador no puede hablar con la base.
 import { avisar } from '@/components/Medidor';
 import { iconFor } from '@/lib/icons';
+import CalendarioDisponibilidad from '@/components/CalendarioDisponibilidad';
 import type { Category, Property, Zone } from '@/lib/types';
 import {
   AboutIslandSection,
@@ -95,8 +96,11 @@ function urlReservaWhatsApp(
   guests: number,
   whatsapp: string | null,
   tasas?: { bcv: number | null; usdt: number | null },
+  fechas?: { checkIn: string; checkOut: string },
 ): string | null {
   if (!whatsapp) return null;
+  const fechaCorta = (iso: string) => `${iso.slice(8)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+  const estadia = fechas ? `del ${fechaCorta(fechas.checkIn)} al ${fechaCorta(fechas.checkOut)}` : '';
   const huespedes = `${guests} ${guests === 1 ? 'huésped' : 'huéspedes'}`;
   const noches = `${nights} ${nights === 1 ? 'noche' : 'noches'}`;
   // El «objeto de la compra» completo: apartamento, noches, personas y el
@@ -108,7 +112,7 @@ function urlReservaWhatsApp(
     ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
     : [
         `Hola, quiero reservar *${property.name}* (${property.location}).`,
-        `Estadía: ${noches}, ${huespedes}`,
+        `Estadía: ${noches}${estadia ? ` (${estadia})` : ''}, ${huespedes}`,
         `Precio: US$${property.pricePerNight} por noche (dólar BCV)`,
         `*Total: US$${total.toLocaleString('es-VE')}*`,
         bcv ? `En bolívares: ${bolivares(total * bcv, 0)} (tasa BCV de hoy: ${bolivares(bcv, 2)} por dólar)` : '',
@@ -209,7 +213,7 @@ export default function HomeClient({
   const [bookingGuests, setBookingGuests] = useState(1);
 
   const waReserva = selectedProperty
-    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp, { bcv: tasaBcv, usdt: tasaUsdt })
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp, { bcv: tasaBcv, usdt: tasaUsdt }, { checkIn: fechaIn, checkOut: fechaOut })
     : null;
 
   // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
@@ -864,7 +868,7 @@ export default function HomeClient({
               role="dialog"
               aria-modal="true"
               aria-label={`Detalles de ${selectedProperty.name}`}
-              className="relative z-10 flex max-h-[94dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[22px] border border-white/60 bg-white/95 text-ink shadow-[0_40px_90px_-30px_rgba(11,74,92,.5)] ring-1 ring-brand/10 backdrop-blur-xl md:max-h-[90vh] md:rounded-[22px]"
+              className="relative z-10 flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-t-[22px] border border-white/60 bg-white/95 text-ink shadow-[0_40px_90px_-30px_rgba(11,74,92,.5)] ring-1 ring-brand/10 backdrop-blur-xl md:max-h-[90vh] md:rounded-[22px]"
             >
 
               {/* Header */}
@@ -894,7 +898,7 @@ export default function HomeClient({
                 className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar"
               >
                 
-                <div className="md:grid md:grid-cols-[1fr_21rem] md:items-start md:gap-8">
+                <div className="md:grid md:grid-cols-[1fr_22rem] md:items-start md:gap-10">
                 <div className="space-y-6">
                 {/* Image Gallery (Main + small grid) */}
                 <div className="space-y-2">
@@ -988,6 +992,31 @@ export default function HomeClient({
                   </div>
                 </div>
 
+                {/* Calendario amplio, dos meses en escritorio (como Airbnb).
+                    Los días tomados salen de /api/disponibilidad/<slug>:
+                    reservas del panel + lo sincronizado de Airbnb por iCal.
+                    `key` por slug: cada apartamento arranca su propio
+                    calendario. `siempre`: sin API igual se puede elegir. */}
+                {!selectedProperty.priceOnRequest && (
+                  <div id="calendario-reserva" className="border-t border-line pt-6">
+                    <CalendarioDisponibilidad
+                      key={selectedProperty.slug}
+                      slug={selectedProperty.slug}
+                      meses={2}
+                      variante="amplio"
+                      siempre
+                      minNoches={Math.max(1, selectedProperty.nightsCount)}
+                      inicial={{ checkIn: fechaIn, checkOut: fechaOut }}
+                      onCambio={(f) => {
+                        if (f) {
+                          setFechaIn(f.checkIn);
+                          setFechaOut(f.checkOut);
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+
                 </div>
                 {/* Columna derecha: la tarjeta de reserva, pegada al hacer scroll (como en Airbnb) */}
                 <div className="md:sticky md:top-0">
@@ -1050,10 +1079,18 @@ export default function HomeClient({
                     </div>
 
                     <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-line">
-                      <label className="block border-r border-line p-2.5"><span className="block text-micro font-semibold uppercase text-gray-400">Entrada</span>
-                        <input type="date" value={fechaIn} min={hoyIso} onChange={(e) => { setFechaIn(e.target.value); if (fechaOut <= e.target.value) setFechaOut(sumarDias(e.target.value, Math.max(1, selectedProperty.nightsCount))); }} className="mt-0.5 w-full bg-transparent text-meta font-semibold text-ink focus:outline-none" /></label>
-                      <label className="block p-2.5"><span className="block text-micro font-semibold uppercase text-gray-400">Salida</span>
-                        <input type="date" value={fechaOut} min={sumarDias(fechaIn, Math.max(1, selectedProperty.nightsCount))} onChange={(e) => setFechaOut(e.target.value)} className="mt-0.5 w-full bg-transparent text-meta font-semibold text-ink focus:outline-none" /></label>
+                      {([['Entrada', fechaIn], ['Salida', fechaOut]] as const).map(([rotulo, iso], i) => (
+                        <button
+                          key={rotulo}
+                          type="button"
+                          onClick={() => document.getElementById('calendario-reserva')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                          className={`block p-2.5 text-left transition-colors hover:bg-paper ${i === 0 ? 'border-r border-line' : ''}`}
+                          aria-label={`${rotulo}: cambiar en el calendario`}
+                        >
+                          <span className="block text-micro font-semibold uppercase text-gray-400">{rotulo}</span>
+                          <span className="mt-0.5 block text-meta font-semibold text-ink tabular-nums">{iso.slice(8)}/{iso.slice(5, 7)}/{iso.slice(0, 4)}</span>
+                        </button>
+                      ))}
                     </div>
                     <div className="grid grid-cols-1 gap-3">
                       <div>
