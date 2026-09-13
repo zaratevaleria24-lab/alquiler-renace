@@ -22,7 +22,8 @@ export default function CuponBienvenida() {
   const reducido = useReducedMotion();
 
   useEffect(() => {
-    try { if (localStorage.getItem(CLAVE)) return; } catch {}
+    // Solo «ok» (ya tiene su código) lo apaga; un «cerrado» viejo no cuenta.
+    try { if (localStorage.getItem(CLAVE) === 'ok') return; } catch {}
     let mostrado = false;
     const mostrar = () => { if (mostrado) return; mostrado = true; setAbierto(true); window.removeEventListener('scroll', porScroll); };
     const porScroll = () => { if (window.scrollY > document.documentElement.scrollHeight * 0.35) mostrar(); };
