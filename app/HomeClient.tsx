@@ -835,7 +835,7 @@ export default function HomeClient({
       {/* 5. SIDEBAR DRAWER: DETALLES DE PROPIEDAD */}
       <AnimatePresence>
         {isDetailOpen && selectedProperty && (
-          <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6">
             {/* Backdrop */}
             <motion.div 
               initial={{ opacity: 0 }}
@@ -846,15 +846,17 @@ export default function HomeClient({
             />
 
             {/* Drawer Panel */}
+            {/* Centrado en escritorio, hoja desde abajo en teléfono: la reserva
+                es el momento central, no un panel lateral. */}
             <motion.div 
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              initial={{ y: 48, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 48, opacity: 0 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 240 }}
               role="dialog"
               aria-modal="true"
               aria-label={`Detalles de ${selectedProperty.name}`}
-              className="relative w-full max-w-xl bg-white h-full shadow-2xl flex flex-col z-10 text-ink"
+              className="relative z-10 flex max-h-[94dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-panel bg-white text-ink shadow-lift-lg md:max-h-[88vh] md:rounded-panel"
             >
 
               {/* Header */}
@@ -1019,11 +1021,10 @@ export default function HomeClient({
                       <div>
                         {tasaBcv ? (
                           <>
-                            <span className="text-title-sm font-semibold text-accent">US${selectedProperty.pricePerNight.toLocaleString()}</span>
+                            <span className="text-title font-semibold text-brand-deep">US${selectedProperty.pricePerNight.toLocaleString()}</span>
                             <span className="text-meta text-gray-500 font-medium"> / noche</span>
-                            <span className="mono-data block text-meta text-ink-muted">
-                              {bolivares(selectedProperty.pricePerNight * tasaBcv, 0)} al BCV{tasaUsdt ? ` · ≈ ${(selectedProperty.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT` : ''}
-                            </span>
+                            <span className="mono-data block text-meta text-ink">{bolivares(selectedProperty.pricePerNight * tasaBcv, 0)} <span className="text-ink-muted">al BCV</span></span>
+                            {tasaUsdt && <span className="mono-data block text-ui text-ink-muted">≈ {(selectedProperty.pricePerNight * tasaBcv / tasaUsdt).toFixed(1)} USDT <span className="text-ink-faint">referencia</span></span>}
                           </>
                         ) : (
                           <>
@@ -1073,7 +1074,6 @@ export default function HomeClient({
                     <div className="space-y-2 pt-2 text-body text-ink-muted">
                       <div className="flex justify-between">
                         <span>Estadía de {bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}</span>
-                        <span className="mono-data">Ref. US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                       </div>
 
                       {/* El BOLÍVAR es el total a pagar: es la moneda de curso
@@ -1082,26 +1082,25 @@ export default function HomeClient({
                           a ser el total — mejor eso que un bolívar equivocado. */}
                       {tasaBcv ? (
                         <>
-                          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand">
+                          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-4 font-semibold text-brand-deep">
                             <span className="text-body-lg">Total</span>
-                            <span className="mono-data text-title">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
+                            <span className="mono-data text-[30px] leading-none">US${(selectedProperty.pricePerNight * bookingNights).toLocaleString()}</span>
                           </div>
-                          <div className="flex items-baseline justify-between gap-3 text-meta text-ink-soft">
-                            <span>En bolívares al BCV</span>
+                          <div className="flex items-baseline justify-between gap-3 text-meta text-ink">
+                            <span className="text-ink-muted">En bolívares al BCV</span>
                             <span className="mono-data">{bolivares(selectedProperty.pricePerNight * bookingNights * tasaBcv, 0)}</span>
                           </div>
                           {tasaUsdt && (
-                            <div className="flex items-baseline justify-between gap-3 text-meta text-ink-soft">
-                              <span>Si pagas en USDT</span>
+                            <div className="flex items-baseline justify-between gap-3 text-ui text-ink-muted">
+                              <span>Referencia en USDT</span>
                               <span className="mono-data">≈ {(selectedProperty.pricePerNight * bookingNights * tasaBcv / tasaUsdt).toFixed(1)} USDT</span>
                             </div>
                           )}
                           {/* `text-meta`, no `text-micro`: globals.css reserva
                               micro para etiquetas en versalitas, y esto es texto
                               corrido que el huésped tiene que poder leer. */}
-                          <p className="text-meta text-ink-muted">
-                            Precio en dólares a tasa BCV ({bolivares(tasaBcv, 2)} por US$). Puedes pagar en dólares, en bolívares al BCV del día o en USDT al equivalente del día (tasa Binance).
-                            El monto final se ajusta a las tasas del día de pago.
+                          <p className="text-ui text-ink-muted">
+                            Pagas en dólares, en bolívares al BCV del día ({bolivares(tasaBcv, 2)}/US$) o en USDT.
                           </p>
                         </>
                       ) : (
