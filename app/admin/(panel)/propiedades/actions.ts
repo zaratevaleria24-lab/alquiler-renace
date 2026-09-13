@@ -58,6 +58,10 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   const location = String(formData.get('location') ?? '').trim();
   const airbnbUrl = String(formData.get('airbnb_url') ?? '').trim().slice(0, 300);
   if (airbnbUrl && !/^https:\/\/(www\.)?airbnb\.[a-z.]+\//i.test(airbnbUrl)) redirect(`/propiedades/${id}?error=airbnb`);
+  const airbnbRatingRaw = String(formData.get('airbnb_rating') ?? '').trim().replace(',', '.');
+  const airbnbRating = airbnbRatingRaw === '' ? null : Math.min(5, Math.max(0, Math.round(Number(airbnbRatingRaw) * 10) / 10));
+  const airbnbResenas = Math.max(0, Math.trunc(Number(formData.get('airbnb_resenas')) || 0));
+  const airbnbDetalle = String(formData.get('airbnb_detalle') ?? '').trim().slice(0, 120);
   const description = String(formData.get('description') ?? '').trim();
   const priceOnRequest = asBool(formData.get('price_on_request'));
   const pricePerNight = priceOnRequest
@@ -87,12 +91,13 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
            name = $2, zone_slug = $3, location = $4, description = $5,
            price_per_night = $6, price_on_request = $7, price_text = $8,
            guests_adults = $9, guests_children = $10,
-           is_real = $11, is_published = $12, airbnb_url = $13, updated_at = now()
+           is_real = $11, is_published = $12, airbnb_url = $13, airbnb_rating = $14, airbnb_resenas = $15, airbnb_detalle = $16, updated_at = now()
          WHERE id = $1`,
         [
           id, name, zoneSlug, location, description,
           pricePerNight, priceOnRequest, priceText,
           guestsAdults, guestsChildren, isReal, isPublished, airbnbUrl,
+          Number.isFinite(airbnbRating as number) ? airbnbRating : null, airbnbResenas, airbnbDetalle,
         ],
       );
       if (res.rowCount !== 1) throw new Error('propiedad inexistente');

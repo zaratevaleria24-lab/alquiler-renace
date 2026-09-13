@@ -158,6 +158,9 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
   // /enlaces#airbnb abre el carrusel directo (para pegarlo en una historia).
   useEffect(() => { if (location.hash === '#airbnb') setAbierto(true); }, []);
   const { icono: Icono, color } = tipoDe(enlace.tipo);
+  const valorados = anuncios.filter((a) => a.rating != null);
+  const media = valorados.length ? valorados.reduce((t, a) => t + (a.rating ?? 0), 0) / valorados.length : 0;
+  const resenas = anuncios.reduce((t, a) => t + a.resenas, 0);
   return (
     <div>
       <button
@@ -170,7 +173,15 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-line bg-white" style={{ color }}><Icono className="h-5 w-5" strokeWidth={1.75} /></span>
         <span className="min-w-0 flex-1">
           <span className="block text-[15px] font-medium leading-tight text-ink">{enlace.etiqueta}</span>
-          {enlace.descripcion && <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-muted">{enlace.descripcion}</span>}
+          {/* Lo mejor de los dos mundos: la confianza de Airbnb (valoración media
+              y reseñas reales) a la vista ANTES de tocar, y al tocar, nuestras
+              fotos y nuestro carrusel, sin scripts de terceros. */}
+          {valorados.length > 0 ? (
+            <span className="mt-0.5 flex items-center gap-1 text-[12.5px] leading-snug text-ink-muted">
+              <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" fill={color} aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" /></svg>
+              <span><b className="text-ink">{media.toFixed(1)}</b> en Airbnb{resenas > 0 ? ` · ${resenas} reseñas` : ''} · {anuncios.length} apartamentos</span>
+            </span>
+          ) : enlace.descripcion && <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-muted">{enlace.descripcion}</span>}
         </span>
         <ChevronDown aria-hidden="true" className={`h-[18px] w-[18px] shrink-0 text-ink-faint transition-transform duration-300 ${abierto ? 'rotate-180 text-brand' : ''}`} />
       </button>
@@ -189,12 +200,23 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
               {anuncios.map((a, i) => {
                 const contenido = (
                   <>
-                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card bg-luz">
+                    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-card bg-luz shadow-lift">
                       {a.portada && <img src={a.portada} alt={a.nombre} width={220} height={275} loading={i < 2 ? 'eager' : 'lazy'} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />}
                       <span className="absolute left-2 top-2 rounded-chip bg-white/90 px-2 py-0.5 text-[11px] font-medium text-ink">{a.zona}</span>
+                      {a.rating != null && (
+                        <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-chip bg-white/95 px-2 py-0.5 text-[12px] font-semibold text-ink shadow-lift">
+                          <svg viewBox="0 0 24 24" className="h-3 w-3" fill={color} aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" /></svg>
+                          {a.rating.toFixed(1)}{a.resenas > 0 && <span className="font-normal text-ink-muted">({a.resenas})</span>}
+                        </span>
+                      )}
+                      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-2.5 pb-2 pt-8 text-white">
+                        <span className="block font-serif text-[15px] font-semibold leading-tight">{a.nombre}</span>
+                        {a.detalle && <span className="mt-0.5 block text-[11px] text-white/85">{a.detalle}</span>}
+                      </span>
                     </div>
-                    <span className="mt-2 block font-serif text-[15px] font-semibold leading-tight text-ink">{a.nombre}</span>
-                    <span className="mt-0.5 block text-[12px]" style={{ color }}>{a.url ? 'Ver en Airbnb ↗' : 'Pronto en Airbnb'}</span>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-medium" style={{ color }}>
+                      <Icono className="h-3 w-3" strokeWidth={1.75} />{a.url ? 'Ver anuncio en Airbnb' : 'Pronto en Airbnb'}
+                    </span>
                   </>
                 );
                 const clase = 'group block w-[46vw] max-w-[190px] shrink-0 snap-start';

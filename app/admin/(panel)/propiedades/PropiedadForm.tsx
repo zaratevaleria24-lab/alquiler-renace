@@ -72,6 +72,11 @@ export default function PropiedadForm({
             placeholder="https://www.airbnb.com/rooms/12345678"
             ayuda="Sale en el carrusel de «Reservar por Airbnb» de la página de enlaces. Vacío = el apartamento aparece sin enlace."
           />
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Campo name="airbnb_rating" label="Valoración en Airbnb" type="number" min={0} max={5} defaultValue={propiedad?.airbnbRating ?? ''} placeholder="5.0" ayuda="Tal como la muestra Airbnb (0 a 5, con decimal)." />
+            <Campo name="airbnb_resenas" label="Reseñas en Airbnb" type="number" min={0} defaultValue={propiedad?.airbnbResenas || ''} placeholder="12" />
+            <Campo name="airbnb_detalle" label="Resumen del anuncio" defaultValue={propiedad?.airbnbDetalle} placeholder="2 habitaciones · 3 camas · 2 baños" ayuda="Se muestra bajo el nombre en el carrusel." />
+          </div>
           <Campo
             name="description"
             label="Descripción"

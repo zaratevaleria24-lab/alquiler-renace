@@ -53,6 +53,9 @@ export interface PropiedadEdicion {
   zoneSlug: string;
   location: string;
   airbnbUrl: string;
+  airbnbRating: number | null;
+  airbnbResenas: number;
+  airbnbDetalle: string;
   description: string;
   pricePerNight: number;
   priceOnRequest: boolean;
@@ -68,12 +71,12 @@ export async function getPropiedadAdmin(
   id: string,
 ): Promise<PropiedadEdicion | undefined> {
   const [p] = await rows<{
-    id: string; slug: string; name: string; zone_slug: string; location: string; airbnb_url: string;
+    id: string; slug: string; name: string; zone_slug: string; location: string; airbnb_url: string; airbnb_rating: number | null; airbnb_resenas: number; airbnb_detalle: string;
     description: string; price_per_night: number; price_on_request: boolean;
     guests_adults: number; guests_children: number;
     is_real: boolean; is_published: boolean;
   }>(
-    `SELECT id, slug, name, zone_slug, location, airbnb_url, description,
+    `SELECT id, slug, name, zone_slug, location, airbnb_url, airbnb_rating, airbnb_resenas, airbnb_detalle, description,
             price_per_night, price_on_request, guests_adults, guests_children,
             is_real, is_published
      FROM properties WHERE id = $1`,
@@ -100,6 +103,9 @@ export async function getPropiedadAdmin(
     zoneSlug: p.zone_slug,
     location: p.location,
     airbnbUrl: p.airbnb_url ?? '',
+    airbnbRating: p.airbnb_rating == null ? null : Number(p.airbnb_rating),
+    airbnbResenas: Number(p.airbnb_resenas ?? 0),
+    airbnbDetalle: p.airbnb_detalle ?? '',
     description: p.description,
     pricePerNight: p.price_per_night,
     priceOnRequest: p.price_on_request,

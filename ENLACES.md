@@ -102,3 +102,9 @@ de contrato/cláusulas para firma del cliente (dos features aparte).
   Propiedades → «Enlace del anuncio en Airbnb»). Sin URL sale «Pronto en Airbnb».
   `/enlaces#airbnb` abre el carrusel directo. Los clics se cuentan como
   `airbnb:<slug>`.
+- Confianza de Airbnb sin su iframe (migración 019: `airbnb_rating`,
+  `airbnb_resenas`, `airbnb_detalle`, se copian a mano en Propiedades): el botón
+  muestra «★ 5.0 en Airbnb · N reseñas · 4 apartamentos» antes de tocar; cada
+  tarjeta del carrusel lleva la estrella, las reseñas y el resumen («2 habitaciones
+  · 3 camas · 2 baños») sobre la foto. El embed oficial de Airbnb se descartó:
+  script externo (se bloquea en Venezuela), 450×300 fijo, rastreo de terceros.

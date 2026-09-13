@@ -355,12 +355,12 @@ export async function moverEnlace(id: string, hacia: 'arriba' | 'abajo'): Promis
 /** Los apartamentos publicados con su portada y su anuncio de Airbnb, para el
  *  carrusel que se despliega bajo «Reservar por Airbnb». Sin URL salen igual
  *  (portada + nombre) pero sin enlace, como el resto de la página. */
-export interface AnuncioAirbnb { slug: string; nombre: string; zona: string; portada: string | null; url: string }
+export interface AnuncioAirbnb { slug: string; nombre: string; zona: string; portada: string | null; url: string; rating: number | null; resenas: number; detalle: string }
 export async function getAnunciosAirbnb(): Promise<AnuncioAirbnb[]> {
-  const rs = await rows<{ slug: string; name: string; zone: string; cover: string | null; airbnb_url: string }>(
-    `SELECT p.slug, p.name, z.name AS zone, p.airbnb_url,
+  const rs = await rows<{ slug: string; name: string; zone: string; cover: string | null; airbnb_url: string; airbnb_rating: number | null; airbnb_resenas: number; airbnb_detalle: string }>(
+    `SELECT p.slug, p.name, z.name AS zone, p.airbnb_url, p.airbnb_rating, p.airbnb_resenas, p.airbnb_detalle,
             (SELECT i.path FROM property_images i WHERE i.property_id = p.id ORDER BY i.is_cover DESC, i.sort_order LIMIT 1) AS cover
        FROM properties p LEFT JOIN zones z ON z.slug = p.zone_slug
       WHERE p.is_published ORDER BY p.sort_order, p.name`);
-  return rs.map((r) => ({ slug: r.slug, nombre: r.name, zona: r.zone ?? '', portada: r.cover, url: urlSegura(r.airbnb_url ?? '') ?? '' }));
+  return rs.map((r) => ({ slug: r.slug, nombre: r.name, zona: r.zone ?? '', portada: r.cover, url: urlSegura(r.airbnb_url ?? '') ?? '', rating: r.airbnb_rating == null ? null : Number(r.airbnb_rating), resenas: Number(r.airbnb_resenas ?? 0), detalle: r.airbnb_detalle ?? '' }));
 }
