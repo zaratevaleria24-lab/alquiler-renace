@@ -1,7 +1,7 @@
 import { Download, Mail, Trash2 } from 'lucide-react';
 import { listarContactos } from '@/lib/contactos';
 import { Aviso, Cifra, Tarjeta } from '../_ui';
-import { borrarContactoAction } from './actions';
+import { alternarUsadoAction, borrarContactoAction } from './actions';
 
 // CRM: quién dejó su correo, con qué cupón, de dónde vino y si ya lo usó.
 // Exporta CSV para Mailchimp/Brevo o para una campaña desde Resend.
@@ -32,7 +32,8 @@ export default async function ContactosPage({ searchParams }: { searchParams: Pr
                 <td className="px-4 py-3 text-body font-semibold text-ink">{c.nombre || '—'}</td>
                 <td className="px-4 py-3 text-meta"><a href={`mailto:${c.email}`} className="inline-flex items-center gap-1.5 text-brand-deep hover:underline underline-offset-4"><Mail className="h-3.5 w-3.5" />{c.email}</a>{c.correoEnviadoAt ? '' : <span className="ml-2 text-ui text-ink-faint">sin correo enviado</span>}</td>
                 <td className="px-4 py-3 text-meta text-ink-muted">{c.telefono || '—'}</td>
-                <td className="px-4 py-3 font-mono text-ui">{c.cupon}{c.cuponUsadoAt && <span className="ml-1 text-ink-faint">· usado</span>}</td>
+                <td className="px-4 py-3 font-mono text-ui">{c.cupon}
+                  <form action={alternarUsadoAction} className="mt-1"><input type="hidden" name="id" value={c.id} /><input type="hidden" name="usado" value={c.cuponUsadoAt ? '0' : '1'} /><button type="submit" className={`rounded-chip border px-2 py-0.5 font-sans text-[11px] ${c.cuponUsadoAt ? 'border-line text-ink-muted' : 'border-brand-deep/40 text-brand-deep'}`}>{c.cuponUsadoAt ? 'usado · reactivar' : 'marcar usado'}</button></form></td>
                 <td className="px-4 py-3 text-ui text-ink-muted">{c.origen}{c.pagina ? ` · ${c.pagina}` : ''}{c.utm.utm_source ? ` · ${c.utm.utm_source}` : ''}</td>
                 <td className="px-4 py-3 font-mono text-ui text-ink-muted">{new Date(c.createdAt).toLocaleDateString('es-VE')}</td>
                 <td className="px-4 py-3 text-right"><form action={borrarContactoAction}><input type="hidden" name="id" value={c.id} /><button type="submit" title="Borrar" className="flex h-9 w-9 items-center justify-center rounded-control text-ink-faint hover:text-accent"><Trash2 className="h-4 w-4" /></button></form></td>

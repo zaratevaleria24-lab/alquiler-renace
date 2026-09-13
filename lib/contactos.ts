@@ -15,7 +15,7 @@ const desde = (r: Record<string, unknown>): Contacto => ({
 function nuevoCupon(): string {
   const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let x = '';
   for (let i = 0; i < 4; i++) x += abc[randomInt(abc.length)];
-  return `RENACE5-${x}`;
+  return `RENACE10-${x}`;
 }
 
 /** Alta (o reencuentro) por correo: si ya existía, devuelve su cupón. */
@@ -40,8 +40,9 @@ export async function marcarCorreoEnviado(id: string) { await query(`UPDATE cont
 export async function listarContactos(): Promise<Contacto[]> { return (await rows<Record<string, unknown>>(`SELECT * FROM contactos ORDER BY created_at DESC`)).map(desde); }
 /** Valida un cupón (para /reservas): devuelve el % o null. */
 export async function descuentoDe(cupon: string): Promise<{ pct: number; nombre: string } | null> {
-  const c = cupon.trim().toUpperCase(); if (!/^RENACE5-[A-Z0-9]{4}$/.test(c)) return null;
+  const c = cupon.trim().toUpperCase(); if (!/^RENACE10-[A-Z0-9]{4}$/.test(c)) return null;
   const [r] = await rows<{ descuento_pct: number; nombre: string }>(`SELECT descuento_pct, nombre FROM contactos WHERE cupon = $1 AND cupon_usado_at IS NULL`, [c]);
   return r ? { pct: Number(r.descuento_pct), nombre: r.nombre } : null;
 }
 export async function borrarContacto(id: string) { await query(`DELETE FROM contactos WHERE id = $1`, [id]); }
+export async function marcarCuponUsado(id: string, usado: boolean) { await query(`UPDATE contactos SET cupon_usado_at = ${usado ? 'now()' : 'NULL'} WHERE id = $1`, [id]); }

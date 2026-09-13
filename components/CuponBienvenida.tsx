@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { X } from 'lucide-react';
+import { Check, Copy, X } from 'lucide-react';
 import { pedirCuponAction } from '@/app/acciones/cupon';
 
 // El cupón de bienvenida: 5 % en la primera reserva directa + la guía de la
@@ -14,10 +14,14 @@ import { pedirCuponAction } from '@/app/acciones/cupon';
 // DESPUÉS de dar el código, opcional: no frena la conversión y suma al CRM.
 const CLAVE = 'mr:cupon';
 
-export default function CuponBienvenida() {
+export interface AptoCupon { slug: string; nombre: string; sector: string }
+
+export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] }) {
+  const [copiado, setCopiado] = useState(false);
+  const copiar = async () => { try { await navigator.clipboard.writeText(cupon); setCopiado(true); setTimeout(() => setCopiado(false), 1600); } catch {} };
   const [abierto, setAbierto] = useState(false);
   const [estado, setEstado] = useState<'form' | 'ok'>('form');
-  const [cupon, setCupon] = useState(''); const [pct, setPct] = useState(5);
+  const [cupon, setCupon] = useState(''); const [pct, setPct] = useState(10);
   const [error, setError] = useState<string | null>(null); const [enviando, setEnviando] = useState(false);
   const reducido = useReducedMotion();
 
@@ -63,8 +67,11 @@ export default function CuponBienvenida() {
               ) : (
                 <>
                   <p className="label-eyebrow mt-3 text-brand-deep">Tu código</p>
-                  <p className="mono-data mt-2 inline-block rounded-card border border-dashed border-brand-deep bg-white px-5 py-3 text-[26px] font-semibold tracking-[.12em] text-brand-deep">{cupon}</p>
-                  <p className="mt-3 text-meta text-ink-soft">Te lo enviamos también por correo. Vale una vez en tu primera reserva directa, sin vencimiento.</p>
+                  <button type="button" onClick={copiar} className="mono-data mt-2 inline-flex items-center gap-3 rounded-card border border-dashed border-brand-deep bg-white px-5 py-3 text-[24px] font-semibold tracking-[.12em] text-brand-deep" title="Copiar código">
+                    {cupon}{copiado ? <Check className="h-5 w-5 text-brand" /> : <Copy className="h-5 w-5 text-ink-muted" />}
+                  </button>
+                  <p className="mt-2 text-ui text-ink-muted">{copiado ? 'Copiado. Pégalo en la reserva o en el WhatsApp.' : 'Toca el código para copiarlo.'}</p>
+                  <p className="mt-2 text-meta text-ink-soft">Te lo enviamos también por correo. Vale una vez, en tu primera reserva directa de cualquier apartamento, traslado o carro. Sin vencimiento.</p>
                 </>
               )}
             </div>
@@ -79,6 +86,14 @@ export default function CuponBienvenida() {
               </form>
             ) : (
               <div className="space-y-3 px-6 pb-6 pt-5">
+                {aptos.length > 0 && (
+                  <div>
+                    <p className="text-ui font-semibold uppercase tracking-[0.12em] text-ink-subtle">Aplícalo en tu apartamento</p>
+                    <ul className="mt-2 grid grid-cols-2 gap-2">
+                      {aptos.map((a) => <li key={a.slug}><Link href={`/reservas?cupon=${encodeURIComponent(cupon)}&apto=${a.slug}`} onClick={cerrar} className="block rounded-card border border-line bg-paper px-3 py-2 text-left transition-colors hover:border-brand/40"><span className="block text-meta font-semibold leading-tight text-ink">{a.nombre}</span><span className="block text-[11px] text-ink-muted">{a.sector}</span></Link></li>)}
+                    </ul>
+                  </div>
+                )}
                 <Link href={`/reservas?cupon=${encodeURIComponent(cupon)}`} onClick={cerrar} className="btn-solid w-full justify-center">Calcular mi estadía con el descuento</Link>
                 <Link href="/guia" onClick={cerrar} className="flex min-h-[46px] w-full items-center justify-center rounded-control border border-line bg-white text-meta font-medium text-brand-deep hover:border-brand/40">Abrir la guía de la isla</Link>
               </div>

@@ -26,7 +26,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [descuento, setDescuento] = useState<{ pct: number; nombre: string } | null>(null);
   const [cuponError, setCuponError] = useState<string | null>(null);
   const aplicarCupon = async (c: string) => { const v = await validarCuponAction(c); setDescuento(v); setCuponError(v ? null : 'Ese código no existe o ya se usó.'); };
-  useEffect(() => { const c = new URLSearchParams(location.search).get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } }, []);
+  useEffect(() => { const q = new URLSearchParams(location.search); const c = q.get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } const a = q.get('apto'); if (a && aptos.some((x) => x.slug === a)) setSlug(a); }, []);
 
   useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => setTasa(d.usdt ?? d.bcv ?? null)).catch(() => {}); }, []);
   useEffect(() => { if (!slug) return; setOcupado(null); fetch(`/api/disponibilidad/${slug}`).then((r) => r.json()).then((d) => setOcupado(d.ocupado ?? [])).catch(() => setOcupado([])); }, [slug]);

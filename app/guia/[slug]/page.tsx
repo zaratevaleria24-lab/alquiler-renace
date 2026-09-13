@@ -235,7 +235,7 @@ async function PaginaHub({ slug }: { slug: string }) {
           <ListaGuia cat="" escucha={false} lugares={propios.map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }))} />
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
-            <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar (Los Geranios, La Caranta y Playa El Ángel) desde US$60 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>
+            <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar (Los Geranios, La Caranta y Playa El Ángel) desde US$65 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>
             <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="btn-solid">Ver hospedajes</Link>{wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Reservar por WhatsApp</a>}</div>
           </section>
         </main>

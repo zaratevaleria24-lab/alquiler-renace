@@ -903,10 +903,12 @@ export default function HomeClient({
                       <h2 className="font-serif text-title font-medium text-brand tracking-tight">{selectedProperty.name}</h2>
                       <p className="text-meta text-ink-muted mt-0.5 font-medium">{selectedProperty.location}</p>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-paper text-amber-800 border border-line rounded-chip px-3 py-1.5 text-meta font-semibold">
-                      <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
-                      <span>{selectedProperty.rating}</span>
-                    </div>
+                    {selectedProperty.airbnbRating != null && (
+                      <div className="flex flex-col items-end rounded-chip border border-line bg-paper px-3 py-1.5 text-meta font-semibold text-ink" title="Valoración real en Airbnb">
+                        <span className="flex items-center gap-1.5"><Star className="h-3.5 w-3.5 fill-[#FF5A5F] text-[#FF5A5F]" />{selectedProperty.airbnbRating.toFixed(1)}</span>
+                        <span className="text-[11px] font-normal text-ink-muted">{selectedProperty.airbnbResenas ? `${selectedProperty.airbnbResenas} reseñas · ` : ''}Airbnb</span>
+                      </div>
+                    )}
                   </div>
                   <p className="text-meta text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
                   {/* La página propia es la versión canónica y compartible del
@@ -1438,12 +1440,7 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
               <span className="mono-data flex items-center gap-1 text-ink"><Star className="h-3.5 w-3.5 fill-[#FF5A5F] text-[#FF5A5F]" aria-hidden="true" />{property.airbnbRating.toFixed(1)}</span>
               <span className="mt-1 text-[11px] text-ink-muted">{property.airbnbResenas ? `${property.airbnbResenas} reseñas · ` : ''}Airbnb</span>
             </span>
-          ) : property.isReal && property.rating !== null && (
-            <span className="mono-data flex shrink-0 items-center gap-1 text-ink-muted">
-              <Star className="h-3.5 w-3.5 fill-brand text-brand" aria-hidden="true" />
-              {property.rating.toFixed(1)}
-            </span>
-          )}
+          ) : null}
         </div>
 
         <p className="text-meta text-ink-soft line-clamp-2">{property.description}</p>
