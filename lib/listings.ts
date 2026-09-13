@@ -37,6 +37,12 @@ export interface Property {
   priceOnRequest?: boolean;
   nightsCount: number;
   rating: number;
+  /** Sector dentro de la zona («La Caranta», «Los Geranios»): primer tramo de `location`. */
+  sector?: string;
+  /** Datos del anuncio en Airbnb, leídos de su página (lib/airbnb.ts). */
+  airbnbRating?: number | null;
+  airbnbResenas?: number;
+  airbnbUrl?: string;
   categories: string[];
   image: string;
   gallery: string[];

@@ -1383,16 +1383,12 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-ink/75 via-ink/25 to-transparent"
         />
 
-        {/* Categoría arriba a la izquierda, en vidrio como el resto del sitio */}
+        {/* Sector arriba a la izquierda («La Caranta», «Los Geranios»): ubica
+            mejor que una categoría genérica como «Centro». */}
         <div className="absolute left-4 top-4 flex gap-1.5">
-          {property.categories.slice(0, 1).map((cat) => (
-            <span
-              key={cat}
-              className="label-eyebrow rounded-chip border border-white/40 bg-white/80 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm"
-            >
-              {cat}
-            </span>
-          ))}
+          <span className="label-eyebrow rounded-chip border border-white/40 bg-white/80 px-2.5 py-1.5 text-brand-deep backdrop-blur-sm">
+            {property.sector || property.categories[0]}
+          </span>
         </div>
 
         <button
@@ -1435,7 +1431,14 @@ function PropertyCard({ property, tasaBcv, onSelect }: PropertyCardProps) {
               relleno llevan ratings inventados (4.6–5.0) y enseñárselos al
               visitante es pedirle que confíe en un dato falso — el mismo motivo
               por el que lib/schema.ts no emite aggregateRating. */}
-          {property.isReal && property.rating !== null && (
+          {/* Valoración REAL de Airbnb (leída de su anuncio) cuando existe;
+              si no, la propia solo en inventario real. */}
+          {property.airbnbRating != null ? (
+            <span className="flex shrink-0 flex-col items-end leading-none" title={`${property.airbnbRating.toFixed(1)} en Airbnb${property.airbnbResenas ? ` · ${property.airbnbResenas} reseñas` : ''}`}>
+              <span className="mono-data flex items-center gap-1 text-ink"><Star className="h-3.5 w-3.5 fill-[#FF5A5F] text-[#FF5A5F]" aria-hidden="true" />{property.airbnbRating.toFixed(1)}</span>
+              <span className="mt-1 text-[11px] text-ink-muted">{property.airbnbResenas ? `${property.airbnbResenas} reseñas · ` : ''}Airbnb</span>
+            </span>
+          ) : property.isReal && property.rating !== null && (
             <span className="mono-data flex shrink-0 items-center gap-1 text-ink-muted">
               <Star className="h-3.5 w-3.5 fill-brand text-brand" aria-hidden="true" />
               {property.rating.toFixed(1)}

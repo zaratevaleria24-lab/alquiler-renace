@@ -21,6 +21,7 @@ const PROPERTY_SELECT = `
     p.id, p.slug, p.name, p.location, p.description,
     p.price_text, p.price_per_night, p.price_on_request, p.nights_count,
     p.rating, p.guests_adults, p.guests_children, p.is_real,
+    p.airbnb_rating, p.airbnb_resenas, p.airbnb_url,
     z.slug AS zone_slug, z.name AS zone_name,
     COALESCE(json_agg(
       DISTINCT jsonb_build_object('path', i.path, 'alt', i.alt, 'isCover', i.is_cover, 'ord', i.sort_order)
@@ -46,7 +47,7 @@ const PROPERTY_SELECT = `
 type PropertyRow = {
   id: string; slug: string; name: string; location: string; description: string;
   price_text: string; price_per_night: number; price_on_request: boolean;
-  nights_count: number; rating: string | null;
+  nights_count: number; rating: string | null; airbnb_rating: string | null; airbnb_resenas: number | null; airbnb_url: string | null;
   guests_adults: number; guests_children: number; is_real: boolean;
   zone_slug: string; zone_name: string;
   images: { path: string; alt: string; isCover: boolean; ord: number }[];
@@ -76,6 +77,10 @@ function toProperty(r: PropertyRow): Property {
     // numeric llega como string desde pg: si no se convierte, las comparaciones
     // numéricas del filtro de la web fallan en silencio.
     rating: r.rating === null ? null : Number(r.rating),
+    sector: (r.location ?? '').split(',')[0].trim().replace(/^Urb\.\s*/i, ''),
+    airbnbRating: r.airbnb_rating == null ? null : Number(r.airbnb_rating),
+    airbnbResenas: Number(r.airbnb_resenas ?? 0),
+    airbnbUrl: r.airbnb_url ?? '',
     guestsAllowed: { adults: r.guests_adults, children: r.guests_children },
     isReal: r.is_real,
     image: cover?.path ?? '',

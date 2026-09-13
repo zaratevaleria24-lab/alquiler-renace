@@ -7,8 +7,9 @@ import { X } from 'lucide-react';
 import { pedirCuponAction } from '@/app/acciones/cupon';
 
 // El cupón de bienvenida: 5 % en la primera reserva directa + la guía de la
-// isla, a cambio de nombre y correo. Poca fricción: dos campos, un botón, y
-// aparece una sola vez (localStorage), a los 6 s o al bajar un 35 %, nunca en
+// isla, a cambio de nombre y correo. Poca fricción: dos campos, un botón. Se
+// muestra en cada carga (a los 6 s o al bajar un 35 %) hasta que la persona
+// completa el formulario; desde entonces no vuelve (localStorage). Nunca en
 // las páginas de trabajo (/contrato, /enlaces, panel). El WhatsApp se pide
 // DESPUÉS de dar el código, opcional: no frena la conversión y suma al CRM.
 const CLAVE = 'mr:cupon';
@@ -30,7 +31,9 @@ export default function CuponBienvenida() {
     return () => { clearTimeout(t); window.removeEventListener('scroll', porScroll); };
   }, []);
 
-  const cerrar = () => { setAbierto(false); try { localStorage.setItem(CLAVE, estado === 'ok' ? 'ok' : 'cerrado'); } catch {} };
+  // Cerrar sin completar NO lo apaga: vuelve a aparecer en la próxima carga.
+  // Solo desaparece para siempre cuando la persona ya tiene su código.
+  const cerrar = () => { setAbierto(false); if (estado === 'ok') { try { localStorage.setItem(CLAVE, 'ok'); } catch {} } };
   const enviar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setError(null); setEnviando(true);
     const fd = new FormData(e.currentTarget); fd.set('pagina', location.pathname + location.search);
