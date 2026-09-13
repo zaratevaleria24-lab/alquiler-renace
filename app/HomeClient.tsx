@@ -983,7 +983,7 @@ export default function HomeClient({
                   <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
                     <div className="flex justify-between items-baseline border-b border-line pb-3">
                       <span className="text-body font-semibold text-accent">Precio según temporada</span>
-                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                      <span className="text-ui text-ink-muted">Hasta {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
                     <p className="text-meta text-gray-600">
                       El precio de esta propiedad varía según la temporada. Contáctanos y te confirmamos disponibilidad y tarifa para tus fechas.
@@ -1017,7 +1017,7 @@ export default function HomeClient({
                   </div>
                 ) : (
                   <div className="p-5 bg-white rounded-2xl border border-line shadow-sm space-y-4">
-                    <div className="flex justify-between items-baseline border-b border-line pb-3">
+                    <div className="flex flex-col gap-1 border-b border-line pb-3">
                       <div>
                         {tasaBcv ? (
                           <>
