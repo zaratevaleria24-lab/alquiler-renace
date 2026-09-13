@@ -516,3 +516,22 @@ robots.txt, sitemap (120 URLs con lastmod: 104 de la guía), llms.txt.
    inglés (la diáspora busca en español, no hace falta hoy).
 8. **Correo/marca**: DMARC (pendiente en Cloudflare) también mejora la reputación
    del dominio para Google.
+
+### Ejecutado el mismo día (2026-09-13, tarde)
+- Hubs editoriales: /guia/playas, /guia/donde-comer, /guia/servicios, /guia/aventura
+  (`lib/guia-hubs.ts`; se sirven desde `app/guia/[slug]`), en sitemap y enlazados
+  desde /guia, cada ficha y las landings de zona.
+- Fichas de la guía: FAQ visible + FAQPage (horario, cómo llegar, costo, mejor
+  momento, contacto), `openingHours`, línea de autor («Escrito por Valeria…»).
+- Interlinking guía ↔ alojamientos: /propiedad/<slug> y /alquiler/<zona> muestran
+  «Cerca, según nuestra guía» (lugares con el mismo zone_slug) y los hubs.
+- Páginas nuevas: /nosotros (AboutPage, valores, quién atiende, RIF), /politicas
+  (cancelación, depósito, normas, datos), /reservas (calculadora con fechas,
+  disponibilidad real, US$ + Bs a tasa USDT, WhatsApp armado; FAQPage).
+- `?c=` en /guia → `noindex, follow`; `/$` y `/&` → 301 al inicio (Search Console
+  los reportaba como 404; no salen de nuestro HTML).
+- Search Console (dato del dueño): dominio YA verificado, 244 impresiones / 5 clics,
+  9 indexadas / 15 no. Los «404» de /alquiler/juan-griego etc. hoy responden 200;
+  /propiedad/studio-* devuelven 410 a propósito (listados de relleno retirados).
+  Falta: **reenviar el sitemap** (Google leyó 10 URLs el 10/09; hoy trae 127) y
+  pedir indexación de /guia, los 4 hubs y /reservas.

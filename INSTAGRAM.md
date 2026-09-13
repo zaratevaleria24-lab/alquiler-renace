@@ -82,3 +82,10 @@ mezclados, distintos en cada post.
   Ketchup Hot — un reel conjunto llega a las dos audiencias.
 - Pedir a cada huésped una foto/historia etiquetando @margaritarenace.ve y
   republicarla (contenido de huéspedes rinde más que el profesional).
+
+## Plantillas listas (2026-09-13)
+7 historias 1080×1920 con datos reales en **Admin → Plantillas de Instagram**
+(`/admin/plantillas`): una por apartamento (foto, zona, US$/noche, ★ Airbnb),
+«¿Cuánto cuestan 5 noches?», la guía con QR y las reseñas. Se regeneran con
+`node scripts/plantillas-historias.cjs` cuando cambian precios o reseñas.
+La página que enlazan los reels de precio es **/reservas**.
