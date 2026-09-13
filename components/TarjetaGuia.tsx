@@ -34,13 +34,23 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
   const ir = l.latitud != null ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}` : l.mapsUrl;
   const donde = [sinPlusCode(l.direccion), l.municipio && !l.direccion?.includes(l.municipio) ? l.municipio : ''].filter(Boolean).join(' · ');
   const acciones = [
-    wa && { href: wa, I: MessageCircle, t: 'WhatsApp', ext: true },
+    wa && { href: wa.includes('wa.me/') && !wa.includes('text=') ? `${wa}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}` : wa, I: MessageCircle, t: 'WhatsApp', ext: true, aliado: true },
     l.telefono && !wa?.startsWith('https://wa.me') && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
     l.telefono && wa?.startsWith('https://wa.me') && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
     ig && { href: ig, I: Instagram, t: 'Instagram', ext: true },
     web && !ig && { href: web, I: null, t: 'Web', ext: true },
     ir && { href: ir, I: Navigation, t: 'Ir', ext: true },
-  ].filter(Boolean).slice(0, 4) as { href: string; I: typeof Star | null; t: string; ext: boolean }[];
+  ].filter(Boolean).slice(0, 4) as { href: string; I: typeof Star | null; t: string; ext: boolean; aliado?: boolean }[];
+  // Si la persona llegó por el QR de un apartamento (?apto=), el mensaje al
+  // aliado dice dónde está hospedada: así el aliado sabe que viene por canal
+  // recomendado y que rige la tarifa acordada (MARCA.md §5).
+  const conApto = (href: string) => {
+    try {
+      const slug = sessionStorage.getItem('mr:apto'); if (!slug || !href.includes('wa.me/')) return href;
+      const nombre = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      const u = new URL(href); u.searchParams.set('text', `Hola, estoy hospedado con Margarita Renace en ${nombre} y quisiera información sobre ${l.nombre}.`); return u.toString();
+    } catch { return href; }
+  };
   const href = `/guia/${l.slug}`;
 
   return (
@@ -81,7 +91,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
       {acciones.length > 0 && (
         <div className="mt-auto flex divide-x divide-line border-t border-line text-[13px] font-medium text-brand-deep">
           {acciones.map((a) => (
-            <a key={a.t} href={a.href} target={a.ext ? '_blank' : undefined} rel={a.ext ? 'noopener noreferrer' : undefined} className="flex min-h-[42px] flex-1 items-center justify-center gap-1.5 hover:bg-paper">
+            <a key={a.t} href={a.href} onClick={a.aliado ? (e) => { const h = conApto(a.href); if (h !== a.href) { e.preventDefault(); window.open(h, '_blank', 'noopener'); } } : undefined} target={a.ext ? '_blank' : undefined} rel={a.ext ? 'noopener noreferrer' : undefined} className="flex min-h-[42px] flex-1 items-center justify-center gap-1.5 hover:bg-paper">
               {a.I ? <a.I className="h-3.5 w-3.5" aria-hidden="true" /> : null}{a.t}
             </a>
           ))}

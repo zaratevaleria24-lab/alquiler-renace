@@ -36,7 +36,7 @@ alojarse, comprar y moverse sin sentir que la están estafando.
 
 | Principio | Dónde está |
 |---|---|
-| Tratos justos | Precio en US$, USDT, Bs a tasa de mercado y BCV con la tasa del día; «sin comisiones ocultas» escrito y cumplido |
+| Tratos justos | Precio en US$ a tasa BCV (referencia oficial), bolívares al BCV y USDT como referencia alternativa, con la tasa del día; «sin comisiones ocultas» escrito y cumplido |
 | Conciencia | Fotos autohospedadas (Venezuela bloquea CDNs), sitio liviano, sin webfonts externas |
 | Empatía | WhatsApp directo con una persona; «Te respondemos nosotros, no un robot» |
 | Humildad | Si un inmueble no tiene precio publicado decimos «a consultar», no inventamos uno; los anuncios de terceros se marcan como tales |
@@ -82,6 +82,14 @@ alojarse, comprar y moverse sin sentir que la están estafando.
   volver de visita o comprar para regresar, y paga en USDT o dólares.
 - **El dueño de la isla** que tiene un apartamento cerrado o una casa que vender
   y no sabe cómo llegar a esa gente sin que un intermediario se quede con todo.
+
+## La red de aliados
+
+La misión no termina en el apartamento: los negocios que recomendamos en la
+guía pasan el **Filtro Margarita Renace** (precio transparente, respuesta
+inmediata, compromiso comunitario, revisión por feedback) y llevan el sello
+«Recomendado». Está detallado en `MARCA.md` §4, que es el documento madre de
+la marca; este documento manda solo en la voz y los valores.
 
 ## Cómo se usa este documento
 

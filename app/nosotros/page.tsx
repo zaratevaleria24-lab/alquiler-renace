@@ -45,6 +45,17 @@ export default async function NosotrosPage() {
               <p className="mt-3"><a href="https://www.instagram.com/margaritarenace.ve/" target="_blank" rel="noopener noreferrer" className="text-brand-deep underline underline-offset-4">@margaritarenace.ve</a></p>
             </aside>
           </section>
+          <section aria-labelledby="red" className="section-gap">
+            <h2 id="red" className="font-serif text-title font-semibold text-ink">La red Margarita Renace</h2>
+            <p className="mt-4 text-body leading-relaxed text-ink-soft">Recibimos un flujo constante de huéspedes y lo usamos para darle visibilidad a microempresas de la isla que trabajan bien y cobran justo: agua a domicilio, traslados, comida, aventura. Un negocio lleva el sello «Recomendado por Margarita Renace» solo si pasa nuestro filtro:</p>
+            <ol className="mt-4 grid gap-3 sm:grid-cols-2">
+              {[['Precio transparente y razonable', 'Tarifa acordada y estable, la misma para el turista, el extranjero y el local. Cero sobreprecio improvisado.'], ['Respuesta inmediata y trato cálido', 'WhatsApp atendido por una persona, en minutos, en el horario acordado.'], ['Compromiso comunitario', 'Microemprendedores locales que viven de su oficio y reinvierten en la zona.'], ['Revisión por feedback', 'Dos reportes de huéspedes por informalidad o cobro abusivo y el negocio sale del catálogo, con la razón explicada.']].map(([t, d], i) => (
+                <li key={t} className="rounded-card border border-line bg-white p-4"><p className="font-serif text-title-sm font-semibold text-brand-deep"><span className="mono-data mr-2 text-ink-faint">{i + 1}</span>{t}</p><p className="mt-1.5 text-meta leading-relaxed text-ink-soft">{d}</p></li>
+              ))}
+            </ol>
+            <p className="mt-4 text-meta text-ink-muted">Si tienes un negocio en la isla y trabajas así, <a href="https://wa.me/584221161238?text=Hola%2C%20tengo%20un%20negocio%20en%20Margarita%20y%20quiero%20ser%20aliado%20de%20Margarita%20Renace." rel="noopener" className="text-brand-deep underline underline-offset-4">escríbenos</a>. <Link href="/guia/servicios" className="text-brand-deep underline underline-offset-4">Ver los aliados en la guía →</Link></p>
+          </section>
+
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Hablamos?</h2>
             <p className="mt-3 max-w-2xl text-body text-ink-soft">Dinos fechas y cuántos vienen; te respondemos con disponibilidad y precio cerrado en el día.</p>

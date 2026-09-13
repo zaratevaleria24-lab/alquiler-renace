@@ -21,6 +21,9 @@ export default function Bienvenida({ forzar = false }: { forzar?: boolean }) {
   const [listo, setListo] = useState(false);
 
   useEffect(() => {
+    // El QR de cada apartamento trae ?apto=<slug>: se recuerda en la sesión para
+    // que los WhatsApp a los aliados digan «estoy hospedado en …».
+    try { const a = new URLSearchParams(location.search).get('apto'); if (a) sessionStorage.setItem('mr:apto', a); } catch {}
     let vista = false;
     try { vista = sessionStorage.getItem('guia:bienvenida') === '1'; } catch {}
     // Solo en teléfono (donde llega el QR) y una vez por sesión; en escritorio

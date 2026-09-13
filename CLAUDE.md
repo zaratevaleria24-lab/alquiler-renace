@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Sections and their docs: `SEO.md`, `VENTAS.md` (En venta), `GUIA.md` (tourist guide, `/guia`), `CALENDARIO.md`, `ENLACES.md`, `CONTRATOS.md` (guest contracts with e-signature, `/admin/contratos`), `CRM.md` (welcome coupon + contacts CRM, `/admin/contactos`), `SEGURIDAD.md` (security audit and rules — the app connects as the least-privilege role `margarita_app`; migrations use `margarita`).
 
+**Read `MARCA.md` first** — the brand's core: vision, pricing philosophy (US$ at BCV as reference), the partner filter («Filtro Margarita Renace») and the QR→WhatsApp guest experience. Business decisions, copy and partner features must fit it.
+
 **Read `PRINCIPIOS.md` before shipping anything** — the engineering harness: measure first, performance budget for Venezuelan connections, native scroll on listings, tagged caching, data/rights rules, pre-publish checklist.
 
 **Read `IDENTIDAD.md` before writing any user-facing copy** — mission, values (fair deals, conscience, empathy, humility, equity), voice rules and the phrases that represent the brand. Copy that doesn't fit it gets rewritten.
