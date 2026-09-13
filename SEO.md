@@ -454,3 +454,65 @@ concreto. Cada guía nueva debe abrir con la respuesta, no con introducción.
 - Google — [Vacation rentals partners](https://support.google.com/hotelprices/answer/11946834); [Lodgify: Google Vacation Rentals guía 2026](https://www.lodgify.com/blog/google-vacation-rentals-guide/); [Rental Scale-Up: conexión directa vs. partner](https://www.rentalscaleup.com/how-to-list-on-google-vacation-rentals-part-3-direct-connection-or-connectivity-providers/).
 - [CraftedStays: Vacation Rental SEO + AI Search 2026](https://craftedstays.co/vacation-rental-seo/); [VillaMarketers: guía completa 2026](https://villamarketers.com/vacation-rental-seo-guide); [Boostly: 7 tácticas para reserva directa](https://boostly.co.uk/vacation-rental-seo-tips/); [Houfy: Google Business Profile para vacacionales 2026](https://www.houfy.com/blog/google-business-profile-for-vacation-rentals-2026).
 - [Search Engine Land: GEO 2026](https://searchengineland.com/mastering-generative-engine-optimization-in-2026-full-guide-469142); [HubSpot: GEO para pequeños negocios](https://blog.hubspot.com/marketing/generative-engine-optimization-small-business); [Megabant: factores de SEO local 2026](https://www.megabant.com/local-seo-ranking-factors-what-matters-most-in-2026/).
+
+## Auditoría 2026-09-13 (tras guía, En venta, contratos, enlaces)
+
+**Escaneo real** (curl sobre el sitio en producción): títulos, descripciones,
+canonical, robots, H1, JSON-LD, alt, enlaces internos, peso y TTFB de 11 URLs;
+robots.txt, sitemap (120 URLs con lastmod: 104 de la guía), llms.txt.
+
+### Corregido en el acto
+- **/guia pesaba 1,25 MB** (303 KB gzip): Next duplicaba el árbol de 103 tarjetas
+  en el payload RSC. La lista pasó a componente cliente (`components/ListaGuia.tsx`)
+  con datos compactos → **0,73 MB / 88 KB gzip**, mismo HTML para Google.
+- 100 miniaturas de la guía con `alt=""` → ahora «Nombre, Isla de Margarita».
+- /guia tenía **dos H1** (móvil y escritorio) → uno solo con spans responsivos.
+- Títulos de 94–119 caracteres en la guía → ≤ 86 (`Nombre · Categoría en Isla de
+  Margarita`, la plantilla antepone la marca). Descripciones de 194–237 → ≤ 166.
+- Helpers puros de la guía en `lib/guia-comun.ts` (seguro para cliente).
+
+### Estado
+| Página | Título | Desc. | H1 | Canonical | JSON-LD | Peso |
+|---|---|---|---|---|---|---|
+| / | 67 | 160 | 1 | ✓ | Organization+LocalBusiness, WebSite, FAQPage | 99 KB |
+| /guia | 72 | 147 | 1 | ✓ | BreadcrumbList, ItemList | 734 KB (88 gz) |
+| /guia/[slug] | 61–86 | 143–155 | 1 | ✓ | Breadcrumb + Beach/Restaurant/LocalBusiness… | ~97 KB |
+| /en-venta | 69 | 163 | 1 | ✓ | Breadcrumb, FAQPage | 195 KB |
+| /propiedad/[slug] | 75 | 155 | 1 | ✓ | Breadcrumb, Accommodation; og:image = portada | ~55 KB |
+| /alquiler/[zona] | 74 | 162 | 1 | ✓ | Place, ItemList | 58 KB |
+| /autos | 70 | 166 | 1 | ✓ | Breadcrumb | 46 KB |
+| /enlaces | noindex a propósito | | | | | 32 KB |
+
+### Plan de mejora (prioridad → impacto)
+1. **Search Console + Business Profile** (dueño): verificar propiedad (el TXT
+   google-site-verification ya está en DNS), enviar sitemap, crear/reclamar la
+   ficha de Google Business «Margarita Renace» en Pampatar con fotos, horario y
+   el WhatsApp; enlazarla desde `sameAs` del LocalBusiness. Es el mayor salto
+   para búsquedas locales («apartamentos en Pampatar»).
+2. **Contenido por intención de búsqueda**: hoy las landings de zona (9) tienen
+   160 palabras; ampliar cada una a 400–600 con qué hay cerca, precios medios,
+   cómo llegar, y enlazar a los lugares de la guía de esa zona (interlinking
+   guía ↔ alojamientos en ambos sentidos; ya existe «Dormí cerca» en la guía,
+   falta el sentido inverso en /propiedad y /alquiler).
+3. **Guía como imán de tráfico**: 103 fichas indexables con datos únicos.
+   Añadir a cada ficha 2–3 preguntas frecuentes reales (FAQPage) y `TouristTrip`
+   / `TouristAttraction` con `geo` y `openingHours` completos (ya hay lat/lng y
+   horario de Google). Crear 4 páginas «hub» editoriales: /guia/playas,
+   /guia/donde-comer, /guia/servicios, /guia/aventura (hoy son filtros ?c= con
+   canonical a /guia: no rankean por sí mismos).
+4. **Reseñas propias**: pedir a cada huésped una reseña en Google Business y
+   mostrar `aggregateRating` SOLO de reseñas propias en el sitio (las de Airbnb no
+   se pueden marcar). Cuando haya 5+, activar el markup en /propiedad.
+5. **Core Web Vitals**: /guia todavía 734 KB de HTML; objetivo < 400 KB:
+   servir solo la primera tanda en HTML y traer el resto por fetch al bajar
+   (hoy va todo oculto). Imágenes: pasar miniaturas a AVIF + WebP con `srcset`
+   (llega con R2). Medir con PageSpeed cuando el dueño habilite la API.
+6. **Señales de confianza**: página «Quiénes somos» con foto del equipo, RIF y
+   dirección (E-E-A-T), política de cancelación y de datos (ya están en el
+   contrato: enlazarlas como páginas), y autor visible en la guía («Escrito por
+   Valeria, anfitriona en Pampatar»).
+7. **Higiene**: el filtro ?c= podría llevar `noindex,follow` además del canonical;
+   revisar 404/410 en Search Console; añadir `hreflang` solo si algún día hay
+   inglés (la diáspora busca en español, no hace falta hoy).
+8. **Correo/marca**: DMARC (pendiente en Cloudflare) también mejora la reputación
+   del dominio para Google.
