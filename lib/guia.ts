@@ -15,7 +15,7 @@ import { query, rows } from './db';
 
 export type Categoria =
   | 'playa' | 'historia' | 'naturaleza' | 'mirador' | 'museo' | 'comer'
-  | 'actividad' | 'nocturna' | 'compras' | 'familia'
+  | 'actividad' | 'aventura' | 'nocturna' | 'compras' | 'familia'
   // Servicios: lo que un huésped necesita RESOLVER desde el apartamento.
   | 'delivery' | 'supermercado' | 'licores' | 'agua' | 'salud' | 'transporte';
 
@@ -23,7 +23,8 @@ export type Grupo = 'descubrir' | 'resolver';
 
 export const CATEGORIAS: { key: Categoria; label: string; plural: string; emoji: string; grupo: Grupo; sub: string }[] = [
   { key: 'playa', label: 'Playa', plural: 'Playas', emoji: '🏖', grupo: 'descubrir', sub: 'Dónde bañarte hoy' },
-  { key: 'actividad', label: 'Actividad', plural: 'Qué hacer', emoji: '🪁', grupo: 'descubrir', sub: 'Kite, buceo, lanchas, caminatas' },
+  { key: 'actividad', label: 'Paseos', plural: 'Paseos y tours', emoji: '🪁', grupo: 'descubrir', sub: 'Lanchas, islas, excursiones' },
+  { key: 'aventura', label: 'Aventura', plural: 'Aventura y deporte', emoji: '🥾', grupo: 'descubrir', sub: 'Senderismo, kite, buceo, surf' },
   { key: 'comer', label: 'Comer', plural: 'Dónde comer', emoji: '🍽', grupo: 'descubrir', sub: 'Los más recomendados' },
   { key: 'historia', label: 'Historia', plural: 'Historia', emoji: '🏰', grupo: 'descubrir', sub: 'Castillos, fortines, iglesias' },
   { key: 'naturaleza', label: 'Naturaleza', plural: 'Naturaleza', emoji: '🌿', grupo: 'descubrir', sub: 'Lagunas, cerros, manglares' },
@@ -43,7 +44,7 @@ export const esServicio = (c: string) => CATEGORIAS.find((x) => x.key === c)?.gr
 export const categoriaLabel = (c: string) => CATEGORIAS.find((x) => x.key === c)?.label ?? c;
 export const categoriaPlural = (c: string) => CATEGORIAS.find((x) => x.key === c)?.plural ?? c;
 
-export interface FotoGuia { path: string; alt: string; credito: string; licencia: string; fuente: 'propia' | 'commons' | 'duena' }
+export interface FotoGuia { path: string; alt: string; credito: string; licencia: string; fuente: 'propia' | 'commons' | 'duena' | 'instagram' }
 export interface FotoGoogle { name: string; autor: string }
 
 export interface Lugar {
@@ -55,7 +56,7 @@ export interface Lugar {
   telefono: string | null; web: string | null; instagram: string | null; mapsUrl: string | null;
   horario: string[] | null; nivelPrecio: string | null; resumenGoogle: string | null;
   fotosGoogle: FotoGoogle[]; datosActualizados: string | null;
-  fotos: FotoGuia[]; destacado: boolean; orden: number; publicado: boolean;
+  fotos: FotoGuia[]; destacado: boolean; aliado: boolean; orden: number; publicado: boolean;
 }
 
 export interface Consejo { id: string; tema: string; titulo: string; texto: string; orden: number; publicado: boolean }
@@ -86,7 +87,7 @@ const lugarDesde = (r: Record<string, unknown>): Lugar => ({
   mapsUrl: (r.maps_url as string) ?? null, horario: (r.horario as string[]) ?? null, nivelPrecio: (r.nivel_precio as string) ?? null,
   resumenGoogle: (r.resumen_google as string) ?? null, fotosGoogle: (r.fotos_google as FotoGoogle[]) ?? [],
   datosActualizados: r.datos_actualizados ? new Date(r.datos_actualizados as string).toISOString() : null,
-  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
+  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), aliado: Boolean(r.aliado), orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
 });
 
 const SELECT = `SELECT g.*, z.name AS zone_name FROM guia_lugares g LEFT JOIN zones z ON z.slug = g.zone_slug`;
@@ -94,7 +95,7 @@ export const TAG_GUIA = 'guia';
 
 export const getLugares = unstable_cache(
   async (): Promise<Lugar[]> =>
-    (await rows<Record<string, unknown>>(`${SELECT} WHERE g.publicado ORDER BY g.destacado DESC, g.orden, g.resenas DESC NULLS LAST, g.nombre`)).map(lugarDesde),
+    (await rows<Record<string, unknown>>(`${SELECT} WHERE g.publicado ORDER BY g.aliado DESC, g.destacado DESC, g.orden, g.resenas DESC NULLS LAST, g.nombre`)).map(lugarDesde),
   ['guia-lugares'], { tags: [TAG_GUIA], revalidate: 3600 },
 );
 export async function getLugar(slug: string): Promise<Lugar | undefined> {

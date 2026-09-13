@@ -88,7 +88,7 @@ export const AMENITIES_PLAYA = [
 const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
   {
     id: '1',
-    name: 'Los Geranios · Depto de lujo',
+    name: 'Los Geranios A',
     location: 'Urb. Maneiro, Pampatar, Margarita',
     priceText: 'Consultar precio',
     pricePerNight: 0,
@@ -96,9 +96,8 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
     nightsCount: 2,
     rating: 4.9,
     categories: ['Centro', 'Familiar', 'Piscina'],
-    image: '/uploads/properties/los-geranios-a/piscina.webp',
+    image: '/properties/los-geranios-a/habitacion-principal.webp',
     gallery: [
-      '/uploads/properties/los-geranios-a/piscina.webp',
       '/properties/los-geranios-a/habitacion-principal.webp'
     ],
     description: 'Apartamento totalmente equipado en zona céntrica de Pampatar, a solo 5 minutos del C.C. Sambil. Cuenta con seguridad 24/7, piscina, cancha deportiva, zona de parrilla y parque infantil dentro de la urbanización. Ideal para familias: habitación principal con cama queen y baño privado, habitación secundaria con cama queen y gaveta adicional. Todo lo que necesitas cerca, en una de las zonas más cómodas de la isla.',
@@ -256,14 +255,14 @@ const RAW_PROPERTIES: Omit<Property, "zone" | "slug">[] = [
   },
   {
     id: '8',
-    name: 'Loft Playa El Yaque',
-    location: 'Playa El Yaque, Margarita',
+    name: 'Los Geranios · Depto de lujo',
+    location: 'Urb. Los Geranios, Pampatar, Margarita',
     priceText: 'US$42 / noche',
     pricePerNight: 42,
     nightsCount: 3,
     rating: 4.75,
     categories: ['Playa', 'Económico'],
-    image: '/images/photo-1499793983690.webp',
+    image: '/uploads/properties/los-geranios-lujo/piscina.webp',
     gallery: [
       '/images/photo-1499793983690.webp',
       '/images/photo-1515263487990.webp',

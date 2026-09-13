@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
 
 const MENSAJES: Record<string, string> = {
   'faltan-datos': 'Faltan datos obligatorios: título y zona.',
-  'sin-fotos': 'No llegó ningún archivo: elegí al menos una foto.',
+  'sin-fotos': 'No llegó ningún archivo: elige al menos una foto.',
   'foto-invalida': 'Alguno de los archivos no es una imagen válida o pesa más de 12MB.',
-  'no-guardado': 'No se pudo guardar. Revisá los datos e intentá otra vez.',
+  'no-guardado': 'No se pudo guardar. Revisa los datos e intentá otra vez.',
 };
 
 export default async function EditarInmueblePage({

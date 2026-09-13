@@ -43,7 +43,7 @@ export default async function DetalleInmueble({ d }: { d: DatosDetalle }) {
   const wa = d.whatsapp
     ? `https://wa.me/${d.whatsapp}?text=${encodeURIComponent(`Hola, me interesa «${d.titulo}» (${d.zona}, ref. ${d.ref}) que vi en ${url}. ¿Me pasan más información y coordinamos una visita?`)}`
     : null;
-  const compartir = `https://wa.me/?text=${encodeURIComponent(`Mirá este inmueble en Margarita: ${d.titulo} — ${url}`)}`;
+  const compartir = `https://wa.me/?text=${encodeURIComponent(`Mira este inmueble en Margarita: ${d.titulo} — ${url}`)}`;
   const mapa = d.lat != null && d.lng != null
     ? `https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${d.ubicacion || d.zona}, Isla de Margarita`)}`;
@@ -109,7 +109,7 @@ export default async function DetalleInmueble({ d }: { d: DatosDetalle }) {
               {d.descripcion ? (
                 <p className="mt-5 max-w-prose whitespace-pre-line text-body text-ink/80 leading-relaxed">{d.descripcion}</p>
               ) : (
-                <p className="mt-5 text-body text-ink/70">El anuncio no trae descripción. Escribinos y te pasamos detalles y más fotos.</p>
+                <p className="mt-5 text-body text-ink/70">El anuncio no trae descripción. Escríbenos y te pasamos detalles y más fotos.</p>
               )}
             </section>
 

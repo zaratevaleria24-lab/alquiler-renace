@@ -45,8 +45,8 @@ alojarse, comprar y moverse sin sentir que la están estafando.
 
 ## Cómo hablamos
 
-- **De vos a vos, en español venezolano.** Cercano, sin jerga inmobiliaria ni
-  anglicismos. «Escribinos», no «Contáctenos». «Te lo confirmamos en el día»,
+- **De tú a tú, en español venezolano.** Cercano, sin jerga inmobiliaria ni
+  anglicismos. «Escríbenos», no «Contáctenos». «Te lo confirmamos en el día»,
   no «Consulte disponibilidad».
 - **Con datos, no con adjetivos.** No «exclusivo», «espectacular», «único».
   Sí «a 15 minutos del aeropuerto», «72 m²», «tasa BCV de hoy: 832,49».

@@ -45,7 +45,7 @@ export default async function VentasPage({
           <p className="mt-2 max-w-2xl text-meta text-ink-muted">
             Anuncios de Facebook Marketplace en la isla. Se publican en /en-venta con
             precio y fotos; <b>el teléfono del vendedor solo se ve acá</b>: el público
-            te escribe a vos. Podés ocultar cualquiera con un clic.
+            te escribe a tú. Puedes ocultar cualquiera con un clic.
           </p>
         </div>
         <Link href="/admin/ventas/inmuebles" className="btn-solid">

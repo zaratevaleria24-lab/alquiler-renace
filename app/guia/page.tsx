@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, claveMaps, esServicio, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
-import TarjetaLugar from '@/components/TarjetaLugar';
+import { CATEGORIAS, claveMaps, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
+import TarjetaGuia from '@/components/TarjetaGuia';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
-import TarjetaServicio from '@/components/TarjetaServicio';
 import Bienvenida from '@/components/Bienvenida';
 
 // GUÍA TURÍSTICA — /guia
@@ -80,7 +79,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           <HubGuia
             inicial={cat ?? ''}
             whatsapp={contacto.whatsapp}
-            baldosas={CATEGORIAS.filter((c) => cuenta(c.key) > 0).map((c) => ({ key: c.key, label: c.label, sub: c.sub, emoji: c.emoji, grupo: c.grupo, n: cuenta(c.key) }))}
+            baldosas={CATEGORIAS.filter((c) => cuenta(c.key) > 0).map((c) => ({ key: c.key, label: c.label, sub: c.sub, grupo: c.grupo, n: cuenta(c.key) }))}
           />
           <div id="resultados-guia" className="mt-8 flex flex-wrap items-baseline justify-between gap-3 md:mt-0">
             <h2 className="font-serif text-title-sm font-semibold text-ink">
@@ -92,10 +91,8 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
               desde el servidor, así el enlace compartido abre bien sin JS. */}
-          <ul id="grid-guia" className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {lugares.map((l, k) => esServicio(l.categoria)
-              ? <TarjetaServicio key={l.id} l={l} oculta={Boolean(cat) && l.categoria !== cat} />
-              : <TarjetaLugar key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
+          <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+            {lugares.map((l, k) => <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
           </ul>
 
           <section aria-labelledby="consejos" className="section-gap">
@@ -114,8 +111,8 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           </section>
 
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
-            <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedás en la isla?</h2>
-            <p className="mt-3 max-w-2xl text-body text-ink-soft">Tenemos apartamentos en Pampatar, Porlamar, Costa Azul y El Yaque, con precio claro y trato directo. Y si algo de esta guía no te cuadra, escribinos: la corregimos.</p>
+            <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
+            <p className="mt-3 max-w-2xl text-body text-ink-soft">Tenemos apartamentos en Pampatar, Porlamar, Costa Azul y El Yaque, con precio claro y trato directo. Y si algo de esta guía no te cuadra, escríbenos: la corregimos.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/" className="btn-solid">Ver alojamientos</Link>
               {wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Preguntar por WhatsApp</a>}

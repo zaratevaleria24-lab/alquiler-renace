@@ -8,7 +8,8 @@ import { getZones } from '@/lib/queries';
 import { breadcrumbSchema, graph } from '@/lib/schema';
 import { CATEGORIAS, categoriaLabel, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe } from '@/lib/guia';
 import GaleriaInmueble from '@/components/GaleriaInmueble';
-import TarjetaLugar from '@/components/TarjetaLugar';
+import TarjetaGuia from '@/components/TarjetaGuia';
+import IconoCategoria from '@/components/IconosGuia';
 
 // Ficha de un lugar de la guía. Orden pensado para el teléfono: fotos, los
 // cuatro datos que decides con (cuándo ir, cuánto dura, cuánto cuesta, cómo
@@ -39,7 +40,6 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
   const [l, todos, contacto, zonas] = await Promise.all([getLugar(slug), getLugares(), getContacto(), getZones()]);
   if (!l) notFound();
   const path = `/guia/${l.slug}`;
-  const emoji = CATEGORIAS.find((c) => c.key === l.categoria)?.emoji ?? '';
   const fotos = galeriaDe(l);
   const hoy = horarioHoy(l);
   const irA = l.latitud != null && l.longitud != null
@@ -56,7 +56,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
     hoy && { I: Clock, k: 'Horario de hoy', v: hoy },
   ].filter(Boolean) as { I: typeof Sun; k: string; v: string }[];
 
-  const tipoSchema = { playa: 'Beach', historia: 'LandmarksOrHistoricalBuildings', naturaleza: 'Park', mirador: 'TouristAttraction', museo: 'Museum', comer: 'Restaurant', actividad: 'TouristAttraction', nocturna: 'BarOrPub', compras: 'ShoppingCenter', familia: 'AmusementPark', delivery: 'FoodEstablishment', supermercado: 'GroceryStore', licores: 'LiquorStore', agua: 'LocalBusiness', salud: 'MedicalBusiness', transporte: 'LocalBusiness' }[l.categoria] ?? 'TouristAttraction';
+  const tipoSchema = { playa: 'Beach', historia: 'LandmarksOrHistoricalBuildings', naturaleza: 'Park', mirador: 'TouristAttraction', museo: 'Museum', comer: 'Restaurant', actividad: 'TouristAttraction', nocturna: 'BarOrPub', compras: 'ShoppingCenter', familia: 'AmusementPark', delivery: 'FoodEstablishment', supermercado: 'GroceryStore', licores: 'LiquorStore', agua: 'LocalBusiness', salud: 'MedicalBusiness', transporte: 'LocalBusiness', aventura: 'SportsActivityLocation' }[l.categoria] ?? 'TouristAttraction';
   const jsonLd = graph(
     breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: '/guia' }, { name: l.nombre, path }]),
     {
@@ -82,7 +82,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
               <li><Link href={`/guia?c=${l.categoria}`} className="hover:text-brand hover:underline underline-offset-4">{CATEGORIAS.find((c) => c.key === l.categoria)?.plural}</Link></li>
             </ol>
           </nav>
-          <p className="label-eyebrow mt-5 text-brand-deep">{emoji} {categoriaLabel(l.categoria)}{l.municipio ? ` · ${l.municipio}` : ''}{l.destacado ? ' · Imperdible' : ''}</p>
+          <p className="label-eyebrow mt-5 flex items-center gap-1.5 text-brand-deep"><IconoCategoria cat={l.categoria} className="h-4 w-4" />{categoriaLabel(l.categoria)}{l.municipio ? ` · ${l.municipio}` : ''}{l.destacado ? ' · Imperdible' : ''}</p>
           <h1 className="mt-2 font-serif text-display font-normal leading-[1.03] track-display text-ink text-balance">{l.nombre}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-meta text-ink-soft">
             {l.rating != null && <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />{l.rating.toFixed(1)} <span className="text-ink-muted">({l.resenas?.toLocaleString('es-VE')} reseñas en Google)</span></span>}
@@ -140,23 +140,23 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
                   <li><a href={ig} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Instagram className="h-4 w-4" aria-hidden="true" />{l.instagram ? `@${l.instagram.replace(/^@/, '')}` : 'Ver en Instagram'}</a></li>
                   {l.web && <li><a href={l.web} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Globe className="h-4 w-4" aria-hidden="true" />Sitio web</a></li>}
                 </ul>
-                {wa && <a href={wa} rel="noopener" className="mt-4 block rounded-control border border-line bg-paper px-4 py-2.5 text-center text-meta font-medium text-brand-deep hover:border-brand/40">Preguntanos por WhatsApp</a>}
+                {wa && <a href={wa} rel="noopener" className="mt-4 block rounded-control border border-line bg-paper px-4 py-2.5 text-center text-meta font-medium text-brand-deep hover:border-brand/40">Pregúntanos por WhatsApp</a>}
               </div>
               {zonaCercana && zonaCercana.properties.length > 0 && (
                 <div className="rounded-card border border-line bg-white p-4">
-                  <p className="label-eyebrow text-ink-subtle">Dormí cerca</p>
+                  <p className="label-eyebrow text-ink-subtle">Duerme cerca</p>
                   <p className="mt-1.5 text-meta text-ink-soft">{zonaCercana.properties.length === 1 ? 'Un apartamento nuestro' : `${zonaCercana.properties.length} apartamentos nuestros`} en {zonaCercana.name}{zonaCercana.minPrice ? `, desde US$ ${zonaCercana.minPrice}/noche` : ''}.</p>
                   <Link href={`/alquiler/${zonaCercana.slug}`} className="mt-2 inline-block text-meta font-medium text-brand-deep underline-offset-4 hover:underline">Ver alojamientos en {zonaCercana.name} →</Link>
                 </div>
               )}
-              <p className="px-1 text-ui text-ink-faint">Valoración, horario y teléfono: Google. El texto y el consejo son nuestros. Si algo cambió, avisanos.</p>
+              <p className="px-1 text-ui text-ink-faint">Valoración, horario y teléfono: Google. El texto y el consejo son nuestros. Si algo cambió, avísanos.</p>
             </aside>
           </div>
 
           {relacionados.length > 0 && (
             <section aria-labelledby="mas" className="section-gap">
               <h2 id="mas" className="font-serif text-headline font-normal track-headline text-ink">Más <em className="headline-italic">{CATEGORIAS.find((c) => c.key === l.categoria)?.plural.toLowerCase()}</em></h2>
-              <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{relacionados.map((r) => <TarjetaLugar key={r.id} l={r} />)}</ul>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{relacionados.map((r) => <TarjetaGuia key={r.id} l={r} />)}</ul>
             </section>
           )}
         </main>

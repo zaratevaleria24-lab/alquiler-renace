@@ -25,7 +25,7 @@ export default async function GuiaAdminPage({ searchParams }: { searchParams: Pr
         </div>
       </header>
       {guardado && <Aviso tono="ok">Guardado. La guía pública se regenera sola.</Aviso>}
-      {error === 'nombre' && <Aviso tono="error">Poné un nombre para crear el lugar.</Aviso>}
+      {error === 'nombre' && <Aviso tono="error">Pon un nombre para crear el lugar.</Aviso>}
 
       <Tarjeta className="mt-8 p-5">
         <form action={crearLugarAction} className="flex flex-wrap items-end gap-3">

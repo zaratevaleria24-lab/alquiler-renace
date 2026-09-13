@@ -50,7 +50,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: '¿Cómo se reserva un apartamento en Margarita Renace?',
-    a: 'Directo con el anfitrión, por WhatsApp y sin comisiones de plataforma. En la página de cada apartamento elegís fechas y cantidad de huéspedes y el botón de reservar abre un mensaje ya escrito con esos datos; el anfitrión confirma disponibilidad, tarifa y forma de pago por el mismo chat. Cada apartamento tiene su calendario de disponibilidad publicado, así que antes de escribir ya sabés si las fechas están libres.',
+    a: 'Directo con el anfitrión, por WhatsApp y sin comisiones de plataforma. En la página de cada apartamento elegís fechas y cantidad de huéspedes y el botón de reservar abre un mensaje ya escrito con esos datos; el anfitrión confirma disponibilidad, tarifa y forma de pago por el mismo chat. Cada apartamento tiene su calendario de disponibilidad publicado, así que antes de escribir ya sabes si las fechas están libres.',
   },
   {
     q: '¿Margarita Renace también alquila autos?',

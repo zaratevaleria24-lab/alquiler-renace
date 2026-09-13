@@ -20,7 +20,7 @@ export default function QrPage() {
           <p className="mt-2 text-meta text-ink-soft leading-relaxed">Playas, castillos, dónde comer, qué hacer y los consejos que te daría un amigo margariteño. Con horarios, cómo llegar y fotos.</p>
           <p className="mono-data mt-5 text-ink-muted">margaritarenace.com.ve/guia</p>
         </div>
-        <p className="no-print mt-6 text-center text-meta text-ink-muted">Para imprimir: Ctrl+P (o Compartir → Imprimir en el teléfono). Tamaño A5. También podés descargar el <a href="/qr-guia.png" className="text-brand-deep underline underline-offset-4">QR en PNG</a> o <a href="/qr-guia.svg" className="text-brand-deep underline underline-offset-4">SVG</a> para ponerlo donde quieras.</p>
+        <p className="no-print mt-6 text-center text-meta text-ink-muted">Para imprimir: Ctrl+P (o Compartir → Imprimir en el teléfono). Tamaño A5. También puedes descargar el <a href="/qr-guia.png" className="text-brand-deep underline underline-offset-4">QR en PNG</a> o <a href="/qr-guia.svg" className="text-brand-deep underline underline-offset-4">SVG</a> para ponerlo donde quieras.</p>
       </div>
     </div>
   );

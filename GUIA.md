@@ -11,7 +11,7 @@ historia, naturaleza, miradores, museos, con niños, de noche, compras) más 7
 consejos de viaje (dinero, transporte, seguridad, playa, comida, temporadas,
 servicios). Cada ficha: fotos, cuándo ir, cuánto dura, cuánto cuesta, horario de
 hoy, valoración de Google, descripción y **el consejo de Margarita Renace**,
-«Cómo llegar» (Google Maps con ruta), Instagram, teléfono, y «Dormí cerca» con
+«Cómo llegar» (Google Maps con ruta), Instagram, teléfono, y «Duerme cerca» con
 nuestros apartamentos de la zona.
 
 ## Las tres fuentes y sus reglas
@@ -46,7 +46,7 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
 - Móvil primero: cabecera corta, categorías en tira deslizable pegada bajo la barra, tarjetas grandes con foto, barra fija «Ir» en la ficha.
 - Sin Lenis en `/guia` (igual que `/en-venta`): scroll nativo.
 - El mapa es un extra bajo demanda (~150 KB de SDK que la lista no paga).
-- La zona mostrada es el **municipio** real, no la zona del sitio más cercana (que engañaba: «Playa El Agua · Manzanillo»). «Dormí cerca» sí usa la zona más cercana si está a ≤12 km.
+- La zona mostrada es el **municipio** real, no la zona del sitio más cercana (que engañaba: «Playa El Agua · Manzanillo»). «Duerme cerca» sí usa la zona más cercana si está a ≤12 km.
 - Indexable y en el sitemap: es contenido propio y es la mejor pieza SEO del sitio («qué hacer en Margarita», «Playa El Agua horario», etc.).
 
 
@@ -75,3 +75,39 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
   vuelve a correr el importador con `--sin-fotos` NO las toca (solo rellena las que
   no tienen `google_place_id`… revisar el log y volver a anular si hace falta).
 - Peso de `/guia`: 154 KB gzip de HTML (82 tarjetas), TTFB ≈ 0,1 s cacheado.
+
+
+## Aliados, aventura, iconografía y voz (2026-09-13, tarde)
+
+- **Voz venezolana, no rioplatense.** Todo el sitio (código, semilla, BD de la guía,
+  IDENTIDAD.md) pasó de voseo a «tú»: «pide», «escríbenos», «para ti». Script en el
+  scratchpad de la sesión (`venezolano.py`); si vuelve a aparecer un «pedí» o «querés»,
+  es un error. Cuidado: el pase tocó `animate` → `anímate` en props de Motion una vez;
+  ya está corregido, pero no correr reemplazos ciegos sobre código.
+- **Categoría `aventura`** (senderismo, kite, buceo, surf) separada de `actividad`
+  (ahora «Paseos y tours»). Operadores encontrados en Instagram con Apify:
+  @senderosmargarita (68 k, Premio Nacional de Turismo 2024), @exploramargarita
+  (43 k), @espartanostrekkingmgta, @margaritalaperladelcaribe.
+- **Aliados** (`guia_lugares.aliado`, migración 013): negocios con trato directo.
+  Van primero en su categoría, con franja «Recomendado por Margarita Renace» y
+  borde de marca. Se marcan en Admin → Guía → Estado, o con `aliado: true` en la
+  semilla. Hoy: **Caribest Water** (@caribest_water, agua, Pampatar/Terranova/Jorge
+  Coll) y **Ketchup Hot** (@ketchuphot, empanadas). **Ventura** (bicicletas y
+  recorridos, socio) NO apareció en Instagram con ese nombre: falta el @ exacto.
+- **Una sola tarjeta** (`components/TarjetaGuia.tsx`) para lugares y servicios:
+  compacta en teléfono (foto cuadrada), vertical en escritorio (foto 16:10 arriba);
+  siempre valoración, horario de hoy, dónde está (sin plus codes de Google), consejo y
+  fila de acciones WhatsApp / Llamar / Instagram / Web / Ir (máximo 4; WhatsApp
+  sale del teléfono o de un enlace wa.me/wa.link en `web`).
+- **Iconografía propia** (`components/IconosGuia.tsx`): trazo fino con motivos de
+  petroglifo (puntos, zigzag, vasija, papagayo, trompo, mapire). Sustituye a los
+  emojis en hub, chips, tarjetas y ficha; el mapa sigue usando emoji como etiqueta.
+- **Hub móvil** (`HubGuia`): dos paneles «Resolver» (6) y «Descubrir» (11 + «Ver
+  todo» = 3×4) tipo control remoto, filas de 3 con líneas finas.
+- **Fotos de Instagram**: para 14 servicios sin foto de Google ni de Commons se
+  guardó la imagen de perfil del negocio (`/uploads/guia/<slug>/ig.webp`,
+  `fuente: 'instagram'`, crédito «Foto: @cuenta · Instagram»). Es la imagen con la que
+  el negocio se presenta públicamente; si alguno pide quitarla, se borra desde Admin.
+- Semilla: `busqueda: ''` = no consultar Google (negocios que Google confunde con
+  otro). El importador ya no vuelve a consultar Places si la fila tiene place_id.
+- Apify: consumido US$2,04 de 5 este mes tras estas búsquedas.

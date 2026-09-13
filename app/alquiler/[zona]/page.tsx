@@ -227,8 +227,8 @@ export default async function ZonaPage({
               <div className="block-gap rounded-card border border-line bg-white p-7">
                 <p className="text-body text-ink/80 leading-relaxed">
                   Todavía no tenemos apartamentos publicados en {zone.name}. Estamos
-                  incorporando alojamientos zona por zona; si buscás en esta parte de
-                  la isla, escribinos y te avisamos apenas haya uno, o te orientamos
+                  incorporando alojamientos zona por zona; si buscas en esta parte de
+                  la isla, escríbenos y te avisamos apenas haya uno, o te orientamos
                   a la zona vecina más parecida.
                 </p>
                 <div className="mt-5 flex flex-wrap gap-3">

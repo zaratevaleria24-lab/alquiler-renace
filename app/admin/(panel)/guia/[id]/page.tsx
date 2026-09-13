@@ -7,8 +7,8 @@ import { borrarFotoLugarAction, guardarLugarAction, refrescarGoogleAction, subir
 
 export const dynamic = 'force-dynamic';
 const MENSAJES: Record<string, string> = {
-  'faltan-datos': 'Nombre y categoría son obligatorios.', 'sin-fotos': 'Elegí al menos una foto.', 'foto-invalida': 'Alguna foto no es válida o pesa más de 12MB.',
-  'no-guardado': 'No se pudo guardar.', 'sin-google': 'Google no encontró ese lugar. Probá ajustar el nombre o el municipio.',
+  'faltan-datos': 'Nombre y categoría son obligatorios.', 'sin-fotos': 'Elige al menos una foto.', 'foto-invalida': 'Alguna foto no es válida o pesa más de 12MB.',
+  'no-guardado': 'No se pudo guardar.', 'sin-google': 'Google no encontró ese lugar. Prueba ajustar el nombre o el municipio.',
 };
 
 export default async function EditarLugarPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string; creada?: string; guardado?: string }> }) {
@@ -26,7 +26,7 @@ export default async function EditarLugarPage({ params, searchParams }: { params
         </div>
         <Insignia tono={l.publicado ? 'ok' : 'neutro'}>{l.publicado ? 'publicado' : 'borrador'}</Insignia>
       </header>
-      {creada && <Aviso tono="ok">Lugar creado como borrador{l.googlePlaceId ? ' con los datos de Google' : ''}. Escribí la descripción y el consejo, subí fotos y publicalo.</Aviso>}
+      {creada && <Aviso tono="ok">Lugar creado como borrador{l.googlePlaceId ? ' con los datos de Google' : ''}. Escribí la descripción y el consejo, sube fotos y publicalo.</Aviso>}
       {guardado && <Aviso tono="ok">Guardado. La guía pública se regenera sola.</Aviso>}
       {error && <Aviso tono="error">{MENSAJES[error] ?? MENSAJES['no-guardado']}</Aviso>}
 
@@ -56,7 +56,7 @@ export default async function EditarLugarPage({ params, searchParams }: { params
 
       <form action={guardarLugarAction} className="mt-4">
         <input type="hidden" name="id" value={l.id} />
-        <Seccion id="texto" titulo="Texto" cursiva="nuestro" descripcion="Datos y no adjetivos, de vos a vos. Es lo que la gente lee en el teléfono.">
+        <Seccion id="texto" titulo="Texto" cursiva="nuestro" descripcion="Datos y no adjetivos, de tú a tú. Es lo que la gente lee en el teléfono.">
           <Tarjeta className="space-y-5 p-6">
             <div className="grid gap-5 sm:grid-cols-3">
               <Campo name="nombre" label="Nombre" required defaultValue={l.nombre} />
@@ -80,6 +80,7 @@ export default async function EditarLugarPage({ params, searchParams }: { params
         <Seccion id="estado" titulo="Estado">
           <Tarjeta className="space-y-5 p-6">
             <Interruptor name="destacado" label="Imperdible" ayuda="Sale primero en la guía con la etiqueta «Imperdible»." defaultChecked={l.destacado} />
+            <div className="border-t border-line pt-5"><Interruptor name="aliado" label="Aliado de Margarita Renace" ayuda="Negocio con el que tenemos trato directo: va primero en su categoría con el sello «Recomendado»." defaultChecked={l.aliado} /></div>
             <div className="border-t border-line pt-5"><Interruptor name="publicado" label="Publicado en la guía" defaultChecked={l.publicado} /></div>
           </Tarjeta>
         </Seccion>

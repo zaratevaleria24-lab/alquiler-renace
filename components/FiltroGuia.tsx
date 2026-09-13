@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Categoria } from '@/lib/guia';
+import IconoCategoria from '@/components/IconosGuia';
 
 // Filtro de categorías de la guía SIN ir al servidor: las 60 tarjetas ya están
 // en la página (con data-cat) y acá solo se muestran u ocultan. Cambiar de
@@ -62,7 +63,7 @@ export default function FiltroGuia({ chips, inicial }: { chips: ChipCategoria[];
                 activo ? 'border-brand-deep bg-brand-deep text-white' : 'border-line bg-white text-ink-soft hover:border-brand/40'
               }`}
             >
-              {c.emoji && <span aria-hidden="true">{c.emoji}</span>}{c.label} · {c.n}
+              {c.key && <IconoCategoria cat={c.key} className="h-4 w-4" />}{c.label} · {c.n}
             </a>
           </li>
         );

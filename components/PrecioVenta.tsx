@@ -26,7 +26,7 @@ export default async function PrecioVenta({
         <p className="label-eyebrow text-ink-subtle">Precio</p>
         <p className="mono-data mt-2 text-title-sm text-brand-deep">A consultar</p>
         <p className="mt-3 text-meta text-ink-muted">
-          El propietario no publicó el precio. Escribinos y te lo confirmamos en el día, en dólares y
+          El propietario no publicó el precio. Escríbenos y te lo confirmamos en el día, en dólares y
           en bolívares a la tasa del momento.
         </p>
       </div>

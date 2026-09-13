@@ -226,7 +226,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                   </div>
                   {waBusco && (
                     <p className="border-t border-line pt-4 text-meta text-ink-muted">
-                      ¿No ves lo que buscás? <a href={waBusco} className="font-medium text-brand-deep underline-offset-4 hover:underline" rel="noopener">Escribinos</a> con zona y presupuesto.
+                      ¿No ves lo que buscas? <a href={waBusco} className="font-medium text-brand-deep underline-offset-4 hover:underline" rel="noopener">Escríbenos</a> con zona y presupuesto.
                     </p>
                   )}
                 </form>
@@ -247,10 +247,10 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
                 <div className="mt-7 rounded-panel border border-line bg-white p-7">
                   <p className="text-body text-ink/80 leading-relaxed">
                     {hayFiltro ? 'No hay inmuebles con esos filtros ahora mismo. ' : 'Estamos incorporando los primeros inmuebles. '}
-                    Decinos qué buscás y dónde: trabajamos con propietarios de toda la isla y te conseguimos opciones con los papeles en orden.
+                    Dinos qué buscas y dónde: trabajamos con propietarios de toda la isla y te conseguimos opciones con los papeles en orden.
                   </p>
                   <div className="mt-5 flex flex-wrap gap-3">
-                    {waBusco && <a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscás</a>}
+                    {waBusco && <a href={waBusco} className="btn-solid" rel="noopener">Decirnos qué buscas</a>}
                     {hayFiltro && <Link href={PATH} className="inline-flex items-center rounded-chip border border-line bg-white px-4 py-2 text-meta font-medium text-brand-deep hover:border-ink">Ver todos</Link>}
                   </div>
                 </div>
@@ -293,7 +293,7 @@ export default async function EnVentaPage({ searchParams }: { searchParams: Prom
               <h2 id="vendes" className="font-serif text-headline font-normal track-headline">¿Vendés en Margarita?</h2>
               <p className="mt-4 max-w-2xl text-body-lg text-ink-soft">
                 Lo publicamos con fotos profesionales, precio en las monedas que usa el comprador y el respaldo
-                de un sitio que Google ya conoce. Vos ponés el inmueble y los papeles; nosotros, los compradores.
+                de un sitio que Google ya conoce. Tú ponés el inmueble y los papeles; nosotros, los compradores.
                 Sin exclusividad forzada ni costos por adelantado.
               </p>
               {waVendo && <p className="mt-6"><a href={waVendo} className="btn-solid bg-white text-brand-deep" rel="noopener">Quiero vender mi inmueble</a></p>}
