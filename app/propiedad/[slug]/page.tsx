@@ -283,7 +283,7 @@ export default async function PropiedadPage({
                 <p className="mt-3 flex flex-wrap items-center gap-2 text-body text-ink-soft">
                   <span className="inline-flex items-center gap-1 font-semibold text-ink"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="#FF5A5F" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" /></svg>{property.airbnbRating.toFixed(1)}</span>
                   <span>{property.airbnbResenas ? `${property.airbnbResenas} reseñas` : 'valoración'} en Airbnb</span>
-                  {property.airbnbUrl && <a href={property.airbnbUrl} target="_blank" rel="noopener noreferrer" className="text-brand-deep underline underline-offset-4">Ver el anuncio →</a>}
+                  {property.airbnbUrl && <a href={property.airbnbResenasUrl || property.airbnbUrl} target="_blank" rel="noopener noreferrer" className="text-brand-deep underline underline-offset-4">Leer las reseñas en Airbnb →</a>}
                 </p>
               )}
               {resenas.length > 0 && (

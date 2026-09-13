@@ -81,6 +81,8 @@ function toProperty(r: PropertyRow): Property {
     airbnbRating: r.airbnb_rating == null ? null : Number(r.airbnb_rating),
     airbnbResenas: Number(r.airbnb_resenas ?? 0),
     airbnbUrl: r.airbnb_url ?? '',
+    // Las reseñas del anuncio abren directo con /reviews al final de la URL del anuncio.
+    airbnbResenasUrl: r.airbnb_url ? r.airbnb_url.split('?')[0].replace(/\/$/, '') + '/reviews' : '',
     guestsAllowed: { adults: r.guests_adults, children: r.guests_children },
     isReal: r.is_real,
     image: cover?.path ?? '',

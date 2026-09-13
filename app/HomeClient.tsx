@@ -929,10 +929,10 @@ export default function HomeClient({
                       <p className="text-meta text-ink-muted mt-0.5 font-medium">{selectedProperty.location}</p>
                     </div>
                     {selectedProperty.airbnbRating != null && (
-                      <div className="flex flex-col items-end rounded-chip border border-line bg-paper px-3 py-1.5 text-meta font-semibold text-ink" title="Valoración real en Airbnb">
+                      <a href={selectedProperty.airbnbResenasUrl || selectedProperty.airbnbUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-end rounded-chip border border-line bg-paper px-3 py-1.5 text-meta font-semibold text-ink transition-colors hover:border-brand/40" title="Leer las reseñas en Airbnb">
                         <span className="flex items-center gap-1.5"><Star className="h-3.5 w-3.5 fill-[#FF5A5F] text-[#FF5A5F]" />{selectedProperty.airbnbRating.toFixed(1)}</span>
-                        <span className="text-[11px] font-normal text-ink-muted">{selectedProperty.airbnbResenas ? `${selectedProperty.airbnbResenas} reseñas · ` : ''}Airbnb</span>
-                      </div>
+                        <span className="text-[11px] font-normal text-brand-deep">Leer {selectedProperty.airbnbResenas ? `${selectedProperty.airbnbResenas} ` : ''}reseñas en Airbnb ↗</span>
+                      </a>
                     )}
                   </div>
                   <p className="text-meta text-gray-600 leading-relaxed font-normal">{selectedProperty.description}</p>
@@ -1468,10 +1468,10 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
           {/* Valoración REAL de Airbnb (leída de su anuncio) cuando existe;
               si no, la propia solo en inventario real. */}
           {property.airbnbRating != null ? (
-            <span className="flex shrink-0 flex-col items-end leading-none" title={`${property.airbnbRating.toFixed(1)} en Airbnb${property.airbnbResenas ? ` · ${property.airbnbResenas} reseñas` : ''}`}>
+            <a href={property.airbnbResenasUrl || property.airbnbUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex shrink-0 flex-col items-end leading-none hover:underline underline-offset-4" title="Leer las reseñas en Airbnb">
               <span className="mono-data flex items-center gap-1 text-ink"><Star className="h-3.5 w-3.5 fill-[#FF5A5F] text-[#FF5A5F]" aria-hidden="true" />{property.airbnbRating.toFixed(1)}</span>
-              <span className="mt-1 text-[11px] text-ink-muted">{property.airbnbResenas ? `${property.airbnbResenas} reseñas · ` : ''}Airbnb</span>
-            </span>
+              <span className="mt-1 text-[11px] text-brand-deep">{property.airbnbResenas ? `Leer ${property.airbnbResenas} reseñas` : 'Reseñas'} en Airbnb ↗</span>
+            </a>
           ) : null}
         </div>
 

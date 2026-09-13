@@ -43,6 +43,8 @@ export interface Property {
   airbnbRating?: number | null;
   airbnbResenas?: number;
   airbnbUrl?: string;
+  /** Enlace directo a las reseñas del anuncio en Airbnb. */
+  airbnbResenasUrl?: string;
   categories: string[];
   image: string;
   gallery: string[];
