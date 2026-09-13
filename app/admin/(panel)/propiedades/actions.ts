@@ -13,6 +13,7 @@ import { usuarioActual } from '@/lib/auth';
 import { query, rows, withTransaction } from '@/lib/db';
 import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
 import { sincronizarAirbnb } from '@/lib/airbnb';
+import { borrarResena, crearResena } from '@/lib/resenas';
 
 async function exigirSesion(): Promise<void> {
   if (!(await usuarioActual())) redirect('/admin/login');
@@ -363,4 +364,26 @@ export async function editarAltFotoAction(formData: FormData): Promise<void> {
   if (!id || !fotoId) redirect('/admin/propiedades');
   await query(`UPDATE property_images SET alt = $3 WHERE id = $1 AND property_id = $2`, [fotoId, id, alt]);
   regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#fotos`);
+}
+
+
+/** Reseña real transcrita (Airbnb, WhatsApp, Google). Nunca inventada. */
+export async function crearResenaAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+  const id = String(formData.get('id') ?? ''); if (!id) redirect('/admin/propiedades');
+  const autor = String(formData.get('autor') ?? '').trim().slice(0, 60);
+  const texto = String(formData.get('texto') ?? '').trim().slice(0, 1500);
+  const fecha = String(formData.get('fecha') ?? '').slice(0, 10);
+  const p = Number(formData.get('puntuacion')); const puntuacion = Number.isInteger(p) && p >= 1 && p <= 5 ? p : null;
+  const fuente = ['airbnb', 'whatsapp', 'google', 'directo'].includes(String(formData.get('fuente'))) ? String(formData.get('fuente')) : 'airbnb';
+  const url = String(formData.get('url') ?? '').trim().slice(0, 300);
+  if (autor.length < 2 || texto.length < 10 || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) redirect(`/propiedades/${id}?error=resena#resenas`);
+  await crearResena({ propertyId: id, autor, fecha, texto, puntuacion, fuente, url: /^https?:\/\//.test(url) ? url : '' });
+  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#resenas`);
+}
+export async function borrarResenaAction(formData: FormData): Promise<void> {
+  await exigirSesion();
+  const id = String(formData.get('id') ?? ''); const rid = String(formData.get('resena_id') ?? '');
+  if (id && rid) await borrarResena(rid, id);
+  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#resenas`);
 }

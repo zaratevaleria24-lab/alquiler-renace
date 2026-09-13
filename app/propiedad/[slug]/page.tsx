@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProperties, getProperty, getZone } from '@/lib/queries';
 import { getLugares } from '@/lib/guia';
+import { resenasDe } from '@/lib/resenas';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
@@ -88,6 +89,7 @@ export default async function PropiedadPage({
 
   const path = `/propiedad/${property.slug}`;
   const zonePath = `/alquiler/${property.zoneSlug}`;
+  const resenas = await resenasDe(property.id);
   // Interlinking guía ↔ alojamiento: lo que hay cerca según nuestra guía.
   const cercanos = (await getLugares()).filter((l) => l.zoneSlug === property.zoneSlug).slice(0, 6).map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 160), consejo: l.consejo.slice(0, 160), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }));
   const [zone, contacto] = await Promise.all([
@@ -274,6 +276,30 @@ export default async function PropiedadPage({
           {/* Enlazado interno: a la landing de la zona (contexto y autoridad) y
               a las demás propiedades de la misma zona, para que ninguna página
               de propiedad quede huérfana. */}
+          {(resenas.length > 0 || property.airbnbRating != null) && (
+            <section aria-labelledby="resenas" className="section-gap">
+              <h2 id="resenas" className="font-serif text-headline text-ink font-normal track-headline">Lo que dicen <em className="headline-italic">los huéspedes</em></h2>
+              {property.airbnbRating != null && (
+                <p className="mt-3 flex flex-wrap items-center gap-2 text-body text-ink-soft">
+                  <span className="inline-flex items-center gap-1 font-semibold text-ink"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="#FF5A5F" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" /></svg>{property.airbnbRating.toFixed(1)}</span>
+                  <span>{property.airbnbResenas ? `${property.airbnbResenas} reseñas` : 'valoración'} en Airbnb</span>
+                  {property.airbnbUrl && <a href={property.airbnbUrl} target="_blank" rel="noopener noreferrer" className="text-brand-deep underline underline-offset-4">Ver el anuncio →</a>}
+                </p>
+              )}
+              {resenas.length > 0 && (
+                <ul className="mt-6 grid gap-4 md:grid-cols-2">
+                  {resenas.map((r) => (
+                    <li key={r.id} className="rounded-card border border-line bg-white p-5">
+                      <p className="text-body leading-relaxed text-ink-soft">“{r.texto}”</p>
+                      <p className="mt-3 text-meta text-ink-muted"><b className="text-ink">{r.autor}</b> · {new Date(r.fecha + 'T12:00:00').toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })} · {r.fuente === 'airbnb' ? (r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">reseña en Airbnb</a> : 'reseña en Airbnb') : r.fuente === 'whatsapp' ? 'por WhatsApp' : r.fuente}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="mt-4 text-ui text-ink-faint">Reseñas reales, copiadas tal cual de Airbnb o recibidas de huéspedes. No publicamos reseñas inventadas.</p>
+            </section>
+          )}
+
           {cercanos.length > 0 && (
             <section aria-labelledby="cerca-guia" className="section-gap">
               <h2 id="cerca-guia" className="font-serif text-headline text-ink font-normal track-headline">Cerca de aquí, <em className="headline-italic">según nuestra guía</em></h2>

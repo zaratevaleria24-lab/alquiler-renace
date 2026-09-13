@@ -35,10 +35,15 @@ export async function leerAnuncioAirbnb(url: string): Promise<DatosAirbnb | null
     const og = html.match(/<meta property="og:title" content="([^"]*)"/)?.[1]?.replace(/&amp;/g, '&');
     if (!og) return null;
     const rating = og.match(/★\s*([\d.]+)/)?.[1];
-    // «N reviews» sale varias veces; nos quedamos con el valor más repetido.
-    const conteo = new Map<number, number>();
-    for (const x of html.matchAll(/(\d+)\s+reviews?\b/g)) { const n = Number(x[1]); conteo.set(n, (conteo.get(n) ?? 0) + 1); }
-    const resenas = [...conteo.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
+    // Reseñas: primero el JSON-LD del anuncio (aggregateRating.ratingCount);
+    // si no está, el «N reviews» más repetido del HTML.
+    const ld = html.match(/"aggregateRating":\{[^}]*"ratingCount":"?(\d+)"?/)?.[1];
+    let resenas = ld ? Number(ld) : 0;
+    if (!resenas) {
+      const conteo = new Map<number, number>();
+      for (const x of html.matchAll(/(\d+)\s+reviews?\b/g)) { const n = Number(x[1]); conteo.set(n, (conteo.get(n) ?? 0) + 1); }
+      resenas = [...conteo.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 0;
+    }
     const detalle = traducir(og.replace(/\s*·\s*★\s*[\d.]+/, ''));
     return { detalle, rating: rating ? Math.round(Number(rating) * 10) / 10 : null, resenas };
   } catch { return null; }

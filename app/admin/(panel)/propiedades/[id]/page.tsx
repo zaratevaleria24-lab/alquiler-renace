@@ -1,11 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getCatalogosAdmin, getFotosAdmin, getPropiedadAdmin } from '@/lib/admin';
+import { resenasDe } from '@/lib/resenas';
 import { ArrowDown, ArrowUp, ArrowUpRight, Check, ChevronLeft, Star, Trash2 } from 'lucide-react';
-import { Aviso, Insignia, Seccion, ZonaSubida } from '../../_ui';
+import { Aviso, Campo, Insignia, Seccion, Selector, ZonaSubida } from '../../_ui';
 import PropiedadForm from '../PropiedadForm';
 import {
   borrarFotoAction,
+  borrarResenaAction,
+  crearResenaAction,
   editarAltFotoAction,
   moverFotoAction,
   guardarPropiedadAction,
@@ -27,6 +30,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 const MENSAJES: Record<string, string> = {
+  resena: 'La reseña necesita nombre, fecha y al menos una frase.',
   airbnb: 'El enlace de Airbnb debe empezar por https://www.airbnb.com/ (o airbnb.com.ve, .es…).',
   'faltan-datos':
     'Faltan datos obligatorios: nombre, zona y dirección no pueden quedar vacíos.',
@@ -47,10 +51,11 @@ export default async function EditarPropiedadPage({
     params,
     searchParams,
   ]);
-  const [propiedad, catalogos, fotos] = await Promise.all([
+  const [propiedad, catalogos, fotos, resenas] = await Promise.all([
     getPropiedadAdmin(id),
     getCatalogosAdmin(),
     getFotosAdmin(id),
+    resenasDe(id, false),
   ]);
   if (!propiedad) notFound();
 
@@ -104,7 +109,33 @@ export default async function EditarPropiedadPage({
         <Aviso tono="error">{MENSAJES[error] ?? MENSAJES['no-guardado']}</Aviso>
       )}
 
-      <Seccion
+      <Seccion id="resenas" titulo="Reseñas de huéspedes" descripcion={`${resenas.length} ${resenas.length === 1 ? 'reseña' : 'reseñas'}. Solo reales: copiadas de Airbnb (nombre de pila, fecha y texto tal cual) o recibidas por WhatsApp. Nunca inventadas.`}>
+          {resenas.length > 0 && (
+            <ul className="mb-6 space-y-3">
+              {resenas.map((r) => (
+                <li key={r.id} className="rounded-card border border-line bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-meta"><b className="text-ink">{r.autor}</b> <span className="text-ink-muted">· {r.fecha} · {r.fuente}{r.puntuacion ? ` · ${'★'.repeat(r.puntuacion)}` : ''}</span></p>
+                    <form action={borrarResenaAction}><input type="hidden" name="id" value={propiedad.id} /><input type="hidden" name="resena_id" value={r.id} /><button type="submit" title="Borrar reseña" className="flex h-8 w-8 items-center justify-center rounded-control text-ink-faint hover:text-coral"><Trash2 className="h-4 w-4" /></button></form>
+                  </div>
+                  <p className="mt-2 text-body leading-relaxed text-ink-soft">{r.texto}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+          <form action={crearResenaAction} className="grid gap-4 rounded-card border border-line bg-white p-5 md:grid-cols-2">
+            <input type="hidden" name="id" value={propiedad.id} />
+            <Campo name="autor" label="Nombre del huésped (de pila)" required placeholder="Ej. Joselibeth" />
+            <Campo name="fecha" label="Fecha de la reseña" type="date" required />
+            <div className="md:col-span-2"><Campo name="texto" label="Texto, tal cual lo escribió" required filas={3} placeholder="Copia y pega la reseña de Airbnb sin cambiar una palabra." /></div>
+            <Selector name="puntuacion" label="Estrellas" defaultValue="5" opciones={['5', '4', '3', '2', '1'].map((v) => ({ value: v, label: `${v} ★` }))} />
+            <Selector name="fuente" label="Fuente" defaultValue="airbnb" opciones={[{ value: 'airbnb', label: 'Airbnb' }, { value: 'whatsapp', label: 'WhatsApp' }, { value: 'google', label: 'Google' }, { value: 'directo', label: 'Directo' }]} />
+            <div className="md:col-span-2"><Campo name="url" label="Enlace a la reseña (opcional)" placeholder="https://www.airbnb.com/rooms/…/reviews" ayuda="Si viene de Airbnb, el enlace al anuncio basta: es la prueba de que existe." /></div>
+            <div className="md:col-span-2"><button type="submit" className="btn-solid">Guardar reseña</button></div>
+          </form>
+        </Seccion>
+
+        <Seccion
         id="fotos"
         titulo="Fotos"
         descripcion={
