@@ -33,21 +33,27 @@ y queda constancia. Panel: **/admin/contratos**.
 4. Si hay SMTP, sale copia al correo corporativo y al huésped. La página firmada
    sirve de copia: «Imprimir» → PDF del navegador (CSS de impresión, A4).
 
-## Correo saliente — PENDIENTE DE CONFIGURAR
+## Correo saliente — Resend (PENDIENTE: falta la API key)
 
-Crear `/etc/margarita-renace/correo.env` (chmod 600) con:
+El dominio ya está verificado en Resend: en Cloudflare existen `resend._domainkey`
+(DKIM), `send.margaritarenace.com.ve` MX → amazonses y su SPF. La recepción es
+Cloudflare Email Routing (MX route*.mx.cloudflare.net) → Gmail del dueño: Resend
+solo envía; las respuestas llegan por Email Routing. Desde el VPS el SMTP saliente
+(465/587) está bloqueado; la API HTTPS de Resend sí sale (probado: 401 sin clave).
+
+Crear `/etc/margarita-renace/correo.env` (chmod 600):
 
 ```
-SMTP_HOST=smtp.ejemplo.com
-SMTP_PORT=587
-SMTP_USER=hola@margaritarenace.com.ve
-SMTP_PASS=********
-CORREO_DESDE="Margarita Renace <hola@margaritarenace.com.ve>"
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxx
+CORREO_DESDE="Margarita Renace <reservas@margaritarenace.com.ve>"
+CORREO_RESPONDER_A=reservas@margaritarenace.com.ve
 ```
 
-y reiniciar (`pm2 restart margarita-renace`). Google Workspace: smtp.gmail.com:587
-con contraseña de aplicación. Zoho: smtp.zoho.com:587. cPanel: mail.dominio:465.
-Sin el archivo, el panel avisa y ofrece WhatsApp/enlace: nunca se bloquea.
+y `pm2 restart margarita-renace`. La clave se crea en resend.com → API Keys
+(permiso «Sending access», dominio margaritarenace.com.ve). El remitente puede
+ser cualquier @margaritarenace.com.ve; conviene que exista como regla de Email
+Routing para recibir respuestas. Sin el archivo, el panel avisa y ofrece
+WhatsApp/enlace.
 
 ## Reglas
 
