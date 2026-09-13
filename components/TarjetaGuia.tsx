@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Instagram, MapPin, MessageCircle, Navigation, Phone, Star } from 'lucide-react';
-import { CATEGORIAS, categoriaLabel, esServicio, horarioHoy, miniatura, portadaDe, type Lugar } from '@/lib/guia';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esServicio, horarioHoy, miniatura, portadaDe, type Lugar } from '@/lib/guia';
 import IconoCategoria from '@/components/IconosGuia';
 
 // LA tarjeta de la guía: la misma para una playa, un restaurante o el camión
@@ -42,7 +42,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false }: { 
   const href = `/guia/${l.slug}`;
 
   return (
-    <li data-cat={l.categoria} hidden={oculta} className={`flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'border-brand/50 ring-1 ring-brand/20' : 'border-line'}`}>
+    <li data-cat={categoriasDe(l).join(' ')} hidden={oculta} className={`flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'border-brand/50 ring-1 ring-brand/20' : 'border-line'}`}>
       {l.aliado && (
         <p className="flex items-center gap-1.5 bg-brand-deep px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">
           <Star className="h-3 w-3 fill-current" aria-hidden="true" />Recomendado por Margarita Renace

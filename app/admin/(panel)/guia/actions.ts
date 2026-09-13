@@ -33,12 +33,13 @@ export async function guardarLugarAction(fd: FormData) {
   if (!CATEGORIAS.some((c) => c.key === cat) || !String(fd.get('nombre') ?? '').trim()) redirect(`/admin/guia/${id}?error=faltan-datos`);
   await query(
     `UPDATE guia_lugares SET nombre=$2, categoria=$3, municipio=$4, descripcion=$5, consejo=$6, mejor_momento=$7, duracion=$8, costo=$9,
-       instagram=$10, web=$11, destacado=$12, publicado=$13, orden=$14, aliado=$15, updated_at=now() WHERE id=$1`,
+       instagram=$10, web=$11, destacado=$12, publicado=$13, orden=$14, aliado=$15, categorias_extra=$16, updated_at=now() WHERE id=$1`,
     [id, String(fd.get('nombre')).trim().slice(0, 120), cat, String(fd.get('municipio') ?? '').trim().slice(0, 80),
      String(fd.get('descripcion') ?? '').trim().slice(0, 3000), String(fd.get('consejo') ?? '').trim().slice(0, 1500),
      String(fd.get('mejor_momento') ?? '').trim().slice(0, 80), String(fd.get('duracion') ?? '').trim().slice(0, 80), String(fd.get('costo') ?? '').trim().slice(0, 120),
      String(fd.get('instagram') ?? '').trim().replace(/^@/, '').slice(0, 60) || null, String(fd.get('web') ?? '').trim().slice(0, 300) || null,
-     asBool(fd.get('destacado')), asBool(fd.get('publicado')), Math.trunc(Number(fd.get('orden')) || 0), asBool(fd.get('aliado'))],
+     asBool(fd.get('destacado')), asBool(fd.get('publicado')), Math.trunc(Number(fd.get('orden')) || 0), asBool(fd.get('aliado')),
+     CATEGORIAS.filter((c) => c.key !== cat && fd.getAll('categorias_extra').includes(c.key)).map((c) => c.key)],
   );
   regenerar(); redirect(`/admin/guia/${id}?guardado=1`);
 }

@@ -17,7 +17,7 @@ export type Categoria =
   | 'playa' | 'historia' | 'naturaleza' | 'mirador' | 'museo' | 'comer'
   | 'actividad' | 'aventura' | 'nocturna' | 'compras' | 'familia'
   // Servicios: lo que un huésped necesita RESOLVER desde el apartamento.
-  | 'delivery' | 'supermercado' | 'licores' | 'agua' | 'salud' | 'transporte';
+  | 'delivery' | 'supermercado' | 'licores' | 'agua' | 'salud' | 'transporte' | 'practico';
 
 export type Grupo = 'descubrir' | 'resolver';
 
@@ -39,8 +39,12 @@ export const CATEGORIAS: { key: Categoria; label: string; plural: string; emoji:
   { key: 'agua', label: 'Agua y gas', plural: 'Agua y gas', emoji: '💧', grupo: 'resolver', sub: 'Botellones, cisterna, bombonas' },
   { key: 'salud', label: 'Salud', plural: 'Farmacias y clínicas', emoji: '➕', grupo: 'resolver', sub: 'Farmacias 24 h y clínicas' },
   { key: 'transporte', label: 'Moverse', plural: 'Moverse', emoji: '🚕', grupo: 'resolver', sub: 'Taxis, apps, alquiler de carros' },
+  { key: 'practico', label: 'Prácticos', plural: 'Servicios prácticos', emoji: '🧺', grupo: 'resolver', sub: 'Lavandería, cambio, SIM, gasolina' },
 ];
 export const esServicio = (c: string) => CATEGORIAS.find((x) => x.key === c)?.grupo === 'resolver';
+// Todas las categorías de un lugar (principal + extras), para filtrar y contar.
+export const categoriasDe = (l: { categoria: string; categoriasExtra: string[] }) => [l.categoria, ...l.categoriasExtra];
+export const enCategoria = (l: { categoria: string; categoriasExtra: string[] }, c: string) => categoriasDe(l).includes(c);
 export const categoriaLabel = (c: string) => CATEGORIAS.find((x) => x.key === c)?.label ?? c;
 export const categoriaPlural = (c: string) => CATEGORIAS.find((x) => x.key === c)?.plural ?? c;
 
@@ -56,7 +60,7 @@ export interface Lugar {
   telefono: string | null; web: string | null; instagram: string | null; mapsUrl: string | null;
   horario: string[] | null; nivelPrecio: string | null; resumenGoogle: string | null;
   fotosGoogle: FotoGoogle[]; datosActualizados: string | null;
-  fotos: FotoGuia[]; destacado: boolean; aliado: boolean; orden: number; publicado: boolean;
+  fotos: FotoGuia[]; destacado: boolean; aliado: boolean; orden: number; publicado: boolean; categoriasExtra: string[];
 }
 
 export interface Consejo { id: string; tema: string; titulo: string; texto: string; orden: number; publicado: boolean }
@@ -87,7 +91,7 @@ const lugarDesde = (r: Record<string, unknown>): Lugar => ({
   mapsUrl: (r.maps_url as string) ?? null, horario: (r.horario as string[]) ?? null, nivelPrecio: (r.nivel_precio as string) ?? null,
   resumenGoogle: (r.resumen_google as string) ?? null, fotosGoogle: (r.fotos_google as FotoGoogle[]) ?? [],
   datosActualizados: r.datos_actualizados ? new Date(r.datos_actualizados as string).toISOString() : null,
-  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), aliado: Boolean(r.aliado), orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
+  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), aliado: Boolean(r.aliado), categoriasExtra: (r.categorias_extra as string[]) ?? [], orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
 });
 
 const SELECT = `SELECT g.*, z.name AS zone_name FROM guia_lugares g LEFT JOIN zones z ON z.slug = g.zone_slug`;

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import type { Categoria } from '@/lib/guia';
 import IconoCategoria from '@/components/IconosGuia';
+import { MessageCircle, Siren } from 'lucide-react';
 
 // El "control remoto" de la guía, solo en teléfono (md:hidden). Quien escanea
 // el QR no quiere leer 90 tarjetas: quiere RESOLVER algo (agua, comida, un
@@ -11,7 +12,7 @@ import IconoCategoria from '@/components/IconosGuia';
 // de tres, con la iconografía artesanal de la isla. Tocar uno filtra la lista
 // (FiltroGuia hace el trabajo) y baja hasta los resultados.
 
-export interface Baldosa { key: Categoria | ''; label: string; sub: string; n: number; grupo: 'descubrir' | 'resolver' }
+export interface Baldosa { key: Categoria | ''; label: string; sub: string; n: number; grupo: 'descubrir' | 'resolver'; href?: string; icono?: 'anfitrion' | 'emergencia' }
 
 export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Baldosa[]; whatsapp: string | null; inicial: string }) {
   const [activa, setActiva] = useState<string>(inicial);
@@ -37,8 +38,13 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
     const items: Baldosa[] = baldosas.filter((b) => b.grupo === g);
     // La cuadrícula cierra en 3×4 con «Ver todo», que baja a la lista completa.
     if (g === 'descubrir') items.push({ key: '', label: 'Ver todo', sub: '', n: 0, grupo: g });
+    // «Resolver» cierra en 3×3 con las dos cosas que más se necesitan de verdad.
+    if (g === 'resolver') {
+      if (whatsapp) items.push({ key: '', label: 'Anfitrión', sub: '', n: 0, grupo: g, icono: 'anfitrion', href: `https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, estoy en el apartamento y necesito una mano con: ')}` });
+      items.push({ key: '', label: 'Emergencia 911', sub: '', n: 0, grupo: g, icono: 'emergencia', href: 'tel:911' });
+    }
     return (
-      <section aria-label={titulo} className="mt-5">
+      <section aria-label={titulo} className="mt-4">
         <div className="flex items-baseline justify-between px-1">
           <h2 className="font-serif text-[19px] font-semibold text-ink">{titulo}</h2>
           <p className="text-[12px] text-ink-muted">{sub}</p>
@@ -46,12 +52,20 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
         <ul className="mt-2.5 grid grid-cols-3 overflow-hidden rounded-panel border border-line bg-white shadow-lift">
           {items.map((b, i) => (
             <motion.li
-              key={b.key || 'todo'}
+              key={b.key || b.icono || 'todo'}
               className={`${i % 3 !== 2 ? 'border-r' : ''} ${i < items.length - (items.length % 3 || 3) ? 'border-b' : ''} border-line`}
               initial={reducido ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.035 * (i0 + i), duration: 0.3, ease: [0.2, 0, 0.2, 1] }}
             >
+              {b.href ? (
+                <a href={b.href} rel="noopener" className="flex min-h-[92px] w-full flex-col items-center justify-center gap-2 px-2 py-3 text-center transition-colors duration-150 active:bg-luz">
+                  <span className={b.icono === 'emergencia' ? 'text-accent' : 'text-brand'}>
+                    {b.icono === 'anfitrion' ? <MessageCircle className="h-8 w-8" strokeWidth={1.6} aria-hidden="true" /> : <Siren className="h-8 w-8" strokeWidth={1.6} aria-hidden="true" />}
+                  </span>
+                  <span className="block text-[12.5px] font-semibold leading-tight text-brand-deep">{b.label}</span>
+                </a>
+              ) : (
               <button
                 type="button"
                 onClick={() => elegir(b.key)}
@@ -60,6 +74,7 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
                 <span className="text-brand">{b.key ? <IconoCategoria cat={b.key} className="h-8 w-8" /> : <span className="flex h-8 w-8 items-center justify-center font-serif text-[26px] leading-none">∞</span>}</span>
                 <span className="block text-[12.5px] font-semibold leading-tight text-brand-deep">{b.label}</span>
               </button>
+              )}
             </motion.li>
           ))}
         </ul>
@@ -71,19 +86,6 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
     <div className="md:hidden">
       {panel('resolver', 'Resolver', 'Desde el apartamento', 0)}
       {panel('descubrir', 'Descubrir', 'Salir a la isla', 6)}
-      {whatsapp && (
-        <a
-          href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Hola, estoy en el apartamento y necesito una mano con: ')}`}
-          rel="noopener"
-          className="mt-5 flex min-h-[56px] items-center justify-between gap-3 rounded-panel bg-brand-deep px-4 text-white shadow-lift"
-        >
-          <span>
-            <span className="block text-[14px] font-semibold">¿No está lo que buscas?</span>
-            <span className="block text-[12px] text-white/80">Escríbele al anfitrión por WhatsApp</span>
-          </span>
-          <span aria-hidden="true" className="text-xl">→</span>
-        </a>
-      )}
     </div>
   );
 }

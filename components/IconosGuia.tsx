@@ -41,6 +41,8 @@ export const ICONOS: Record<string, (p: P) => ReactElement> = {
   salud: (p) => (<svg {...base(p)}><circle cx="12" cy="12" r="9" /><path d="M12 7.5v9M7.5 12h9" strokeWidth="2" /></svg>),
   // Carrito por delante (por puesto)
   transporte: (p) => (<svg {...base(p)}><path d="M4 16v-4l2-5.5A1.5 1.5 0 0 1 7.4 5.5h9.2A1.5 1.5 0 0 1 18 6.5L20 12v4" /><path d="M4 16h16v2.5H4z" /><path d="M6 12h12" /><path d="M7 14.3h.01M17 14.3h.01" strokeWidth="2.4" /><path d="M6 18.5v1.5M18 18.5v1.5" /></svg>),
+  // Nudo de hamaca (chinchorro): lo práctico, lo de todos los días
+  practico: (p) => (<svg {...base(p)}><path d="M4 6h16M4 18h16" /><path d="M6 6c0 5 4 6 6 6s6-1 6-6" /><path d="M6 18c0-5 4-6 6-6s6 1 6 6" /><path d="M12 9.5v5" /><path d="M9 3.5v2.5M15 3.5v2.5M9 18v2.5M15 18v2.5" /></svg>),
   // Cerro con sendero de puntos y banderín
   aventura: (p) => (<svg {...base(p)}><path d="M2 20 9 7l4 6 3-4 6 11z" /><path d="M2 20h20" /><path d="M8 17h.01M10.5 14.5h.01M13 17.5h.01" strokeWidth="2.4" /><path d="M16 9V4.5l3 1.2-3 1.3" /></svg>),
 };

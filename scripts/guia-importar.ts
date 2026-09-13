@@ -43,15 +43,15 @@ async function fotosCommons(consulta: string, max = 3) {
 async function importarLugar(s: Semilla) {
   const slug = slugify(s.nombre).slice(0, 70);
   const [fila] = await rows<{ id: string; fotos: unknown[]; google_place_id: string | null }>(
-    `INSERT INTO guia_lugares (slug, nombre, categoria, descripcion, consejo, mejor_momento, duracion, costo, instagram, web, destacado, municipio, telefono, direccion, aliado)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,COALESCE($14,''),$15)
+    `INSERT INTO guia_lugares (slug, nombre, categoria, descripcion, consejo, mejor_momento, duracion, costo, instagram, web, destacado, municipio, telefono, direccion, aliado, categorias_extra)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,COALESCE($14,''),$15,$16)
      ON CONFLICT (slug) DO UPDATE SET nombre=EXCLUDED.nombre, categoria=EXCLUDED.categoria, descripcion=EXCLUDED.descripcion,
        consejo=EXCLUDED.consejo, mejor_momento=EXCLUDED.mejor_momento, duracion=EXCLUDED.duracion, costo=EXCLUDED.costo,
        instagram=COALESCE(EXCLUDED.instagram, guia_lugares.instagram), web=COALESCE(guia_lugares.web, EXCLUDED.web),
        destacado=EXCLUDED.destacado, municipio=EXCLUDED.municipio, updated_at=now(),
-       telefono=COALESCE(guia_lugares.telefono, EXCLUDED.telefono), direccion=CASE WHEN guia_lugares.direccion='' THEN EXCLUDED.direccion ELSE guia_lugares.direccion END, aliado=EXCLUDED.aliado
+       telefono=COALESCE(guia_lugares.telefono, EXCLUDED.telefono), direccion=CASE WHEN guia_lugares.direccion='' THEN EXCLUDED.direccion ELSE guia_lugares.direccion END, aliado=EXCLUDED.aliado, categorias_extra=EXCLUDED.categorias_extra
      RETURNING id, fotos, google_place_id`,
-    [slug, s.nombre, s.categoria, s.descripcion, s.consejo, s.mejorMomento ?? '', s.duracion ?? '', s.costo ?? '', s.instagram ?? null, s.web ?? null, s.destacado ?? false, s.municipio ?? '', s.telefono ?? null, s.direccion ?? null, s.aliado ?? false],
+    [slug, s.nombre, s.categoria, s.descripcion, s.consejo, s.mejorMomento ?? '', s.duracion ?? '', s.costo ?? '', s.instagram ?? null, s.web ?? null, s.destacado ?? false, s.municipio ?? '', s.telefono ?? null, s.direccion ?? null, s.aliado ?? false, s.categoriasExtra ?? []],
   );
   // Google Places
   // Sin busqueda (''), no se consulta Google: para servicios que Google confunde

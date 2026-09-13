@@ -111,3 +111,24 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
 - Semilla: `busqueda: ''` = no consultar Google (negocios que Google confunde con
   otro). El importador ya no vuelve a consultar Places si la fila tiene place_id.
 - Apify: consumido US$2,04 de 5 este mes tras estas búsquedas.
+
+
+## Segunda tanda (2026-09-13, noche)
+
+- **Ventura = V2 Aventuras** (@v2aventuras, 13,7 k; jeeps, e-bikes, cuatrimotos,
+  trekking; 0414-2016635; v2aventuras.com.ve). Aliado, en `aventura` + extra
+  `transporte`. **La Perla = Recargas La Perla C.A.** (@recargaslaperla, C.C. Paseo
+  Pampatar, 0412-5860310), aliado en `agua`. Los encontró Google Places, no Instagram.
+- **Varias categorías por lugar**: `guia_lugares.categorias_extra text[]`
+  (migración 014). Guuao Marketplace es `licores` + `nocturna` (cierra a las 12).
+  `data-cat` de la tarjeta lleva todas; `enCategoria()/categoriasDe()` en lib/guia.ts;
+  en admin, chips «También aparece en».
+- **Categoría `practico`** (Prácticos): Lavandería San Jorge (@lavanderiasanjorge,
+  delivery), Lavandería La Caracola, Italcambio (Sambil), Digitel/Movistar (SIM).
+  Icono: nudo de chinchorro.
+- **Hub 3×3 + 3×4**: «Resolver» cierra con «Anfitrión» (WhatsApp) y «Emergencia 911»
+  (tel:911); «Descubrir» con «Ver todo». Se quitó la barra azul de WhatsApp (ya está
+  el botón). Cabecera móvil tipo app: «¿Qué necesitas hoy?» + una línea; el
+  titular editorial queda solo en escritorio.
+- Bienvenida: dura entre 2,2 y 3,4 s (antes se iba antes de verse).
+- Total: 103 entradas.

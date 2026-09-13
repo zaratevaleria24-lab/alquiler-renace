@@ -10,6 +10,7 @@ export interface Semilla {
   instagram?: string; web?: string; destacado?: boolean; municipio?: string;
   telefono?: string; direccion?: string; // para servicios que Google no tiene bien
   aliado?: boolean; // trato directo con nosotros: sello «Recomendado» y primero en su categoría
+  categoriasExtra?: Categoria[]; // también aparece en estas categorías
 }
 
 export const LUGARES: Semilla[] = [
@@ -174,9 +175,9 @@ export const LUGARES: Semilla[] = [
   { nombre: 'Al Costo Market', categoria: 'supermercado', busqueda: 'Al Costo Market Margarita', instagram: 'alcostomgta', municipio: 'Mariño',
     descripcion: 'Mercado de precios bajos muy activo en Instagram: publican ofertas cada semana. Productos básicos, limpieza y bebidas.',
     consejo: 'Revisa su Instagram antes de ir: las ofertas de quincena valen la pena para una estadía larga.', mejorMomento: 'Quincena', duracion: '', costo: '' },
-  { nombre: 'Guuao Marketplace', categoria: 'licores', busqueda: 'GUUAO MARKETPLACE MARGARITA', municipio: 'Maneiro',
-    descripcion: 'Tienda de licores y bodegón con buena selección de rones venezolanos, vinos y cervezas importadas. Precios claros y estacionamiento.',
-    consejo: 'Si quieres llevarte ron de regalo, acá está la mejor selección de Santa Teresa, Diplomático y Pampero.', mejorMomento: '', duracion: '', costo: '' },
+  { nombre: 'Guuao Marketplace', categoria: 'licores', categoriasExtra: ['nocturna'], busqueda: 'GUUAO MARKETPLACE MARGARITA', municipio: 'Maneiro',
+    descripcion: 'Bodegón y licorería con terraza: de día compras ron, vino y cerveza importada a buen precio; de noche es punto de encuentro para tomar algo con música hasta la medianoche. Estacionamiento propio.',
+    consejo: 'Si quieres llevarte ron de regalo, aquí está la mejor selección de Santa Teresa, Diplomático y Pampero. Para la noche, llega antes de las 10: cierra a las 12.', mejorMomento: 'Tarde-noche', duracion: '', costo: '$$' },
   { nombre: 'Prolicor', categoria: 'licores', busqueda: 'Prolicor Porlamar', municipio: 'Mariño',
     descripcion: 'Licorería clásica de Porlamar con dos sedes: precios de mayorista, cerveza fría por cajas y todo el ron nacional.',
     consejo: 'Para una reunión en el apartamento, la caja de cerveza sale más barata acá que en el supermercado.', mejorMomento: '', duracion: '', costo: '' },
@@ -279,6 +280,26 @@ export const LUGARES: Semilla[] = [
   { nombre: 'Margarita La Perla del Caribe — excursiones', categoria: 'aventura', busqueda: '', instagram: 'margaritalaperladelcaribe', web: 'https://wa.link/l5xh16', municipio: '', direccion: 'Cabo Negro, Carecare y toda la isla',
     descripcion: 'Senderismo, rutas y paseos por rincones menos conocidos: Cabo Negro, Carecare y la costa norte. Más de 10 mil seguidores.',
     consejo: 'Buena alternativa cuando Senderos Margarita está lleno. Escríbeles por WhatsApp con la fecha que tienes libre.', mejorMomento: 'Mañana', duracion: 'Medio día', costo: 'Por persona' },
+  // ── Aliados encontrados en Google Places + Instagram (2026-09-13) ──
+  { nombre: 'V2 Aventuras — e-bikes, jeeps y trekking', categoria: 'aventura', busqueda: 'V2Aventuras Porlamar', instagram: 'v2aventuras', telefono: '+58 414 2016635', web: 'https://www.v2aventuras.com.ve/', municipio: 'Mariño', direccion: 'Frente al C.C. La Vela, Porlamar', aliado: true, categoriasExtra: ['transporte'],
+    descripcion: 'Alquiler de bicicletas eléctricas y recorridos guiados en jeep, cuatrimoto, e-bike y a pie por la Margarita que no sale en las postales: Macanao, salinas, pueblos de pescadores. Casi 14 mil seguidores.',
+    consejo: 'Son nuestros aliados para moverte distinto: dinos qué día tienes libre y te coordinamos la salida. La ruta en e-bike al atardecer por Pampatar es la que más recomendamos.', mejorMomento: 'Mañana temprano o atardecer', duracion: '2 horas a día completo', costo: 'Por persona, según ruta' },
+  { nombre: 'Recargas La Perla — agua potable', categoria: 'agua', busqueda: 'Recargas la Perla C.A Pampatar', instagram: 'recargaslaperla', telefono: '+58 412 5860310', web: 'https://api.whatsapp.com/send?phone=584125860310', municipio: 'Maneiro', direccion: 'C.C. Paseo, nivel PB, local A-6, Av. Bolívar, Pampatar · reparto', aliado: true,
+    descripcion: 'Recarga y venta de botellones de agua potable con reparto a domicilio. Lunes a sábado de 8:30 a 6:30. Es a quien llamamos nosotros.',
+    consejo: 'Pide por WhatsApp y di que vienes de Margarita Renace. Si el botellón del apartamento está vacío al llegar, avísanos y lo resolvemos.', mejorMomento: 'Mañana', duracion: '', costo: 'Botellón' },
+  // ── Prácticos ──
+  { nombre: 'Lavandería San Jorge', categoria: 'practico', busqueda: 'Lavanderia San Jorge Jorge Coll Margarita', instagram: 'lavanderiasanjorge', telefono: '+58 424 8874344', web: 'https://wa.me/+584248874344', municipio: 'Maneiro', direccion: 'Urb. Jorge Coll · delivery',
+    descripcion: 'Más de 20 años: lavandería, tintorería y costura con delivery. Lunes a viernes de 8 a 6, sábados hasta la 1.',
+    consejo: 'Para una estadía larga: mándales la ropa por delivery el lunes y la tienes el miércoles. Cobran por kilo.', mejorMomento: '', duracion: '', costo: 'Por kilo' },
+  { nombre: 'Lavandería La Caracola', categoria: 'practico', busqueda: 'Lavandería y tintorería la caracola Central Margarita Porlamar', municipio: 'Mariño',
+    descripcion: 'Lavandería y tintorería en el C.C. Central Margarita (Av. Bolívar, Porlamar), la mejor valorada de la ciudad.',
+    consejo: 'Cómoda si te quedas en Porlamar: dejas la ropa mientras haces mercado en el Central Madeirense.', mejorMomento: '', duracion: '', costo: 'Por kilo' },
+  { nombre: 'Italcambio — cambio de divisas', categoria: 'practico', busqueda: 'Italcambio Centro Sambil Pampatar', instagram: 'italcambio', municipio: 'Maneiro',
+    descripcion: 'Casa de cambio autorizada dentro del Sambil. Cambia dólares y euros a bolívares a la tasa oficial del día.',
+    consejo: 'Casi todo se paga en dólares en efectivo o con pago móvil; solo necesitas bolívares para transporte público y algunos puestos. Cambia poco.', mejorMomento: '', duracion: '', costo: 'Comisión según monto' },
+  { nombre: 'Digitel y Movistar en el Sambil — SIM y datos', categoria: 'practico', busqueda: '', municipio: 'Maneiro',
+    descripcion: 'Tiendas de las operadoras en el Sambil para comprar una línea prepago venezolana con datos. Digitel suele tener mejor cobertura en la isla.',
+    consejo: 'Lleva el pasaporte. Con 10 dólares tienes datos para la semana; el Wi-Fi del apartamento cubre el resto.', mejorMomento: '', duracion: '30 minutos', costo: 'Desde US$5' },
 ];
 
 export const CONSEJOS: { tema: string; titulo: string; texto: string }[] = [

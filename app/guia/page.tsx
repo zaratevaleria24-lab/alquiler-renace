@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, claveMaps, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
+import { CATEGORIAS, claveMaps, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
 export default async function GuiaPage({ searchParams }: { searchParams: Promise<{ c?: string; desde?: string }> }) {
   const [sp, lugares, consejos, contacto] = await Promise.all([searchParams, getLugares(), getConsejos(), getContacto()]);
   const cat = CATEGORIAS.find((c) => c.key === sp.c)?.key as Categoria | undefined;
-  const visibles = cat ? lugares.filter((l) => l.categoria === cat) : lugares;
-  const cuenta = (k: Categoria) => lugares.filter((l) => l.categoria === k).length;
+  const visibles = cat ? lugares.filter((l) => enCategoria(l, cat)) : lugares;
+  const cuenta = (k: Categoria) => lugares.filter((l) => enCategoria(l, k)).length;
   const puntos = lugares.filter((l) => l.latitud != null && l.longitud != null).map((l) => ({
     slug: l.slug, nombre: l.nombre, categoria: l.categoria, emoji: CATEGORIAS.find((c) => c.key === l.categoria)?.emoji ?? '📍',
     lat: l.latitud!, lng: l.longitud!, foto: portadaDe(l) ? miniatura(portadaDe(l)!.src) : null,
@@ -52,14 +52,20 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
       <Bienvenida forzar={sp.desde === 'qr'} />
       <div className="min-h-screen bg-paper">
         <header className="bg-luz border-b border-line">
-          <div className="max-w-6xl mx-auto px-5 pb-5 pt-[88px] md:px-8 md:pb-8 md:pt-28">
+          <div className="max-w-6xl mx-auto px-5 pb-4 pt-[84px] md:px-8 md:pb-8 md:pt-28">
             <div className="flex items-end justify-between gap-6">
               <div>
                 <p className="label-eyebrow text-brand-deep">Guía turística · {SITE.region.island}</p>
-                <h1 className="mt-1.5 font-serif text-headline font-normal leading-[1.05] track-headline text-ink">
+                {/* En teléfono la cabecera es de app: una pregunta y a los botones.
+                    En escritorio queda el titular editorial de siempre. */}
+                <h1 className="mt-1.5 font-serif text-[28px] font-normal leading-[1.05] track-headline text-ink md:hidden">
+                  ¿Qué necesitas <em className="headline-italic">hoy</em>?
+                </h1>
+                <h1 className="mt-1.5 hidden font-serif text-headline font-normal leading-[1.05] track-headline text-ink md:block">
                   Lo mejor de la isla, <em className="headline-italic">contado por gente de acá</em>
                 </h1>
-                <p className="mt-3 max-w-xl text-meta text-ink-soft md:text-body">
+                <p className="mt-2 text-[13px] text-ink-muted md:hidden">{lugares.length} lugares y servicios · contado por gente de acá</p>
+                <p className="mt-3 hidden max-w-xl text-meta text-ink-soft md:block md:text-body">
                   {lugares.length} lugares, planes y servicios con datos reales: horario, valoración, cómo llegar y el consejo que te daría un amigo margariteño.
                 </p>
               </div>
@@ -92,7 +98,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
               desde el servidor, así el enlace compartido abre bien sin JS. */}
           <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-            {lugares.map((l, k) => <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
+            {lugares.map((l, k) => <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={cat ? !enCategoria(l, cat) : false} />)}
           </ul>
 
           <section aria-labelledby="consejos" className="section-gap">

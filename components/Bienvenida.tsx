@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 // Bienvenida de la guía: la pantalla que ve quien escanea el QR mientras el
 // resto carga. El emblema entra con un resorte suave, el nombre aparece, y una
 // barra avanza con la carga REAL de la página (no un temporizador falso): al
-// terminar, se va con un fundido. Máximo ~2,4 s aunque la red esté lenta, y
+// terminar, se va con un fundido. Dura entre 2,2 y 3,4 s (menos no se aprecia), y
 // nunca más de una vez por sesión. Quien pidió menos movimiento no la ve.
 //
 // Librería: Motion (v12, ya en el proyecto). Se importa solo acá, así el resto
@@ -33,13 +33,13 @@ export default function Bienvenida({ forzar = false }: { forzar?: boolean }) {
     const onLoad = () => { cargado = true; };
     window.addEventListener('load', onLoad);
     // Avanza con el tiempo hasta 85 % y salta al 100 % cuando la página terminó
-    // de cargar; nunca se queda esperando más de 2,4 s.
+    // de cargar y pasaron al menos 2,2 s; nunca espera más de 3,4 s.
     const t = setInterval(() => {
       const dt = performance.now() - inicio;
-      const base = Math.min(85, (dt / 1800) * 85);
-      const fin = cargado || dt > 2400;
+      const base = Math.min(85, (dt / 2000) * 85);
+      const fin = (cargado && dt > 2200) || dt > 3400;
       setProgreso(fin ? 100 : base);
-      if (fin) { clearInterval(t); setTimeout(() => setListo(true), 320); }
+      if (fin) { clearInterval(t); setTimeout(() => setListo(true), 420); }
     }, 60);
     return () => { clearInterval(t); window.removeEventListener('load', onLoad); };
   }, [reducido, forzar]);

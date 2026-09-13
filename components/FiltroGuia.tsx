@@ -27,7 +27,7 @@ export default function FiltroGuia({ chips, inicial }: { chips: ChipCategoria[];
     if (!grid) return;
     let visibles = 0;
     for (const li of Array.from(grid.children) as HTMLElement[]) {
-      const ok = !cat || li.dataset.cat === cat;
+      const ok = !cat || (li.dataset.cat ?? '').split(' ').includes(cat);
       li.hidden = !ok;
       if (ok) visibles++;
     }

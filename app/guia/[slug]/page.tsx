@@ -56,7 +56,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
     hoy && { I: Clock, k: 'Horario de hoy', v: hoy },
   ].filter(Boolean) as { I: typeof Sun; k: string; v: string }[];
 
-  const tipoSchema = { playa: 'Beach', historia: 'LandmarksOrHistoricalBuildings', naturaleza: 'Park', mirador: 'TouristAttraction', museo: 'Museum', comer: 'Restaurant', actividad: 'TouristAttraction', nocturna: 'BarOrPub', compras: 'ShoppingCenter', familia: 'AmusementPark', delivery: 'FoodEstablishment', supermercado: 'GroceryStore', licores: 'LiquorStore', agua: 'LocalBusiness', salud: 'MedicalBusiness', transporte: 'LocalBusiness', aventura: 'SportsActivityLocation' }[l.categoria] ?? 'TouristAttraction';
+  const tipoSchema = { playa: 'Beach', historia: 'LandmarksOrHistoricalBuildings', naturaleza: 'Park', mirador: 'TouristAttraction', museo: 'Museum', comer: 'Restaurant', actividad: 'TouristAttraction', nocturna: 'BarOrPub', compras: 'ShoppingCenter', familia: 'AmusementPark', delivery: 'FoodEstablishment', supermercado: 'GroceryStore', licores: 'LiquorStore', agua: 'LocalBusiness', salud: 'MedicalBusiness', transporte: 'LocalBusiness', aventura: 'SportsActivityLocation', practico: 'LocalBusiness' }[l.categoria] ?? 'TouristAttraction';
   const jsonLd = graph(
     breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: '/guia' }, { name: l.nombre, path }]),
     {

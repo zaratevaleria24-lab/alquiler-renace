@@ -80,6 +80,17 @@ export default async function EditarLugarPage({ params, searchParams }: { params
         <Seccion id="estado" titulo="Estado">
           <Tarjeta className="space-y-5 p-6">
             <Interruptor name="destacado" label="Imperdible" ayuda="Sale primero en la guía con la etiqueta «Imperdible»." defaultChecked={l.destacado} />
+            <fieldset className="border-t border-line pt-5">
+              <legend className="text-meta font-medium text-ink">También aparece en</legend>
+              <p className="mt-1 text-ui text-ink-muted">Un lugar puede vivir en más de una categoría (Guuao: licores y de noche).</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CATEGORIAS.filter((c) => c.key !== l.categoria).map((c) => (
+                  <label key={c.key} className="inline-flex cursor-pointer items-center gap-1.5 rounded-chip border border-line bg-white px-3 py-1.5 text-ui has-[:checked]:border-brand-deep has-[:checked]:bg-brand-deep has-[:checked]:text-white">
+                    <input type="checkbox" name="categorias_extra" value={c.key} defaultChecked={l.categoriasExtra.includes(c.key)} className="sr-only" />{c.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             <div className="border-t border-line pt-5"><Interruptor name="aliado" label="Aliado de Margarita Renace" ayuda="Negocio con el que tenemos trato directo: va primero en su categoría con el sello «Recomendado»." defaultChecked={l.aliado} /></div>
             <div className="border-t border-line pt-5"><Interruptor name="publicado" label="Publicado en la guía" defaultChecked={l.publicado} /></div>
           </Tarjeta>
