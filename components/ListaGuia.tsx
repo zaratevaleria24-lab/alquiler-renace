@@ -26,13 +26,16 @@ export default function ListaGuia({ lugares, cat: inicial, escucha = true }: { l
     return () => window.removeEventListener('guia:elegir', on);
   }, [escucha]);
 
+  // El centinela aparece y desaparece (al filtrar, al agotar la lista): el
+  // observador se engancha cada vez que el nodo existe, no solo al montar.
+  const hayMas = visibles.length > limite;
   useEffect(() => {
     const s = centinela.current;
-    if (!s || !('IntersectionObserver' in window)) return;
+    if (!hayMas || !s || !('IntersectionObserver' in window)) return;
     const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) setLimite((n) => n + POR_PAGINA); }, { rootMargin: '700px 0px' });
     io.observe(s);
     return () => io.disconnect();
-  }, []);
+  }, [hayMas, cat, limite]);
 
   useEffect(() => {
     if (!escucha) return;
