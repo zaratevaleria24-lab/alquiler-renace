@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getAnunciosAirbnb, getEnlacesPublicos } from '@/lib/enlaces';
+import { refrescarAirbnbSiHaceFalta } from '@/lib/airbnb';
 import { getAjustes } from '@/lib/settings';
 import { SITE } from '@/lib/site';
 import { BotonesEnlaces } from '@/components/BotonesEnlaces';
@@ -51,6 +52,8 @@ export const metadata: Metadata = {
 };
 
 export default async function EnlacesPage() {
+  // Datos originales de Airbnb, como mucho una vez al día.
+  await refrescarAirbnbSiHaceFalta().catch(() => {});
   const [{ botones, circulos }, ajustes, anuncios] = await Promise.all([
     getEnlacesPublicos(),
     getAjustes(),

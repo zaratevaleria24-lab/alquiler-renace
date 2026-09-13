@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation';
 import { usuarioActual } from '@/lib/auth';
 import { query, rows, withTransaction } from '@/lib/db';
 import { FotoInvalidaError, borrarArchivoFoto, guardarFoto } from '@/lib/uploads';
+import { sincronizarAirbnb } from '@/lib/airbnb';
 
 async function exigirSesion(): Promise<void> {
   if (!(await usuarioActual())) redirect('/admin/login');
@@ -125,6 +126,8 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
     redirect(`/propiedades/${id}?error=no-guardado`);
   }
 
+  // Datos originales del anuncio (valoración, reseñas, resumen) desde Airbnb.
+  if (airbnbUrl) await sincronizarAirbnb(id, airbnbUrl).catch(() => false);
   regenerarSitio();
   redirect('/admin/propiedades?guardado=1');
 }

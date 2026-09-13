@@ -211,7 +211,7 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
                       )}
                       <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent px-2.5 pb-2 pt-8 text-white">
                         <span className="block font-serif text-[15px] font-semibold leading-tight">{a.nombre}</span>
-                        {a.detalle && <span className="mt-0.5 block text-[11px] text-white/85">{a.detalle}</span>}
+                        {a.detalle && <span className="mt-0.5 block text-[11px] leading-snug text-white/90">{a.detalle}{a.rating != null ? ` · ★ ${a.rating.toFixed(1)}${a.resenas ? ` (${a.resenas})` : ''}` : ''}</span>}
                       </span>
                     </div>
                     <span className="mt-1.5 inline-flex items-center gap-1 text-[12px] font-medium" style={{ color }}>

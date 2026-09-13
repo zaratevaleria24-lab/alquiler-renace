@@ -108,3 +108,9 @@ de contrato/cláusulas para firma del cliente (dos features aparte).
   tarjeta del carrusel lleva la estrella, las reseñas y el resumen («2 habitaciones
   · 3 camas · 2 baños») sobre la foto. El embed oficial de Airbnb se descartó:
   script externo (se bloquea en Venezuela), 450×300 fijo, rastreo de terceros.
+- **Datos originales de Airbnb, automáticos** (`lib/airbnb.ts`): se lee la
+  etiqueta og:title del anuncio («Condo in Pampatar · ★5.0 · 2 bedrooms · 3 beds ·
+  2 baths») y el «N reviews» del HTML, se traduce y se guarda; se refresca al
+  guardar la propiedad y como mucho una vez al día al abrir /enlaces
+  (`airbnb_sync_at`, migración 020). El anuncio 1553769675039954102 es **Bahía
+  Mágica** (★5.0, 3 reseñas). Solo falta pegar la URL de los otros tres.
