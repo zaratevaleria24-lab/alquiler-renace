@@ -85,7 +85,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
           <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total <span className="text-ui font-normal text-ink-muted">· dólar BCV</span></dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
           {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares ({bs(tasa)}/US$)</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
-          {enUsdt != null && <div className="flex justify-between py-2"><dt className="text-ink-muted">Referencia alternativa en USDT</dt><dd className="mono-data">≈ {enUsdt.toFixed(1)} USDT</dd></div>}
+          {enUsdt != null && <div className="flex justify-between py-2"><dt className="text-ink-muted">USDT · referencia alternativa</dt><dd className="mono-data">≈ {enUsdt.toFixed(1)} USDT</dd></div>}
         </dl>
         {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
           : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>

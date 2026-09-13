@@ -1033,7 +1033,7 @@ export default function HomeClient({
                           </>
                         )}
                       </div>
-                      <span className="text-meta text-gray-400 font-medium">Capacidad máx: {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
+                      <span className="text-ui text-ink-muted">Hasta {selectedProperty.guestsAllowed.adults + selectedProperty.guestsAllowed.children} personas</span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -1092,7 +1092,7 @@ export default function HomeClient({
                           </div>
                           {tasaUsdt && (
                             <div className="flex items-baseline justify-between gap-3 text-ui text-ink-muted">
-                              <span>Referencia alternativa en USDT</span>
+                              <span>USDT · referencia alternativa</span>
                               <span className="mono-data">≈ {(selectedProperty.pricePerNight * bookingNights * tasaBcv / tasaUsdt).toFixed(1)} USDT</span>
                             </div>
                           )}
