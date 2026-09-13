@@ -29,7 +29,7 @@ interface Campo<K extends string = string> {
    * campo que se edita en otra pantalla se restablecería solo cada vez que
    * alguien guardara Contenido, sin tocarlo y sin avisar.
    */
-  pantalla?: 'contenido' | 'enlaces';
+  pantalla?: 'contenido' | 'enlaces' | 'contratos';
 }
 
 /**
@@ -119,6 +119,17 @@ export const CAMPOS = [
     porDefecto: 'Apartamentos y autos en Isla de Margarita.',
     pantalla: 'enlaces',
   },
+  // Datos legales del arrendador: se editan en /admin/contratos y salen en la
+  // cabecera de cada contrato. Sin ellos el contrato se genera igual pero avisa.
+  { key: 'razon_social', label: 'Razón social o nombre del arrendador', tipo: 'texto', ayuda: 'Tal como debe aparecer en el contrato. Puede ser una persona natural.', porDefecto: 'Margarita Renace', pantalla: 'contratos' },
+  { key: 'rif', label: 'RIF o cédula del arrendador', tipo: 'texto', ayuda: 'Ej. J-12345678-9 o V-12345678.', porDefecto: '', pantalla: 'contratos' },
+  { key: 'representante', label: 'Representante que firma', tipo: 'texto', ayuda: 'Nombre y apellido de quien firma por el arrendador.', porDefecto: '', pantalla: 'contratos' },
+  { key: 'representante_cedula', label: 'Cédula del representante', tipo: 'texto', porDefecto: '', pantalla: 'contratos' },
+  { key: 'domicilio_fiscal', label: 'Domicilio del arrendador', tipo: 'texto', ayuda: 'Ciudad y estado bastan: Pampatar, estado Nueva Esparta.', porDefecto: 'Pampatar, estado Nueva Esparta, Venezuela', pantalla: 'contratos' },
+  { key: 'correo_corporativo', label: 'Correo corporativo', tipo: 'texto', ayuda: 'Desde el que salen los contratos y al que llega la copia firmada. Debe coincidir con la cuenta configurada en el servidor (/etc/margarita-renace/correo.env).', porDefecto: '', pantalla: 'contratos' },
+  { key: 'contrato_checkin', label: 'Hora de entrada', tipo: 'texto', porDefecto: '15:00', pantalla: 'contratos' },
+  { key: 'contrato_checkout', label: 'Hora de salida', tipo: 'texto', porDefecto: '11:00', pantalla: 'contratos' },
+  { key: 'contrato_deposito', label: 'Depósito de garantía por defecto (US$)', tipo: 'texto', ayuda: 'Se propone al crear cada contrato; se puede cambiar en cada uno.', porDefecto: '50', pantalla: 'contratos' },
 ] as const satisfies readonly Campo[];
 
 export type ClaveAjuste = (typeof CAMPOS)[number]['key'];
@@ -136,7 +147,7 @@ export const CAMPOS_UI: readonly Campo<ClaveAjuste>[] = CAMPOS;
 /** Los campos de UNA pantalla del panel. Cada pantalla dibuja y guarda solo los
  *  suyos; ver la nota de `pantalla` en Campo para el porqué. */
 export function camposDe(
-  pantalla: 'contenido' | 'enlaces',
+  pantalla: 'contenido' | 'enlaces' | 'contratos',
 ): readonly Campo<ClaveAjuste>[] {
   return CAMPOS_UI.filter((c) => (c.pantalla ?? 'contenido') === pantalla);
 }

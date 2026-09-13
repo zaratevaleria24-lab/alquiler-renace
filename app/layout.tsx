@@ -150,7 +150,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   // le quitaría lo único que tiene que hacer, que es que toques un botón.
   // La ruta la pone el middleware; ver el comentario de allá.
   const ruta = cabeceras.get('x-ruta') ?? '';
-  const esEnlaces = ruta === '/enlaces';
+  const esEnlaces = ruta === '/enlaces' || ruta.startsWith('/contrato/');
   // La home pinta la barra ella misma (le pasa el reinicio de búsqueda); el
   // resto la recibe desde acá. Mismo componente: components/NavBar.
   const esHome = ruta === '/' || ruta === '';

@@ -16,7 +16,7 @@ export default function QrPage() {
           <p className="mt-4 font-serif text-[26px] font-semibold leading-tight text-ink">Margarita <span className="text-accent">Renace</span></p>
           <p className="label-eyebrow mt-1 text-brand-deep">Guía turística de la isla</p>
           <img src="/qr-guia.png" alt="Código QR de la guía turística" width={820} height={820} className="mx-auto mt-6 w-[240px] rounded-card" />
-          <p className="mt-6 font-serif text-title-sm text-ink">Escaneá y descubrí la isla</p>
+          <p className="mt-6 font-serif text-title-sm text-ink">Escanea y descubre la isla</p>
           <p className="mt-2 text-meta text-ink-soft leading-relaxed">Playas, castillos, dónde comer, qué hacer y los consejos que te daría un amigo margariteño. Con horarios, cómo llegar y fotos.</p>
           <p className="mono-data mt-5 text-ink-muted">margaritarenace.com.ve/guia</p>
         </div>
