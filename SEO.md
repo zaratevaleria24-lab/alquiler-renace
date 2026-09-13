@@ -560,3 +560,12 @@ robots.txt, sitemap (120 URLs con lastmod: 104 de la guía), llms.txt.
 - **Landings de zona ampliadas** (`lib/zones-content-extra.ts`): 518–907 palabras
   por zona con distancias, servicios de la guía, precios y cuándo ir; las zonas sin
   inventario lo dicen con honestidad y remiten a Pampatar/Costa Azul/Porlamar.
+
+### Páginas por intención de búsqueda (2026-09-13, noche)
+`lib/paginas-intencion.ts` + `app/[tema]/page.tsx` (`dynamicParams=false`: solo
+los slugs declarados; el resto sigue 404). Article + FAQPage, apartamentos
+propios, enlaces a hubs y CTA a /reservas. En sitemap y en el pie:
+- /apartamentos-con-piscina-en-margarita
+- /alquiler-por-mes-en-margarita (precio mensual «a consultar», sin inventar)
+- /cuanto-cuesta-viajar-a-margarita (presupuesto 5 noches con rangos honestos)
+Para agregar otra: una entrada más en PAGINAS; el sitemap y la ruta salen solos.

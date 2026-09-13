@@ -68,6 +68,15 @@ export async function SiteFooter() {
               <Link href="/en-venta" className={enlace}>
                 En venta
               </Link>
+              <Link href="/apartamentos-con-piscina-en-margarita" className={enlace}>
+                Con piscina
+              </Link>
+              <Link href="/alquiler-por-mes-en-margarita" className={enlace}>
+                Por mes
+              </Link>
+              <Link href="/cuanto-cuesta-viajar-a-margarita" className={enlace}>
+                Cuánto cuesta
+              </Link>
               <Link href="/reservas" className={enlace}>
                 Reservar
               </Link>

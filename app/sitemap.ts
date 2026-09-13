@@ -3,6 +3,7 @@ import { getProperties, getZonesAll } from '@/lib/queries';
 import { getInmueblesPublicados } from '@/lib/ventas';
 import { getLugares } from '@/lib/guia';
 import { HUBS } from '@/lib/guia-hubs';
+import { PAGINAS } from '@/lib/paginas-intencion';
 import { absoluteUrl } from '@/lib/site';
 
 // Genera /sitemap.xml en build, a partir de las mismas zonas que producen las
@@ -47,6 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/en-venta'), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.8 },
     { url: absoluteUrl('/guia'), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.9 },
     ...HUBS.map((h) => ({ url: absoluteUrl(`/guia/${h.slug}`), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.8 })),
+    ...PAGINAS.map((p) => ({ url: absoluteUrl(`/${p.slug}`), lastModified: buildDate, changeFrequency: 'monthly' as const, priority: 0.7 })),
     { url: absoluteUrl('/reservas'), lastModified: buildDate, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: absoluteUrl('/nosotros'), lastModified: buildDate, changeFrequency: 'monthly' as const, priority: 0.6 },
     { url: absoluteUrl('/politicas'), lastModified: buildDate, changeFrequency: 'yearly' as const, priority: 0.4 },
