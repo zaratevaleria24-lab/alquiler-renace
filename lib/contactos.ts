@@ -38,11 +38,21 @@ export async function registrarContacto(v: { nombre: string; email: string; tele
 }
 export async function marcarCorreoEnviado(id: string) { await query(`UPDATE contactos SET correo_enviado_at = now() WHERE id = $1`, [id]); }
 export async function listarContactos(): Promise<Contacto[]> { return (await rows<Record<string, unknown>>(`SELECT * FROM contactos ORDER BY created_at DESC`)).map(desde); }
-/** Valida un cupón (para /reservas): devuelve el % o null. */
-export async function descuentoDe(cupon: string): Promise<{ pct: number; nombre: string } | null> {
-  const c = cupon.trim().toUpperCase(); if (!/^RENACE10-[A-Z0-9]{4}$/.test(c)) return null;
-  const [r] = await rows<{ descuento_pct: number; nombre: string }>(`SELECT descuento_pct, nombre FROM contactos WHERE cupon = $1 AND cupon_usado_at IS NULL`, [c]);
-  return r ? { pct: Number(r.descuento_pct), nombre: r.nombre } : null;
+/** Normaliza lo que la persona escribe: mayúsculas, sin espacios, y los
+ *  códigos viejos «RENACE5-XXXX» (primer día, 5 %) valen como «RENACE10-XXXX»:
+ *  el sufijo es la identidad, el prefijo solo dice el porcentaje de la época. */
+export function normalizarCupon(v: string): string | null {
+  const c = v.trim().toUpperCase().replace(/\s+/g, '').replace(/^RENACE(5|10)[-–]?/, 'RENACE10-');
+  return /^RENACE10-[A-Z0-9]{4}$/.test(c) ? c : null;
+}
+export type EstadoCupon = { estado: 'ok'; pct: number; nombre: string; cupon: string } | { estado: 'usado'; cupon: string } | { estado: 'invalido' };
+/** Valida un cupón (para /reservas) distinguiendo «no existe» de «ya se usó». */
+export async function descuentoDe(cupon: string): Promise<EstadoCupon> {
+  const c = normalizarCupon(cupon); if (!c) return { estado: 'invalido' };
+  const [r] = await rows<{ descuento_pct: number; nombre: string; cupon_usado_at: Date | null }>(`SELECT descuento_pct, nombre, cupon_usado_at FROM contactos WHERE cupon = $1`, [c]);
+  if (!r) return { estado: 'invalido' };
+  if (r.cupon_usado_at) return { estado: 'usado', cupon: c };
+  return { estado: 'ok', pct: Number(r.descuento_pct), nombre: r.nombre, cupon: c };
 }
 export async function borrarContacto(id: string) { await query(`DELETE FROM contactos WHERE id = $1`, [id]); }
 export async function marcarCuponUsado(id: string, usado: boolean) { await query(`UPDATE contactos SET cupon_usado_at = ${usado ? 'now()' : 'NULL'} WHERE id = $1`, [id]); }

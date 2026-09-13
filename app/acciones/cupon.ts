@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers';
 import { createHash } from 'node:crypto';
-import { registrarContacto, marcarCorreoEnviado, descuentoDe } from '@/lib/contactos';
+import { registrarContacto, marcarCorreoEnviado, descuentoDe, type EstadoCupon } from '@/lib/contactos';
 import { correoConfigurado, enviarCorreo } from '@/lib/correo';
 import { correoCupon } from '@/lib/correo-plantillas';
 
@@ -41,6 +41,6 @@ export async function pedirCuponAction(fd: FormData): Promise<{ ok: boolean; cup
   return { ok: true, cupon: contacto.cupon, pct: contacto.descuentoPct, nuevo };
 }
 
-export async function validarCuponAction(codigo: string): Promise<{ pct: number; nombre: string } | null> {
+export async function validarCuponAction(codigo: string): Promise<EstadoCupon> {
   return descuentoDe(codigo);
 }

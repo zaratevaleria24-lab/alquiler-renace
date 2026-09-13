@@ -26,7 +26,12 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [cupon, setCupon] = useState('');
   const [descuento, setDescuento] = useState<{ pct: number; nombre: string } | null>(null);
   const [cuponError, setCuponError] = useState<string | null>(null);
-  const aplicarCupon = async (c: string) => { const v = await validarCuponAction(c); setDescuento(v); setCuponError(v ? null : 'Ese código no existe o ya se usó.'); };
+  const aplicarCupon = async (c: string) => {
+    if (!c.trim()) { setDescuento(null); setCuponError(null); return; }
+    const v = await validarCuponAction(c);
+    if (v.estado === 'ok') { setDescuento({ pct: v.pct, nombre: v.nombre }); setCupon(v.cupon); setCuponError(null); }
+    else { setDescuento(null); setCuponError(v.estado === 'usado' ? 'Ese código ya se usó en una reserva. Si crees que es un error, escríbenos por WhatsApp.' : 'Ese código no existe. Revisa las letras (por ejemplo RENACE10-7K3M) o pide el tuyo en el inicio.'); }
+  };
   useEffect(() => { const q = new URLSearchParams(location.search); const c = q.get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } const a = q.get('apto'); if (a && aptos.some((x) => x.slug === a)) setSlug(a); }, []);
 
   useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => { setTasa(d.bcv ?? null); setUsdt(d.usdt ?? null); }).catch(() => {}); }, []);
