@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "clean": "next clean"
+    "clean": "next clean",
+    "deploy": "next build && pm2 restart margarita-renace --update-env && sleep 4 && node scripts/indexnow.cjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

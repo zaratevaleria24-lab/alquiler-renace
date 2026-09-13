@@ -139,3 +139,8 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
   que pasan de la tanda con `hidden` + clase `paginada`; un centinela `#mas-guia`
   con IntersectionObserver va soltando más al bajar; `<noscript>` las muestra todas.
   Al cambiar de categoría se vuelve a la primera tanda.
+
+- **Lista cliente (2026-09-13 noche):** `components/ListaGuia.tsx` filtra y pagina
+  en React (ya no se manipulan `hidden`/`.paginada` en el DOM). El servidor solo
+  pinta 18 tarjetas; los hubs `/guia/<tema>` (lib/guia-hubs.ts) listan cada tema
+  con `escucha={false}`. Fichas con FAQ + FAQPage, openingHours y autor.

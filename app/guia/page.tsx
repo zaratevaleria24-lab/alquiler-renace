@@ -108,8 +108,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
             ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, direccion: (l.direccion ?? '').slice(0, 90),
             fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })), horario: l.horario,
           }))} />
-          <div id="mas-guia" aria-hidden="true" className="h-10" hidden={visibles.length <= POR_PAGINA} />
-          <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
+          <noscript><p className="mt-4 text-meta text-ink-muted">Sin JavaScript se muestran los primeros {POR_PAGINA} lugares; explora por tema en <Link href="/guia/playas">playas</Link>, <Link href="/guia/donde-comer">dónde comer</Link>, <Link href="/guia/servicios">servicios</Link> y <Link href="/guia/aventura">aventura</Link>.</p></noscript>
 
           <nav aria-label="Guías por tema" className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {HUBS.map((h) => (

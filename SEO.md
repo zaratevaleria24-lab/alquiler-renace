@@ -535,3 +535,16 @@ robots.txt, sitemap (120 URLs con lastmod: 104 de la guía), llms.txt.
   /propiedad/studio-* devuelven 410 a propósito (listados de relleno retirados).
   Falta: **reenviar el sitemap** (Google leyó 10 URLs el 10/09; hoy trae 127) y
   pedir indexación de /guia, los 4 hubs y /reservas.
+
+### Rendimiento e indexación (2026-09-13, noche)
+- **/guia: 1,25 MB → 359 KB (67 KB gzip)**. `ListaGuia` es dueña del filtro y la
+  paginación: el servidor pinta solo la primera tanda (18) y manda los 103 lugares
+  como datos compactos; el navegador pinta al filtrar o al bajar (botón «Ver más»
+  + IntersectionObserver). FiltroGuia y HubGuia solo avisan `guia:elegir`.
+- **IndexNow** (`scripts/indexnow.cjs`): al desplegar con `npm run deploy` se
+  avisa a Bing/Yandex/DuckDuckGo de las URLs nuevas (estado en
+  `/root/backups/margarita/indexnow-enviadas.json`). Clave en
+  `/etc/margarita-renace/indexnow.env`, archivo público `public/<clave>.txt`.
+  Primer envío: 127 URLs, HTTP 202. Google no usa IndexNow → sitemap + Search Console.
+- Regla operativa: **URL nueva → reenviar sitemap + solicitar indexación en Search
+  Console; texto cambiado → nada.** Despliegue estándar: `npm run deploy`.

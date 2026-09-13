@@ -232,9 +232,7 @@ async function PaginaHub({ slug }: { slug: string }) {
           </div>
         </header>
         <main className="max-w-6xl mx-auto px-5 py-8 md:px-8 md:py-10">
-          <ListaGuia cat="" lugares={propios.map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }))} />
-          <div id="mas-guia" hidden aria-hidden="true" />
-          <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
+          <ListaGuia cat="" escucha={false} lugares={propios.map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }))} />
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
             <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar, Costa Azul y Porlamar desde US$60 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>

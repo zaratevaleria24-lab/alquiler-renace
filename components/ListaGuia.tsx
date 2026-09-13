@@ -1,23 +1,61 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import TarjetaGuia from '@/components/TarjetaGuia';
-import { POR_PAGINA, enCategoria, type Lugar } from '@/lib/guia-comun';
+import { CATEGORIAS, POR_PAGINA, enCategoria, type Lugar } from '@/lib/guia-comun';
 
-// POR QUÉ CLIENTE: si las 100 tarjetas se renderizan como componentes de
-// servidor, Next mete el árbol entero (HTML) DOS veces en la página: una como
-// HTML y otra serializada para hidratar. La guía pesaba 1,25 MB. Como
-// componente cliente el servidor sigue pintando el HTML (SEO intacto) pero al
-// payload solo van los datos compactos. FiltroGuia sigue mandando sobre el DOM
-// (data-cat, hidden, .paginada) exactamente igual que antes.
-export default function ListaGuia({ lugares, cat }: { lugares: Lugar[]; cat: string }) {
-  let n = 0;
+// La lista de la guía, dueña del filtro y de la paginación.
+//
+// POR QUÉ ASÍ: el servidor pinta SOLO la primera tanda (18 tarjetas) en el
+// HTML —la guía pasó de 1,25 MB a menos de 300 KB— y manda los 100 lugares
+// como datos compactos; el navegador pinta el resto al filtrar o al bajar.
+// Las fichas siguen enlazadas para Google desde el sitemap, los hubs
+// (/guia/playas…), las zonas y cada propiedad. Los chips (FiltroGuia) y el hub
+// de teléfono (HubGuia) solo avisan «guia:elegir»; esta lista responde con
+// «guia:categoria» para el mapa, el hub y los chips.
+export default function ListaGuia({ lugares, cat: inicial, escucha = true }: { lugares: Lugar[]; cat: string; escucha?: boolean }) {
+  const [cat, setCat] = useState(inicial);
+  const [limite, setLimite] = useState(POR_PAGINA);
+  const centinela = useRef<HTMLDivElement>(null);
+  const visibles = cat ? lugares.filter((l) => enCategoria(l, cat)) : lugares;
+
+  useEffect(() => {
+    if (!escucha) return;
+    const on = (e: Event) => { setCat(String((e as CustomEvent<string>).detail ?? '')); setLimite(POR_PAGINA); };
+    window.addEventListener('guia:elegir', on);
+    return () => window.removeEventListener('guia:elegir', on);
+  }, [escucha]);
+
+  useEffect(() => {
+    const s = centinela.current;
+    if (!s || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) setLimite((n) => n + POR_PAGINA); }, { rootMargin: '700px 0px' });
+    io.observe(s);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!escucha) return;
+    const titulo = document.getElementById('titulo-guia'), cuenta = document.getElementById('cuenta-guia');
+    if (titulo) titulo.textContent = cat ? (CATEGORIAS.find((c) => c.key === cat)?.plural ?? '') : 'Imperdibles primero';
+    if (cuenta) cuenta.textContent = String(visibles.length);
+    const url = cat ? `/guia?c=${cat}` : '/guia';
+    if (location.pathname === '/guia' && location.pathname + location.search !== url) history.replaceState(null, '', url);
+    window.dispatchEvent(new CustomEvent('guia:categoria', { detail: cat }));
+  }, [cat, visibles.length, escucha]);
+
   return (
-    <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-      {lugares.map((l, k) => {
-        const coincide = cat ? enCategoria(l, cat) : true;
-        if (coincide) n++;
-        return <TarjetaGuia key={l.id} l={l} prioridad={k < 2} oculta={!coincide} paginada={coincide && n > POR_PAGINA} />;
-      })}
-    </ul>
+    <>
+      <ul id="grid-guia" className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+        {visibles.slice(0, limite).map((l, k) => <TarjetaGuia key={l.id} l={l} prioridad={k < 2} />)}
+      </ul>
+      {visibles.length > limite && (
+        <div ref={centinela} className="mt-6 flex justify-center">
+          <button type="button" onClick={() => setLimite((n) => n + POR_PAGINA)} className="inline-flex min-h-[44px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">
+            Ver más ({visibles.length - limite} restantes)
+          </button>
+        </div>
+      )}
+    </>
   );
 }
