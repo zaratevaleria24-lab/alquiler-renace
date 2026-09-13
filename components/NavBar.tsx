@@ -53,7 +53,7 @@ export default function NavBar({
             <img src="/logo-mark-teal.svg" alt="" width={40} height={40} className="h-full w-full object-contain" />
           </span>
           <span className="font-serif text-ui-lg md:text-body font-semibold tracking-wide leading-none whitespace-nowrap">
-            Margarita <em className="not-italic"><span className="font-serif italic font-light text-accent">Renace</span></em>
+            Margarita<span className="text-accent"> Renace</span>
           </span>
         </Link>
 

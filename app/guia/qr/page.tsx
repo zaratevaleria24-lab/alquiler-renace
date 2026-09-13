@@ -13,7 +13,7 @@ export default function QrPage() {
       <div className="mx-auto max-w-[420px] px-5">
         <div className="cartel rounded-panel border border-line bg-white p-8 text-center shadow-lift-lg">
           <img src="/logo-mark-teal.svg" alt="" width={72} height={72} className="mx-auto h-[72px] w-[72px]" />
-          <p className="mt-4 font-serif text-[26px] font-semibold leading-tight text-ink">Margarita <span className="font-serif italic font-light text-accent">Renace</span></p>
+          <p className="mt-4 font-serif text-[26px] font-semibold leading-tight text-ink">Margarita <span className="text-accent">Renace</span></p>
           <p className="label-eyebrow mt-1 text-brand-deep">Guía turística de la isla</p>
           <img src="/qr-guia.png" alt="Código QR de la guía turística" width={820} height={820} className="mx-auto mt-6 w-[240px] rounded-card" />
           <p className="mt-6 font-serif text-title-sm text-ink">Escaneá y descubrí la isla</p>
