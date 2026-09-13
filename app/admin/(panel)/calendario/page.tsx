@@ -9,6 +9,7 @@ import {
   sincronizarFeeds,
 } from '@/lib/calendario';
 import { absoluteUrl } from '@/lib/site';
+import { getEventosAirbnb } from '@/lib/airbnb-correo';
 import { Aviso, Cifra, Insignia, Seccion, Tarjeta } from '../_ui';
 import { agregarFeedAction, eliminarFeedAction, sincronizarAction } from './actions';
 import Multicalendario from './Multicalendario';
@@ -95,6 +96,7 @@ export default async function CalendarioPage({
             ical_token
      FROM properties ORDER BY sort_order, name`,
   );
+  const eventosCorreo = await getEventosAirbnb(15);
   const reales = todas.filter((p) => p.is_real);
   const visibles = reales.length ? reales : todas.filter((p) => p.is_published);
   const idsVisibles = visibles.map((p) => p.id);
@@ -320,6 +322,45 @@ export default async function CalendarioPage({
             );
           })}
         </div>
+        <p className="mt-4 text-meta text-ink-muted">
+          Los feeds se refrescan solos cada 10 minutos (cron del servidor) y al
+          instante cuando llega un correo de Airbnb. «Sincronizar ahora» fuerza
+          todos en este momento.
+        </p>
+      </Seccion>
+
+      {/* ── Correos de Airbnb ───────────────────────────────────────────── */}
+      <Seccion
+        id="correos"
+        titulo="Correos de"
+        cursiva="Airbnb"
+        descripcion="Cada notificación que Airbnb manda (reserva, cancelación, evaluación, pago) llega acá por airbnb@margaritarenace.com.ve y dispara la sincronización. Ver AIRBNB-CORREO.md."
+      >
+        <Tarjeta className="p-5">
+          {eventosCorreo.length === 0 ? (
+            <p className="py-6 text-center text-body text-ink-muted">
+              Todavía no ha llegado ningún correo. Cuando el reenvío desde Gmail
+              esté activo, la confirmación de Google aparece aquí con su código.
+            </p>
+          ) : (
+            <ul className="divide-y divide-line">
+              {eventosCorreo.map((e) => (
+                <li key={e.id} className="flex flex-wrap items-start gap-x-4 gap-y-1 py-3">
+                  <span className="w-36 shrink-0 font-mono text-ui text-ink-subtle">
+                    {new Intl.DateTimeFormat('es-VE', { timeZone: 'America/Caracas', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(e.recibido_at)}
+                  </span>
+                  <Insignia tono={e.error ? 'aviso' : e.tipo === 'confirmada' || e.tipo === 'cancelada' ? 'ok' : 'neutro'}>{e.tipo}</Insignia>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-meta font-semibold text-ink" title={e.asunto}>{e.asunto || '(sin asunto)'}</p>
+                    <p className="text-ui text-ink-muted">
+                      {e.property ? `${e.property} · ` : ''}{e.check_in && e.check_out ? `${e.check_in} → ${e.check_out} · ` : ''}{e.resultado}{e.error ? ` · ${e.error}` : ''}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Tarjeta>
       </Seccion>
     </div>
   );

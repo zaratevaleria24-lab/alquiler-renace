@@ -88,6 +88,9 @@
   /* Acento CÁLIDO de ocre para destellos mínimos: el nombre en la barra,
      filetes, versalitas. Es el contrapunto que evita el look monocromo frío. */
   --color-accent: #c0563c;       /* terracota: el nombre y detalles mínimos */
+  --color-oro: #d9a441;          /* oro: sello «Recomendado por Margarita Renace» (2026-09-13) */
+  --color-oro-deep: #b06f14;
+  --color-naranja: #e4823a;      /* naranja del sello, para que resalte en la guía */
 
   /* Apoyos secundarios, solo en detalles. */
   --color-sage: #8a9578;
@@ -432,25 +435,25 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1.5px;
+  padding: 2px;
   pointer-events: none;
   z-index: 1;
   --brillo-ang: 0deg;
   background:
     conic-gradient(from var(--brillo-ang),
-      rgba(18, 110, 139, .35) 0deg,
-      rgba(18, 110, 139, .35) 250deg,
-      #126e8b 290deg,
-      #e8c07a 320deg,
+      rgba(217, 164, 65, .7) 0deg,
+      rgba(217, 164, 65, .7) 250deg,
+      #e4823a 290deg,
+      #f3cf7a 320deg,
       #ffffff 335deg,
-      #e8c07a 350deg,
-      rgba(18, 110, 139, .35) 360deg);
+      #f3cf7a 350deg,
+      rgba(217, 164, 65, .7) 360deg);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   animation: brillo-girar 3.6s linear infinite;
 }
-.borde-brillo-grueso::before { padding: 2px; }
+.borde-brillo-grueso::before { padding: 2.5px; }
 @keyframes brillo-girar { to { --brillo-ang: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .borde-brillo::before { animation: none; } }

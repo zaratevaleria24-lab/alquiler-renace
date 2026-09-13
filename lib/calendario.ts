@@ -2,10 +2,11 @@
 //
 // LA SINCRONIZACIÓN ES A DEMANDA, igual que las tasas (lib/tasas.ts): se
 // dispara al abrir el calendario del panel o al pedir disponibilidad pública,
-// y solo si el feed lleva más de SYNC_MINUTOS sin refrescarse. Sin demonio ni
-// cron: este servidor de 3.7GB ya carga tres productos, y a un calendario de
-// alquileres no le cambia nada un desfase de una hora — el propio Airbnb
-// refresca los calendarios conectados cada varias horas.
+// y solo si el feed lleva más de SYNC_MINUTOS sin refrescarse. Desde el
+// 2026-09-13 además hay un cron cada 10 min (scripts/cron-calendario.sh →
+// /api/calendario/sync) y los correos de Airbnb la fuerzan al instante
+// (lib/airbnb-correo.ts): el visitante ve el calendario de Airbnb con minutos
+// de desfase, no horas. Son 4 feeds; el costo es despreciable.
 //
 // FECHAS COMO TEXTO 'YYYY-MM-DD' DE PUNTA A PUNTA. node-postgres convierte las
 // columnas `date` a Date de JavaScript en la zona horaria DEL SERVIDOR, que no
@@ -17,7 +18,7 @@ import { query, rows, withTransaction } from './db';
 import { parseIcs } from './ical';
 
 /** Minutos antes de considerar vencido lo importado de un feed. */
-const SYNC_MINUTOS = 60;
+const SYNC_MINUTOS = 10;
 
 /** 'YYYY-MM-DD' de hoy en Venezuela, que no es la zona horaria del servidor. */
 export function hoyCaracas(): string {
@@ -32,7 +33,7 @@ export function hoyCaracas(): string {
 export interface Reserva {
   id: string;
   propertyId: string;
-  origen: 'manual' | 'ical';
+  origen: 'manual' | 'ical' | 'airbnb-correo';
   tipo: 'reserva' | 'bloqueo';
   estado: 'confirmada' | 'tentativa';
   huesped: string;
@@ -72,7 +73,7 @@ const RESERVA_SELECT = `
 `;
 
 type ReservaRow = {
-  id: string; property_id: string; origen: 'manual' | 'ical';
+  id: string; property_id: string; origen: 'manual' | 'ical' | 'airbnb-correo';
   tipo: 'reserva' | 'bloqueo'; estado: 'confirmada' | 'tentativa';
   huesped: string; telefono: string; notas: string; total_usd: string | null;
   check_in: string; check_out: string; noches: number;
@@ -128,6 +129,18 @@ async function importarFeed(feed: { id: string; property_id: string; url: string
         [feed.property_id, tipo, e.inicio, e.fin, feed.id, e.uid, e.summary],
       );
     }
+
+    // Lo que un correo de Airbnb bloqueó de forma provisional queda cubierto
+    // en cuanto el iCal trae la misma estadía: el iCal es la verdad y el
+    // bloqueo por correo se retira para no duplicar la noche en el panel.
+    await q(
+      `DELETE FROM reservas c
+       WHERE c.origen = 'airbnb-correo' AND c.property_id = $1
+         AND EXISTS (SELECT 1 FROM reservas i
+                     WHERE i.feed_id = $2 AND i.property_id = c.property_id
+                       AND i.check_in < c.check_out AND i.check_out > c.check_in)`,
+      [feed.property_id, feed.id],
+    );
 
     // Lo que ya no viene en el feed se canceló en Airbnb… si es futuro. Las
     // estadías pasadas desaparecen del feed por viejas, no por canceladas, y

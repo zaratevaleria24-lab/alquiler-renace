@@ -61,3 +61,13 @@ usuario `__codigo__`); techo global de 30 fallos / 15 min desde cualquier origen
 Para volver al usuario+contraseña basta borrar el archivo. **Un código de 4
 dígitos es débil**: subirlo a 8+ dígitos o cambiarlo por 2FA cuando el dueño
 lo decida (`printf 'PANEL_CODIGO=…' > /etc/margarita-renace/panel.env && pm2 restart margarita-renace`).
+
+## Calendario: secreto compartido (2026-09-13)
+
+`/etc/margarita-renace/calendario.env` → `CALENDARIO_SECRETO` (48 hex, 0600). Lo
+usan el cron local y el Email Worker de Cloudflare para llamar a
+`/api/calendario/sync` y `/api/airbnb/correo`; ambas rutas responden 404 sin
+él (comparación en tiempo constante, `lib/calendario-secreto.ts`). El webhook
+guarda el correo crudo (máx. 2 MB) y solo actúa sobre `reservas` con origen
+`airbnb-correo`; nunca toca reservas manuales ni de iCal. El worker rechaza
+remitentes que no sean de Airbnb o Google.

@@ -35,7 +35,7 @@ export interface PropiedadCal {
 export interface ReservaCal {
   id: string;
   propertyId: string;
-  origen: 'manual' | 'ical';
+  origen: 'manual' | 'ical' | 'airbnb-correo';
   tipo: 'reserva' | 'bloqueo';
   estado: 'confirmada' | 'tentativa';
   huesped: string;
@@ -78,6 +78,7 @@ function claseBarra(r: ReservaCal): string {
   if (r.tipo === 'bloqueo')
     return 'bg-paper-warm text-ink-muted border border-line-strong';
   if (r.origen === 'ical') return 'bg-coral text-white';
+  if (r.origen === 'airbnb-correo') return 'bg-coral/70 text-white border border-dashed border-white/70';
   if (r.estado === 'tentativa')
     return 'bg-brand-soft text-brand-deep border border-dashed border-brand';
   return 'bg-brand text-white';
@@ -86,6 +87,7 @@ function claseBarra(r: ReservaCal): string {
 function etiquetaBarra(r: ReservaCal): string {
   if (r.tipo === 'bloqueo') return 'Cerrado';
   if (r.origen === 'ical') return r.feedNombre ?? 'Airbnb';
+  if (r.origen === 'airbnb-correo') return `Airbnb · correo${r.huesped ? ` · ${r.huesped}` : ''}`;
   return r.huesped || 'Reserva';
 }
 

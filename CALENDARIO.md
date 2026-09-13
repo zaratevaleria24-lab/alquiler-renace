@@ -23,9 +23,12 @@ dos meses lado a lado en escritorio, uno en teléfono, con `siempre` para que se
 pueda elegir fechas aunque la API no responda; los días tomados salen de
 `/api/disponibilidad/<slug>`. Las fechas elegidas viajan al mensaje de WhatsApp.
 
-No hay demonio ni cron: los feeds se refrescan al abrir el calendario del
-panel o al consultar disponibilidad pública, solo si llevan más de una hora
-sin refrescar. El botón «Sincronizar ahora» del panel fuerza todos.
+Los feeds se refrescan al abrir el calendario del panel o al consultar
+disponibilidad pública si llevan más de 10 minutos sin refrescar, además de un
+cron cada 10 min (`scripts/cron-calendario.sh` → `/api/calendario/sync` con el
+secreto de `/etc/margarita-renace/calendario.env`) y al instante cuando llega
+un correo de Airbnb (ver `AIRBNB-CORREO.md`). El botón «Sincronizar ahora» del
+panel fuerza todos.
 
 ## Conectar una propiedad con Airbnb (pasos para la dueña)
 

@@ -11,7 +11,8 @@ import IconoCategoria from '@/components/IconosGuia';
 // debajo el resto, como las tarjetas de siempre. Siempre: nombre, valoración y
 // horario de hoy, DÓNDE está, el consejo, y una fila de acciones: WhatsApp,
 // llamar, Instagram, web, cómo llegar. Los ALIADOS (trato directo con nosotros)
-// llevan el sello «Recomendado» y un borde en el color de la marca.
+// llevan el sello «Recomendado» en dorado/naranja (el dueño pidió que resalte
+// sobre el teal de la marca) y un borde que gira con el mismo oro.
 function waDe(tel: string | null): string | null {
   if (!tel) return null;
   let d = tel.replace(/\D/g, '');
@@ -56,7 +57,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
   return (
     <li data-cat={categoriasDe(l).join(' ')} hidden={oculta || paginada} className={`${paginada ? 'paginada ' : ''}flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'borde-brillo border-transparent' : 'border-line'}`}>
       {l.aliado && (
-        <p className="flex items-center gap-1.5 bg-brand-deep px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">
+        <p className="flex items-center gap-1.5 bg-[linear-gradient(90deg,#b06f14,#d9a441_55%,#e4823a)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,.18)]">
           <Star className="h-3 w-3 fill-current" aria-hidden="true" />Recomendado por Margarita Renace
         </p>
       )}

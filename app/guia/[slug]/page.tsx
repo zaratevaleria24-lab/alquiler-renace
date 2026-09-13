@@ -137,7 +137,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
 
               {l.consejo && (
                 <aside className={`mt-8 rounded-panel border bg-luz p-6 md:p-7 ${l.aliado ? 'borde-brillo borde-brillo-grueso border-transparent' : 'border-line'}`}>
-                  <p className="label-eyebrow flex items-center gap-1.5 text-brand-deep">{l.aliado && <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}El consejo de {SITE.name}{l.aliado ? ' · aliado' : ''}</p>
+                  <p className={`label-eyebrow flex items-center gap-1.5 ${l.aliado ? 'text-oro-deep' : 'text-brand-deep'}`}>{l.aliado && <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}{l.aliado ? `Recomendado por ${SITE.name}` : `El consejo de ${SITE.name}`}</p>
                   <p className="mt-2 text-body text-ink leading-relaxed">{l.consejo}</p>
                 </aside>
               )}

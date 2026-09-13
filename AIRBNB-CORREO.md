@@ -60,6 +60,21 @@ uno del dominio (es también el correo de acceso; riesgo innecesario).
 - «Disponibilidad al día · hace N min» junto al calendario, con la hora real.
 - Fechas en el mensaje de WhatsApp (hecho) y precongelar el contrato con ellas.
 
+## Estado (2026-09-13, noche)
+
+Hecho en el servidor y desplegado:
+- Migración `024-airbnb-correo.sql`: tabla `airbnb_eventos`, origen `airbnb-correo` en `reservas`.
+- `lib/airbnb-correo.ts`: lectura MIME mínima, clasificación, extracción (código HM…, anuncio por `/rooms/<id>` contra `properties.airbnb_url`, fechas es/en, nombre) y acción. Probado de punta a punta con un correo sintético: bloquea, la API pública lo muestra, la cancelación lo libera.
+- `POST /api/airbnb/correo` (webhook, Bearer `CALENDARIO_SECRETO`) y `GET/POST /api/calendario/sync` (fuerza todos los feeds). Sin secreto responden 404.
+- Secreto en `/etc/margarita-renace/calendario.env` (solo custodia; no rotar sin avisar).
+- Cron `*/10` → `scripts/cron-calendario.sh` (log en `/root/backups/margarita/calendario-sync.log`); `SYNC_MINUTOS` bajó de 60 a 10.
+- El iCal sustituye los bloqueos por correo que solapa (en `importarFeed`).
+- Panel `/admin/calendario`: barras «Airbnb · correo» y sección «Correos de Airbnb» (últimos 15, con resultado y código de verificación si es de Google).
+- Worker listo para pegar: `infra/cloudflare/airbnb-correo-worker.js` (instrucciones en el encabezado).
+- Bahía Mágica y Agua Mar marcados `is_real` para que entren al multicalendario.
+
+Falta del dueño: pegar los 4 iCal, crear el worker + la dirección `airbnb@` en Cloudflare, y el reenvío en Gmail.
+
 ## Pasos y orden propuesto
 
 1. Dueño: pegar los 4 iCal de Airbnb en el panel e importar los 4 nuestros en Airbnb.
