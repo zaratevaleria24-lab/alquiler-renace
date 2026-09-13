@@ -108,11 +108,13 @@ function urlReservaWhatsApp(
     ? `Hola, vi «${property.name}» (${property.location}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${huespedes}?`
     : [
         `Hola, quiero reservar *${property.name}* (${property.location}).`,
-        `🌙 ${noches} · 👥 ${huespedes}`,
-        `💵 US$${property.pricePerNight} × ${nights} = *US$${total.toLocaleString('es-VE')}*`,
-        bcv ? `   = ${bolivares(total * bcv, 0)} al BCV (${bolivares(bcv, 2)}/US$)` : '',
-        bcv && usdt ? `   ≈ ${(total * bcv / usdt).toFixed(1)} USDT` : '',
-        `¿Está disponible? Pago por pago móvil (Bs al BCV), Zelle, efectivo o USDT.`,
+        `Estadía: ${noches}, ${huespedes}`,
+        `Precio: US$${property.pricePerNight} por noche (dólar BCV)`,
+        `*Total: US$${total.toLocaleString('es-VE')}*`,
+        bcv ? `En bolívares: ${bolivares(total * bcv, 0)} (BCV ${bolivares(bcv, 2)})` : '',
+        bcv && usdt ? `Referencia USDT: ${(total * bcv / usdt).toFixed(1)} USDT` : '',
+        `Puedo pagar por: pago móvil (Bs) · Zelle (US$) · efectivo (US$) · USDT por Binance.`,
+        `¿Está disponible?`,
         `https://margaritarenace.com.ve/propiedad/${property.slug}`,
       ].filter(Boolean).join('\n');
   return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;

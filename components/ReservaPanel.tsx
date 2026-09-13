@@ -132,11 +132,13 @@ export default function ReservaPanel({
     ? `Hola, vi «${nombre}» (${ubicacion}) en margaritarenace.com.ve. ¿Disponibilidad y tarifa para ${textoHuespedes}${fechas ? `, ${textoFechas(fechas)} (${textoNoches})` : ''}?`
     : [
         `Hola, quiero reservar *${nombre}* (${ubicacion}).`,
-        `🌙 ${textoNoches}${conFechas} · 👥 ${textoHuespedes}`,
-        `💵 US$${precioPorNoche} × ${nochesElegidas} = *US$${total.toLocaleString('es-VE')}*`,
-        tasa?.bcv ? `   = ${bolivares(total * tasa.bcv)} al BCV (${bolivares(tasa.bcv)}/US$)` : '',
-        tasa?.bcv && tasa.usdt ? `   ≈ ${(total * tasa.bcv / tasa.usdt).toFixed(1)} USDT` : '',
-        '¿Está disponible? Pago por pago móvil (Bs al BCV), Zelle, efectivo o USDT.',
+        `Estadía: ${textoNoches}${conFechas}, ${textoHuespedes}`,
+        `Precio: US$${precioPorNoche} por noche (dólar BCV)`,
+        `*Total: US$${total.toLocaleString('es-VE')}*`,
+        tasa?.bcv ? `En bolívares: ${bolivares(total * tasa.bcv)} (BCV ${bolivares(tasa.bcv)})` : '',
+        tasa?.bcv && tasa.usdt ? `Referencia USDT: ${(total * tasa.bcv / tasa.usdt).toFixed(1)} USDT` : '',
+        'Puedo pagar por: pago móvil (Bs) · Zelle (US$) · efectivo (US$) · USDT por Binance.',
+        '¿Está disponible?',
         `https://margaritarenace.com.ve/propiedad/${slug}`,
       ].filter(Boolean).join('\n');
   const whatsapp = numero

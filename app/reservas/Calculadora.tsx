@@ -26,6 +26,13 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [cupon, setCupon] = useState('');
   const [descuento, setDescuento] = useState<{ pct: number; nombre: string } | null>(null);
   const [cuponError, setCuponError] = useState<string | null>(null);
+  const PAGOS = [
+    { k: 'pago-movil', t: 'Pago móvil', d: 'en bolívares al BCV' },
+    { k: 'zelle', t: 'Zelle', d: 'en dólares' },
+    { k: 'efectivo', t: 'Efectivo', d: 'dólares al llegar' },
+    { k: 'usdt', t: 'USDT', d: 'por Binance, al equivalente' },
+  ] as const;
+  const [pago, setPago] = useState<(typeof PAGOS)[number]['k']>('pago-movil');
   const aplicarCupon = async (c: string) => {
     if (!c.trim()) { setDescuento(null); setCuponError(null); return; }
     const v = await validarCuponAction(c);
@@ -45,15 +52,20 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   // El «objeto de la compra» completo va al WhatsApp: el anfitrión no tiene
   // que preguntar nada y el huésped ve el precio en las tres formas de pago.
   const enUsdt = tasa && usdt ? total * tasa / usdt : null;
+  const pagoElegido = PAGOS.find((x) => x.k === pago)!;
   const mensaje = [
     `Hola, quiero reservar *${apto?.nombre}* (${apto?.zona}).`,
-    `📅 Entrada ${entrada} · Salida ${salida} · ${noches} ${noches === 1 ? 'noche' : 'noches'}`,
-    `👥 ${personas} ${personas === 1 ? 'persona' : 'personas'}`,
-    `💵 ${usd(apto?.precio ?? 0)} × ${noches} = ${usd(bruto)}${descuento ? `\n🎟️ Cupón ${cupon} (−${descuento.pct} %): −${usd(rebaja)}` : ''}`,
-    `*Total: ${usd(total)}*${tasa ? `\n   = ${bs(total * tasa)} al BCV (${bs(tasa)}/US$)` : ''}${enUsdt ? `\n   ≈ ${enUsdt.toFixed(1)} USDT` : ''}`,
-    `¿Está disponible? Pago por ${tasa ? 'pago móvil (Bs al BCV), ' : ''}Zelle, efectivo o USDT.`,
-    `${location.origin}/propiedad/${apto?.slug}`,
-  ].join('\n');
+    `Entrada: ${entrada} · Salida: ${salida}`,
+    `Estadía: ${noches} ${noches === 1 ? 'noche' : 'noches'}, ${personas} ${personas === 1 ? 'persona' : 'personas'}`,
+    `Precio: ${usd(apto?.precio ?? 0)} por noche (dólar BCV) × ${noches} = ${usd(bruto)}`,
+    descuento ? `Cupón ${cupon}: −${descuento.pct} % (−${usd(rebaja)})` : '',
+    `*Total: ${usd(total)}*`,
+    tasa ? `En bolívares: ${bs(total * tasa)} (BCV ${bs(tasa)})` : '',
+    enUsdt ? `Referencia USDT: ${enUsdt.toFixed(1)} USDT` : '',
+    `Forma de pago: ${pagoElegido.t} (${pagoElegido.d}).`,
+    '¿Está disponible?',
+    `https://margaritarenace.com.ve/propiedad/${apto?.slug}`,
+  ].filter(Boolean).join('\n');
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
 
   return (
@@ -90,6 +102,18 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
         {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
           : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>
           : noches > 0 && <p className="mt-3 rounded-card border border-brand/30 bg-brand-tint px-3 py-2 text-meta text-brand-deep">Fechas libres según nuestro calendario (incluye Airbnb).</p>}
+        <fieldset className="mt-3">
+          <legend className="text-ui font-semibold uppercase tracking-[0.12em] text-ink-subtle">¿Cómo prefieres pagar?</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {PAGOS.map((x) => (
+              <label key={x.k} className={`cursor-pointer rounded-card border px-3 py-2 text-left transition-colors ${pago === x.k ? 'border-brand-deep bg-brand-tint' : 'border-line bg-white hover:border-brand/40'}`}>
+                <input type="radio" name="pago" value={x.k} checked={pago === x.k} onChange={() => setPago(x.k)} className="sr-only" />
+                <span className="block text-meta font-semibold text-ink">{x.t}</span><span className="block text-[11px] text-ink-muted">{x.d}</span>
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-ui text-ink-muted">¿Prefieres tarjeta internacional? Reserva por <a href="/enlaces#airbnb" className="text-brand-deep underline underline-offset-4">Airbnb</a> (con su comisión).</p>
+        </fieldset>
         <form onSubmit={(e) => { e.preventDefault(); aplicarCupon(cupon); }} className="mt-3 flex gap-2">
           <label className="relative flex-1"><Ticket className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" aria-hidden="true" /><input value={cupon} onChange={(e) => setCupon(e.target.value.toUpperCase())} placeholder="Código de descuento" aria-label="Código de descuento" className="mono-data w-full rounded-control border border-line bg-paper py-2 pl-9 pr-3 text-meta" /></label>
           <button type="submit" className="rounded-control border border-line bg-white px-3 text-ui font-medium text-brand-deep hover:border-brand/40">Aplicar</button>
