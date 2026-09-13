@@ -1,19 +1,19 @@
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import { categoriaLabel, portadaDe, type Lugar } from '@/lib/guia';
+import { categoriaLabel, miniatura, portadaDe, type Lugar } from '@/lib/guia';
 import { CATEGORIAS } from '@/lib/guia';
 
 // Tarjeta de un lugar de la guía. Pensada para el pulgar: foto grande, nombre,
 // una línea de contexto y la valoración. Nada que leer con lupa.
-export default function TarjetaLugar({ l, prioridad = false }: { l: Lugar; prioridad?: boolean }) {
+export default function TarjetaLugar({ l, prioridad = false, oculta = false }: { l: Lugar; prioridad?: boolean; oculta?: boolean }) {
   const foto = portadaDe(l);
   const emoji = CATEGORIAS.find((c) => c.key === l.categoria)?.emoji ?? '';
   return (
-    <li className="group overflow-hidden rounded-panel border border-line bg-white shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lift-lg [content-visibility:auto] [contain-intrinsic-size:auto_340px]">
+    <li data-cat={l.categoria} hidden={oculta} className="group overflow-hidden rounded-panel border border-line bg-white shadow-lift transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lift-lg [content-visibility:auto] [contain-intrinsic-size:auto_340px]">
       <Link href={`/guia/${l.slug}`} className="block">
         <div className="relative overflow-hidden">
           {foto ? (
-            <img src={foto.src} alt={foto.alt} width={800} height={500} loading={prioridad ? 'eager' : 'lazy'} fetchPriority={prioridad ? 'high' : 'auto'} decoding="async"
+            <img src={miniatura(foto.src)} alt={foto.alt} width={480} height={300} loading={prioridad ? 'eager' : 'lazy'} fetchPriority={prioridad ? 'high' : 'auto'} decoding="async"
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="aspect-[16/10] w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
           ) : (
             <div className="flex aspect-[16/10] w-full items-center justify-center bg-luz text-3xl">{emoji}</div>

@@ -104,6 +104,13 @@ export async function getLugarAdmin(id: string): Promise<Lugar | undefined> {
   return r ? lugarDesde(r) : undefined;
 }
 
+/** Versión chica (480px) de una foto guardada: `x.webp` → `x-s.webp`. Las de
+ *  Google van por el proxy con `?w=480`. Para tarjetas y mapa; la galería usa la grande. */
+export function miniatura(src: string): string {
+  if (src.startsWith('/api/guia/foto/')) return `${src}?w=480`;
+  return src.replace(/\.webp$/, '-s.webp');
+}
+
 /** Foto de portada: propia/Commons primero; si no hay, la primera de Google vía proxy. */
 export function portadaDe(l: Lugar): { src: string; alt: string; credito: string } | null {
   if (l.fotos[0]) return { src: l.fotos[0].path, alt: l.fotos[0].alt, credito: l.fotos[0].credito };

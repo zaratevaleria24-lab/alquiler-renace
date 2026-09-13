@@ -69,6 +69,9 @@ export async function guardarFoto(
 
   await mkdir(dirFisico, { recursive: true });
   await sharp(webp).toFile(path.join(dirFisico, nombre));
+  if (raiz === 'guia') {
+    await sharp(webp).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 70 }).toFile(path.join(dirFisico, nombre.replace(/\.webp$/, '-s.webp')));
+  }
 
   return `${PUBLIC_PREFIX}/${raiz}/${carpeta}/${nombre}`;
 }
@@ -163,6 +166,9 @@ export async function guardarFotoRemota(
     const dirFisico = path.join(UPLOADS_DIR, raiz, dir);
     await mkdir(dirFisico, { recursive: true });
     await sharp(webp).toFile(path.join(dirFisico, nombre));
+    // Miniatura de 480px para las tarjetas: 30 KB en vez de 300. La grande queda
+    // para la galería. Ver miniatura() en lib/guia.ts.
+    await sharp(webp).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 70 }).toFile(path.join(dirFisico, nombre.replace(/\.webp$/, '-s.webp')));
     return `${PUBLIC_PREFIX}/${raiz}/${dir}/${nombre}`;
   } catch {
     return null;

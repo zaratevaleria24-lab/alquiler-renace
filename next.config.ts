@@ -35,6 +35,7 @@ const nextConfig: NextConfig = {
       // 2026-09-12: «Apartamento Costa Azul» pasó a llamarse «Bahía Mágica». La
       // URL vieja está en Google y en enlaces compartidos: 301 a la nueva.
       { source: '/propiedad/apartamento-costa-azul', destination: '/propiedad/bahia-magica', permanent: true },
+      { source: '/propiedad/penthouse-porlamar-centro', destination: '/propiedad/agua-mar', permanent: true },
       { source: '/links', destination: '/enlaces', permanent: true },
       { source: '/linktree', destination: '/enlaces', permanent: true },
       { source: '/bio', destination: '/enlaces', permanent: true },

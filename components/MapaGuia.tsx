@@ -15,6 +15,11 @@ export default function MapaGuia({ puntos, clave }: { puntos: PuntoMapa[]; clave
   const [abierto, setAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const caja = useRef<HTMLDivElement>(null);
+  const marcadores = useRef<{ cat: string; m: any }[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  useEffect(() => {
+    const f = (e: Event) => { const c = (e as CustomEvent<string>).detail; for (const x of marcadores.current) x.m.setVisible(!c || x.cat === c); };
+    window.addEventListener('guia:categoria', f); return () => window.removeEventListener('guia:categoria', f);
+  }, []);
 
   useEffect(() => {
     if (!abierto || !clave || !caja.current) return;
@@ -32,6 +37,7 @@ export default function MapaGuia({ puntos, clave }: { puntos: PuntoMapa[]; clave
           label: { text: p.emoji, fontSize: '16px' },
           icon: { path: g.maps.SymbolPath.CIRCLE, scale: 15, fillColor: '#fff8f2', fillOpacity: 1, strokeColor: '#0b4a5c', strokeWeight: 1.5 },
         });
+        marcadores.current.push({ cat: p.categoria, m });
         m.addListener('click', () => {
           info.setContent(`<div style="font-family:system-ui;max-width:220px">${p.foto ? `<img src="${p.foto}" alt="" style="width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:8px">` : ''}<p style="margin:8px 0 2px;font-weight:600;color:#0b4a5c">${p.nombre}</p><a href="/guia/${p.slug}" style="color:#126e8b;font-size:13px">Ver ficha →</a></div>`);
           info.open({ map: mapa, anchor: m });

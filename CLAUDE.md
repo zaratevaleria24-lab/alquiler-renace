@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Sections and their docs: `SEO.md`, `VENTAS.md` (En venta), `GUIA.md` (tourist guide, `/guia`), `CALENDARIO.md`, `ENLACES.md`.
 
+**Read `PRINCIPIOS.md` before shipping anything** — the engineering harness: measure first, performance budget for Venezuelan connections, native scroll on listings, tagged caching, data/rights rules, pre-publish checklist.
+
 **Read `IDENTIDAD.md` before writing any user-facing copy** — mission, values (fair deals, conscience, empathy, humility, equity), voice rules and the phrases that represent the brand. Copy that doesn't fit it gets rewritten.
 
 A second surface — an admin dashboard for managing listings/reservations — is planned on a separate subdomain, sharing this codebase's stack and conventions.

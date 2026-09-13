@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, claveMaps, getConsejos, getLugares, portadaDe, type Categoria } from '@/lib/guia';
+import { CATEGORIAS, claveMaps, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import TarjetaLugar from '@/components/TarjetaLugar';
 import MapaGuia from '@/components/MapaGuia';
+import FiltroGuia from '@/components/FiltroGuia';
 
 // GUÍA TURÍSTICA — /guia
 //
@@ -32,7 +33,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
   const cuenta = (k: Categoria) => lugares.filter((l) => l.categoria === k).length;
   const puntos = lugares.filter((l) => l.latitud != null && l.longitud != null).map((l) => ({
     slug: l.slug, nombre: l.nombre, categoria: l.categoria, emoji: CATEGORIAS.find((c) => c.key === l.categoria)?.emoji ?? '📍',
-    lat: l.latitud!, lng: l.longitud!, foto: portadaDe(l)?.src ?? null,
+    lat: l.latitud!, lng: l.longitud!, foto: portadaDe(l) ? miniatura(portadaDe(l)!.src) : null,
   }));
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent('Hola, estoy viendo la guía turística de Margarita Renace y tengo una pregunta: ')}` : null;
   const jsonLd = graph(breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: PATH }]), {
@@ -61,28 +62,26 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           </div>
           {/* Categorías: tira deslizable, pegada bajo la barra al hacer scroll */}
           <nav aria-label="Categorías" className="sticky top-[88px] z-30 border-t border-line/70 bg-paper/90 backdrop-blur-md md:top-[104px]">
-            <ul className="max-w-6xl mx-auto flex gap-2 overflow-x-auto px-5 py-3 md:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <li><Link href={PATH} scroll={false} className={`inline-flex min-h-[38px] items-center whitespace-nowrap rounded-chip border px-3.5 text-ui font-medium transition-colors ${!cat ? 'border-brand-deep bg-brand-deep text-white' : 'border-line bg-white text-ink-soft hover:border-brand/40'}`}>Todo · {lugares.length}</Link></li>
-              {CATEGORIAS.filter((c) => cuenta(c.key) > 0).map((c) => (
-                <li key={c.key}>
-                  <Link href={`${PATH}?c=${c.key}`} scroll={false} className={`inline-flex min-h-[38px] items-center gap-1.5 whitespace-nowrap rounded-chip border px-3.5 text-ui font-medium transition-colors ${cat === c.key ? 'border-brand-deep bg-brand-deep text-white' : 'border-line bg-white text-ink-soft hover:border-brand/40'}`}>
-                    <span aria-hidden="true">{c.emoji}</span>{c.plural} · {cuenta(c.key)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <FiltroGuia
+              inicial={cat ?? ''}
+              chips={[{ key: '', label: 'Todo', n: lugares.length }, ...CATEGORIAS.filter((c) => cuenta(c.key) > 0).map((c) => ({ key: c.key, label: c.plural, emoji: c.emoji, n: cuenta(c.key) }))]}
+            />
           </nav>
         </header>
 
         <main className="max-w-6xl mx-auto px-5 py-7 md:px-8 md:py-10">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-serif text-title-sm font-semibold text-ink">
-              {cat ? CATEGORIAS.find((c) => c.key === cat)!.plural : 'Imperdibles primero'} <span className="mono-data text-ink-muted">{visibles.length}</span>
+              <span id="titulo-guia">{cat ? CATEGORIAS.find((c) => c.key === cat)!.plural : 'Imperdibles primero'}</span>{' '}
+              <span id="cuenta-guia" className="mono-data text-ink-muted">{visibles.length}</span>
             </h2>
-            <MapaGuia puntos={cat ? puntos.filter((p) => p.categoria === cat) : puntos} clave={claveMaps()} />
+            <MapaGuia puntos={puntos} clave={claveMaps()} />
           </div>
-          <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visibles.map((l, k) => <TarjetaLugar key={l.id} l={l} prioridad={k < 2} />)}
+          {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
+              oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
+              desde el servidor, así el enlace compartido abre bien sin JS. */}
+          <ul id="grid-guia" className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {lugares.map((l, k) => <TarjetaLugar key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
           </ul>
 
           <section aria-labelledby="consejos" className="section-gap">
