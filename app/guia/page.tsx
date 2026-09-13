@@ -3,21 +3,27 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, claveMaps, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
+import { CATEGORIAS, claveMaps, esServicio, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import TarjetaLugar from '@/components/TarjetaLugar';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
+import HubGuia from '@/components/HubGuia';
+import TarjetaServicio from '@/components/TarjetaServicio';
+import Bienvenida from '@/components/Bienvenida';
 
 // GUÍA TURÍSTICA — /guia
 //
 // Se abre desde un QR pegado en cada apartamento, así que está hecha para el
-// teléfono: cabecera corta, categorías en una tira que se desliza con el
-// pulgar, tarjetas grandes con foto, y el mapa solo si lo piden. Los textos son
+// teléfono (8 de cada 10 visitas): bienvenida animada mientras carga, un hub
+// de baldosas «Resolver / Descubrir» (HubGuia) en vez de una lista larga,
+// tarjetas grandes con foto para lugares y tarjetas de acción (llamar,
+// WhatsApp, ir) para servicios, y el mapa solo si lo piden. En escritorio
+// queda la tira de chips de siempre. Los textos son
 // nuestros (IDENTIDAD.md); los datos, de Google; las fotos, libres o nuestras.
 
 export const revalidate = 3600;
 const PATH = '/guia';
-const TITULO = 'Guía turística de Isla de Margarita: playas, qué hacer, dónde comer';
+const TITULO = 'Guía de Isla de Margarita: playas, qué hacer, dónde comer y servicios a domicilio';
 const DESCRIPCION = 'Los mejores sitios de la Isla de Margarita explicados por gente de la isla: playas, castillos, La Restinga, kitesurf en El Yaque, dónde comer y consejos reales de dinero, transporte y seguridad.';
 
 export const metadata: Metadata = {
@@ -26,7 +32,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: TITULO, description: DESCRIPCION, images: ['/opengraph-image'] },
 };
 
-export default async function GuiaPage({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
+export default async function GuiaPage({ searchParams }: { searchParams: Promise<{ c?: string; desde?: string }> }) {
   const [sp, lugares, consejos, contacto] = await Promise.all([searchParams, getLugares(), getConsejos(), getContacto()]);
   const cat = CATEGORIAS.find((c) => c.key === sp.c)?.key as Categoria | undefined;
   const visibles = cat ? lugares.filter((l) => l.categoria === cat) : lugares;
@@ -44,9 +50,10 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      <Bienvenida forzar={sp.desde === 'qr'} />
       <div className="min-h-screen bg-paper">
         <header className="bg-luz border-b border-line">
-          <div className="max-w-6xl mx-auto px-5 pb-6 pt-24 md:px-8 md:pb-8 md:pt-28">
+          <div className="max-w-6xl mx-auto px-5 pb-5 pt-[88px] md:px-8 md:pb-8 md:pt-28">
             <div className="flex items-end justify-between gap-6">
               <div>
                 <p className="label-eyebrow text-brand-deep">Guía turística · {SITE.region.island}</p>
@@ -54,7 +61,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
                   Lo mejor de la isla, <em className="headline-italic">contado por gente de acá</em>
                 </h1>
                 <p className="mt-3 max-w-xl text-meta text-ink-soft md:text-body">
-                  {lugares.length} lugares y planes con datos reales: horario, valoración, cómo llegar y el consejo que te daría un amigo margariteño.
+                  {lugares.length} lugares, planes y servicios con datos reales: horario, valoración, cómo llegar y el consejo que te daría un amigo margariteño.
                 </p>
               </div>
               <img src="/logo-mark-teal.svg" alt="" width={72} height={72} className="hidden h-[72px] w-[72px] shrink-0 opacity-80 sm:block" />
@@ -69,8 +76,13 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           </nav>
         </header>
 
-        <main className="max-w-6xl mx-auto px-5 py-7 md:px-8 md:py-10">
-          <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <main className="max-w-6xl mx-auto px-5 py-5 md:px-8 md:py-10">
+          <HubGuia
+            inicial={cat ?? ''}
+            whatsapp={contacto.whatsapp}
+            baldosas={CATEGORIAS.filter((c) => cuenta(c.key) > 0).map((c) => ({ key: c.key, label: c.label, sub: c.sub, emoji: c.emoji, grupo: c.grupo, n: cuenta(c.key) }))}
+          />
+          <div id="resultados-guia" className="mt-8 flex flex-wrap items-baseline justify-between gap-3 md:mt-0">
             <h2 className="font-serif text-title-sm font-semibold text-ink">
               <span id="titulo-guia">{cat ? CATEGORIAS.find((c) => c.key === cat)!.plural : 'Imperdibles primero'}</span>{' '}
               <span id="cuenta-guia" className="mono-data text-ink-muted">{visibles.length}</span>
@@ -81,7 +93,9 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
               desde el servidor, así el enlace compartido abre bien sin JS. */}
           <ul id="grid-guia" className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {lugares.map((l, k) => <TarjetaLugar key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
+            {lugares.map((l, k) => esServicio(l.categoria)
+              ? <TarjetaServicio key={l.id} l={l} oculta={Boolean(cat) && l.categoria !== cat} />
+              : <TarjetaLugar key={l.id} l={l} prioridad={k < 2} oculta={Boolean(cat) && l.categoria !== cat} />)}
           </ul>
 
           <section aria-labelledby="consejos" className="section-gap">

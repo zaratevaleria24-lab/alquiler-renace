@@ -14,6 +14,13 @@ export interface ChipCategoria { key: Categoria | ''; label: string; emoji?: str
 export default function FiltroGuia({ chips, inicial }: { chips: ChipCategoria[]; inicial: Categoria | '' }) {
   const [cat, setCat] = useState<Categoria | ''>(inicial);
 
+  // El hub de teléfono (HubGuia) elige categorías desde afuera.
+  useEffect(() => {
+    const on = (e: Event) => setCat((e as CustomEvent<Categoria>).detail);
+    window.addEventListener('guia:elegir', on);
+    return () => window.removeEventListener('guia:elegir', on);
+  }, []);
+
   useEffect(() => {
     const grid = document.getElementById('grid-guia');
     if (!grid) return;
@@ -34,11 +41,19 @@ export default function FiltroGuia({ chips, inicial }: { chips: ChipCategoria[];
   }, [cat, chips]);
 
   return (
-    <ul className="max-w-6xl mx-auto flex gap-2 overflow-x-auto px-5 py-3 md:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <ul className={`max-w-6xl mx-auto gap-2 overflow-x-auto px-5 py-3 md:flex md:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${cat ? 'flex' : 'hidden'}`}>
+      {cat && (
+        <li className="md:hidden">
+          <button type="button" onClick={() => { setCat(''); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className="inline-flex min-h-[38px] items-center gap-1 whitespace-nowrap rounded-chip border border-brand-deep/30 bg-white px-3 text-ui font-semibold text-brand-deep" aria-label="Volver al inicio de la guía">
+            ← Inicio
+          </button>
+        </li>
+      )}
       {chips.map((c) => {
         const activo = cat === c.key;
         return (
-          <li key={c.key || 'todo'}>
+          <li key={c.key || 'todo'} className={c.key ? '' : 'hidden md:block'}>
             <a
               href={c.key ? `/guia?c=${c.key}` : '/guia'}
               onClick={(e) => { e.preventDefault(); setCat(c.key); }}

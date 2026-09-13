@@ -48,3 +48,30 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
 - El mapa es un extra bajo demanda (~150 KB de SDK que la lista no paga).
 - La zona mostrada es el **municipio** real, no la zona del sitio más cercana (que engañaba: «Playa El Agua · Manzanillo»). «Dormí cerca» sí usa la zona más cercana si está a ≤12 km.
 - Indexable y en el sitemap: es contenido propio y es la mejor pieza SEO del sitio («qué hacer en Margarita», «Playa El Agua horario», etc.).
+
+
+## Servicios y hub móvil (2026-09-13)
+
+- La guía también **resuelve**: 6 categorías de servicio (`grupo: 'resolver'` en
+  `CATEGORIAS`): `delivery`, `supermercado`, `licores`, `agua` (botellones,
+  cisterna, gas), `salud` (farmacias y clínicas), `transporte` (Ridery, taxis,
+  alquiler de carros, nuestro traslado). 22 entradas en `scripts/guia-semilla.ts`,
+  descubiertas con Google Places e Instagram (Apify): @tucisternamargarita,
+  @aguagraterol, @elabuelopachangueromgta, @alcostomgta, @farmaciaelcrucero.mgta.
+- Los servicios usan `components/TarjetaServicio.tsx` (foto chica, acciones
+  WhatsApp / Llamar / Ir / Instagram a la vista); los lugares siguen con
+  `TarjetaLugar`. `esServicio(cat)` decide cuál.
+- **Teléfono** (8 de cada 10 visitas): `components/HubGuia.tsx` muestra baldosas
+  «Resolver» y «Descubrir» en vez de la lista; tocar una dispara `guia:elegir`,
+  `FiltroGuia` filtra y baja a `#resultados-guia`; aparece la tira de chips con
+  «← Inicio» para volver. En escritorio (`md:`) el hub no existe y quedan los chips.
+- **Bienvenida** (`components/Bienvenida.tsx`, Motion v12): emblema con resorte,
+  nombre y barra que sigue la carga real (`load`), tope 2,4 s, una vez por sesión
+  (`sessionStorage guia:bienvenida`), solo en teléfono o con `?desde=qr` (el QR
+  apunta ahí y en ese caso viene ya en el HTML del servidor). Con
+  `prefers-reduced-motion` no se muestra.
+- Entradas cuyo match de Google fue erróneo se dejaron sin datos de Google a
+  mano (El Abuelo Pachanguero, TequeDun, Yummy, Tu Cisterna, Traslados MR): si se
+  vuelve a correr el importador con `--sin-fotos` NO las toca (solo rellena las que
+  no tienen `google_place_id`… revisar el log y volver a anular si hace falta).
+- Peso de `/guia`: 154 KB gzip de HTML (82 tarjetas), TTFB ≈ 0,1 s cacheado.

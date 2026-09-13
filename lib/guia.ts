@@ -15,20 +15,31 @@ import { query, rows } from './db';
 
 export type Categoria =
   | 'playa' | 'historia' | 'naturaleza' | 'mirador' | 'museo' | 'comer'
-  | 'actividad' | 'nocturna' | 'compras' | 'familia';
+  | 'actividad' | 'nocturna' | 'compras' | 'familia'
+  // Servicios: lo que un huésped necesita RESOLVER desde el apartamento.
+  | 'delivery' | 'supermercado' | 'licores' | 'agua' | 'salud' | 'transporte';
 
-export const CATEGORIAS: { key: Categoria; label: string; plural: string; emoji: string }[] = [
-  { key: 'playa', label: 'Playa', plural: 'Playas', emoji: '🏖' },
-  { key: 'actividad', label: 'Actividad', plural: 'Qué hacer', emoji: '🪁' },
-  { key: 'comer', label: 'Comer', plural: 'Dónde comer', emoji: '🍽' },
-  { key: 'historia', label: 'Historia', plural: 'Historia', emoji: '🏰' },
-  { key: 'naturaleza', label: 'Naturaleza', plural: 'Naturaleza', emoji: '🌿' },
-  { key: 'mirador', label: 'Mirador', plural: 'Miradores', emoji: '🌅' },
-  { key: 'museo', label: 'Museo', plural: 'Museos', emoji: '🖼' },
-  { key: 'familia', label: 'Con niños', plural: 'Con niños', emoji: '🎡' },
-  { key: 'nocturna', label: 'Noche', plural: 'De noche', emoji: '🌙' },
-  { key: 'compras', label: 'Compras', plural: 'Compras', emoji: '🛍' },
+export type Grupo = 'descubrir' | 'resolver';
+
+export const CATEGORIAS: { key: Categoria; label: string; plural: string; emoji: string; grupo: Grupo; sub: string }[] = [
+  { key: 'playa', label: 'Playa', plural: 'Playas', emoji: '🏖', grupo: 'descubrir', sub: 'Dónde bañarte hoy' },
+  { key: 'actividad', label: 'Actividad', plural: 'Qué hacer', emoji: '🪁', grupo: 'descubrir', sub: 'Kite, buceo, lanchas, caminatas' },
+  { key: 'comer', label: 'Comer', plural: 'Dónde comer', emoji: '🍽', grupo: 'descubrir', sub: 'Los más recomendados' },
+  { key: 'historia', label: 'Historia', plural: 'Historia', emoji: '🏰', grupo: 'descubrir', sub: 'Castillos, fortines, iglesias' },
+  { key: 'naturaleza', label: 'Naturaleza', plural: 'Naturaleza', emoji: '🌿', grupo: 'descubrir', sub: 'Lagunas, cerros, manglares' },
+  { key: 'mirador', label: 'Mirador', plural: 'Miradores', emoji: '🌅', grupo: 'descubrir', sub: 'Para el atardecer' },
+  { key: 'museo', label: 'Museo', plural: 'Museos', emoji: '🖼', grupo: 'descubrir', sub: 'Una hora fuera del sol' },
+  { key: 'familia', label: 'Con niños', plural: 'Con niños', emoji: '🎡', grupo: 'descubrir', sub: 'Parques y planes' },
+  { key: 'nocturna', label: 'Noche', plural: 'De noche', emoji: '🌙', grupo: 'descubrir', sub: 'Bares y música' },
+  { key: 'compras', label: 'Compras', plural: 'Compras', emoji: '🛍', grupo: 'descubrir', sub: 'Centros comerciales y mercados' },
+  { key: 'delivery', label: 'A domicilio', plural: 'Pedir a domicilio', emoji: '🛵', grupo: 'resolver', sub: 'Comida hasta tu puerta' },
+  { key: 'supermercado', label: 'Supermercado', plural: 'Supermercados', emoji: '🛒', grupo: 'resolver', sub: 'Sigo, Río, mercados' },
+  { key: 'licores', label: 'Licores', plural: 'Licores y bebidas', emoji: '🍾', grupo: 'resolver', sub: 'Guuao, Prolicor, delivery' },
+  { key: 'agua', label: 'Agua y gas', plural: 'Agua y gas', emoji: '💧', grupo: 'resolver', sub: 'Botellones, cisterna, bombonas' },
+  { key: 'salud', label: 'Salud', plural: 'Farmacias y clínicas', emoji: '➕', grupo: 'resolver', sub: 'Farmacias 24 h y clínicas' },
+  { key: 'transporte', label: 'Moverse', plural: 'Moverse', emoji: '🚕', grupo: 'resolver', sub: 'Taxis, apps, alquiler de carros' },
 ];
+export const esServicio = (c: string) => CATEGORIAS.find((x) => x.key === c)?.grupo === 'resolver';
 export const categoriaLabel = (c: string) => CATEGORIAS.find((x) => x.key === c)?.label ?? c;
 export const categoriaPlural = (c: string) => CATEGORIAS.find((x) => x.key === c)?.plural ?? c;
 
