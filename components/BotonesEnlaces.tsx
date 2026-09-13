@@ -185,7 +185,7 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
             transition={{ duration: 0.35, ease: [0.2, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <ul className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-2 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <ul className="-mx-5 flex snap-x snap-proximity gap-3 overflow-x-auto px-5 pb-2 pt-3 [scroll-padding-left:1.25rem] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {anuncios.map((a, i) => {
                 const contenido = (
                   <>
