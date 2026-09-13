@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProperties, getProperty, getZone } from '@/lib/queries';
+import { getLugares } from '@/lib/guia';
+import TarjetaGuia from '@/components/TarjetaGuia';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { iconFor } from '@/lib/icons';
@@ -86,6 +88,8 @@ export default async function PropiedadPage({
 
   const path = `/propiedad/${property.slug}`;
   const zonePath = `/alquiler/${property.zoneSlug}`;
+  // Interlinking guía ↔ alojamiento: lo que hay cerca según nuestra guía.
+  const cercanos = (await getLugares()).filter((l) => l.zoneSlug === property.zoneSlug).slice(0, 6).map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 160), consejo: l.consejo.slice(0, 160), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }));
   const [zone, contacto] = await Promise.all([
     getZone(property.zoneSlug),
     getContacto(),
@@ -270,6 +274,15 @@ export default async function PropiedadPage({
           {/* Enlazado interno: a la landing de la zona (contexto y autoridad) y
               a las demás propiedades de la misma zona, para que ninguna página
               de propiedad quede huérfana. */}
+          {cercanos.length > 0 && (
+            <section aria-labelledby="cerca-guia" className="section-gap">
+              <h2 id="cerca-guia" className="font-serif text-headline text-ink font-normal track-headline">Cerca de aquí, <em className="headline-italic">según nuestra guía</em></h2>
+              <p className="mt-3 max-w-2xl text-body text-ink-soft">Playas, dónde comer y servicios a domicilio alrededor de {property.name}, con horario, valoración y cómo llegar. La misma guía que recibes por QR al entrar al apartamento.</p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{cercanos.map((l) => <TarjetaGuia key={l.id} l={l} />)}</ul>
+              <p className="mt-6"><Link href="/guia" className="text-meta font-medium text-brand-deep underline-offset-4 hover:underline">Ver la guía completa de la isla →</Link></p>
+            </section>
+          )}
+
           <nav aria-labelledby="mas-en-la-zona" className="section-gap">
             <h2
               id="mas-en-la-zona"

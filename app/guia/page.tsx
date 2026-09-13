@@ -8,6 +8,7 @@ import ListaGuia from '@/components/ListaGuia';
 import MapaGuia from '@/components/MapaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
+import { HUBS } from '@/lib/guia-hubs';
 import Bienvenida from '@/components/Bienvenida';
 
 // GUÍA TURÍSTICA — /guia
@@ -25,7 +26,13 @@ const PATH = '/guia';
 const TITULO = 'Guía de Isla de Margarita: playas, comida y servicios';
 const DESCRIPCION = 'Playas, castillos, dónde comer, aventura y servicios a domicilio en la Isla de Margarita, con horarios, cómo llegar y consejos de gente de la isla.';
 
-export const metadata: Metadata = {
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ c?: string }> }): Promise<Metadata> {
+  const { c } = await searchParams;
+  // Los filtros ?c= son la misma página: canonical a /guia y sin indexar (las
+  // páginas por tema son /guia/playas, /guia/donde-comer, /guia/servicios, /guia/aventura).
+  return { ...metadata, robots: c ? { index: false, follow: true } : undefined };
+}
+const metadata: Metadata = {
   title: TITULO, description: DESCRIPCION, alternates: { canonical: PATH },
   openGraph: { type: 'website', url: absoluteUrl(PATH), siteName: SITE.name, title: TITULO, description: DESCRIPCION, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: TITULO }] },
   twitter: { card: 'summary_large_image', title: TITULO, description: DESCRIPCION, images: ['/opengraph-image'] },
@@ -103,6 +110,16 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
           }))} />
           <div id="mas-guia" aria-hidden="true" className="h-10" hidden={visibles.length <= POR_PAGINA} />
           <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
+
+          <nav aria-label="Guías por tema" className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {HUBS.map((h) => (
+              <Link key={h.slug} href={`/guia/${h.slug}`} className="rounded-card border border-line bg-white p-4 transition-colors hover:border-brand/40">
+                <p className="label-eyebrow text-brand-deep">Guía por tema</p>
+                <p className="mt-1 font-serif text-title-sm font-semibold text-ink">{h.h1[0]} <em className="headline-italic">{h.h1[1]}</em></p>
+                <p className="mt-1 text-ui text-ink-muted">{lugares.filter((l) => (h.categorias as string[]).some((c) => enCategoria(l, c))).length} lugares →</p>
+              </Link>
+            ))}
+          </nav>
 
           <section aria-labelledby="consejos" className="section-gap">
             <p className="label-eyebrow text-brand-deep">Antes de salir</p>

@@ -6,9 +6,12 @@ import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { getZones } from '@/lib/queries';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, categoriaLabel, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe } from '@/lib/guia';
+import { CATEGORIAS, categoriaLabel, categoriasDe, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe } from '@/lib/guia';
 import GaleriaInmueble from '@/components/GaleriaInmueble';
 import TarjetaGuia from '@/components/TarjetaGuia';
+import ListaGuia from '@/components/ListaGuia';
+import { HUBS, hubDe, hubsDeCategoria } from '@/lib/guia-hubs';
+import { getAjustes } from '@/lib/settings';
 import IconoCategoria from '@/components/IconosGuia';
 
 // Ficha de un lugar de la guía. Orden pensado para el teléfono: fotos, los
@@ -17,10 +20,12 @@ import IconoCategoria from '@/components/IconosGuia';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
-export async function generateStaticParams() { return (await getLugares()).map((l) => ({ slug: l.slug })); }
+export async function generateStaticParams() { return [...HUBS.map((h) => ({ slug: h.slug })), ...(await getLugares()).map((l) => ({ slug: l.slug }))]; }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const hub = hubDe(slug);
+  if (hub) return { title: hub.titulo, description: hub.descripcion, alternates: { canonical: `/guia/${hub.slug}` }, openGraph: { type: 'website', url: absoluteUrl(`/guia/${hub.slug}`), siteName: SITE.name, title: hub.titulo, description: hub.descripcion, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: hub.titulo }] } };
   const l = await getLugar(slug);
   if (!l) return { title: 'Lugar no disponible' };
   const path = `/guia/${l.slug}`;
@@ -38,8 +43,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function LugarPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [l, todos, contacto, zonas] = await Promise.all([getLugar(slug), getLugares(), getContacto(), getZones()]);
+  if (hubDe(slug)) return <PaginaHub slug={slug} />;
+  const [l, todos, contacto, zonas, ajustes] = await Promise.all([getLugar(slug), getLugares(), getContacto(), getZones(), getAjustes()]);
   if (!l) notFound();
+  const autora = (ajustes as unknown as Record<string, string>).representante || 'el equipo de Margarita Renace';
+
   const path = `/guia/${l.slug}`;
   const fotos = galeriaDe(l);
   const hoy = horarioHoy(l);
@@ -50,6 +58,14 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, vi «${l.nombre}» en la guía de margaritarenace.com.ve. ¿Me ayudan con `)}` : null;
   const zonaCercana = zonas.find((z) => z.slug === l.zoneSlug);
   const relacionados = todos.filter((x) => x.categoria === l.categoria && x.slug !== l.slug).slice(0, 3);
+  // Preguntas frecuentes reales, armadas con los datos de la ficha.
+  const faq: { q: string; a: string }[] = [
+    l.horario?.length ? { q: `¿Cuál es el horario de ${l.nombre}?`, a: `${hoy ? `Hoy: ${hoy}. ` : ''}Horario según Google: ${l.horario.join('; ')}.` } : null,
+    { q: `¿Cómo llegar a ${l.nombre}?`, a: `${l.direccion ? `Queda en ${l.direccion.replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '')}${l.municipio ? `, municipio ${l.municipio}` : ''}. ` : ''}${zonaCercana ? `Desde nuestros apartamentos en ${zonaCercana.name} ` : 'Desde Pampatar o Porlamar '}se llega en carro o taxi; el botón «Cómo llegar» abre la ruta en Google Maps.` },
+    l.costo ? { q: `¿Cuánto cuesta ${l.nombre}?`, a: l.costo } : null,
+    l.mejorMomento ? { q: `¿Cuál es el mejor momento para ir a ${l.nombre}?`, a: `${l.mejorMomento}.${l.duracion ? ` Calcula ${l.duracion.toLowerCase()}.` : ''}` } : null,
+    l.telefono || l.instagram ? { q: `¿Cómo contacto a ${l.nombre}?`, a: `${l.telefono ? `Teléfono ${l.telefono}. ` : ''}${l.instagram ? `Instagram @${l.instagram.replace(/^@/, '')}. ` : ''}${l.web ? `Web: ${l.web}.` : ''}`.trim() } : null,
+  ].filter(Boolean) as { q: string; a: string }[];
   const datos = [
     l.mejorMomento && { I: Sun, k: 'Mejor momento', v: l.mejorMomento },
     l.duracion && { I: Timer, k: 'Cuánto dura', v: l.duracion },
@@ -68,7 +84,10 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
       ...(l.telefono ? { telephone: l.telefono } : {}), ...(l.web ? { sameAs: [l.web] } : {}),
       isAccessibleForFree: /gratis/i.test(l.costo),
       touristType: ['Familias', 'Parejas', 'Viajeros de Venezuela y la diáspora'],
+      ...(l.horario?.length ? { openingHours: l.horario } : {}),
+      ...(l.rating != null && l.resenas ? {} : {}),
     },
+    ...(faq.length ? [{ '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }] : []),
   );
 
   return (
@@ -123,6 +142,21 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
                 </aside>
               )}
 
+              <p className="mt-6 text-ui text-ink-muted">Escrito por {autora}, anfitriona en Pampatar · datos de horario y valoración de Google · actualizado {new Date(l.datosActualizados ?? Date.now()).toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })}.</p>
+
+              {faq.length > 0 && (
+                <section aria-labelledby="faq" className="mt-8">
+                  <h2 id="faq" className="font-serif text-title-sm font-semibold text-ink">Preguntas frecuentes</h2>
+                  <dl className="mt-3 divide-y divide-line rounded-card border border-line bg-white">
+                    {faq.map((f) => <div key={f.q} className="px-5 py-3.5"><dt className="text-body font-semibold text-brand-deep">{f.q}</dt><dd className="mt-1 text-meta leading-relaxed text-ink-soft">{f.a}</dd></div>)}
+                  </dl>
+                </section>
+              )}
+
+              {hubsDeCategoria(l.categoria).length > 0 && (
+                <p className="mt-6 text-meta text-ink-soft">Más en la guía: {hubsDeCategoria(l.categoria).map((h, i) => <span key={h.slug}>{i > 0 ? ' · ' : ''}<Link href={`/guia/${h.slug}`} className="text-brand-deep underline underline-offset-4">{h.h1.join(' ')}</Link></span>)}.</p>
+              )}
+
               {l.horario && l.horario.length > 0 && (
                 <details className="mt-8 rounded-card border border-line bg-white">
                   <summary className="cursor-pointer px-5 py-4 text-body font-semibold text-brand-deep [&::-webkit-details-marker]:hidden">Horario de la semana</summary>
@@ -168,6 +202,45 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
             <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><Navigation className="h-4 w-4" aria-hidden="true" />Ir</a>
           </div>
         </div>
+      </div>
+    </>
+  );
+}
+
+
+// ── Página por tema (hub) ────────────────────────────────────────────────────
+async function PaginaHub({ slug }: { slug: string }) {
+  const hub = hubDe(slug)!;
+  const [lugares, contacto] = await Promise.all([getLugares(), getContacto()]);
+  const propios = lugares.filter((l) => (hub.categorias as string[]).some((c) => categoriasDe(l).includes(c)));
+  const path = `/guia/${hub.slug}`;
+  const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, estoy viendo la guía de ${hub.h1.join(' ').toLowerCase()} y quiero reservar un apartamento.`)}` : null;
+  const jsonLd = graph(
+    breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: '/guia' }, { name: hub.h1.join(' '), path }]),
+    { '@type': 'ItemList', name: hub.titulo, numberOfItems: propios.length, itemListElement: propios.slice(0, 40).map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })) },
+  );
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      <div className="min-h-screen bg-paper">
+        <header className="bg-luz border-b border-line">
+          <div className="max-w-6xl mx-auto px-5 pb-8 pt-24 md:px-8 md:pb-10 md:pt-28">
+            <nav aria-label="Ruta de navegación" className="text-ui"><ol className="flex flex-wrap items-center gap-2 text-ink-muted"><li><Link href="/guia" className="hover:text-brand">Guía</Link></li><li aria-hidden="true">/</li><li className="text-ink">{hub.h1.join(' ')}</li></ol></nav>
+            <h1 className="mt-4 font-serif text-headline font-normal leading-[1.05] track-headline text-ink">{hub.h1[0]} <em className="headline-italic">{hub.h1[1]}</em></h1>
+            <div className="mt-5 max-w-2xl space-y-3 text-body leading-relaxed text-ink-soft">{hub.intro.map((p) => <p key={p.slice(0, 20)}>{p}</p>)}</div>
+            <p className="mt-4 text-meta text-ink-muted">{propios.length} lugares · {HUBS.filter((h) => h.slug !== hub.slug).map((h, i) => <span key={h.slug}>{i > 0 ? ' · ' : 'También: '}<Link href={`/guia/${h.slug}`} className="text-brand-deep underline underline-offset-4">{h.h1.join(' ')}</Link></span>)}</p>
+          </div>
+        </header>
+        <main className="max-w-6xl mx-auto px-5 py-8 md:px-8 md:py-10">
+          <ListaGuia cat="" lugares={propios.map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }))} />
+          <div id="mas-guia" hidden aria-hidden="true" />
+          <noscript><style>{`#grid-guia li.paginada{display:list-item!important}`}</style></noscript>
+          <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
+            <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
+            <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar, Costa Azul y Porlamar desde US$60 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>
+            <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="btn-solid">Ver alojamientos</Link>{wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Reservar por WhatsApp</a>}</div>
+          </section>
+        </main>
       </div>
     </>
   );

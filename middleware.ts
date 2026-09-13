@@ -74,6 +74,11 @@ export function middleware(request: NextRequest) {
       });
     }
 
+    // Google descubrió «/$» y «/&» (no salen de nuestro HTML): se mandan al
+    // inicio con 301 para que las saque del índice en vez de acumular 404.
+    if (pathname === '/$' || pathname === '/&' || pathname === '/%24' || pathname === '/%26') {
+      return NextResponse.redirect(new URL('/', request.url), 301);
+    }
     const cabeceras = new Headers(request.headers);
     cabeceras.set('x-ruta', pathname);
     return NextResponse.next({ request: { headers: cabeceras } });

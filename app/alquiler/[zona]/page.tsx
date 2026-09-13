@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getZone, getZonesAll } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
+import { getLugares } from '@/lib/guia';
+import TarjetaGuia from '@/components/TarjetaGuia';
+import { HUBS } from '@/lib/guia-hubs';
 import { SITE, absoluteUrl } from '@/lib/site';
 
 import {
@@ -96,6 +99,7 @@ export default async function ZonaPage({
   const [allZones, contacto] = await Promise.all([getZonesAll(), getContacto()]);
   const otherZones = allZones.filter((z) => z.slug !== zone.slug);
   const conInventario = otherZones.filter((z) => z.properties.length > 0);
+  const cercanos = (await getLugares()).filter((l) => l.zoneSlug === zone.slug).slice(0, 9).map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 160), consejo: l.consejo.slice(0, 160), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }));
   const sinInventario = zone.properties.length === 0;
   const waConsulta = contacto.whatsapp
     ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(
@@ -214,6 +218,15 @@ export default async function ZonaPage({
               </div>
             )}
           </section>
+
+          {cercanos.length > 0 && (
+            <section aria-labelledby="guia-zona" className="section-gap">
+              <h2 id="guia-zona" className="font-serif text-headline text-ink font-normal track-headline">Qué hay en {zone.name}, <em className="headline-italic">según nuestra guía</em></h2>
+              <p className="mt-3 max-w-2xl text-body text-ink-soft">{cercanos.length} lugares y servicios de {zone.name} que recomendamos a nuestros huéspedes, con horario de hoy, valoración en Google, teléfono y cómo llegar.</p>
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{cercanos.map((l) => <TarjetaGuia key={l.id} l={l} />)}</ul>
+              <p className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-meta">{HUBS.map((h) => <Link key={h.slug} href={`/guia/${h.slug}`} className="font-medium text-brand-deep underline-offset-4 hover:underline">{h.h1.join(' ')} →</Link>)}</p>
+            </section>
+          )}
 
           <section aria-labelledby="alojamientos" className="section-gap reveal">
             <h2

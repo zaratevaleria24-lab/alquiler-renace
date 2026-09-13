@@ -67,6 +67,15 @@ export async function SiteFooter() {
               <Link href="/en-venta" className={enlace}>
                 En venta
               </Link>
+              <Link href="/reservas" className={enlace}>
+                Reservar
+              </Link>
+              <Link href="/nosotros" className={enlace}>
+                Quiénes somos
+              </Link>
+              <Link href="/politicas" className={enlace}>
+                Políticas
+              </Link>
               <Link href="/guia" className={enlace}>
                 Guía turística
               </Link>

@@ -1,0 +1,72 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { CalendarDays, MessageCircle, Users } from 'lucide-react';
+
+interface Apto { slug: string; nombre: string; zona: string; precio: number; personas: number; portada: string }
+interface Ocupado { desde: string; hasta: string }
+const bs = (n: number) => `Bs ${n.toLocaleString('es-VE', { maximumFractionDigits: 0 })}`;
+const usd = (n: number) => `US$ ${n.toLocaleString('es-VE')}`;
+const hoy = () => new Date().toISOString().slice(0, 10);
+const mas = (iso: string, d: number) => { const x = new Date(iso + 'T12:00:00'); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+
+// La calculadora: todo en el navegador con dos llamadas livianas al sitio
+// (/api/tasa y /api/disponibilidad/<slug>). Sin JS igual se ven los precios.
+export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsapp: string | null }) {
+  const [slug, setSlug] = useState(aptos[0]?.slug ?? '');
+  const [entrada, setEntrada] = useState(mas(hoy(), 7));
+  const [salida, setSalida] = useState(mas(hoy(), 10));
+  const [personas, setPersonas] = useState(2);
+  const [tasa, setTasa] = useState<number | null>(null);
+  const [ocupado, setOcupado] = useState<Ocupado[] | null>(null);
+  const apto = aptos.find((a) => a.slug === slug) ?? aptos[0];
+
+  useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => setTasa(d.usdt ?? d.bcv ?? null)).catch(() => {}); }, []);
+  useEffect(() => { if (!slug) return; setOcupado(null); fetch(`/api/disponibilidad/${slug}`).then((r) => r.json()).then((d) => setOcupado(d.ocupado ?? [])).catch(() => setOcupado([])); }, [slug]);
+
+  const noches = Math.max(0, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86400000));
+  const total = noches * (apto?.precio ?? 0);
+  const choque = useMemo(() => (ocupado ?? []).some((o) => entrada < o.hasta && salida > o.desde), [ocupado, entrada, salida]);
+  const mensaje = `Hola, quiero reservar ${apto?.nombre} (${apto?.zona}) del ${entrada} al ${salida}, ${noches} ${noches === 1 ? 'noche' : 'noches'} para ${personas} ${personas === 1 ? 'persona' : 'personas'}. Total estimado ${usd(total)}${tasa ? ` (${bs(total * tasa)} a tasa USDT)` : ''}. ¿Está disponible?`;
+  const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <section aria-label="Apartamentos">
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {aptos.map((a) => (
+            <li key={a.slug}>
+              <button type="button" onClick={() => setSlug(a.slug)} aria-pressed={a.slug === slug} className={`flex w-full gap-3 rounded-card border bg-white p-3 text-left transition-colors ${a.slug === slug ? 'border-brand-deep shadow-lift' : 'border-line hover:border-brand/40'}`}>
+                <img src={a.portada} alt={`${a.nombre}, ${a.zona}`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
+                <span className="min-w-0"><span className="block font-serif text-[17px] font-semibold leading-tight text-ink">{a.nombre}</span><span className="mt-0.5 block text-ui text-ink-muted">{a.zona} · hasta {a.personas} personas</span><span className="mono-data mt-2 block text-ink">{usd(a.precio)} <span className="text-ink-muted">/ noche</span></span></span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Entrada</span><input type="date" value={entrada} min={hoy()} onChange={(e) => { setEntrada(e.target.value); if (salida <= e.target.value) setSalida(mas(e.target.value, 1)); }} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
+          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Salida</span><input type="date" value={salida} min={mas(entrada, 1)} onChange={(e) => setSalida(e.target.value)} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
+          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><Users className="h-3.5 w-3.5" />Personas</span><input type="number" min={1} max={apto?.personas ?? 6} value={personas} onChange={(e) => setPersonas(Math.max(1, Math.min(apto?.personas ?? 6, Number(e.target.value) || 1)))} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
+        </div>
+      </section>
+
+      <aside className="h-fit rounded-panel border border-line bg-white p-5 shadow-lift lg:sticky lg:top-28">
+        <p className="label-eyebrow text-brand-deep">Tu estadía</p>
+        <p className="mt-1 font-serif text-title-sm font-semibold text-ink">{apto?.nombre}</p>
+        <dl className="mt-4 divide-y divide-line text-meta">
+          <div className="flex justify-between py-2"><dt className="text-ink-muted">{noches} {noches === 1 ? 'noche' : 'noches'} × {usd(apto?.precio ?? 0)}</dt><dd className="mono-data">{usd(total)}</dd></div>
+          <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
+          <div className="flex justify-between py-2 text-body font-semibold"><dt>Total</dt><dd className="mono-data">{usd(total)}</dd></div>
+          {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares (tasa USDT {bs(tasa)})</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
+        </dl>
+        {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
+          : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>
+          : noches > 0 && <p className="mt-3 rounded-card border border-brand/30 bg-brand-tint px-3 py-2 text-meta text-brand-deep">Fechas libres según nuestro calendario (incluye Airbnb).</p>}
+        {wa && noches > 0 && <a href={wa} rel="noopener" className="btn-solid mt-4 w-full justify-center"><MessageCircle className="h-4 w-4" />Reservar por WhatsApp</a>}
+        <p className="mt-3 text-ui text-ink-muted">Confirmas con el 50 % y firmas el contrato desde tu teléfono. <Link href="/politicas" className="text-brand-deep underline underline-offset-4">Políticas</Link> · <Link href={`/propiedad/${apto?.slug}`} className="text-brand-deep underline underline-offset-4">Ver el apartamento</Link></p>
+        <p className="mt-2 text-ui text-ink-faint">El monto en bolívares es referencia: se ajusta a la tasa del día de pago.</p>
+      </aside>
+    </div>
+  );
+}
