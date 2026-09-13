@@ -179,7 +179,7 @@ function BotonAirbnb({ enlace, anuncios }: { enlace: EnlacePublico; anuncios: An
           {valorados.length > 0 ? (
             <span className="mt-0.5 flex items-center gap-1 text-[12.5px] leading-snug text-ink-muted">
               <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" fill={color} aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 6.91-1.01z" /></svg>
-              <span><b className="text-ink">{media.toFixed(1)}</b> en Airbnb{resenas > 0 ? ` · ${resenas} reseñas` : ''} · {anuncios.length} apartamentos</span>
+              <span><b className="text-ink">{media.toFixed(1)}</b> en Airbnb{resenas > 0 ? ` · ${resenas} reseñas` : ''}</span>
             </span>
           ) : enlace.descripcion && <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-muted">{enlace.descripcion}</span>}
         </span>
