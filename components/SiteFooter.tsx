@@ -95,7 +95,7 @@ export async function SiteFooter() {
 
         <div className="mt-5 flex flex-col gap-1 border-t border-line/70 pt-4 text-micro text-ink-subtle sm:flex-row sm:items-center sm:justify-between">
           <p>© 2026 Margarita Renace · {SITE.region.island}, {SITE.region.state}, Venezuela</p>
-          <p>Hecho en la isla, sin rastreadores.</p>
+          <p>Construido con <span aria-label="cariño" className="text-accent">♥</span> por Margarita Renace Group</p>
         </div>
       </div>
     </footer>
