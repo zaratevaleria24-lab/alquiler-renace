@@ -1,0 +1,50 @@
+# Guía turística — /guia
+
+Creada el 2026-09-13 a pedido de la mamá de la dueña. Pensada para abrirse desde
+un **QR pegado en cada apartamento** (`/guia/qr` imprime el cartel; el QR en
+`public/qr-guia.png` y `.svg` apunta a `/guia?desde=qr`).
+
+## Qué es
+
+52 lugares y planes de la isla en 10 categorías (playas, qué hacer, dónde comer,
+historia, naturaleza, miradores, museos, con niños, de noche, compras) más 7
+consejos de viaje (dinero, transporte, seguridad, playa, comida, temporadas,
+servicios). Cada ficha: fotos, cuándo ir, cuánto dura, cuánto cuesta, horario de
+hoy, valoración de Google, descripción y **el consejo de Margarita Renace**,
+«Cómo llegar» (Google Maps con ruta), Instagram, teléfono, y «Dormí cerca» con
+nuestros apartamentos de la zona.
+
+## Las tres fuentes y sus reglas
+
+| Fuente | Qué aporta | Regla |
+|---|---|---|
+| **Nosotros** (`scripts/guia-semilla.ts`, editable en `/admin/guia`) | descripción, consejo, mejor momento, duración, costo, categoría | Voz de `IDENTIDAD.md`: datos y no adjetivos |
+| **Google Places (New)** | rating, reseñas, coordenadas, dirección, teléfono, web, horario, resumen, fotos | `place_id` se guarda para siempre; el resto ≤30 días → botón «Refrescar» en el panel. **Las fotos NO se guardan**: `/api/guia/foto/<id>/<n>` las sirve al vuelo con caché de horas y crédito del autor |
+| **Wikimedia Commons** | fotos libres (CC0, dominio público, CC BY, CC BY-SA) | Se descargan a `/var/www/margarita-uploads/guia/<slug>/` con crédito y licencia en `fotos[]`. Revisar a ojo: «Los Frailes» trajo un monasterio y «Sambil» un techo (se quitaron a mano el mismo día) |
+| **Fotos propias** | subidas desde el panel | Van primero: son la portada. Credito «Margarita Renace» |
+
+**Instagram** se investigó con Apify (`instagram-hashtag-scraper`, ~US$0,07): los
+posts recientes de #islademargarita son ruido (tiendas, policía), pero los
+hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
+@margaritakite, @cochekite). Se usan como enlace «Ver en Instagram» por lugar;
+**no se republican fotos de Instagram** (derechos + enlaces que caducan).
+
+## Archivos
+
+- `db/migrations/012-guia.sql` — `guia_lugares`, `guia_consejos`.
+- `lib/guia.ts` — tipos, consultas con caché `TAG_GUIA`, Places, proxy de fotos, horario de hoy.
+- `scripts/guia-semilla.ts` + `scripts/guia-importar.ts` — semilla curada e importador (idempotente):
+  `export $(grep -h '^POSTGRES_URL=' .env | head -1) && npx tsx scripts/guia-importar.ts`.
+  Los volcados de Places usados para «comer» y «noche» están en el scratchpad de la sesión; el script los ignora si no existen.
+- `app/guia/page.tsx`, `app/guia/[slug]/page.tsx`, `app/guia/qr/page.tsx`, `app/api/guia/foto/[id]/[n]/route.ts`.
+- `components/TarjetaLugar.tsx`, `components/MapaGuia.tsx` (Google Maps, se carga solo al tocar «Ver en el mapa»), reutiliza `GaleriaInmueble`.
+- `app/admin/(panel)/guia/` — lista, crear (busca en Google), editar, fotos, imperdible, publicar, refrescar Google.
+- Claves: `/etc/margarita-renace/google.env` (`PLACES_KEY`, `MAPS_JS_KEY`, copiadas de PROYECTO X). **Pendiente del dueño**: agregar `https://margaritarenace.com.ve/*` a los referentes de la clave de Maps o el mapa no carga (la lista funciona igual).
+
+## Decisiones de diseño
+
+- Móvil primero: cabecera corta, categorías en tira deslizable pegada bajo la barra, tarjetas grandes con foto, barra fija «Ir» en la ficha.
+- Sin Lenis en `/guia` (igual que `/en-venta`): scroll nativo.
+- El mapa es un extra bajo demanda (~150 KB de SDK que la lista no paga).
+- La zona mostrada es el **municipio** real, no la zona del sitio más cercana (que engañaba: «Playa El Agua · Manzanillo»). «Dormí cerca» sí usa la zona más cercana si está a ≤12 km.
+- Indexable y en el sitemap: es contenido propio y es la mejor pieza SEO del sitio («qué hacer en Margarita», «Playa El Agua horario», etc.).

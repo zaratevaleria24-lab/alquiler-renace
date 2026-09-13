@@ -39,6 +39,7 @@ export async function guardarFoto(
   file: File,
   propertySlug: string,
   indice: number,
+  raiz: 'properties' | 'guia' = 'properties',
 ): Promise<string> {
   if (file.size === 0) throw new FotoInvalidaError('archivo vacío');
   if (file.size > MAX_FOTO_BYTES) {
@@ -64,12 +65,12 @@ export async function guardarFoto(
   // origen del dato.
   const carpeta = propertySlug.replace(/[^a-z0-9-]/g, '');
   const nombre = `${Date.now()}-${indice}.webp`;
-  const dirFisico = path.join(UPLOADS_DIR, 'properties', carpeta);
+  const dirFisico = path.join(UPLOADS_DIR, raiz, carpeta);
 
   await mkdir(dirFisico, { recursive: true });
   await sharp(webp).toFile(path.join(dirFisico, nombre));
 
-  return `${PUBLIC_PREFIX}/properties/${carpeta}/${nombre}`;
+  return `${PUBLIC_PREFIX}/${raiz}/${carpeta}/${nombre}`;
 }
 
 /**
@@ -142,6 +143,7 @@ export async function guardarFotoRemota(
   url: string,
   carpeta: string,
   indice: number,
+  raiz: 'prospectos' | 'guia' = 'prospectos',
 ): Promise<string | null> {
   try {
     const r = await fetch(url, {
@@ -158,10 +160,10 @@ export async function guardarFotoRemota(
       .toBuffer();
     const dir = carpeta.replace(/[^a-z0-9-]/gi, '');
     const nombre = `${indice}.webp`;
-    const dirFisico = path.join(UPLOADS_DIR, 'prospectos', dir);
+    const dirFisico = path.join(UPLOADS_DIR, raiz, dir);
     await mkdir(dirFisico, { recursive: true });
     await sharp(webp).toFile(path.join(dirFisico, nombre));
-    return `${PUBLIC_PREFIX}/prospectos/${dir}/${nombre}`;
+    return `${PUBLIC_PREFIX}/${raiz}/${dir}/${nombre}`;
   } catch {
     return null;
   }

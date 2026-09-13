@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getProperties, getZonesAll } from '@/lib/queries';
 import { getInmueblesPublicados } from '@/lib/ventas';
+import { getLugares } from '@/lib/guia';
 import { absoluteUrl } from '@/lib/site';
 
 // Genera /sitemap.xml en build, a partir de las mismas zonas que producen las
@@ -11,7 +12,7 @@ import { absoluteUrl } from '@/lib/site';
 // es estático y todas las páginas se regeneran en el mismo build.
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [ZONES, PROPERTIES, VENTAS] = await Promise.all([getZonesAll(), getProperties(), getInmueblesPublicados()]);
+  const [ZONES, PROPERTIES, VENTAS, LUGARES] = await Promise.all([getZonesAll(), getProperties(), getInmueblesPublicados(), getLugares()]);
   const buildDate = new Date();
 
   return [
@@ -43,6 +44,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })),
     { url: absoluteUrl('/en-venta'), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: absoluteUrl('/guia'), lastModified: buildDate, changeFrequency: 'weekly' as const, priority: 0.9 },
+    ...LUGARES.map((l) => ({ url: absoluteUrl(`/guia/${l.slug}`), lastModified: buildDate, changeFrequency: 'monthly' as const, priority: 0.7 })),
     ...VENTAS.map((i) => ({
       url: absoluteUrl(`/en-venta/${i.slug}`),
       lastModified: new Date(i.updatedAt),

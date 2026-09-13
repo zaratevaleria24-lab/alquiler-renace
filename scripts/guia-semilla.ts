@@ -1,0 +1,147 @@
+// Semilla curada de la guía. Texto NUESTRO, con la voz de IDENTIDAD.md: datos y
+// no adjetivos, un consejo útil por lugar, de vos a vos. `busqueda` es lo que se
+// le pide a Google Places para cruzar los datos; `commons` lo que se busca en
+// Wikimedia para fotos libres (si falta, se usa el nombre).
+import type { Categoria } from '../lib/guia';
+
+export interface Semilla {
+  nombre: string; categoria: Categoria; busqueda: string; commons?: string;
+  descripcion: string; consejo: string; mejorMomento?: string; duracion?: string; costo?: string;
+  instagram?: string; web?: string; destacado?: boolean; municipio?: string;
+}
+
+export const LUGARES: Semilla[] = [
+  // ── Playas ────────────────────────────────────────────────────────────────
+  { nombre: 'Playa El Agua', categoria: 'playa', busqueda: 'Playa El Agua Isla de Margarita', commons: 'Playa El Agua Margarita', destacado: true, municipio: 'Antolín del Campo',
+    descripcion: 'Cuatro kilómetros de arena y palmeras en la costa noreste: la playa más conocida de la isla. Tiene la fila más larga de restaurantes y toldos, y el mar es abierto, con oleaje que sube por la tarde.',
+    consejo: 'El mar tiene corrientes en algunos tramos: quedate donde haya bañistas y salvavidas. Los toldos se negocian; preguntá el precio antes de sentarte.', mejorMomento: 'Mañana, hasta las 11', duracion: 'Medio día', costo: 'Gratis · toldo y sillas aparte' },
+  { nombre: 'Playa Parguito', categoria: 'playa', busqueda: 'Playa Parguito Isla de Margarita', commons: 'Playa Parguito', destacado: true, municipio: 'Antolín del Campo',
+    descripcion: 'Pegada a El Agua pero con carácter propio: es la playa de las olas y del surf, con ambiente joven y menos toldos. Arena gruesa y agua clara.',
+    consejo: 'Si vas con niños chicos, mejor El Agua o Puerto Cruz: acá el oleaje es fuerte. Hay alquiler de tablas en la orilla.', mejorMomento: 'Tarde', duracion: '2–4 horas', costo: 'Gratis' },
+  { nombre: 'Playa El Yaque', categoria: 'playa', busqueda: 'Playa El Yaque', commons: 'Playa El Yaque', destacado: true, municipio: 'Tubores',
+    descripcion: 'Agua plana, poca profundidad y viento constante casi todas las tardes: por eso es uno de los lugares de referencia del mundo para kitesurf y windsurf. Está a 5 minutos del aeropuerto, con hoteles, escuelas y bares frente a la playa.',
+    consejo: 'El viento arranca hacia el mediodía. Para bañarte tranquilo, mañana; para ver kites, de 1 a 5. Se puede cruzar en lancha a la isla de Coche desde acá.', mejorMomento: 'Tarde con viento', duracion: 'Medio día', costo: 'Gratis · clase de kite aparte' },
+  { nombre: 'Playa Caribe', categoria: 'playa', busqueda: 'Playa Caribe Isla de Margarita', commons: 'Playa Caribe Margarita', municipio: 'Marcano',
+    descripcion: 'En la costa norte, entre Juan Griego y Manzanillo. Arena clara, agua transparente y oleaje moderado. Es de las playas más limpias y menos ruidosas de la isla.',
+    consejo: 'Hay pocos servicios: llevá agua y algo de comer. El acceso es fácil en carro y hay dónde estacionar.', mejorMomento: 'Mañana', duracion: 'Medio día', costo: 'Gratis' },
+  { nombre: 'Playa Puerto Cruz', categoria: 'playa', busqueda: 'Playa Puerto Cruz Isla de Margarita', commons: 'Playa Puerto Cruz', municipio: 'Gómez',
+    descripcion: 'Una bahía ancha y tranquila al norte, con arena fina y agua calma. Menos concurrida que El Agua y con servicios de sillas y toldos. Buena para familias.',
+    consejo: 'Los fines de semana de temporada se llena a partir de las 11; entre semana la tenés casi para vos.', mejorMomento: 'Mañana', duracion: 'Medio día', costo: 'Gratis · toldo aparte' },
+  { nombre: 'Playa Zaragoza', categoria: 'playa', busqueda: 'Playa Zaragoza Pedro González', commons: 'Playa Zaragoza Margarita', municipio: 'Gómez',
+    descripcion: 'La playa del pueblo de Pedro González, con casas de colores frente al mar y una iglesia al fondo. Ambiente de pueblo de pescadores más que de resort.',
+    consejo: 'Vale la pena caminar el malecón y comer pescado frito en los kioscos. Combinala con Puerto Cruz, que está a 5 minutos.', mejorMomento: 'Tarde', duracion: '2–3 horas', costo: 'Gratis' },
+  { nombre: 'Playa Guacuco', categoria: 'playa', busqueda: 'Playa Guacuco', commons: 'Playa Guacuco', municipio: 'Arismendi',
+    descripcion: 'Playa larga y abierta del este, a 15 minutos de Porlamar. Favorita de los margariteños los domingos: arena amplia, cocoteros y restaurantes de pescado.',
+    consejo: 'El oleaje es moderado pero el fondo baja rápido. Probá el pescado frito con arepitas dulces, que es lo típico acá.', mejorMomento: 'Mañana', duracion: 'Medio día', costo: 'Gratis' },
+  { nombre: 'Playa Manzanillo', categoria: 'playa', busqueda: 'Playa Manzanillo Isla de Margarita', commons: 'Manzanillo Margarita', municipio: 'Marcano',
+    descripcion: 'Bahía protegida en el extremo norte, con un pueblo de pescadores y agua calma. Es de las playas más fotografiadas por la vista desde el mirador de la bajada.',
+    consejo: 'Pará en el mirador antes de bajar: la vista de la bahía completa es la foto. Abajo hay pocos servicios.', mejorMomento: 'Atardecer', duracion: '2 horas', costo: 'Gratis' },
+  { nombre: 'Playa Punta Arenas', categoria: 'playa', busqueda: 'Playa Punta Arenas Macanao', commons: 'Punta Arenas Macanao', municipio: 'Península de Macanao',
+    descripcion: 'En la punta oeste de la península de Macanao, la parte más seca y despoblada de la isla. Agua calma y transparente, arena suave y muy poca gente. Hay kioscos de comida.',
+    consejo: 'Son 50 minutos desde Porlamar por carretera solitaria: andá con el tanque lleno y de día. Es el mejor lugar de la isla para ver el atardecer.', mejorMomento: 'Atardecer', duracion: 'Día completo', costo: 'Gratis' },
+  { nombre: 'Playa La Pared', categoria: 'playa', busqueda: 'Playa La Pared Macanao', commons: 'Playa La Pared Margarita', municipio: 'Península de Macanao',
+    descripcion: 'Playa salvaje de Macanao entre acantilados, con oleaje fuerte y paisaje de desierto junto al mar. No es para bañarse: es para mirar.',
+    consejo: 'No te metas al agua: hay corrientes. Es una parada de 20 minutos para la foto camino a Punta Arenas.', mejorMomento: 'Tarde', duracion: '30 minutos', costo: 'Gratis' },
+  { nombre: 'Playa de Pampatar', categoria: 'playa', busqueda: 'Playa de Pampatar', commons: 'Pampatar bahía', municipio: 'Maneiro',
+    descripcion: 'La bahía de Pampatar, con los botes de pescadores fondeados frente al castillo y la iglesia colonial. Agua calma; más para pasear que para pasar el día de playa.',
+    consejo: 'Combiná castillo, iglesia y una cerveza frente a los botes al atardecer. Los pescadores venden pescado fresco en la mañana.', mejorMomento: 'Atardecer', duracion: '2 horas', costo: 'Gratis' },
+
+  // ── Historia ──────────────────────────────────────────────────────────────
+  { nombre: 'Castillo de San Carlos de Borromeo', categoria: 'historia', busqueda: 'Castillo de San Carlos de Borromeo Pampatar', commons: 'Castillo San Carlos de Borromeo Pampatar', destacado: true, municipio: 'Maneiro',
+    descripcion: 'Fortaleza española de 1684 frente a la bahía de Pampatar, la mejor conservada de la isla. Tiene cañones, un pequeño museo y vista completa de la bahía desde las murallas.',
+    consejo: 'La entrada es barata y hay guías que explican en 20 minutos; vale la pena. Andá temprano: al sol del mediodía las murallas queman.', mejorMomento: 'Mañana o atardecer', duracion: '1 hora', costo: 'Entrada económica' },
+  { nombre: 'Fortín de La Galera', categoria: 'historia', busqueda: 'Fortín de La Galera Juan Griego', commons: 'Fortín de la Galera Juan Griego', destacado: true, municipio: 'Marcano',
+    descripcion: 'Fortín sobre un cerro en Juan Griego, escenario de una batalla de la independencia en 1817. Hoy es el punto clásico para ver el atardecer sobre la bahía, con la laguna de Los Mártires abajo.',
+    consejo: 'Llegá 40 minutos antes de que baje el sol; se llena. Estacioná abajo y subí caminando. Después, cena en el malecón de Juan Griego.', mejorMomento: 'Atardecer', duracion: '1 hora', costo: 'Gratis' },
+  { nombre: 'Castillo de Santa Rosa', categoria: 'historia', busqueda: 'Castillo de Santa Rosa La Asunción', commons: 'Castillo de Santa Rosa La Asunción', municipio: 'Arismendi',
+    descripcion: 'Fortaleza del siglo XVII sobre La Asunción, la capital del estado. Acá estuvo presa Luisa Cáceres de Arismendi, heroína de la independencia. Vista del valle y del cerro Copey.',
+    consejo: 'Combinalo con la plaza Bolívar y la catedral de La Asunción, a 5 minutos caminando: es el casco colonial mejor conservado de la isla.', mejorMomento: 'Mañana', duracion: '1 hora', costo: 'Entrada económica' },
+  { nombre: 'Basílica de Nuestra Señora del Valle', categoria: 'historia', busqueda: 'Basílica Menor Nuestra Señora del Valle Isla de Margarita', commons: 'Basílica Virgen del Valle', destacado: true, municipio: 'García',
+    descripcion: 'El santuario de la Virgen del Valle, patrona de la isla y de los pescadores de todo el oriente venezolano. Iglesia de estilo neogótico en el pueblo de El Valle del Espíritu Santo, con un museo de ofrendas al lado.',
+    consejo: 'El 8 de septiembre es la fiesta grande y llega gente de todo el país. Cualquier otro día se visita en calma; vestite con hombros cubiertos.', mejorMomento: 'Mañana', duracion: '1 hora', costo: 'Gratis' },
+  { nombre: 'Fortín de La Caranta', categoria: 'historia', busqueda: 'Fortín de La Caranta Pampatar', commons: 'Fortín La Caranta', municipio: 'Maneiro',
+    descripcion: 'Ruinas de un fortín del siglo XVII en el cerro que cierra la bahía de Pampatar por el sur. Poco visitado, con la mejor vista de Pampatar y Porlamar.',
+    consejo: 'Se sube en carro hasta arriba. Sin servicios: es parada de 20 minutos para la vista.', mejorMomento: 'Atardecer', duracion: '30 minutos', costo: 'Gratis' },
+  { nombre: 'Salinas de Pampatar', categoria: 'naturaleza', busqueda: 'Salinas de Pampatar', commons: 'Salinas de Pampatar', municipio: 'Maneiro',
+    descripcion: 'Laguna salada en plena Pampatar donde todavía se extrae sal a mano. Según la época, el agua se pone rosada por las algas. Hay flamencos y otras aves.',
+    consejo: 'Los mejores colores son con sol alto y la laguna con poca agua (temporada seca, de enero a mayo). Mirá desde el borde: no se camina sobre la sal.', mejorMomento: 'Mediodía', duracion: '30 minutos', costo: 'Gratis' },
+  { nombre: 'Faro de Punta Ballena', categoria: 'mirador', busqueda: 'Faro de Punta Ballena Pampatar', commons: 'Faro Punta Ballena Pampatar', municipio: 'Maneiro',
+    descripcion: 'Faro sobre las rocas al final de Pampatar, con un paseo pavimentado y vista abierta al mar y a la bahía. Lugar de caminata al atardecer.',
+    consejo: 'Ideal para caminar o trotar temprano o al caer el sol. Hay vendedores de helados y coco los fines de semana.', mejorMomento: 'Atardecer', duracion: '1 hora', costo: 'Gratis' },
+
+  // ── Naturaleza ────────────────────────────────────────────────────────────
+  { nombre: 'Parque Nacional Laguna de La Restinga', categoria: 'naturaleza', busqueda: 'Parque Nacional Laguna de La Restinga', commons: 'Laguna de La Restinga', destacado: true, municipio: 'Tubores',
+    descripcion: 'Laguna de manglares que une las dos partes de la isla. Se recorre en lancha por canales con nombres (el Túnel del Amor, el Canal de la Serpiente) y se termina en una playa larguísima frente al mar abierto, con restaurantes de pescado.',
+    consejo: 'El paseo en lancha se paga en el embarcadero y dura unos 40 minutos; acordá el precio y la hora de regreso antes de salir. Repelente: hay mosquitos al amanecer y al atardecer.', mejorMomento: 'Mañana', duracion: 'Medio día', costo: 'Lancha por grupo · entrada al parque' },
+  { nombre: 'Cerro El Copey', categoria: 'naturaleza', busqueda: 'Parque Nacional Cerro El Copey', commons: 'Cerro El Copey', municipio: 'Arismendi',
+    descripcion: 'El punto más alto de la isla (930 m), parque nacional de bosque húmedo en medio de una isla seca. Se sube en carro por la carretera de La Sierra, con miradores hacia las dos costas.',
+    consejo: 'Arriba hace fresco y hay nubes: llevá algo de manga larga. La carretera es angosta; andá despacio.', mejorMomento: 'Mañana despejada', duracion: '2–3 horas', costo: 'Gratis' },
+  { nombre: 'Isla de Coche', categoria: 'actividad', busqueda: 'Playa la Punta Isla de Coche', commons: 'Isla de Coche', destacado: true, municipio: 'Villalba',
+    descripcion: 'Isla pequeña al sur de Margarita, a 20–30 minutos en lancha desde El Yaque o en ferry desde Punta de Piedras. Playas de arena blanca, agua calma y viento: kitesurf, cuatrimotos y un día de playa sin multitudes.',
+    consejo: 'El full day en lancha desde El Yaque suele incluir el traslado y a veces almuerzo; compará dos operadores. Llevá efectivo: en Coche hay pocos puntos de pago.', mejorMomento: 'Día completo', duracion: 'Día completo', costo: 'Excursión por persona' },
+  { nombre: 'Isla de Cubagua', categoria: 'actividad', busqueda: 'Isla de Cubagua', commons: 'Cubagua', municipio: 'Tubores',
+    descripcion: 'Isla desierta al sur, donde estuvo Nueva Cádiz, la primera ciudad española de Sudamérica (siglo XVI, hoy ruinas). Agua transparente, arena blanca y nada más: no hay pueblo ni servicios.',
+    consejo: 'Solo se llega en excursión en lancha (desde El Yaque o Punta de Piedras). Todo lo que necesites va contigo: agua, comida, sombra.', mejorMomento: 'Día completo', duracion: 'Día completo', costo: 'Excursión por persona' },
+
+  // ── Miradores ─────────────────────────────────────────────────────────────
+  { nombre: 'Mirador La Sierra', categoria: 'mirador', busqueda: 'Mirador La Sierra Isla de Margarita', commons: 'La Sierra Margarita mirador', municipio: 'Arismendi',
+    descripcion: 'En la carretera que sube al Copey, el mirador con la vista más amplia de la isla: el valle de La Asunción, Porlamar y el mar al fondo.',
+    consejo: 'Los fines de semana hay puestos de comida y dulces criollos. Temprano en la mañana hay menos nubes.', mejorMomento: 'Mañana', duracion: '30 minutos', costo: 'Gratis' },
+  { nombre: 'Mirador de Playa Manzanillo', categoria: 'mirador', busqueda: 'Mirador Playa Manzanillo', commons: 'Manzanillo Margarita', municipio: 'Marcano',
+    descripcion: 'La curva de la carretera antes de bajar a Manzanillo, con la bahía completa, el pueblo y los botes abajo. La postal de la costa norte.',
+    consejo: 'Parada de 10 minutos. Estacioná bien a un lado: la carretera es angosta.', mejorMomento: 'Atardecer', duracion: '15 minutos', costo: 'Gratis' },
+
+  // ── Museos ────────────────────────────────────────────────────────────────
+  { nombre: 'Museo Marino de Margarita', categoria: 'museo', busqueda: 'Museo Marino de Margarita Boca de Río', commons: 'Museo Marino de Margarita', municipio: 'Península de Macanao',
+    descripcion: 'En Boca de Río, a la entrada de Macanao. Esqueletos de ballenas, peces vivos en acuarios, tortugas y una colección de especies del Caribe. Muy bueno para ir con niños.',
+    consejo: 'Combinalo con La Restinga, que está a 10 minutos. El museo cierra al mediodía en algunas temporadas: confirmá el horario abajo.', mejorMomento: 'Mañana', duracion: '1–2 horas', costo: 'Entrada económica' },
+  { nombre: 'Museo de Arte Contemporáneo Francisco Narváez', categoria: 'museo', busqueda: 'Museo de Arte Contemporáneo Francisco Narváez Porlamar', commons: 'Museo Francisco Narváez Porlamar', municipio: 'Mariño',
+    descripcion: 'En el centro de Porlamar, dedicado al escultor margariteño Francisco Narváez y a artistas venezolanos contemporáneos. Un espacio fresco y tranquilo para una hora fuera del sol.',
+    consejo: 'Aprovechá para caminar el bulevar Guevara y la iglesia de San Nicolás, a dos cuadras.', mejorMomento: 'Mediodía (aire acondicionado)', duracion: '1 hora', costo: 'Gratis o entrada económica' },
+
+  // ── Qué hacer ─────────────────────────────────────────────────────────────
+  { nombre: 'Kitesurf y windsurf en El Yaque', categoria: 'actividad', busqueda: 'Margarita Kite El Yaque escuela kitesurf', commons: 'Kitesurf El Yaque', destacado: true, instagram: 'margaritakite', municipio: 'Tubores',
+    descripcion: 'Aprender kite en El Yaque es más fácil que en casi cualquier otro lugar: el agua es plana y baja, y el viento entra casi todas las tardes. Hay varias escuelas con instructores certificados; un curso básico son unas 6–9 horas repartidas en 2–3 días.',
+    consejo: 'Reservá la clase por Instagram o WhatsApp con un día de anticipación y preguntá si el equipo está incluido. Protector solar resistente al agua y lycra: el sol de la tarde pega fuerte.', mejorMomento: 'Tarde (1 a 5)', duracion: '2–3 horas por clase', costo: 'Curso por horas' },
+  { nombre: 'Buceo y snorkel en Los Frailes', categoria: 'actividad', busqueda: 'Scuba Diving Margarita buceo', commons: 'Los Frailes Venezuela', destacado: true, instagram: 'scubadivingmargarita', municipio: 'Antolín del Campo',
+    descripcion: 'Los Frailes son un archipiélago de islotes frente a la costa este, a unos 30 minutos en lancha. Agua transparente, arrecifes y cardúmenes: el mejor buceo y snorkel de la zona. Hay salidas de día completo con almuerzo, y minicursos para principiantes.',
+    consejo: 'Confirmá que el operador tenga equipo en buen estado y guía certificado. Si nunca buceaste, el bautizo en aguas calmas es la forma de probar sin certificación.', mejorMomento: 'Mañana (mar más calmo)', duracion: 'Día completo', costo: 'Salida por persona' },
+  { nombre: 'Paseo en lancha por los manglares', categoria: 'actividad', busqueda: 'embarcadero La Restinga paseo en lancha', commons: 'Laguna de La Restinga manglar', municipio: 'Tubores',
+    descripcion: 'Desde el embarcadero de La Restinga, lanchas de pescadores te llevan por los canales de manglar hasta la playa del parque. Se ven ostras pegadas a las raíces, aves y, con suerte, caballitos de mar.',
+    consejo: 'El precio es por lancha (hasta 6–8 personas), no por persona: si van pocos, compartan. Pedí que los dejen en la playa y los recojan a una hora fija.', mejorMomento: 'Mañana', duracion: '2–4 horas', costo: 'Lancha por grupo' },
+  { nombre: 'Excursión a Coche y Cubagua en lancha', categoria: 'actividad', busqueda: 'paseo en lancha El Yaque Coche Cubagua', commons: 'Isla de Coche playa', web: 'https://tulanchaenmargarita.com.ve/', municipio: 'Tubores',
+    descripcion: 'Full day en lancha o catamarán desde El Yaque: Coche, Cubagua o las dos, con paradas para nadar y snorkel. Es la excursión más pedida de la isla.',
+    consejo: 'Preguntá qué incluye (almuerzo, bebidas, snorkel) y cuánta gente va en la lancha. Salí temprano: el mar está más calmo antes del mediodía.', mejorMomento: 'Salida a las 8–9', duracion: 'Día completo', costo: 'Excursión por persona' },
+  { nombre: 'Kitesurf en la isla de Coche', categoria: 'actividad', busqueda: 'Coche Kite Isla de Coche', commons: 'Isla de Coche kitesurf', instagram: 'cochekite', municipio: 'Villalba',
+    descripcion: 'Coche tiene el mismo viento que El Yaque con menos gente en el agua: escuelas y spots frente a hoteles de playa, para quien ya sabe o quiere aprender con calma.',
+    consejo: 'Muchos hacen 2 días en El Yaque y 1 en Coche. Se puede ir y volver en el día en lancha.', mejorMomento: 'Tarde', duracion: 'Día completo', costo: 'Clase por horas' },
+
+  // ── Con niños ─────────────────────────────────────────────────────────────
+  { nombre: 'Waterland Mundo Marino', categoria: 'familia', busqueda: 'Waterland Mundo Marino Isla de Margarita', municipio: 'Maneiro',
+    descripcion: 'Parque con shows de delfines y lobos marinos, y actividad de nado con delfines. Está en Pampatar, cerca de la zona hotelera.',
+    consejo: 'Los shows tienen horarios fijos: revisá abajo y llegá 20 minutos antes. El nado con delfines se reserva aparte y se llena en temporada.', mejorMomento: 'Mañana', duracion: '2–3 horas', costo: 'Entrada · nado aparte' },
+  { nombre: 'Parque El Agua', categoria: 'familia', busqueda: 'Parque El Agua parque acuático Margarita', municipio: 'Antolín del Campo',
+    descripcion: 'Parque acuático con toboganes, piscina de olas y río lento, en la vía a Playa El Agua. Un día completo para niños y adolescentes.',
+    consejo: 'Llevá comida o comprá adentro (afuera no hay mucho). Entre semana casi no hay cola en los toboganes.', mejorMomento: 'Día completo', duracion: 'Día completo', costo: 'Entrada por persona' },
+
+  // ── Compras ───────────────────────────────────────────────────────────────
+  { nombre: 'Centro Comercial Sambil Margarita', categoria: 'compras', busqueda: 'Sambil Margarita', municipio: 'Maneiro',
+    descripcion: 'El centro comercial más grande de la isla, en Pampatar: tiendas, cine, feria de comida y supermercado. Aire acondicionado para las horas de más calor.',
+    consejo: 'Es el lugar más fácil para cambiar o gastar dólares y pagar con tarjeta internacional. Los domingos por la tarde se llena.', mejorMomento: 'Tarde', duracion: '2–3 horas', costo: '—' },
+  { nombre: 'Mercado de Conejeros', categoria: 'compras', busqueda: 'Mercado de Conejeros Porlamar', municipio: 'Mariño',
+    descripcion: 'El mercado popular de Porlamar: pescado del día, frutas, quesos, ropa y artesanía a precios de la isla. Ruidoso, auténtico y barato.',
+    consejo: 'Andá temprano (7–10), con efectivo en bolívares y sin joyas a la vista. Regatear es normal.', mejorMomento: 'Mañana temprano', duracion: '1–2 horas', costo: '—' },
+  { nombre: 'Centro Comercial La Vela', categoria: 'compras', busqueda: 'Centro Comercial La Vela Margarita', municipio: 'Mariño',
+    descripcion: 'Centro comercial abierto junto al mar entre Porlamar y Pampatar, con restaurantes, heladerías y tiendas. Más para pasear al atardecer que para comprar.',
+    consejo: 'Buen plan de tarde-noche con niños: hay espacio para caminar y comer frente al mar.', mejorMomento: 'Atardecer', duracion: '2 horas', costo: '—' },
+];
+
+export const CONSEJOS: { tema: string; titulo: string; texto: string }[] = [
+  { tema: 'dinero', titulo: 'Dólares, bolívares y cómo pagar', texto: 'Casi todo se cobra en bolívares a la tasa del día, aunque los precios se piensen en dólares. Traé dólares en billetes chicos (1, 5, 10, 20) en buen estado: los rotos o escritos no los aceptan. Muchos comercios aceptan pago móvil, Zelle o Binance. Para cambiar, preguntá en tu alojamiento antes que en la calle. Los cajeros dan muy poco efectivo: no cuentes con ellos.' },
+  { tema: 'transporte', titulo: 'Moverse por la isla', texto: 'Hay taxis, apps como Ridery y Yummy, y los autobuses "rojitas" que cubren casi toda la isla por muy poco. Para Macanao, La Restinga o Punta Arenas conviene carro propio o traslado contratado: el transporte público es escaso. Del aeropuerto a Porlamar son 15–20 minutos; a Pampatar, 25–30. Acordá el precio del taxi antes de subir.' },
+  { tema: 'seguridad', titulo: 'Seguridad, sin dramas y sin descuidos', texto: 'Las zonas turísticas (Pampatar, Costa Azul, Playa El Agua, El Yaque) son tranquilas y con presencia policial. Lo básico: no muestres el teléfono ni joyas en la calle, no camines solo de noche por zonas que no conocés, usá taxi o app después de las 9, y no dejes cosas en la arena mientras te bañás. Si alguien te ofrece "el mejor cambio" en la calle, decí no.' },
+  { tema: 'playa', titulo: 'Sol, mar y corrientes', texto: 'El sol acá quema en 20 minutos: protector alto, sombrero y agua. Entre las 12 y las 3 buscá sombra. Las playas del norte y del este (El Agua, Parguito, Guacuco) tienen oleaje y corrientes: bañate donde haya gente y salvavidas. Las del sur (El Yaque, Pampatar) son calmas. En temporada de lluvias (junio a noviembre) hay aguaceros cortos, después vuelve el sol.' },
+  { tema: 'comida', titulo: 'Qué comer', texto: 'Pescado frito con tostones o arepitas dulces en cualquier kiosco de playa es la comida de la isla. Empanadas de cazón en la mañana, pastel de chucho, ensalada de pepitonas, y el sancocho de pescado los domingos. Tomá agua embotellada o filtrada; el hielo de los restaurantes establecidos es seguro.' },
+  { tema: 'temporadas', titulo: 'Cuándo venir', texto: 'Temporada alta: Carnaval, Semana Santa, agosto y del 20 de diciembre al 6 de enero — más gente, más precio, más ambiente. Mayo, junio y de septiembre a noviembre son los meses más tranquilos y más baratos. El viento para kite es más constante de diciembre a julio.' },
+  { tema: 'servicios', titulo: 'Agua, luz e internet', texto: 'Es normal que el agua llegue por tanque o cisterna y que haya cortes de luz cortos: los buenos alojamientos tienen tanque y planta. El internet móvil funciona bien en las zonas turísticas con Digitel o Movistar; comprá una SIM local si te quedás varios días. Descargá los mapas de Google sin conexión antes de salir a Macanao.' },
+];

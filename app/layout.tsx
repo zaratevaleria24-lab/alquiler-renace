@@ -181,7 +181,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
             carga infinita, y la interpolación de Lenis ahí se siente pegada
             (la rueda va por delante de la página). En una lista se busca
             precisión, no inercia. */}
-        {!esPanel && !esEnlaces && !ruta.startsWith('/en-venta') && <SmoothScroll />}
+        {!esPanel && !esEnlaces && !ruta.startsWith('/en-venta') && !ruta.startsWith('/guia') && <SmoothScroll />}
         {/* Medir el panel no aporta nada y ensuciaría las cifras del sitio. */}
         {!esPanel && <Medidor />}
         {!esPanel && !esEnlaces && !esHome && <NavBar whatsapp={contacto.whatsapp} />}

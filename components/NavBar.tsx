@@ -19,7 +19,7 @@ const ENLACES = [
   { label: 'Apartamentos', href: '/#listings-container', enHome: '#listings-container' },
   { label: 'Autos', href: '/autos', enHome: '/autos' },
   { label: 'En venta', href: '/en-venta', enHome: '/en-venta' },
-  { label: 'Zonas', href: '/#zonas-de-la-isla', enHome: '#zonas-de-la-isla' },
+  { label: 'Guía', href: '/guia', enHome: '/guia' },
 ] as const;
 
 export default function NavBar({

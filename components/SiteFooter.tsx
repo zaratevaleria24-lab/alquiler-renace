@@ -67,6 +67,9 @@ export async function SiteFooter() {
               <Link href="/en-venta" className={enlace}>
                 En venta
               </Link>
+              <Link href="/guia" className={enlace}>
+                Guía turística
+              </Link>
             </nav>
 
             <span aria-hidden="true" className="hidden h-3 w-px bg-line-strong sm:block" />
