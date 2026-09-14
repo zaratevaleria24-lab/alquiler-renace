@@ -6,6 +6,19 @@
 // las PÁGINAS, pero una Server Action es un endpoint HTTP propio: se puede
 // invocar sin pasar por la página. Sin este chequeo, cualquiera podría mutar
 // el inventario con un POST bien formado.
+//
+// ⚠️ TODA ruta de `redirect()` de este archivo empieza por `/admin`. No es
+// cosmético. El `redirect()` de una Server Action lo resuelve el enrutador del
+// CLIENTE, que busca la ruta en la tabla de la propia app y NO vuelve a pasar
+// por el middleware. Una ruta sin el prefijo —`/propiedades/<id>`, como estuvo
+// este archivo hasta el 2026-09-14— no existe en esa tabla, así que el
+// enrutador pinta el layout PÚBLICO (con su navbar oscura) dentro del
+// subdominio del panel: la dueña veía una pantalla negra y creía que el
+// borrado había fallado, cuando en realidad ya se había guardado. El
+// middleware acaba enderezándolo con un 307, pero varios segundos después.
+//
+// Es el mismo fallo que se documentó en `middleware.ts` el 2026-08-03 para el
+// login. Ese día se migraron todos los módulos del panel menos este.
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -59,7 +72,7 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   const zoneSlug = String(formData.get('zone_slug') ?? '');
   const location = String(formData.get('location') ?? '').trim();
   const airbnbUrl = String(formData.get('airbnb_url') ?? '').trim().slice(0, 300);
-  if (airbnbUrl && !/^https:\/\/(www\.)?airbnb\.[a-z.]+\//i.test(airbnbUrl)) redirect(`/propiedades/${id}?error=airbnb`);
+  if (airbnbUrl && !/^https:\/\/(www\.)?airbnb\.[a-z.]+\//i.test(airbnbUrl)) redirect(`/admin/propiedades/${id}?error=airbnb`);
   const airbnbRatingRaw = String(formData.get('airbnb_rating') ?? '').trim().replace(',', '.');
   const airbnbRating = airbnbRatingRaw === '' ? null : Math.min(5, Math.max(0, Math.round(Number(airbnbRatingRaw) * 10) / 10));
   const airbnbResenas = Math.max(0, Math.trunc(Number(formData.get('airbnb_resenas')) || 0));
@@ -77,7 +90,7 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   const amenidades = formData.getAll('amenidades').map(String);
 
   if (!id || !name || !zoneSlug || !location) {
-    redirect(`/propiedades/${id}?error=faltan-datos`);
+    redirect(`/admin/propiedades/${id}?error=faltan-datos`);
   }
 
   // price_text se DERIVA, no se edita: es la única forma de que el texto que ve
@@ -124,7 +137,7 @@ export async function guardarPropiedadAction(formData: FormData): Promise<void> 
   } catch {
     // Zona/categoría/amenidad inexistente (FK) o id inválido: se vuelve al
     // formulario con aviso, sin tumbar el panel con una pantalla de error.
-    redirect(`/propiedades/${id}?error=no-guardado`);
+    redirect(`/admin/propiedades/${id}?error=no-guardado`);
   }
 
   // Datos originales del anuncio (valoración, reseñas, resumen) desde Airbnb.
@@ -222,7 +235,7 @@ export async function crearPropiedadAction(formData: FormData): Promise<void> {
   regenerarSitio();
   // Directo a la edición: lo primero que necesita una propiedad recién creada
   // son sus fotos, y se suben desde ahí.
-  redirect(`/propiedades/${id}?creada=1`);
+  redirect(`/admin/propiedades/${id}?creada=1`);
 }
 
 export async function subirFotosAction(formData: FormData): Promise<void> {
@@ -234,7 +247,7 @@ export async function subirFotosAction(formData: FormData): Promise<void> {
     .filter((f): f is File => f instanceof File && f.size > 0);
 
   if (!id) redirect('/admin/propiedades');
-  if (archivos.length === 0) redirect(`/propiedades/${id}?error=sin-fotos`);
+  if (archivos.length === 0) redirect(`/admin/propiedades/${id}?error=sin-fotos`);
 
   const [prop] = await rows<{ slug: string; name: string; zone_name: string }>(
     `SELECT p.slug, p.name, z.name AS zone_name
@@ -259,13 +272,13 @@ export async function subirFotosAction(formData: FormData): Promise<void> {
     }
   } catch (err) {
     if (err instanceof FotoInvalidaError) {
-      redirect(`/propiedades/${id}?error=foto-invalida`);
+      redirect(`/admin/propiedades/${id}?error=foto-invalida`);
     }
-    redirect(`/propiedades/${id}?error=no-guardado`);
+    redirect(`/admin/propiedades/${id}?error=no-guardado`);
   }
 
   regenerarSitio();
-  redirect(`/propiedades/${id}?guardado=1`);
+  redirect(`/admin/propiedades/${id}?guardado=1`);
 }
 
 export async function borrarFotoAction(formData: FormData): Promise<void> {
@@ -297,7 +310,7 @@ export async function borrarFotoAction(formData: FormData): Promise<void> {
   }
 
   regenerarSitio();
-  redirect(`/propiedades/${id}?guardado=1`);
+  redirect(`/admin/propiedades/${id}?guardado=1`);
 }
 
 export async function marcarPortadaAction(formData: FormData): Promise<void> {
@@ -319,7 +332,7 @@ export async function marcarPortadaAction(formData: FormData): Promise<void> {
   });
 
   regenerarSitio();
-  redirect(`/propiedades/${id}?guardado=1`);
+  redirect(`/admin/propiedades/${id}?guardado=1`);
 }
 
 export async function alternarPublicacionAction(formData: FormData): Promise<void> {
@@ -353,7 +366,7 @@ export async function moverFotoAction(formData: FormData): Promise<void> {
     [fotos[i], fotos[j]] = [fotos[j], fotos[i]];
     for (let k = 0; k < fotos.length; k++) await query(`UPDATE property_images SET sort_order = $3 WHERE id = $1 AND property_id = $2`, [fotos[k].id, id, k]);
   }
-  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#fotos`);
+  regenerarSitio(); redirect(`/admin/propiedades/${id}?guardado=1#fotos`);
 }
 
 /** Texto alternativo de una foto: lo lee Google Imágenes y el lector de pantalla. */
@@ -363,7 +376,7 @@ export async function editarAltFotoAction(formData: FormData): Promise<void> {
   const alt = String(formData.get('alt') ?? '').trim().slice(0, 200);
   if (!id || !fotoId) redirect('/admin/propiedades');
   await query(`UPDATE property_images SET alt = $3 WHERE id = $1 AND property_id = $2`, [fotoId, id, alt]);
-  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#fotos`);
+  regenerarSitio(); redirect(`/admin/propiedades/${id}?guardado=1#fotos`);
 }
 
 
@@ -377,13 +390,13 @@ export async function crearResenaAction(formData: FormData): Promise<void> {
   const p = Number(formData.get('puntuacion')); const puntuacion = Number.isInteger(p) && p >= 1 && p <= 5 ? p : null;
   const fuente = ['airbnb', 'whatsapp', 'google', 'directo'].includes(String(formData.get('fuente'))) ? String(formData.get('fuente')) : 'airbnb';
   const url = String(formData.get('url') ?? '').trim().slice(0, 300);
-  if (autor.length < 2 || texto.length < 10 || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) redirect(`/propiedades/${id}?error=resena#resenas`);
+  if (autor.length < 2 || texto.length < 10 || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) redirect(`/admin/propiedades/${id}?error=resena#resenas`);
   await crearResena({ propertyId: id, autor, fecha, texto, puntuacion, fuente, url: /^https?:\/\//.test(url) ? url : '' });
-  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#resenas`);
+  regenerarSitio(); redirect(`/admin/propiedades/${id}?guardado=1#resenas`);
 }
 export async function borrarResenaAction(formData: FormData): Promise<void> {
   await exigirSesion();
   const id = String(formData.get('id') ?? ''); const rid = String(formData.get('resena_id') ?? '');
   if (id && rid) await borrarResena(rid, id);
-  regenerarSitio(); redirect(`/propiedades/${id}?guardado=1#resenas`);
+  regenerarSitio(); redirect(`/admin/propiedades/${id}?guardado=1#resenas`);
 }
