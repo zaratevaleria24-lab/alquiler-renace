@@ -107,11 +107,15 @@ foto real en `public/properties/los-geranios-a/`, así que la dirección es esa.
   No afecta build ni runtime; se puede quitar.
 - `CLAUDE.md` dice que las fuentes son `Cormorant_Garamond`, pero
   `app/layout.tsx` carga `Fraunces`. La doc del repo quedó desactualizada ahí.
-- **Agua Mar está publicado y sin ninguna foto** desde el 14/9: su única foto
-  propia se borró desde el panel esa mañana y las de banco se quitaron ese mismo
-  día (migración 026). La ficha muestra «Fotos al consultar» hasta que se suba
-  una foto real. Los otros ocho alojamientos también quedaron sin fotos, pero
-  esos no están publicados.
+- Los ocho alojamientos inventados quedaron **sin ninguna foto** el 14/9, al
+  quitarse las de banco (migración 026). No se ve en el sitio: ninguno está
+  publicado. Si alguno se publica sin fotos, la ficha muestra «Fotos al
+  consultar» (`components/SinFoto.tsx`).
+- **De dónde salen las fotos que sí quedan**: `/uploads/…` son las subidas desde
+  el panel y viven en `/var/www/margarita-uploads`, fuera de git. El respaldo
+  diario de las 03:45 las incluye — el 14/9 la de Agua Mar se recuperó de ahí
+  después de borrarse desde el panel, así que ese `.tar.gz` es la única vuelta
+  atrás que existe para una foto subida.
 
 ## Métricas: de dónde llega la gente (2026-09-14)
 
