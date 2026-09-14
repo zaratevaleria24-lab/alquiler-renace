@@ -35,6 +35,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       path?: unknown;
+      query?: unknown;
+      ref?: unknown;
       kind?: unknown;
       propertyId?: unknown;
       meta?: unknown;
@@ -43,7 +45,18 @@ export async function POST(request: NextRequest) {
     const path = typeof body.path === 'string' ? body.path : '/';
     const datos = {
       path,
-      referrer: request.headers.get('referer'),
+      // LA PROCEDENCIA LA MANDA EL NAVEGADOR, no la cabecera. El aviso sale de
+      // la propia página, así que su `Referer` es esa misma página y nunca el
+      // sitio que enlazó — por eso `referrer_host` estuvo siempre vacío hasta
+      // hoy. `document.referrer` sí guarda de dónde vino la persona, y no
+      // cambia al navegar dentro del sitio, que es justo lo que hace falta para
+      // atribuir la visita a su origen. La cabecera queda de respaldo.
+      referrer:
+        (typeof body.ref === 'string' && body.ref.slice(0, 500)) ||
+        request.headers.get('referer'),
+      // Solo la cola de parámetros, recortada. Se clasifica en el servidor y se
+      // guarda únicamente la etiqueta resultante.
+      query: typeof body.query === 'string' ? body.query.slice(0, 300) : null,
       ip: ipDelVisitante(request),
       ua: request.headers.get('user-agent') ?? '',
       // Cloudflare la manda en cada petición y no cuesta nada: país sin

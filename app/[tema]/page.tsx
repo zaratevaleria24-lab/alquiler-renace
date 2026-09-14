@@ -7,6 +7,7 @@ import { getProperties } from '@/lib/queries';
 import { getContacto } from '@/lib/settings';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { breadcrumbSchema, graph } from '@/lib/schema';
+import SinFoto from '@/components/SinFoto';
 
 // Páginas por intención de búsqueda (lib/paginas-intencion.ts). Solo existen
 // los slugs declarados: cualquier otra ruta de un segmento sigue dando 404.
@@ -46,7 +47,11 @@ export default async function PaginaTema({ params }: { params: Promise<{ tema: s
             <section aria-labelledby="aptos" className="mb-10"><h2 id="aptos" className="font-serif text-title font-semibold text-ink">Nuestros apartamentos</h2>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">{aptos.map((a) => (
                 <li key={a.slug}><Link href={`/propiedad/${a.slug}`} className="flex gap-3 rounded-card border border-line bg-white p-3 transition-colors hover:border-brand/40">
-                  <img src={a.image} alt={`${a.name}, ${a.zone}, Isla de Margarita`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
+                  {a.image ? (
+                    <img src={a.image} alt={`${a.name}, ${a.zone}, Isla de Margarita`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
+                  ) : (
+                    <SinFoto compacta className="h-24 w-24 shrink-0 rounded-card" />
+                  )}
                   <span className="min-w-0"><span className="block font-serif text-[17px] font-semibold leading-tight text-ink">{a.name}</span><span className="mt-0.5 block text-ui text-ink-muted">{a.zone} · hasta {a.guestsAllowed.adults + a.guestsAllowed.children} personas</span><span className="mono-data mt-2 block text-ink">US$ {a.pricePerNight} <span className="text-ink-muted">/ noche</span></span></span>
                 </Link></li>))}</ul></section>
           )}

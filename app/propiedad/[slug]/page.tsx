@@ -170,17 +170,34 @@ export default async function PropiedadPage({
           {/* Galería. La portada es el LCP de la página: sin lazy y con
               fetchPriority alto, igual que el hero del home. */}
           <section aria-label="Fotos del alojamiento">
-            <div className="overflow-hidden rounded-card border border-line">
-              <img
-                src={property.image}
-                alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
-                width={1200}
-                height={750}
-                fetchPriority="high"
-                decoding="async"
-                className="aspect-[16/10] w-full object-cover"
-              />
-            </div>
+            {/* Un alojamiento puede no tener ninguna foto propia todavía: se
+                prefiere decirlo a rellenar con una foto de banco que no es de
+                esta casa (ver la migración 026). Sin este caso, `property.image`
+                llega vacío y el navegador resuelve <img src=""> contra la propia
+                página: imagen rota y una descarga de más. */}
+            {property.image ? (
+              <div className="overflow-hidden rounded-card border border-line">
+                <img
+                  src={property.image}
+                  alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
+                  width={1200}
+                  height={750}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="aspect-[16/10] w-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 rounded-card border border-line bg-brand-tint px-6 text-center">
+                <p className="font-serif text-title font-normal track-title text-brand-deep">
+                  Fotos al consultar
+                </p>
+                <p className="max-w-sm text-body text-ink-soft">
+                  Todavía no tenemos fotos propias de {property.name}. Escríbenos
+                  y te las pasamos por WhatsApp.
+                </p>
+              </div>
+            )}
             {property.images.length > 1 && (
               <ul className="mt-3 grid grid-cols-3 gap-3">
                 {property.images

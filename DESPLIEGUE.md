@@ -107,6 +107,32 @@ foto real en `public/properties/los-geranios-a/`, así que la dirección es esa.
   No afecta build ni runtime; se puede quitar.
 - `CLAUDE.md` dice que las fuentes son `Cormorant_Garamond`, pero
   `app/layout.tsx` carga `Fraunces`. La doc del repo quedó desactualizada ahí.
+- **Agua Mar está publicado y sin ninguna foto** desde el 14/9: su única foto
+  propia se borró desde el panel esa mañana y las de banco se quitaron ese mismo
+  día (migración 026). La ficha muestra «Fotos al consultar» hasta que se suba
+  una foto real. Los otros ocho alojamientos también quedaron sin fotos, pero
+  esos no están publicados.
+
+## Métricas: de dónde llega la gente (2026-09-14)
+
+El panel `/admin/metricas` ordena el tráfico por FUENTE (Instagram, QR del
+apartamento, Google, directo…). Dos cosas de este servidor que hay que saber:
+
+- **`METRICAS_IPS_EXCLUIDAS` en el `.env`** — lista separada por comas de IPs
+  que no cuentan como visita. Va la IP pública del servidor, porque el proxy
+  personal de la casa sale por ahí y sin esto el dueño navegando aparece como el
+  público mayoritario del sitio: en la semana del 7 al 14 de septiembre eso eran
+  614 avisos, más que todos los visitantes reales juntos. Lo lee Next al
+  arrancar, así que un `pm2 restart margarita-renace` basta para aplicarlo.
+- **La fuente se calcula con lo que manda el navegador**, no con la cabecera
+  `Referer`: el aviso de métricas sale de la propia página, así que su `Referer`
+  es esa misma página. Por eso `page_views.referrer_host` estuvo vacío desde
+  agosto y hasta hoy. Ahora el medidor manda `document.referrer` y la cola de
+  parámetros de la URL. Las filas anteriores al 14/9 no tienen fuente y el panel
+  las agrupa aparte como «Sin registrar».
+
+Para que una campaña se distinga, el enlace tiene que ir etiquetado
+(`?utm_source=ig`, `?desde=qr`). Un enlace sin etiquetar cae en «Directo».
 
 ## Secretos fuera del repo (2026-09-12)
 

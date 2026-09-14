@@ -8,6 +8,7 @@ import TarjetaGuia from '@/components/TarjetaGuia';
 import { HUBS } from '@/lib/guia-hubs';
 import { SITE, absoluteUrl } from '@/lib/site';
 
+import SinFoto from '@/components/SinFoto';
 import {
   breadcrumbSchema,
   graph,
@@ -272,15 +273,19 @@ export default async function ZonaPage({
                   {/* Foto y nombre enlazan a la página propia de la propiedad:
                       sin estos enlaces, /propiedad/<slug> sería huérfana. */}
                   <Link href={`/propiedad/${property.slug}`}>
-                    <img
-                      src={property.image}
-                      alt={`${property.name} — alojamiento en ${property.zone}, Isla de Margarita`}
-                      width={800}
-                      height={600}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-56 w-full object-cover"
-                    />
+                    {property.image ? (
+                      <img
+                        src={property.image}
+                        alt={`${property.name} — alojamiento en ${property.zone}, Isla de Margarita`}
+                        width={800}
+                        height={600}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-56 w-full object-cover"
+                      />
+                    ) : (
+                      <SinFoto className="h-56 w-full" />
+                    )}
                   </Link>
                   <div className="p-5">
                     <h3 className="font-serif text-title-sm text-brand-deep font-semibold">

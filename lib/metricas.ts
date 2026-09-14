@@ -97,6 +97,146 @@ function hostDeProcedencia(referrer: string | null): string | null {
   }
 }
 
+// ── De dónde llegó la visita ────────────────────────────────────────────────
+//
+// LA PREGUNTA QUE RESPONDE: «¿el enlace de la bio de Instagram trae gente, o
+// solo la trae el QR del apartamento?». Sin esto el panel solo sabía enseñar el
+// host de procedencia, que en la app de Instagram viene vacío casi siempre.
+
+/**
+ * Redes, buscadores y correo, por el host de procedencia ya sin `www.`. Basta
+ * con que lo CONTENGA: cada uno llega con media docena de dominios distintos
+ * (l.instagram.com, instagram.com, m.facebook.com, google.co.ve…) y enumerarlos
+ * sería una lista que se queda vieja sola. El orden importa — la app de Gmail
+ * se presenta como `com.google.android.gm` y no es una búsqueda de Google.
+ */
+const FUENTES_POR_HOST: [string, string][] = [
+  ['com.google.android.gm', 'correo'],
+  ['mail.', 'correo'],
+  ['outlook', 'correo'],
+  ['instagram', 'instagram'],
+  ['facebook', 'facebook'],
+  ['fb.', 'facebook'],
+  ['whatsapp', 'whatsapp'],
+  ['wa.me', 'whatsapp'],
+  ['tiktok', 'tiktok'],
+  ['youtube', 'youtube'],
+  ['t.co', 'x'],
+  ['twitter', 'x'],
+  ['x.com', 'x'],
+  ['telegram', 'telegram'],
+  ['google', 'google'],
+  ['bing', 'bing'],
+  ['duckduckgo', 'duckduckgo'],
+  ['yandex', 'yandex'],
+  ['ecosia', 'ecosia'],
+  ['chatgpt', 'ia'],
+  ['openai', 'ia'],
+  ['perplexity', 'ia'],
+  ['claude', 'ia'],
+  ['gemini', 'ia'],
+  ['copilot', 'ia'],
+];
+
+/** `utm_source` lo escribe una persona al armar el enlace: 'ig', 'IG',
+ *  'instagram' son el mismo sitio y en el panel tienen que ser una sola fila. */
+const ALIAS_FUENTE: Record<string, string> = {
+  ig: 'instagram',
+  insta: 'instagram',
+  instagram: 'instagram',
+  fb: 'facebook',
+  facebook: 'facebook',
+  wa: 'whatsapp',
+  whatsapp: 'whatsapp',
+  qr: 'qr',
+};
+
+/** Etiqueta libre saneada: el endpoint está abierto a internet y esto termina
+ *  pintado en el panel. Sin espacios, sin mayúsculas y corto. */
+function etiqueta(v: string): string {
+  return v.trim().toLowerCase().slice(0, 40).replace(/[^a-z0-9_.-]/g, '');
+}
+
+/**
+ * Clasifica la visita en UNA fuente. Prioridad:
+ *
+ *  1. `utm_source` del enlace. Es intención declarada por quien lo publicó, y
+ *     sobrevive a que la app de origen no mande procedencia — que es justo lo
+ *     que pasa con Instagram en iPhone.
+ *  2. `?desde=qr`, el QR del apartamento (ver MARCA.md §5).
+ *  3. El host de procedencia.
+ *  4. 'directo': escribió la dirección, la tenía guardada, o vino de una app
+ *     que no dice cuál es.
+ */
+export function fuenteDeVisita(
+  referrer: string | null,
+  query: string | null,
+): string {
+  const p = new URLSearchParams(query ?? '');
+
+  for (const clave of ['utm_source', 'desde']) {
+    const v = etiqueta(p.get(clave) ?? '');
+    if (v) return ALIAS_FUENTE[v] ?? v;
+  }
+
+  const host = hostDeProcedencia(referrer);
+  if (!host) return 'directo';
+  for (const [aguja, nombre] of FUENTES_POR_HOST) {
+    if (host.includes(aguja)) return nombre;
+  }
+  // Un sitio que enlazó y no está en la lista: se guarda su dominio tal cual.
+  return host.slice(0, 60);
+}
+
+const NOMBRES_FUENTE: Record<string, string> = {
+  directo: 'Directo',
+  qr: 'QR del apartamento',
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  whatsapp: 'WhatsApp',
+  google: 'Búsqueda de Google',
+  bing: 'Búsqueda de Bing',
+  duckduckgo: 'DuckDuckGo',
+  ecosia: 'Ecosia',
+  yandex: 'Yandex',
+  correo: 'Correo',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+  telegram: 'Telegram',
+  x: 'X (Twitter)',
+  ia: 'Asistentes de IA',
+  sin_registrar: 'Sin registrar (antes del 14/9)',
+};
+
+export function nombreFuente(f: string | null): string {
+  if (!f) return 'Sin registrar';
+  return NOMBRES_FUENTE[f] ?? f;
+}
+
+// ── Tráfico interno ─────────────────────────────────────────────────────────
+
+/**
+ * IPs que NO cuentan como visita.
+ *
+ * POR QUÉ HACE FALTA: el sitio se navega a diario desde el propio servidor —el
+ * proxy personal de la casa sale por esa IP— y eso son cientos de avisos por
+ * semana, más que todos los visitantes reales juntos. Un panel que cuenta al
+ * dueño como público no sirve para decidir nada.
+ *
+ * Se configuran en el `.env` del proyecto (METRICAS_IPS_EXCLUIDAS, separadas
+ * por comas) y no en el código: son datos de ESTE servidor, no del producto.
+ */
+const IPS_EXCLUIDAS = new Set(
+  (process.env.METRICAS_IPS_EXCLUIDAS ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+export function esInterna(ip: string): boolean {
+  return IPS_EXCLUIDAS.has(ip);
+}
+
 /**
  * Países de la diáspora con más venezolanos, para el corte que de verdad decide
  * dónde pautar. Cualquier otro país que no sea VE cuenta igual como "afuera";
@@ -132,22 +272,27 @@ export interface DatosVisita {
   ua: string;
   /** Cabecera CF-IPCountry: Cloudflare la manda en cada petición, gratis. */
   pais: string | null;
+  /** La cola de la URL con los parámetros (`?utm_source=ig`, `?desde=qr`). Se
+   *  clasifica acá y se guarda solo la etiqueta: la URL entera nunca se
+   *  almacena, puede traer cualquier cosa pegada por quien comparte el enlace. */
+  query: string | null;
 }
 
 export async function registrarVisita(d: DatosVisita): Promise<void> {
-  if (esBot(d.ua)) return;
+  if (esBot(d.ua) || esInterna(d.ip)) return;
   // Rutas absurdas: alguien probando el endpoint a mano.
   if (!d.path.startsWith('/') || d.path.length > 300) return;
 
   await query(
-    `INSERT INTO page_views (path, referrer_host, device, country, visitor_day)
-     VALUES ($1, $2, $3, $4, $5)`,
+    `INSERT INTO page_views (path, referrer_host, device, country, visitor_day, fuente)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
     [
       d.path,
       hostDeProcedencia(d.referrer),
       dispositivo(d.ua),
       d.pais,
       await huella(d.ip, d.ua),
+      fuenteDeVisita(d.referrer, d.query),
     ],
   );
 }
@@ -156,7 +301,7 @@ export async function registrarEvento(
   kind: Evento,
   d: DatosVisita & { propertyId?: string | null; meta?: Record<string, unknown> },
 ): Promise<void> {
-  if (esBot(d.ua)) return;
+  if (esBot(d.ua) || esInterna(d.ip)) return;
 
   await query(
     `INSERT INTO events (kind, path, property_id, meta, visitor_day)
@@ -173,6 +318,17 @@ export async function registrarEvento(
 
 // ── Consultas del dashboard ─────────────────────────────────────────────────
 
+export interface FuenteResumen {
+  fuente: string;
+  nombre: string;
+  /** Personas distintas cuya PRIMERA visita del día vino de acá. */
+  visitantes: number;
+  /** Páginas que vieron entre todas. */
+  visitas: number;
+  /** Cuántas de esas personas terminaron tocando WhatsApp. */
+  contactos: number;
+}
+
 export interface Resumen {
   visitasHoy: number;
   visitantesHoy: number;
@@ -183,7 +339,8 @@ export interface Resumen {
   diaspora: { dentro: number; afuera: number; sinDato: number };
   porPais: { pais: string; nombre: string; visitantes: number }[];
   porPagina: { path: string; visitas: number; visitantes: number }[];
-  porProcedencia: { host: string; visitas: number }[];
+  /** De dónde llega la gente, ordenado. Ver `getResumenMetricas`. */
+  porFuente: FuenteResumen[];
   dispositivos: { device: string; visitas: number }[];
   /** Propiedades con visitas y cuántas terminaron en clic de WhatsApp. */
   propiedades: { path: string; visitas: number; clics: number }[];
@@ -202,7 +359,7 @@ export async function getResumenMetricas(): Promise<Resumen> {
     diaspora,
     porPais,
     porPagina,
-    porProcedencia,
+    porFuente,
     dispositivos,
     propiedades,
     busquedas,
@@ -225,9 +382,34 @@ export async function getResumenMetricas(): Promise<Resumen> {
     rows(`SELECT path, count(*) v, count(DISTINCT visitor_day) u FROM page_views
           WHERE created_at > now() - interval '30 days'
           GROUP BY path ORDER BY v DESC LIMIT 15`),
-    rows(`SELECT referrer_host, count(*) v FROM page_views
-          WHERE created_at > now() - interval '30 days' AND referrer_host IS NOT NULL
-          GROUP BY referrer_host ORDER BY v DESC LIMIT 10`),
+    // De dónde llega la gente, atribuido a la PRIMERA visita de cada persona
+    // del día: al navegar dentro del sitio la procedencia pasa a ser el propio
+    // dominio, y contar cada página taparía la fuente real bajo «directo».
+    // Se suman también los contactos por WhatsApp de esas mismas personas: es
+    // lo que separa la fuente que trae público de la que trae clientes.
+    rows(`WITH primeras AS (
+            SELECT DISTINCT ON (visitor_day)
+                   visitor_day, coalesce(fuente, 'sin_registrar') fuente
+            FROM page_views
+            WHERE created_at > now() - interval '30 days' AND visitor_day IS NOT NULL
+            ORDER BY visitor_day, created_at
+          ), vistas AS (
+            SELECT visitor_day, count(*) v FROM page_views
+            WHERE created_at > now() - interval '30 days' AND visitor_day IS NOT NULL
+            GROUP BY 1
+          ), contactos AS (
+            SELECT DISTINCT visitor_day FROM events
+            WHERE kind = 'whatsapp' AND visitor_day IS NOT NULL
+              AND created_at > now() - interval '30 days'
+          )
+          SELECT p.fuente,
+                 count(*) u,
+                 coalesce(sum(v.v), 0) v,
+                 count(*) FILTER (WHERE c.visitor_day IS NOT NULL) w
+          FROM primeras p
+          LEFT JOIN vistas v    ON v.visitor_day = p.visitor_day
+          LEFT JOIN contactos c ON c.visitor_day = p.visitor_day
+          GROUP BY 1 ORDER BY 2 DESC, 3 DESC LIMIT 15`),
     rows(`SELECT device, count(*) v FROM page_views
           WHERE created_at > now() - interval '30 days' AND device IS NOT NULL
           GROUP BY device ORDER BY v DESC`),
@@ -274,9 +456,12 @@ export async function getResumenMetricas(): Promise<Resumen> {
       visitas: N(r.v),
       visitantes: N(r.u),
     })),
-    porProcedencia: porProcedencia.map((r) => ({
-      host: String(r.referrer_host),
+    porFuente: porFuente.map((r) => ({
+      fuente: String(r.fuente),
+      nombre: nombreFuente(String(r.fuente)),
+      visitantes: N(r.u),
       visitas: N(r.v),
+      contactos: N(r.w),
     })),
     dispositivos: dispositivos.map((r) => ({
       device: String(r.device),

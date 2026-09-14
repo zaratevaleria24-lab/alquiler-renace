@@ -33,7 +33,20 @@ export function avisar(datos: {
     fetch('/api/visita', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ path: window.location.pathname, ...datos }),
+      body: JSON.stringify({
+        path: window.location.pathname,
+        // Los dos datos que solo existen en el navegador y que dicen de dónde
+        // llegó la persona: los parámetros del enlace (?utm_source=ig del
+        // enlace de la bio, ?desde=qr del cuadro del apartamento) y la página
+        // que la trajo. El servidor no puede deducir ninguno de los dos —su
+        // cabecera `Referer` apunta a esta misma página—, así que si no viajan
+        // acá se pierden. Se leen de `window` y no con `useSearchParams()`: ese
+        // hook obliga a envolver el árbol en Suspense y sacaría al sitio entero
+        // del renderizado estático, que es lo que lo hace rápido en Venezuela.
+        query: window.location.search,
+        ref: document.referrer,
+        ...datos,
+      }),
       keepalive: true,
     }).catch(() => {
       // Que no se registre una visita no es problema del visitante.

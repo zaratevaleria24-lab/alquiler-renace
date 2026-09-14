@@ -104,10 +104,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'José Rodríguez' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1510798831971.webp', 'Suite Frente al Mar Pampatar — alojamiento en Pampatar, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1449034446853.webp', 'Suite Frente al Mar Pampatar — alojamiento en Pampatar, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1504280390367.webp', 'Suite Frente al Mar Pampatar — alojamiento en Pampatar, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'suite-frente-al-mar-pampatar'), 'piscina-infinita', 0),
     ((SELECT id FROM properties WHERE slug = 'suite-frente-al-mar-pampatar'), 'wi-fi-de-alta-velocidad', 1),
@@ -131,10 +131,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'María Fernández' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1576013551627.webp', 'Penthouse Porlamar Centro — alojamiento en Porlamar, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1566073771259.webp', 'Penthouse Porlamar Centro — alojamiento en Porlamar, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1512917774080.webp', 'Penthouse Porlamar Centro — alojamiento en Porlamar, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'penthouse-porlamar-centro'), 'piscina-infinita', 0),
     ((SELECT id FROM properties WHERE slug = 'penthouse-porlamar-centro'), 'wi-fi-de-alta-velocidad', 1),
@@ -158,10 +158,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Luis González' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1580587771525.webp', 'Apartamento Costa Azul — alojamiento en Costa Azul, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1600585154340.webp', 'Apartamento Costa Azul — alojamiento en Costa Azul, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1600607687939.webp', 'Apartamento Costa Azul — alojamiento en Costa Azul, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'apartamento-costa-azul'), 'acceso-directo-a-playa', 0),
     ((SELECT id FROM properties WHERE slug = 'apartamento-costa-azul'), 'wi-fi', 1),
@@ -185,10 +185,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Andrea Salazar' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1533873984035.webp', 'Studio Playa Parguito — alojamiento en Playa Parguito, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1470240731273.webp', 'Studio Playa Parguito — alojamiento en Playa Parguito, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1504280390367.webp', 'Studio Playa Parguito — alojamiento en Playa Parguito, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'studio-playa-parguito'), 'acceso-directo-a-playa', 0),
     ((SELECT id FROM properties WHERE slug = 'studio-playa-parguito'), 'wi-fi', 1),
@@ -212,9 +212,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Roberto Villarroel' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1533090161767.webp', 'Villa Playa Caribe — alojamiento en Playa Caribe, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1510798831971.webp', 'Villa Playa Caribe — alojamiento en Playa Caribe, Isla de Margarita', false, 1);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'villa-playa-caribe'), 'piscina-infinita', 0),
     ((SELECT id FROM properties WHERE slug = 'villa-playa-caribe'), 'wi-fi-de-alta-velocidad', 1),
@@ -239,10 +240,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Gabriela Rojas' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1542314831.webp', 'Apartamento Juan Griego — alojamiento en Juan Griego, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1566073771259.webp', 'Apartamento Juan Griego — alojamiento en Juan Griego, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1576013551627.webp', 'Apartamento Juan Griego — alojamiento en Juan Griego, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'apartamento-juan-griego'), 'wi-fi-de-alta-velocidad', 0),
     ((SELECT id FROM properties WHERE slug = 'apartamento-juan-griego'), 'aire-acondicionado', 1),
@@ -266,10 +267,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Daniel Millán' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1499793983690.webp', 'Loft Playa El Yaque — alojamiento en Playa El Yaque, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1515263487990.webp', 'Loft Playa El Yaque — alojamiento en Playa El Yaque, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1580587771525.webp', 'Loft Playa El Yaque — alojamiento en Playa El Yaque, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'loft-playa-el-yaque'), 'acceso-directo-a-playa', 0),
     ((SELECT id FROM properties WHERE slug = 'loft-playa-el-yaque'), 'wi-fi', 1),
@@ -293,10 +294,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Patricia Guerra' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1504280390367.webp', 'Apartamento Playa Guacuco — alojamiento en Playa Guacuco, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1510798831971.webp', 'Apartamento Playa Guacuco — alojamiento en Playa Guacuco, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1533090161767.webp', 'Apartamento Playa Guacuco — alojamiento en Playa Guacuco, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'apartamento-playa-guacuco'), 'acceso-directo-a-playa', 0),
     ((SELECT id FROM properties WHERE slug = 'apartamento-playa-guacuco'), 'wi-fi', 1),
@@ -320,10 +321,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Alejandra Marín' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1512917774080.webp', 'Suite Manzanillo — alojamiento en Manzanillo, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1580587771525.webp', 'Suite Manzanillo — alojamiento en Manzanillo, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1613490493576.webp', 'Suite Manzanillo — alojamiento en Manzanillo, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'suite-manzanillo'), 'piscina-infinita', 0),
     ((SELECT id FROM properties WHERE slug = 'suite-manzanillo'), 'wi-fi-de-alta-velocidad', 1),
@@ -347,10 +348,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Héctor Bermúdez' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1580587771525.webp', 'Apartamento Marina Pampatar — alojamiento en Pampatar, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1566073771259.webp', 'Apartamento Marina Pampatar — alojamiento en Pampatar, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1512917774080.webp', 'Apartamento Marina Pampatar — alojamiento en Pampatar, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'apartamento-marina-pampatar'), 'piscina-infinita', 0),
     ((SELECT id FROM properties WHERE slug = 'apartamento-marina-pampatar'), 'wi-fi-de-alta-velocidad', 1),
@@ -374,10 +375,10 @@ WITH nueva AS (
     (SELECT id FROM hosts WHERE name = 'Yolanda Ortega' LIMIT 1)
   ) RETURNING id
 )
-INSERT INTO property_images (property_id, path, alt, is_cover, sort_order) VALUES
-    ((SELECT id FROM nueva), '/images/photo-1470240731273.webp', 'Studio Centro Porlamar — alojamiento en Porlamar, Isla de Margarita', true, 0),
-    ((SELECT id FROM nueva), '/images/photo-1533873984035.webp', 'Studio Centro Porlamar — alojamiento en Porlamar, Isla de Margarita', false, 1),
-    ((SELECT id FROM nueva), '/images/photo-1504280390367.webp', 'Studio Centro Porlamar — alojamiento en Porlamar, Isla de Margarita', false, 2);
+-- Sin fotos: las de este alojamiento eran de banco y se quitaron (ver la
+-- migración 026). La galería muestra «Fotos al consultar» hasta que haya
+-- fotos propias. El CTE necesita igual una sentencia que lo consuma.
+SELECT id FROM nueva;
 INSERT INTO property_amenities (property_id, amenity_key, sort_order) VALUES
     ((SELECT id FROM properties WHERE slug = 'studio-centro-porlamar'), 'wi-fi-de-alta-velocidad', 0),
     ((SELECT id FROM properties WHERE slug = 'studio-centro-porlamar'), 'aire-acondicionado', 1),

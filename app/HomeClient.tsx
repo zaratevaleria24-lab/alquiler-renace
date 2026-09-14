@@ -43,6 +43,7 @@ import { avisar } from '@/components/Medidor';
 import { iconFor } from '@/lib/icons';
 import CalendarioDisponibilidad from '@/components/CalendarioDisponibilidad';
 import type { Category, Property, Zone } from '@/lib/types';
+import SinFoto from '@/components/SinFoto';
 import {
   AboutIslandSection,
   FaqSection,
@@ -903,6 +904,7 @@ export default function HomeClient({
                 {/* Image Gallery (Main + small grid) */}
                 <div className="space-y-2">
                   <div className="aspect-[16/10] w-full rounded-2xl overflow-hidden shadow-sm">
+                    {selectedProperty.image ? (
                     <img
                       src={selectedProperty.image}
                       alt={`${selectedProperty.name} — alquiler en ${selectedProperty.zone}, Isla de Margarita`}
@@ -913,6 +915,9 @@ export default function HomeClient({
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
+                    ) : (
+                      <SinFoto className="h-full w-full" />
+                    )}
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {selectedProperty.gallery.map((imgUrl, idx) => (
@@ -1442,6 +1447,7 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
         {/* El alt lleva zona e isla, no solo el nombre: es lo que posiciona
             estas fotos en Google Imágenes, que en viajes es tráfico real.
             Dimensiones explícitas para no provocar salto de layout. */}
+        {property.image ? (
         <img
           src={property.image}
           alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
@@ -1452,6 +1458,9 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           referrerPolicy="no-referrer"
         />
+        ) : (
+          <SinFoto className="h-full w-full" />
+        )}
 
         {/* Degradado solo en el tercio inferior: da contraste a la zona sin
             apagar la foto, que es el activo de la tarjeta. */}

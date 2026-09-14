@@ -1,0 +1,23 @@
+-- Fuera las fotos genéricas de los alojamientos (2026-09-14).
+--
+-- QUÉ SE BORRA: las 32 filas de `property_images` que apuntan a /images/photo-…
+-- — las fotos de banco que venían del andamiaje inicial. Se quedan SOLO las
+-- fotos reales: las tres subidas desde el panel (/uploads/…) y la de Los
+-- Geranios A (/properties/…).
+--
+-- POR QUÉ: enseñar un apartamento con la foto de otro es exactamente lo que la
+-- marca dice no hacer (ver IDENTIDAD.md y MARCA.md). Es la misma decisión que
+-- ya se tomó con las reseñas y las valoraciones inventadas, que por eso no
+-- emiten datos estructurados (ver lib/schema.ts y SEO.md).
+--
+-- QUÉ PASA CON LOS 8 ALOJAMIENTOS INVENTADOS: se quedan sin ninguna foto. No se
+-- ve en el sitio: los ocho tienen is_real = false Y is_published = false, así
+-- que hoy no están publicados. Si alguno se publica sin fotos, la galería ya
+-- sabe qué hacer — muestra «Fotos al consultar» (ver GaleriaInmueble.tsx).
+--
+-- LOS ARCHIVOS NO SE BORRAN. Siguen en public/images/ y versionados en git:
+-- pesan 988 KB en total y uno de ellos es todavía el valor por defecto de la
+-- foto de portada del sitio (lib/settings.ts). Esta migración solo corta la
+-- relación entre un alojamiento y una foto que no es suya.
+
+DELETE FROM property_images WHERE path LIKE '/images/photo-%';

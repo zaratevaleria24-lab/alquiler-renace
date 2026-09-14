@@ -1,4 +1,4 @@
-import { BarChart3, Globe2, Smartphone } from 'lucide-react';
+import { BarChart3, Smartphone } from 'lucide-react';
 import { getResumenMetricas } from '@/lib/metricas';
 import { Cifra, Seccion, Tarjeta } from '../_ui';
 
@@ -119,6 +119,76 @@ export default async function MetricasPage() {
             nota="a quién conviene pautarle"
           />
         </div>
+      </Seccion>
+
+      <Seccion
+        id="fuentes"
+        titulo="De dónde"
+        cursiva="llega la gente"
+        descripcion="Ordenado por personas, 30 días. Cada persona se cuenta en la fuente por la que ENTRÓ: al moverse dentro del sitio la procedencia pasa a ser el propio dominio, y contarla en cada página escondería el origen bajo «directo»."
+      >
+        <Tarjeta className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[34rem] text-left">
+              <thead>
+                <tr className="border-b border-line bg-paper/40">
+                  <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                    Fuente
+                  </th>
+                  <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                    Personas
+                  </th>
+                  <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                    Páginas vistas
+                  </th>
+                  <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
+                    Escribieron por WhatsApp
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {m.porFuente.map((f) => (
+                  <tr
+                    key={f.fuente}
+                    className="border-b border-line/70 last:border-0"
+                  >
+                    <td className="px-5 py-3.5 text-body text-ink">{f.nombre}</td>
+                    <td className="px-5 py-3.5 font-mono text-ui tabular-nums text-ink-muted">
+                      {f.visitantes}
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-ui tabular-nums text-ink-muted">
+                      {f.visitas}
+                      <span className="ml-2 font-sans text-meta text-ink-faint">
+                        {(f.visitas / Math.max(f.visitantes, 1)).toFixed(1)} c/u
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 font-mono text-ui tabular-nums">
+                      {/* Una fuente que trae gente y ni un contacto no está
+                          trayendo clientes: es la comparación que decide dónde
+                          poner el esfuerzo. */}
+                      <span
+                        className={
+                          f.contactos === 0 && f.visitantes >= 10
+                            ? 'text-coral'
+                            : 'text-ink-muted'
+                        }
+                      >
+                        {f.contactos}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Tarjeta>
+        <p className="mt-3 text-meta text-ink-faint">
+          El enlace de la bio de Instagram y el QR del apartamento se reconocen
+          por los parámetros que llevan pegados (<code>?utm_source=ig</code>,{' '}
+          <code>?desde=qr</code>). Un enlace publicado sin ellos cae en
+          «Directo»: si se va a publicar en un sitio nuevo, conviene etiquetarlo
+          antes.
+        </p>
       </Seccion>
 
       <Seccion
@@ -286,26 +356,7 @@ export default async function MetricasPage() {
         </Tarjeta>
       </Seccion>
 
-      <div className="mt-12 grid gap-6 md:grid-cols-2">
-        {m.porProcedencia.length > 0 && (
-          <div>
-            <h2 className="flex items-center gap-2 text-meta font-semibold text-ink-muted">
-              <Globe2 className="h-4 w-4" /> De dónde llegan
-            </h2>
-            <Tarjeta className="mt-4 p-3">
-              <ul className="space-y-1">
-                {m.porProcedencia.map((r) => (
-                  <Barra
-                    key={r.host}
-                    etiqueta={r.host}
-                    valor={r.visitas}
-                    maximo={max(m.porProcedencia.map((x) => x.visitas))}
-                  />
-                ))}
-              </ul>
-            </Tarjeta>
-          </div>
-        )}
+      <div className="mt-12">
         <div>
           <h2 className="flex items-center gap-2 text-meta font-semibold text-ink-muted">
             <Smartphone className="h-4 w-4" /> Móvil o escritorio

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { CalendarDays, MessageCircle, Ticket, Users } from 'lucide-react';
 import { validarCuponAction } from '@/app/acciones/cupon';
+import SinFoto from '@/components/SinFoto';
 
 interface Apto { slug: string; nombre: string; zona: string; precio: number; personas: number; portada: string }
 interface Ocupado { desde: string; hasta: string }
@@ -75,7 +76,11 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           {aptos.map((a) => (
             <li key={a.slug}>
               <button type="button" onClick={() => setSlug(a.slug)} aria-pressed={a.slug === slug} className={`flex w-full gap-3 rounded-card border bg-white p-3 text-left transition-colors ${a.slug === slug ? 'border-brand-deep shadow-lift' : 'border-line hover:border-brand/40'}`}>
-                <img src={a.portada} alt={`${a.nombre}, ${a.zona}`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
+                {a.portada ? (
+                  <img src={a.portada} alt={`${a.nombre}, ${a.zona}`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
+                ) : (
+                  <SinFoto compacta className="h-24 w-24 shrink-0 rounded-card" />
+                )}
                 <span className="min-w-0"><span className="block font-serif text-[17px] font-semibold leading-tight text-ink">{a.nombre}</span><span className="mt-0.5 block text-ui text-ink-muted">{a.zona} · hasta {a.personas} personas</span><span className="mono-data mt-2 block text-ink">{usd(a.precio)} <span className="text-ink-muted">/ noche</span></span></span>
               </button>
             </li>
