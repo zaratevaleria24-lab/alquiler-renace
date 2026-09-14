@@ -4,6 +4,11 @@
 > construimos**. Antes de publicar cualquier cambio en Margarita Renace, se pasa
 > por esta lista. Si algo no la cumple, no sale. Escrito el 2026-09-13 a pedido
 > de la dueña («un arnés para siempre tomar las mejores decisiones»).
+>
+> Son tres capas y conviene no mezclarlas: `MARCA.md` e `IDENTIDAD.md` son el
+> negocio, este archivo es la ingeniería, y **`AGENTES.md` es cómo opera un
+> agente** —cómo verifica, qué hace antes de algo irreversible, cuándo puede
+> decir que terminó—. El estado del día, con fecha, está en `ESTADO.md`.
 
 ## 1. Se mide antes de opinar
 - Cada cambio visual se mira en **captura real** (Chrome headless del servidor,
