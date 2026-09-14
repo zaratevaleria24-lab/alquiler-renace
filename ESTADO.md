@@ -77,6 +77,11 @@ Dos commits, ambos desplegados y verificados:
    existiera, y se añadió `components/SinFoto.tsx`. La foto de Agua Mar, borrada
    desde el panel esa misma mañana, se recuperó del respaldo de las 03:45.
 
+3. **Arreglado el «panel negro».** Quince `redirect()` del módulo de propiedades
+   iban a `/propiedades/<id>` sin el prefijo `/admin`, así que tras borrar o
+   subir una foto el enrutador del cliente pintaba el layout público —navbar
+   oscura— dentro del panel. La escritura sí se hacía; solo la pantalla mentía.
+
 ## Qué falta, y de quién depende
 
 **De la dueña / el dueño** — nada de esto lo puede resolver un agente:
@@ -94,6 +99,30 @@ Dos commits, ambos desplegados y verificados:
 - **DMARC en Cloudflare**, para que los correos no caigan en Promociones.
 - **Dominio autorizado en la clave de Google Maps**, o el mapa de la guía no
   carga en producción.
+
+### Qué se puede y qué no se puede hacer desde el panel
+
+Auditado el 2026-09-14. La mayoría del panel es un CMS completo, pero hay
+huecos concretos, y explican por qué faltan datos en la base:
+
+| Sección | Crear | Editar | Borrar |
+|---|---|---|---|
+| Propiedades | sí | sí | **no existe** |
+| Fotos de propiedad | sí | orden, portada y alt | sí |
+| Reseñas | sí | — | sí |
+| Guía (lugares) | sí | sí | solo despublicar |
+| Enlaces | sí | sí | sí |
+| En venta (propios) | sí | sí | **no existe** |
+| Contactos | sí | tipo y usado | sí |
+| Contratos | sí | — | anular (correcto: son documentos legales) |
+| Calendario y iCal | sí | sí | sí |
+| **Vehículos** | **no** | **no** | **no** — la pantalla dice «En construcción» |
+| **Zonas** | **no** | **no** | **no** — pantalla de relleno |
+
+Consecuencias directas: los 8 alojamientos de relleno **no se pueden quitar
+desde el panel** porque no hay acción de borrar una propiedad, solo
+despublicarla. Y hay 0 vehículos porque la pantalla para cargarlos nunca se
+construyó, aunque las tablas y la página pública `/autos` sí existen.
 
 **Del lado técnico:**
 
