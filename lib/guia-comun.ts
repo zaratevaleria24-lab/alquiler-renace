@@ -53,10 +53,35 @@ export interface Lugar {
   telefono: string | null; web: string | null; instagram: string | null; mapsUrl: string | null;
   horario: string[] | null; nivelPrecio: string | null; resumenGoogle: string | null;
   fotosGoogle: FotoGoogle[]; datosActualizados: string | null;
-  fotos: FotoGuia[]; destacado: boolean; aliado: boolean; orden: number; publicado: boolean; categoriasExtra: string[];
+  fotos: FotoGuia[]; destacado: boolean; aliado: boolean;
+  /** Completa «Recomendado …» en el sello. Vacío = el texto genérico. */
+  aliadoMotivo: string;
+  orden: number; publicado: boolean; categoriasExtra: string[];
 }
 
 export interface Consejo { id: string; tema: string; titulo: string; texto: string; orden: number; publicado: boolean }
+
+/**
+ * Número de WhatsApp de un teléfono, o null si ese teléfono NO puede tenerlo.
+ *
+ * POR QUÉ IMPORTA EL PREFIJO: hasta el 2026-09-15 bastaba con que el número
+ * tuviera nueve dígitos para pintarle un botón de WhatsApp. Auditado ese día:
+ * de 58 lugares con teléfono, **19 no podían tenerlo** —18 fijos 0295/0212 y
+ * uno con formato extranjero—. Un tercio de la guía ofrecía un botón que abre
+ * WhatsApp y responde «número no válido». Peor que no tener el botón.
+ *
+ * Móviles de Venezuela: 0412 y 0422 (Digitel), 0414 y 0424 (Movistar),
+ * 0416 y 0426 (Movilnet). Todo lo que empieza por 2 es fijo.
+ */
+export function waDeTelefono(tel: string | null | undefined): string | null {
+  if (!tel) return null;
+  const d = tel.replace(/\D/g, '').replace(/^58/, '').replace(/^0/, '');
+  return /^4(12|14|16|22|24|26)\d{7}$/.test(d) ? `58${d}` : null;
+}
+
+/** ¿Esta URL ya es un enlace de WhatsApp? (algunos negocios ponen wa.me de web) */
+export const esEnlaceWa = (u: string | null | undefined) =>
+  !!u && /wa\.(me|link)|whatsapp\.com/.test(u);
 
 /** Versión chica (480px) de una foto guardada: `x.webp` → `x-s.webp`. Las de
  *  Google van por el proxy con `?w=480`. Para tarjetas y mapa; la galería usa la grande. */

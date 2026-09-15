@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Instagram, MapPin, MessageCircle, Navigation, Phone, Star } from 'lucide-react';
-import { CATEGORIAS, categoriaLabel, categoriasDe, esServicio, horarioHoy, miniatura, portadaDe, type Lugar } from '@/lib/guia-comun';
+import { Instagram, MapPin, Navigation, Phone, Star } from 'lucide-react';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, waDeTelefono, type Lugar } from '@/lib/guia-comun';
 import IconoCategoria from '@/components/IconosGuia';
+import IconoWhatsApp from '@/components/IconoWhatsApp';
 
 // LA tarjeta de la guía: la misma para una playa, un restaurante o el camión
 // de agua, así la lista se lee como un solo conjunto. En teléfono es compacta
@@ -13,14 +14,9 @@ import IconoCategoria from '@/components/IconosGuia';
 // llamar, Instagram, web, cómo llegar. Los ALIADOS (trato directo con nosotros)
 // llevan el sello «Recomendado» en dorado/naranja (el dueño pidió que resalte
 // sobre el teal de la marca) y un borde que gira con el mismo oro.
-function waDe(tel: string | null): string | null {
-  if (!tel) return null;
-  let d = tel.replace(/\D/g, '');
-  if (d.startsWith('58')) return d;
-  if (d.startsWith('0')) d = d.slice(1);
-  return d.length >= 9 ? '58' + d : null;
-}
-const esWa = (u: string | null) => !!u && /wa\.(me|link)|whatsapp\.com/.test(u);
+// waDeTelefono y esEnlaceWa viven en lib/guia-comun.ts: la ficha del lugar usa
+// los mismos. Antes cada pantalla decidía por su cuenta si un teléfono era
+// WhatsApp, y no coincidían.
 // Google antepone plus codes («2624+5CG, Pampatar»): no le dicen nada a nadie.
 const sinPlusCode = (d: string | null) => (d ?? '').replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '');
 
@@ -29,13 +25,14 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
   const cat = CATEGORIAS.find((c) => c.key === l.categoria);
   const hoy = horarioHoy(l);
   const servicio = esServicio(l.categoria);
-  const wa = waDe(l.telefono) ? `https://wa.me/${waDe(l.telefono)}` : esWa(l.web) ? l.web : null;
-  const web = l.web && !esWa(l.web) ? l.web : null;
+  const numeroWa = waDeTelefono(l.telefono);
+  const wa = numeroWa ? `https://wa.me/${numeroWa}` : esEnlaceWa(l.web) ? l.web : null;
+  const web = l.web && !esEnlaceWa(l.web) ? l.web : null;
   const ig = l.instagram ? `https://www.instagram.com/${l.instagram}/` : null;
   const ir = l.latitud != null ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}` : l.mapsUrl;
   const donde = [sinPlusCode(l.direccion), l.municipio && !l.direccion?.includes(l.municipio) ? l.municipio : ''].filter(Boolean).join(' · ');
   const acciones = [
-    wa && { href: wa.includes('wa.me/') && !wa.includes('text=') ? `${wa}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}` : wa, I: MessageCircle, t: 'WhatsApp', ext: true, aliado: true },
+    wa && { href: wa.includes('wa.me/') && !wa.includes('text=') ? `${wa}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}` : wa, I: IconoWhatsApp, t: 'WhatsApp', ext: true, aliado: true },
     l.telefono && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
     ig && { href: ig, I: Instagram, t: 'Instagram', ext: true },
     web && !ig && { href: web, I: null, t: 'Web', ext: true },
@@ -57,7 +54,8 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
     <li data-cat={categoriasDe(l).join(' ')} hidden={oculta || paginada} className={`${paginada ? 'paginada ' : ''}flex flex-col overflow-hidden rounded-panel border bg-white shadow-lift [content-visibility:auto] [contain-intrinsic-size:auto_200px] md:[contain-intrinsic-size:auto_420px] ${l.aliado ? 'borde-brillo border-transparent' : 'border-line'}`}>
       {l.aliado && (
         <p className="flex items-center gap-1.5 bg-[linear-gradient(90deg,#b06f14,#d9a441_55%,#e4823a)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white [text-shadow:0_1px_1px_rgba(0,0,0,.18)]">
-          <Star className="h-3 w-3 fill-current" aria-hidden="true" />Recomendado por Margarita Renace
+          <Star className="h-3 w-3 shrink-0 fill-current" aria-hidden="true" />
+          <span className="truncate">{l.aliadoMotivo ? `Recomendado ${l.aliadoMotivo}` : 'Recomendado por Margarita Renace'}</span>
         </p>
       )}
       <div className="flex gap-3.5 p-3.5 md:flex-col md:gap-0 md:p-0">

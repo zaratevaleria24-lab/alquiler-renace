@@ -6,13 +6,14 @@ import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { getZones } from '@/lib/queries';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, categoriaLabel, categoriasDe, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe } from '@/lib/guia';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe, waDeTelefono } from '@/lib/guia';
 import GaleriaInmueble from '@/components/GaleriaInmueble';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import ListaGuia from '@/components/ListaGuia';
 import { HUBS, hubDe, hubsDeCategoria } from '@/lib/guia-hubs';
 import { getAjustes } from '@/lib/settings';
 import IconoCategoria from '@/components/IconosGuia';
+import IconoWhatsApp from '@/components/IconoWhatsApp';
 
 // Ficha de un lugar de la guía. Orden pensado para el teléfono: fotos, los
 // cuatro datos que decides con (cuándo ir, cuánto dura, cuánto cuesta, cómo
@@ -54,8 +55,24 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
   const irA = l.latitud != null && l.longitud != null
     ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}&travelmode=driving`
     : l.mapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.nombre + ' Isla de Margarita')}`;
-  const ig = l.instagram ? `https://www.instagram.com/${l.instagram.replace(/^@/, '')}/` : `https://www.instagram.com/explore/search/keyword/?q=${encodeURIComponent(l.nombre + ' margarita')}`;
-  const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, vi «${l.nombre}» en la guía de margaritarenace.com.ve. ¿Me ayudan con `)}` : null;
+  // Instagram SOLO si el lugar tiene el suyo. Antes, cuando no lo tenía, el
+  // enlace llevaba a una BÚSQUEDA de Instagram por el nombre: un botón que dice
+  // «Instagram» y no lleva a su Instagram. 74 de los 103 lugares publicados
+  // caían en ese caso (auditado el 2026-09-15).
+  const ig = l.instagram ? `https://www.instagram.com/${l.instagram.replace(/^@/, '')}/` : null;
+
+  // DOS WhatsApp distintos, y por eso se nombran distinto.
+  //   waLugar    → al negocio, solo si su teléfono es un móvil venezolano.
+  //   wa         → a Margarita Renace, para lo que el negocio no resuelve.
+  // Antes la tarjeta escribía al NEGOCIO y esta ficha escribía a MARGARITA
+  // RENACE, las dos con un botón que decía «WhatsApp»: el mismo gesto llevaba a
+  // dos sitios distintos según la pantalla. Y esta ficha no ofrecía escribirle
+  // al negocio aunque tuviera móvil.
+  const numeroWaLugar = waDeTelefono(l.telefono);
+  const waLugar = numeroWaLugar
+    ? `https://wa.me/${numeroWaLugar}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}`
+    : esEnlaceWa(l.web) ? l.web : null;
+  const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, vi «${l.nombre}» en la guía de margaritarenace.com.ve y quisiera preguntarles algo.`)}` : null;
   const zonaCercana = zonas.find((z) => z.slug === l.zoneSlug);
   const relacionados = todos.filter((x) => x.categoria === l.categoria && x.slug !== l.slug).slice(0, 3);
   // Preguntas frecuentes reales, armadas con los datos de la ficha.
@@ -169,14 +186,22 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
 
             <aside className="h-fit space-y-3 md:sticky md:top-28">
               <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid w-full justify-center"><Navigation className="h-4 w-4" aria-hidden="true" />Cómo llegar</a>
-              <div className="rounded-card border border-line bg-white p-4 text-meta">
-                <ul className="space-y-2.5">
-                  {l.telefono && <li><a href={`tel:${l.telefono.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Phone className="h-4 w-4" aria-hidden="true" />{l.telefono}</a></li>}
-                  <li><a href={ig} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Instagram className="h-4 w-4" aria-hidden="true" />{l.instagram ? `@${l.instagram.replace(/^@/, '')}` : 'Ver en Instagram'}</a></li>
-                  {l.web && <li><a href={l.web} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Globe className="h-4 w-4" aria-hidden="true" />Sitio web</a></li>}
-                </ul>
-                {wa && <a href={wa} rel="noopener" className="mt-4 block rounded-control border border-line bg-paper px-4 py-2.5 text-center text-meta font-medium text-brand-deep hover:border-brand/40">Pregúntanos por WhatsApp</a>}
-              </div>
+              {waLugar && (
+                <a href={waLugar} target="_blank" rel="noopener noreferrer" className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-control border border-line bg-white px-4 text-center text-meta font-medium text-brand-deep transition-colors hover:border-brand/40">
+                  <IconoWhatsApp className="h-4 w-4 shrink-0" /><span className="truncate">Escribir a {l.nombre.split(/[—·]/)[0].trim()}</span>
+                </a>
+              )}
+              {(l.telefono || ig || l.web) && (
+                <div className="rounded-card border border-line bg-white p-4 text-meta">
+                  <ul className="space-y-2.5">
+                    {l.telefono && <li><a href={`tel:${l.telefono.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Phone className="h-4 w-4" aria-hidden="true" />{l.telefono}</a></li>}
+                    {ig && <li><a href={ig} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Instagram className="h-4 w-4" aria-hidden="true" />@{l.instagram?.replace(/^@/, '')}</a></li>}
+                    {l.web && <li><a href={l.web} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-brand-deep hover:underline underline-offset-4"><Globe className="h-4 w-4" aria-hidden="true" />Sitio web</a></li>}
+                  </ul>
+                </div>
+              )}
+              {/* El nuestro, nombrado para que no se confunda con el de arriba. */}
+              {wa && <a href={wa} rel="noopener" className="block rounded-control border border-dashed border-line-strong bg-paper px-4 py-2.5 text-center text-meta text-ink-soft transition-colors hover:border-brand/40 hover:text-brand-deep">¿Dudas? Pregúntale a Margarita Renace</a>}
               {zonaCercana && zonaCercana.properties.length > 0 && (
                 <div className="rounded-card border border-line bg-white p-4">
                   <p className="label-eyebrow text-ink-subtle">Duerme cerca</p>

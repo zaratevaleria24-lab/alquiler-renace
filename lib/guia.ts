@@ -42,7 +42,7 @@ const lugarDesde = (r: Record<string, unknown>): Lugar => ({
   mapsUrl: (r.maps_url as string) ?? null, horario: (r.horario as string[]) ?? null, nivelPrecio: (r.nivel_precio as string) ?? null,
   resumenGoogle: (r.resumen_google as string) ?? null, fotosGoogle: (r.fotos_google as FotoGoogle[]) ?? [],
   datosActualizados: r.datos_actualizados ? new Date(r.datos_actualizados as string).toISOString() : null,
-  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), aliado: Boolean(r.aliado), categoriasExtra: (r.categorias_extra as string[]) ?? [], orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
+  fotos: (r.fotos as FotoGuia[]) ?? [], destacado: Boolean(r.destacado), aliado: Boolean(r.aliado), aliadoMotivo: String(r.aliado_motivo ?? ''), categoriasExtra: (r.categorias_extra as string[]) ?? [], orden: Number(r.orden ?? 0), publicado: Boolean(r.publicado),
 });
 
 const SELECT = `SELECT g.*, z.name AS zone_name FROM guia_lugares g LEFT JOIN zones z ON z.slug = g.zone_slug`;
