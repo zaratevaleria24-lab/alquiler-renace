@@ -88,15 +88,22 @@ Dos commits, ambos desplegados y verificados:
 
 - Los **4 iCal de Airbnb** en `/admin/calendario`: la tabla `ical_feeds` está
   vacía, así que la disponibilidad todavía no se sincroniza de verdad.
-- **Credenciales de Cloudflare R2** (Access Key + Secret) para mover las fotos
-  del panel a almacenamiento de objetos. Hoy viven en el disco del servidor.
+- **Crear el token de API de R2.** Verificado el 2026-09-15: el bucket
+  `margarita-renace` existe y el endpoint responde desde el servidor, pero el
+  token **nunca se creó** — la conversación donde se planteó quedó a medias. Sin
+  Access Key y Secret no hay forma de escribir en el bucket. Y al conectarlo,
+  las fotos deben servirse desde `media.margaritarenace.com.ve` (que todavía no
+  existe en DNS), **nunca desde una URL `r2.dev`**: es un dominio ajeno y
+  Venezuela bloquea CDNs externos, que es la regla que obligó a autohospedar
+  todas las imágenes en julio.
 - **`GA4_ID` y `META_PIXEL_ID`** en `/etc/margarita-renace/marketing.env`, que no
   existe todavía. Sin ese archivo no hay banner de consentimiento ni medición de
   campañas, y las campañas estaban previstas para dentro de días.
 - **Datos legales del contrato**: razón social, RIF y cédula del representante.
   Solo está cargado el nombre del representante.
 - **Ficha de Google del negocio** y reenviar el sitemap en Search Console.
-- **DMARC en Cloudflare**, para que los correos no caigan en Promociones.
+- ~~DMARC en Cloudflare~~ — **ya está puesto** (verificado el 2026-09-15:
+  `_dmarc` con `p=quarantine`, y SPF por Cloudflare Email Routing).
 - **Dominio autorizado en la clave de Google Maps**, o el mapa de la guía no
   carga en producción.
 
