@@ -2,6 +2,8 @@
 
 import { ArrowLeft } from 'lucide-react';
 
+import { puedeVolverAtras } from '@/lib/atras';
+
 // Botón de volver de la ficha de un lugar.
 //
 // EL PROBLEMA: entrar a un lugar desde la guía era un callejón. Arriba solo
@@ -35,17 +37,9 @@ export default function VolverGuia({
     <a
       href={href}
       onClick={(e) => {
-        try {
-          if (
-            window.history.length > 1 &&
-            document.referrer &&
-            new URL(document.referrer).origin === window.location.origin
-          ) {
-            e.preventDefault();
-            window.history.back();
-          }
-        } catch {
-          /* que se comporte como enlace normal */
+        if (puedeVolverAtras()) {
+          e.preventDefault();
+          window.history.back();
         }
       }}
       className="-ml-2 inline-flex min-h-[40px] items-center gap-1.5 rounded-control px-2 text-ui font-medium text-brand-deep transition-colors hover:bg-white/70"

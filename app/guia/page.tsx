@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, POR_PAGINA, claveMaps, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
+import { CATEGORIAS, POR_PAGINA, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import ListaGuia from '@/components/ListaGuia';
-import MapaGuia from '@/components/MapaGuia';
+// import MapaGuia from '@/components/MapaGuia'; // desconectado, ver abajo
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
 import { HUBS } from '@/lib/guia-hubs';
@@ -43,10 +43,9 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
   const cat = CATEGORIAS.find((c) => c.key === sp.c)?.key as Categoria | undefined;
   const visibles = cat ? lugares.filter((l) => enCategoria(l, cat)) : lugares;
   const cuenta = (k: Categoria) => lugares.filter((l) => enCategoria(l, k)).length;
-  const puntos = lugares.filter((l) => l.latitud != null && l.longitud != null).map((l) => ({
-    slug: l.slug, nombre: l.nombre, categoria: l.categoria, emoji: CATEGORIAS.find((c) => c.key === l.categoria)?.emoji ?? '📍',
-    lat: l.latitud!, lng: l.longitud!, foto: portadaDe(l) ? miniatura(portadaDe(l)!.src) : null,
-  }));
+  // Los puntos del mapa se calculaban acá (filtrar + mapear 103 lugares en
+  // cada render) y ya no los consume nadie: el mapa está desconectado. El
+  // bloque original está en el historial, commit de esta misma fecha.
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent('Hola, estoy viendo la guía turística de Margarita Renace y tengo una pregunta: ')}` : null;
   const jsonLd = graph(breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: PATH }]), {
     '@type': 'ItemList', name: TITULO, numberOfItems: lugares.length,
@@ -97,7 +96,14 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               <span id="titulo-guia">{cat ? CATEGORIAS.find((c) => c.key === cat)!.plural : 'Imperdibles primero'}</span>{' '}
               <span id="cuenta-guia" className="mono-data text-ink-muted">{visibles.length}</span>
             </h2>
-            <MapaGuia puntos={puntos} clave={claveMaps()} />
+            {/* MAPA DESCONECTADO (2026-09-15, pedido del dueño). La clave de
+                Google Maps todavía no tiene autorizado este dominio, así que el
+                botón «Ver en el mapa» abría una caja que solo decía que Google
+                no permite el mapa acá. Un botón que solo sabe disculparse es
+                peor que no tenerlo. El componente y los puntos siguen listos:
+                para volver a enchufarlo basta autorizar el dominio en la clave
+                (ver GUIA.md) y devolver esta línea:
+                <MapaGuia puntos={puntos} clave={claveMaps()} /> */}
           </div>
           {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas

@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { ArrowLeft, Menu, X } from 'lucide-react';
+
+import { puedeVolverAtras } from '@/lib/atras';
 
 // LA barra de navegación del sitio: un solo componente para la home y para
 // todas las páginas internas (antes la home tenía la suya dentro de HomeClient
@@ -14,13 +16,22 @@ import { Menu, X } from 'lucide-react';
 // La barra usa la escala de INTERFAZ (text-ui): una barra fija compite con el
 // contenido por espacio vertical, así que acá manda la densidad.
 
-const ENLACES = [
+interface Enlace {
+  label: string;
+  href: string;
+  /** Destino cuando ya estás en la home: ahí casi todo es un ancla. */
+  enHome: string;
+  /** Solo el primero, fuera de la home: retrocede en vez de ir al inicio. */
+  atras?: boolean;
+}
+
+const ENLACES: readonly Enlace[] = [
   { label: 'Inicio', href: '/', enHome: '#hero-frame' },
   { label: 'Hospedajes', href: '/#listings-container', enHome: '#listings-container' },
   { label: 'Autos', href: '/autos', enHome: '/autos' },
   { label: 'En venta', href: '/en-venta', enHome: '/en-venta' },
   { label: 'Guía turística', href: '/guia', enHome: '/guia' },
-] as const;
+];
 
 export default function NavBar({
   whatsapp, onInicio,
@@ -33,9 +44,30 @@ export default function NavBar({
   const [activoHome, setActivoHome] = useState('Inicio');
   const ruta = usePathname();
   const enHome = ruta === '/';
-  const activo = (e: (typeof ENLACES)[number]) =>
+  const activo = (e: Enlace) =>
     enHome ? activoHome === e.label : !e.href.includes('#') && e.href !== '/' && ruta.startsWith(e.href);
-  const destino = (e: (typeof ENLACES)[number]) => (enHome ? e.enHome : e.href);
+  const destino = (e: Enlace) => (enHome ? e.enHome : e.href);
+
+  // FUERA DE LA HOME, «Inicio» es «Volver».
+  //
+  // En la home, «Inicio» sube al principio y limpia los filtros: ahí sirve.
+  // En cualquier otra página llevaba al home del alquiler, que para quien está
+  // leyendo la guía es salirse de la guía — y era el único botón de la barra
+  // que parecía servir para retroceder. Ahora retrocede de verdad: vuelve a la
+  // página anterior del sitio, y si no hay ninguna (se entró por el QR, por
+  // Instagram, por Google) cae al inicio, que es su enlace de siempre. El logo
+  // sigue llevando al inicio, así que no se pierde el acceso.
+  const enlaces: readonly Enlace[] = enHome
+    ? ENLACES
+    : [{ ...ENLACES[0], label: 'Volver', atras: true }, ...ENLACES.slice(1)];
+  const alTocar = (e: Enlace) => (ev: React.MouseEvent) => {
+    if (e.atras && puedeVolverAtras()) {
+      ev.preventDefault();
+      window.history.back();
+      return;
+    }
+    setActivoHome(e.label);
+  };
   // Un solo llamado a la acción a la derecha: WhatsApp (en escritorio). La
   // hamburguesa solo existe en teléfono; en escritorio los enlaces ya están.
   const waReservar = whatsapp
@@ -60,15 +92,16 @@ export default function NavBar({
         </Link>
 
         <div className="hidden md:flex items-center gap-0.5 rounded-control border border-line bg-paper p-1">
-          {ENLACES.map((e) => (
+          {enlaces.map((e) => (
             <a
               key={e.label}
               href={destino(e)}
-              onClick={() => setActivoHome(e.label)}
+              onClick={alTocar(e)}
               className={`rounded-chip px-4 py-2 text-ui font-medium tracking-wide transition-all ${
                 activo(e) ? 'bg-ink text-white' : 'text-ink-soft hover:bg-white hover:text-ink'
               }`}
             >
+              {e.atras && <ArrowLeft className="mr-1 inline-block h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />}
               {e.label}
             </a>
           ))}
@@ -96,7 +129,7 @@ export default function NavBar({
       {abierto && (
         <div id="menu-movil" className="mt-2 rounded-control border border-line bg-white p-2 shadow-lift md:hidden">
           <ul className="flex flex-col">
-            {ENLACES.map((e) => (
+            {enlaces.map((e) => (
               <li key={e.label}>
                 <a
                   href={destino(e)}
