@@ -84,7 +84,12 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
 
   return (
     <div className="md:hidden">
-      {panel('resolver', 'Resolver', 'Desde el apartamento', 0)}
+      {/* «Resolver» era la palabra de quien administra, no la de quien viaja:
+          nombra un problema. Quien llega no viene a resolver nada, viene a
+          pasar unos días y necesita agua, una farmacia, mercado y un taxi. La
+          clave interna del grupo sigue siendo 'resolver' — cambiarla tocaría
+          categorías, filtros y enlaces compartidos por nada. */}
+      {panel('resolver', 'Día a día', 'Agua, farmacia, mercado, taxi', 0)}
       {panel('descubrir', 'Descubrir', 'Salir a la isla', 6)}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Instagram, MapPin, Navigation, Phone, Star } from 'lucide-react';
-import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, sinPlusCode, waDeTelefono, type Lugar } from '@/lib/guia-comun';
+import { CATEGORIAS, categoriaLabel, categoriasDe, distanciaAPampatar, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, sinPlusCode, waDeTelefono, type Lugar } from '@/lib/guia-comun';
 import IconoCategoria from '@/components/IconosGuia';
 import IconoWhatsApp from '@/components/IconoWhatsApp';
 
@@ -79,6 +79,11 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
             {l.rating != null && <span className="inline-flex items-center gap-1 text-ink"><Star className="h-3 w-3 fill-current text-accent" aria-hidden="true" />{l.rating.toFixed(1)}{l.resenas ? <span className="text-ink-faint"> ({l.resenas})</span> : null}</span>}
             {hoy && <span>Hoy {hoy}</span>}
             {!hoy && l.costo && <span>{l.costo}</span>}
+            {/* Nuestros cuatro apartamentos están en Pampatar: para un huésped
+                lo primero no es la dirección, es qué tan lejos le queda. */}
+            {distanciaAPampatar(l.latitud, l.longitud) && (
+              <span className="text-ink-faint">a {distanciaAPampatar(l.latitud, l.longitud)} de Pampatar</span>
+            )}
           </p>
           {donde && <p className="mt-1 flex items-start gap-1 text-[12px] leading-snug text-ink-soft"><MapPin className="mt-[2px] h-3 w-3 shrink-0 text-ink-faint" aria-hidden="true" /><span className="line-clamp-1">{donde}</span></p>}
           <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-ink-soft">{servicio ? (l.consejo || l.descripcion) : (l.descripcion)}</p>

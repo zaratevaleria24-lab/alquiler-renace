@@ -62,6 +62,39 @@ export interface Lugar {
 export interface Consejo { id: string; tema: string; titulo: string; texto: string; orden: number; publicado: boolean }
 
 /**
+ * Pampatar, y por qué todo se mide desde acá: los cuatro apartamentos están en
+ * Pampatar (Los Geranios, La Caranta y Playa El Ángel), así que para un
+ * huésped la pregunta no es «dónde queda» sino «qué tan lejos me queda». El
+ * punto de referencia es el centro del pueblo, junto al castillo.
+ */
+const PAMPATAR = { lat: 10.9986, lng: -63.7906 };
+
+/**
+ * Distancia en línea recta desde Pampatar, ya escrita para leer: «400 m»,
+ * «3,4 km». En línea recta y no por carretera a propósito — calcular la ruta
+ * real pediría una llamada a Google por cada lugar en cada carga, y para
+ * decidir «¿me queda cerca o lejos?» la línea recta alcanza. Por eso se dice
+ * «a 3,4 km» y nunca «a 8 minutos», que sería prometer un tiempo que no medimos.
+ */
+export function distanciaAPampatar(
+  lat: number | null | undefined,
+  lng: number | null | undefined,
+): string | null {
+  if (lat == null || lng == null) return null;
+  const rad = (g: number) => (g * Math.PI) / 180;
+  const km =
+    6371 *
+    Math.acos(
+      Math.min(1,
+        Math.cos(rad(PAMPATAR.lat)) * Math.cos(rad(lat)) * Math.cos(rad(lng) - rad(PAMPATAR.lng)) +
+        Math.sin(rad(PAMPATAR.lat)) * Math.sin(rad(lat))),
+    );
+  if (!Number.isFinite(km)) return null;
+  if (km < 1) return `${Math.max(50, Math.round(km * 1000 / 50) * 50)} m`;
+  return `${km.toFixed(1).replace('.', ',')} km`;
+}
+
+/**
  * Quita el «plus code» que Google antepone a muchas direcciones
  * («2624+5CG, Pampatar»). No le dice nada a nadie y ocupa la mitad de la línea.
  * Lo usaban la tarjeta y no la ficha, así que la misma dirección se veía
