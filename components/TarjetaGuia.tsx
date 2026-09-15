@@ -36,8 +36,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
   const donde = [sinPlusCode(l.direccion), l.municipio && !l.direccion?.includes(l.municipio) ? l.municipio : ''].filter(Boolean).join(' · ');
   const acciones = [
     wa && { href: wa.includes('wa.me/') && !wa.includes('text=') ? `${wa}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}` : wa, I: MessageCircle, t: 'WhatsApp', ext: true, aliado: true },
-    l.telefono && !wa?.startsWith('https://wa.me') && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
-    l.telefono && wa?.startsWith('https://wa.me') && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
+    l.telefono && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
     ig && { href: ig, I: Instagram, t: 'Instagram', ext: true },
     web && !ig && { href: web, I: null, t: 'Web', ext: true },
     ir && { href: ir, I: Navigation, t: 'Ir', ext: true },
@@ -89,13 +88,37 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
           <p className="mt-1.5 line-clamp-2 text-[13px] leading-snug text-ink-soft">{servicio ? (l.consejo || l.descripcion) : (l.descripcion)}</p>
         </div>
       </div>
+      {/* Pie de acciones: UNA con nombre y las demás en icono.
+          ANTES: las cuatro con nombre, cada una `flex-1`. Cuatro etiquetas
+          —WhatsApp, Llamar, Instagram, Ir— no caben en una tarjeta de móvil, y
+          como el contenido va centrado el sobrante se derrama por los dos lados
+          hasta que el `overflow-hidden` de la tarjeta lo recorta: el icono de
+          WhatsApp salía partido por la mitad (visto a 360 px el 2026-09-15).
+          `flex-1` no lo evitaba, porque un elemento flexible no encoge por
+          debajo de su contenido salvo que se le diga con `min-w-0`.
+          AHORA, y no es solo para que quepa: la acción de este negocio es
+          escribir por WhatsApp (MARCA.md §5). Darle el mismo peso visual que a
+          «Ir» era plano. La principal se lleva el ancho que sobra y puede
+          recortarse; las otras son cuadrados de 48 px, que además es una diana
+          más cómoda para el dedo que un texto de 13 px. */}
       {acciones.length > 0 && (
-        <div className="mt-auto flex divide-x divide-line border-t border-line text-[13px] font-medium text-brand-deep">
-          {acciones.map((a) => (
-            <a key={a.t} href={a.href} onClick={a.aliado ? (e) => { const h = conApto(a.href); if (h !== a.href) { e.preventDefault(); window.open(h, '_blank', 'noopener'); } } : undefined} target={a.ext ? '_blank' : undefined} rel={a.ext ? 'noopener noreferrer' : undefined} className="flex min-h-[42px] flex-1 items-center justify-center gap-1.5 hover:bg-paper">
-              {a.I ? <a.I className="h-3.5 w-3.5" aria-hidden="true" /> : null}{a.t}
-            </a>
-          ))}
+        <div className="mt-auto flex items-stretch divide-x divide-line border-t border-line text-[13px] font-medium text-brand-deep">
+          {acciones.map((a, i) => {
+            const onClick = a.aliado
+              ? (e: React.MouseEvent) => { const h = conApto(a.href); if (h !== a.href) { e.preventDefault(); window.open(h, '_blank', 'noopener'); } }
+              : undefined;
+            const comun = { href: a.href, onClick, target: a.ext ? '_blank' : undefined, rel: a.ext ? 'noopener noreferrer' : undefined } as const;
+            return i === 0 ? (
+              <a key={a.t} {...comun} className="flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 px-2 hover:bg-paper">
+                {a.I ? <a.I className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
+                <span className="truncate">{a.t}</span>
+              </a>
+            ) : (
+              <a key={a.t} {...comun} aria-label={a.t} title={a.t} className="flex w-12 shrink-0 items-center justify-center text-ink-muted transition-colors hover:bg-paper hover:text-brand-deep">
+                {a.I ? <a.I className="h-4 w-4" aria-hidden="true" /> : <span className="text-[11px] font-semibold uppercase">{a.t}</span>}
+              </a>
+            );
+          })}
         </div>
       )}
     </li>
