@@ -111,9 +111,11 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
         <div className="mt-3 flex items-center justify-between gap-3">
           <button type="button" onClick={() => abrir(0)} className="inline-flex items-center gap-2 rounded-chip border border-line bg-white px-3.5 py-2 text-ui font-medium text-brand-deep transition-all hover:border-ink hover:shadow-hard-sm">
             <Images className="h-4 w-4" aria-hidden="true" />
-            Ver las {n} fotos
+            {n === 1 ? 'Ver la foto' : `Ver las ${n} fotos`}
           </button>
-          <p className="text-ui text-ink-faint">Toca una foto para verla en grande</p>
+          {/* Con una sola foto no hay nada que «recorrer»: el aviso sobraba y
+              encima decía «una foto» al lado de un botón que decía «1 fotos». */}
+          {n > 1 && <p className="text-ui text-ink-faint">Toca una foto para verla en grande</p>}
         </div>
       </section>
 

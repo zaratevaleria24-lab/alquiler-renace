@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Instagram, MapPin, Navigation, Phone, Star } from 'lucide-react';
-import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, waDeTelefono, type Lugar } from '@/lib/guia-comun';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, sinPlusCode, waDeTelefono, type Lugar } from '@/lib/guia-comun';
 import IconoCategoria from '@/components/IconosGuia';
 import IconoWhatsApp from '@/components/IconoWhatsApp';
 
@@ -17,8 +17,6 @@ import IconoWhatsApp from '@/components/IconoWhatsApp';
 // waDeTelefono y esEnlaceWa viven en lib/guia-comun.ts: la ficha del lugar usa
 // los mismos. Antes cada pantalla decidía por su cuenta si un teléfono era
 // WhatsApp, y no coincidían.
-// Google antepone plus codes («2624+5CG, Pampatar»): no le dicen nada a nadie.
-const sinPlusCode = (d: string | null) => (d ?? '').replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '');
 
 export default function TarjetaGuia({ l, prioridad = false, oculta = false, paginada = false }: { l: Lugar; prioridad?: boolean; oculta?: boolean; paginada?: boolean }) {
   const foto = portadaDe(l);

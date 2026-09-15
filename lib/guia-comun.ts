@@ -62,6 +62,15 @@ export interface Lugar {
 export interface Consejo { id: string; tema: string; titulo: string; texto: string; orden: number; publicado: boolean }
 
 /**
+ * Quita el «plus code» que Google antepone a muchas direcciones
+ * («2624+5CG, Pampatar»). No le dice nada a nadie y ocupa la mitad de la línea.
+ * Lo usaban la tarjeta y no la ficha, así que la misma dirección se veía
+ * limpia en el listado y con el código en la página del lugar.
+ */
+export const sinPlusCode = (d: string | null | undefined) =>
+  (d ?? '').replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '').trim();
+
+/**
  * Número de WhatsApp de un teléfono, o null si ese teléfono NO puede tenerlo.
  *
  * POR QUÉ IMPORTA EL PREFIJO: hasta el 2026-09-15 bastaba con que el número

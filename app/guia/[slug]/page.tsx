@@ -6,7 +6,7 @@ import { SITE, absoluteUrl } from '@/lib/site';
 import { getContacto } from '@/lib/settings';
 import { getZones } from '@/lib/queries';
 import { breadcrumbSchema, graph } from '@/lib/schema';
-import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe, waDeTelefono } from '@/lib/guia';
+import { CATEGORIAS, categoriaLabel, categoriasDe, esEnlaceWa, esServicio, galeriaDe, getLugar, getLugares, horarioHoy, portadaDe, sinPlusCode, waDeTelefono } from '@/lib/guia';
 import GaleriaInmueble from '@/components/GaleriaInmueble';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import ListaGuia from '@/components/ListaGuia';
@@ -14,6 +14,7 @@ import { HUBS, hubDe, hubsDeCategoria } from '@/lib/guia-hubs';
 import { getAjustes } from '@/lib/settings';
 import IconoCategoria from '@/components/IconosGuia';
 import IconoWhatsApp from '@/components/IconoWhatsApp';
+import VolverGuia from '@/components/VolverGuia';
 
 // Ficha de un lugar de la guía. Orden pensado para el teléfono: fotos, los
 // cuatro datos que decides con (cuándo ir, cuánto dura, cuánto cuesta, cómo
@@ -68,6 +69,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
   // RENACE, las dos con un botón que decía «WhatsApp»: el mismo gesto llevaba a
   // dos sitios distintos según la pantalla. Y esta ficha no ofrecía escribirle
   // al negocio aunque tuviera móvil.
+  const servicio = esServicio(l.categoria);
   const numeroWaLugar = waDeTelefono(l.telefono);
   const waLugar = numeroWaLugar
     ? `https://wa.me/${numeroWaLugar}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}`
@@ -112,7 +114,11 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <div className="min-h-screen bg-paper pb-24 md:pb-0">
         <header className="max-w-5xl mx-auto px-5 pt-24 md:px-8 md:pt-28">
-          <nav aria-label="Ruta de navegación" className="text-ui">
+          {/* Volver primero y grande; la miga de pan debajo y solo en pantalla
+              ancha. En el teléfono, dos enlaces en gris de 13 px separados por
+              una barra no son una forma de navegar: son adorno. Ver VolverGuia. */}
+          <VolverGuia href={`/guia?c=${l.categoria}`} texto={(CATEGORIAS.find((c) => c.key === l.categoria)?.plural ?? 'la guía').toLowerCase()} />
+          <nav aria-label="Ruta de navegación" className="mt-1 hidden text-ui md:block">
             <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
               <li><Link href="/guia" className="hover:text-brand hover:underline underline-offset-4">Guía</Link></li>
               <li aria-hidden="true">/</li>
@@ -123,7 +129,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
           <h1 className="mt-2 font-serif text-display font-normal leading-[1.03] track-display text-ink text-balance">{l.nombre}</h1>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-meta text-ink-soft">
             {l.rating != null && <span className="inline-flex items-center gap-1"><Star className="h-4 w-4 fill-brand text-brand" aria-hidden="true" />{l.rating.toFixed(1)} <span className="text-ink-muted">({l.resenas?.toLocaleString('es-VE')} reseñas en Google)</span></span>}
-            {l.direccion && <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 stroke-[1.6] text-brand" aria-hidden="true" />{l.direccion}</span>}
+            {sinPlusCode(l.direccion) && <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 stroke-[1.6] text-brand" aria-hidden="true" />{sinPlusCode(l.direccion)}</span>}
           </div>
         </header>
 
@@ -154,7 +160,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
 
               {l.consejo && (
                 <aside className={`mt-8 rounded-panel border bg-luz p-6 md:p-7 ${l.aliado ? 'borde-brillo borde-brillo-grueso border-transparent' : 'border-line'}`}>
-                  <p className={`label-eyebrow flex items-center gap-1.5 ${l.aliado ? 'text-oro-deep' : 'text-brand-deep'}`}>{l.aliado && <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}{l.aliado ? `Recomendado por ${SITE.name}` : `El consejo de ${SITE.name}`}</p>
+                  <p className={`label-eyebrow flex items-center gap-1.5 ${l.aliado ? 'text-oro-deep' : 'text-brand-deep'}`}>{l.aliado && <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />}{l.aliado ? (l.aliadoMotivo ? `Recomendado ${l.aliadoMotivo}` : `Recomendado por ${SITE.name}`) : `El consejo de ${SITE.name}`}</p>
                   <p className="mt-2 text-body text-ink leading-relaxed">{l.consejo}</p>
                 </aside>
               )}
@@ -222,9 +228,23 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
         </main>
 
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 px-4 py-3 backdrop-blur-md md:hidden [padding-bottom:max(0.75rem,env(safe-area-inset-bottom))]">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0"><p className="truncate text-body font-semibold text-ink">{l.nombre}</p>{hoy && <p className="text-ui text-ink-muted">Hoy: {hoy}</p>}</div>
-            <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><Navigation className="h-4 w-4" aria-hidden="true" />Ir</a>
+          {/* La acción que corresponde al tipo de lugar. A una playa o un museo
+              se va; a un servicio de agua a domicilio se le ESCRIBE — ofrecerle
+              «Ir» a una empresa de delivery era mandar a la gente a conducir
+              hasta un depósito. `esServicio` ya hace esa distinción en la guía. */}
+          <div className="flex items-center gap-2.5">
+            <div className="min-w-0 flex-1"><p className="truncate text-body font-semibold text-ink">{l.nombre}</p>{hoy && <p className="text-ui text-ink-muted">Hoy: {hoy}</p>}</div>
+            {servicio && waLugar ? (
+              <>
+                <a href={irA} target="_blank" rel="noopener noreferrer" aria-label="Cómo llegar" title="Cómo llegar" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-brand-deep"><Navigation className="h-4 w-4" aria-hidden="true" /></a>
+                <a href={waLugar} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><IconoWhatsApp className="h-4 w-4" />Escribir</a>
+              </>
+            ) : (
+              <>
+                {waLugar && <a href={waLugar} target="_blank" rel="noopener noreferrer" aria-label={`Escribir a ${l.nombre} por WhatsApp`} title="WhatsApp" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-brand-deep"><IconoWhatsApp className="h-4 w-4" /></a>}
+                <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><Navigation className="h-4 w-4" aria-hidden="true" />Ir</a>
+              </>
+            )}
           </div>
         </div>
       </div>
