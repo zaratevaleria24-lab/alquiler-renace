@@ -8,9 +8,14 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       // El límite por defecto es 1MB: no alcanza para subir fotos desde el
-      // panel. 15MB permite varias fotos de teléfono por envío; sharp las
-      // reduce a WebP en el servidor, así que a disco llega mucho menos.
-      bodySizeLimit: '15mb',
+      // panel. Sube a 30MB —lo mismo que deja pasar nginx en el vhost del
+      // panel— porque seis a diez fotos de teléfono no cabían en 15MB y el
+      // envío fallaba sin decir por qué. Es la RED DE SEGURIDAD, para quien
+      // tenga JavaScript desactivado: normalmente el navegador ya las encoge
+      // antes de enviarlas (app/admin/(panel)/CampoFotos.tsx) y llegan 2 o 3MB.
+      // No subir más: el cuerpo entero se retiene en memoria y este proceso
+      // comparte 3,7GB con otros dos productos.
+      bodySizeLimit: '30mb',
     },
   },
   typescript: {

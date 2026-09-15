@@ -25,7 +25,12 @@ module.exports = {
       instances: 1,
       autorestart: true,
       watch: false,
-      max_memory_restart: '400M',
+      // 400M era demasiado justo: el proceso ya vive en ~300M y una subida de
+      // fotos —cuerpo en memoria más sharp procesando varias— lo cruzaba, así
+      // que PM2 lo reiniciaba A MITAD DE LA SUBIDA y la foto se perdía sin
+      // error visible. 768M deja margen y sigue muy por debajo de los 3,7GB
+      // del servidor, que tiene ~2,6GB disponibles.
+      max_memory_restart: '768M',
       env: {
         NODE_ENV: 'production',
         PORT: '3002',

@@ -117,6 +117,33 @@ foto real en `public/properties/los-geranios-a/`, así que la dirección es esa.
   después de borrarse desde el panel, así que ese `.tar.gz` es la única vuelta
   atrás que existe para una foto subida.
 
+## Subir fotos desde el panel (2026-09-15)
+
+Para publicar un apartamento hacen falta seis o diez fotos, y las de un teléfono
+pesan de 3 a 6 MB. Había tres techos por debajo de eso y la subida fallaba sin
+decir por qué:
+
+| Techo | Antes | Ahora |
+|---|---|---|
+| `client_max_body_size` de nginx (panel) | 30 MB | 30 MB |
+| `bodySizeLimit` de Next (`next.config.ts`) | 15 MB | 30 MB |
+| `max_memory_restart` de PM2 | 400 MB | **768 MB** |
+
+El de PM2 era el peor: el proceso ya vive en unos 300 MB, así que una subida
+grande lo cruzaba y **PM2 lo reiniciaba a mitad de la carga**, perdiendo la foto
+sin ningún error a la vista.
+
+Lo que de verdad lo arregla es que ahora el navegador **encoge las fotos antes de
+enviarlas** (`app/admin/(panel)/CampoFotos.tsx`, a 1600 px y WebP, los mismos
+valores que usa sharp en el servidor): diez fotos pasan de ~40 MB a ~2 o 3 MB. Es
+mejora progresiva — sin JavaScript se envía el original y por eso los techos de
+arriba siguen importando.
+
+⚠️ **`max_memory_restart` vive en `ecosystem.config.cjs`, y `pm2 restart` NO
+relee ese archivo.** Para cambiarlo hace falta
+`pm2 delete margarita-renace && pm2 start ecosystem.config.cjs --only margarita-renace && pm2 save`.
+Se comprueba con `pm2 describe margarita-renace`.
+
 ## Métricas: de dónde llega la gente (2026-09-14)
 
 El panel `/admin/metricas` ordena el tráfico por FUENTE (Instagram, QR del

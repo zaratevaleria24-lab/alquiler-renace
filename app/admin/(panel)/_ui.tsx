@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import CampoFotos from './CampoFotos';
+
 // Piezas de interfaz del panel.
 //
 // POR QUÉ EXISTEN: la primera versión usaba controles NATIVOS del navegador
@@ -281,15 +283,14 @@ export function ZonaSubida({
         {ayuda && (
           <span className="mt-1 block text-meta text-ink-muted">{ayuda}</span>
         )}
-        <input
+        {/* La caja no se esconde con sr-only: el usuario necesita ver el nombre
+            del archivo elegido antes de enviar. Se estiliza el botón interno.
+            CampoFotos le añade el encogido en el navegador — ver ese archivo:
+            sin JavaScript se comporta como el input de siempre. */}
+        <CampoFotos
           id={id}
-          type="file"
           name={name}
-          required
           multiple={multiple}
-          accept="image/*"
-          // La caja no se esconde con sr-only: el usuario necesita ver el nombre
-          // del archivo elegido antes de enviar. Se estiliza el botón interno.
           className="mt-4 block w-full text-meta text-ink-soft file:mr-4 file:cursor-pointer file:rounded-chip file:border-0 file:bg-brand-tint file:px-4 file:py-2.5 file:text-meta file:font-semibold file:text-brand-deep file:transition-colors hover:file:bg-brand-soft"
         />
       </label>
