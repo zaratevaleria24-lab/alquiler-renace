@@ -72,10 +72,13 @@ Next.js 15 (App Router) + React 19 + Tailwind 4 + TypeScript, sobre **PostgreSQL
 - **`db/schema.sql` + migraciones + `db/seed.sql` tienen que poder levantar una
   base desde cero.** Se verifica creando una base de prueba y aplicándolos en
   orden; si tocas el esquema, hazlo antes de dar por bueno el cambio.
-- **Las fotos subidas viven en `/var/www/margarita-uploads`**, fuera del repo y
-  fuera de git — nginx no puede servir desde `/root`. La base guarda la ruta
-  pública `/uploads/…`. El respaldo diario de las 03:45 es su **única** vuelta
-  atrás.
+- **Las fotos subidas van a Cloudflare R2 y al disco** (desde el 2026-09-15).
+  El sitio las sirve desde `media.margaritarenace.com.ve` y la base guarda esa
+  URL completa; la copia en `/var/www/margarita-uploads` es la que recoge el
+  respaldo nocturno. Ver `lib/r2.ts` y `lib/uploads.ts`. **Nunca apuntes una
+  imagen a la URL `r2.dev` del bucket**: es un dominio ajeno y Venezuela los
+  bloquea, que es la razón por la que en julio hubo que autohospedar las 26
+  originales.
 - **Métricas propias, sin Google Analytics** (`lib/metricas.ts`): sus recursos se
   bloquean en Venezuela. No se guarda ninguna IP, solo un hash con sal diaria que
   se borra. Ver la migración 007 antes de tocar nada de esto.

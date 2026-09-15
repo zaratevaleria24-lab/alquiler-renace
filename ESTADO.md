@@ -88,14 +88,17 @@ Dos commits, ambos desplegados y verificados:
 
 - Los **4 iCal de Airbnb** en `/admin/calendario`: la tabla `ical_feeds` está
   vacía, así que la disponibilidad todavía no se sincroniza de verdad.
-- **Crear el token de API de R2.** Verificado el 2026-09-15: el bucket
-  `margarita-renace` existe y el endpoint responde desde el servidor, pero el
-  token **nunca se creó** — la conversación donde se planteó quedó a medias. Sin
-  Access Key y Secret no hay forma de escribir en el bucket. Y al conectarlo,
-  las fotos deben servirse desde `media.margaritarenace.com.ve` (que todavía no
-  existe en DNS), **nunca desde una URL `r2.dev`**: es un dominio ajeno y
-  Venezuela bloquea CDNs externos, que es la regla que obligó a autohospedar
-  todas las imágenes en julio.
+- ~~Credenciales de Cloudflare R2~~ — **hecho el 2026-09-15.** El token existe,
+  el panel sube al bucket y las 353 fotos que había se migraron. El sitio las
+  sirve desde `media.margaritarenace.com.ve`.
+- **Apagar la «Public Development URL» del bucket** (`pub-….r2.dev`). No la usa
+  nadie, pero mientras exista hay una vía por la que las fotos podrían acabar
+  sirviéndose desde un dominio ajeno, y Venezuela los bloquea. Es un clic.
+- **Un segundo token de Cloudflare con permiso de purga de caché.** Hoy, al
+  borrar una foto, desaparece del bucket pero el borde la sigue sirviendo hasta
+  un año (TTL de la regla de caché). No molesta en la práctica —los nombres
+  llevan marca de tiempo y el sitio deja de enlazarla— pero sin purga una foto
+  retirada sigue accesible para quien tenga el enlace directo.
 - **`GA4_ID` y `META_PIXEL_ID`** en `/etc/margarita-renace/marketing.env`, que no
   existe todavía. Sin ese archivo no hay banner de consentimiento ni medición de
   campañas, y las campañas estaban previstas para dentro de días.

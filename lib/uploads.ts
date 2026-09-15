@@ -1,23 +1,57 @@
 // Guardado de fotos subidas desde el panel. SOLO SERVIDOR.
 //
-// DÓNDE VIVEN LOS ARCHIVOS: /var/www/margarita-uploads, NO dentro del proyecto.
-// Es la regla del servidor ("nunca servir nada desde /root/ vía nginx"): nginx
-// sirve /uploads/* directo desde /var/www con cache largo, sin pasar por Node.
-// La base guarda la ruta pública (/uploads/properties/<slug>/<archivo>.webp);
-// el matcher del middleware ya excluye /uploads.
+// DÓNDE VAN LOS ARCHIVOS (desde el 2026-09-15): a los DOS sitios.
+//
+//   1. Al bucket de Cloudflare R2, que es de donde las sirve el sitio. La base
+//      guarda la URL completa: https://media.margaritarenace.com.ve/<clave>.
+//      Se sirven desde el borde de Cloudflare, no desde este servidor.
+//   2. Al disco, en /var/www/margarita-uploads, como antes.
+//
+// LA COPIA EN DISCO NO SOBRA, y no es por desconfianza del bucket: es lo que
+// recoge el respaldo nocturno (`uploads-*.tar.gz`). Sin ella, las fotos serían
+// lo único del proyecto sin ninguna copia bajo nuestro control. Y si el bucket
+// falla en mitad de una subida, la foto ya está en disco y se sirve desde acá
+// como hasta ayer, en vez de perderse.
+//
+// SI NO HAY BUCKET CONFIGURADO todo esto se salta solo y el módulo se comporta
+// igual que siempre: disco y rutas /uploads/…, que nginx sigue sirviendo. Las
+// fotos anteriores al 2026-09-15 conservan esa ruta y no hace falta tocarlas.
+//
+// ⚠️ La regla del servidor sigue en pie: nunca servir nada desde /root/ por
+// nginx, y nunca apuntar una imagen a un dominio ajeno — ver lib/r2.ts sobre
+// por qué el bucket va por un subdominio nuestro y no por una URL r2.dev.
 //
 // OPTIMIZACIÓN: toda foto se convierte a WebP redimensionada (ancho máx 1600,
 // sin agrandar) con sharp — el mismo criterio del commit "imagenes a WebP" que
 // optimizó las 26 originales. Una foto de teléfono de 4MB queda en ~150-300KB,
 // que es la diferencia entre cargar o no con una conexión venezolana.
 
-import { mkdir, unlink } from 'node:fs/promises';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
+import { borrarDeR2, claveDeUrl, subirAR2 } from './r2';
+
 const UPLOADS_DIR = process.env.UPLOADS_DIR ?? '/var/www/margarita-uploads';
-/** Prefijo público que sirve nginx. */
+/** Prefijo público que sirve nginx para lo que se quedó en disco. */
 const PUBLIC_PREFIX = '/uploads';
+
+/**
+ * Deja un archivo en disco y en el bucket, y devuelve la dirección con la que
+ * hay que guardarlo en la base: la del bucket si llegó, y si no la local.
+ *
+ * Se escriben los MISMOS bytes en los dos sitios. Antes el disco recibía
+ * `sharp(webp).toFile(...)`, que volvía a codificar lo ya codificado: una
+ * pasada de más y una pérdida de calidad para nada.
+ */
+async function publicar(clave: string, cuerpo: Buffer): Promise<string> {
+  const fisico = path.join(UPLOADS_DIR, clave);
+  await mkdir(path.dirname(fisico), { recursive: true });
+  await writeFile(fisico, cuerpo);
+
+  const url = await subirAR2(clave, cuerpo, 'image/webp');
+  return url ?? `${PUBLIC_PREFIX}/${clave}`;
+}
 
 const MAX_WIDTH = 1600;
 const WEBP_QUALITY = 78;
@@ -65,15 +99,18 @@ export async function guardarFoto(
   // origen del dato.
   const carpeta = propertySlug.replace(/[^a-z0-9-]/g, '');
   const nombre = `${Date.now()}-${indice}.webp`;
-  const dirFisico = path.join(UPLOADS_DIR, raiz, carpeta);
 
-  await mkdir(dirFisico, { recursive: true });
-  await sharp(webp).toFile(path.join(dirFisico, nombre));
+  // La miniatura va primero: si falla, mejor enterarse antes de publicar la
+  // grande y dejar una ficha de guía con una tarjeta rota.
   if (raiz === 'guia') {
-    await sharp(webp).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 70 }).toFile(path.join(dirFisico, nombre.replace(/\.webp$/, '-s.webp')));
+    const mini = await sharp(webp)
+      .resize({ width: 480, withoutEnlargement: true })
+      .webp({ quality: 70 })
+      .toBuffer();
+    await publicar(`${raiz}/${carpeta}/${nombre.replace(/\.webp$/, '-s.webp')}`, mini);
   }
 
-  return `${PUBLIC_PREFIX}/${raiz}/${carpeta}/${nombre}`;
+  return publicar(`${raiz}/${carpeta}/${nombre}`, webp);
 }
 
 /**
@@ -109,30 +146,46 @@ export async function guardarImagenSitio(
   }
 
   const nombre = `${clave.replace(/[^a-z0-9_-]/g, '')}-${Date.now()}.webp`;
-  const dirFisico = path.join(UPLOADS_DIR, 'sitio');
-  await mkdir(dirFisico, { recursive: true });
-  await sharp(webp).toFile(path.join(dirFisico, nombre));
-
-  return `${PUBLIC_PREFIX}/sitio/${nombre}`;
+  return publicar(`sitio/${nombre}`, webp);
 }
 
 /**
- * Borra el archivo físico de una foto subida. Solo toca rutas bajo /uploads:
- * las fotos históricas del seed viven en public/ (van con el repo) y de esas
- * solo se borra la fila en la base.
+ * Borra el archivo de una foto subida, en el bucket y en disco.
+ *
+ * Acepta las dos formas que puede tener una fila: la URL del bucket (desde el
+ * 2026-09-15) y la ruta /uploads/… de antes. Las fotos históricas de la semilla
+ * viven en public/ y van con el repo: de esas solo se borra la fila.
+ *
+ * Si la foto es de la guía, arrastra su miniatura `-s.webp`. Sin esto quedarían
+ * huérfanas acumulándose en el bucket, que además se paga por lo que ocupa.
+ *
+ * ⚠️ Borrar del bucket NO la quita de la vista enseguida: el borde de
+ * Cloudflare la sigue sirviendo. El porqué y qué haría falta, en lib/r2.ts.
  */
 export async function borrarArchivoFoto(publicPath: string): Promise<void> {
-  if (!publicPath.startsWith(`${PUBLIC_PREFIX}/`)) return;
+  const clave =
+    claveDeUrl(publicPath) ??
+    (publicPath.startsWith(`${PUBLIC_PREFIX}/`)
+      ? publicPath.slice(PUBLIC_PREFIX.length + 1)
+      : null);
+  if (!clave) return;
 
-  const relativo = publicPath.slice(PUBLIC_PREFIX.length + 1);
-  const fisico = path.join(UPLOADS_DIR, relativo);
-  // path.join normaliza: si tras normalizar se salió de UPLOADS_DIR, era un
-  // intento de traversal guardado en la base — no se toca.
-  if (!fisico.startsWith(UPLOADS_DIR + path.sep)) return;
+  const claves = [clave];
+  if (clave.startsWith('guia/')) {
+    claves.push(clave.replace(/\.webp$/, '-s.webp'));
+  }
 
-  await unlink(fisico).catch(() => {
-    // Si el archivo ya no existe, borrar la fila igual es lo correcto.
-  });
+  for (const k of claves) {
+    await borrarDeR2(k);
+
+    const fisico = path.join(UPLOADS_DIR, k);
+    // path.join normaliza: si tras normalizar se salió de UPLOADS_DIR, era un
+    // intento de traversal guardado en la base — no se toca.
+    if (!fisico.startsWith(UPLOADS_DIR + path.sep)) continue;
+    await unlink(fisico).catch(() => {
+      // Si el archivo ya no existe, borrar la fila igual es lo correcto.
+    });
+  }
 }
 
 /**
@@ -163,13 +216,14 @@ export async function guardarFotoRemota(
       .toBuffer();
     const dir = carpeta.replace(/[^a-z0-9-]/gi, '');
     const nombre = `${indice}.webp`;
-    const dirFisico = path.join(UPLOADS_DIR, raiz, dir);
-    await mkdir(dirFisico, { recursive: true });
-    await sharp(webp).toFile(path.join(dirFisico, nombre));
     // Miniatura de 480px para las tarjetas: 30 KB en vez de 300. La grande queda
-    // para la galería. Ver miniatura() en lib/guia.ts.
-    await sharp(webp).resize({ width: 480, withoutEnlargement: true }).webp({ quality: 70 }).toFile(path.join(dirFisico, nombre.replace(/\.webp$/, '-s.webp')));
-    return `${PUBLIC_PREFIX}/${raiz}/${dir}/${nombre}`;
+    // para la galería. Ver miniatura() en lib/guia-comun.ts.
+    const mini = await sharp(webp)
+      .resize({ width: 480, withoutEnlargement: true })
+      .webp({ quality: 70 })
+      .toBuffer();
+    await publicar(`${raiz}/${dir}/${nombre.replace(/\.webp$/, '-s.webp')}`, mini);
+    return publicar(`${raiz}/${dir}/${nombre}`, webp);
   } catch {
     return null;
   }
