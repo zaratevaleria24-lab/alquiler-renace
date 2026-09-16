@@ -14,6 +14,10 @@ import { zonaPorCoordenadas } from '../lib/ventas';
 import { CONSEJOS, LUGARES, type Semilla } from './guia-semilla';
 
 const SIN_FOTOS = process.argv.includes('--sin-fotos');
+// --solo=texto,texto: importa nada más las entradas cuyo nombre contenga uno de
+// esos textos. Para sumar un puñado de servicios sin reescribir los 103 lugares
+// (y sin pisar lo que la dueña haya editado a mano en el panel).
+const SOLO = process.argv.find((a) => a.startsWith('--solo='))?.slice('--solo='.length).split(',').map((t) => t.trim().toLowerCase()).filter(Boolean) ?? null;
 const LICENCIAS_OK = /^(CC0|Public domain|CC BY(-SA)? [0-9.]+|CC BY(-SA)?)$/i;
 const UA = 'MargaritaRenaceGuia/1.0 (https://margaritarenace.com.ve; contacto por WhatsApp en el sitio)';
 
@@ -105,8 +109,8 @@ async function importarDescubiertos() {
         ? `${resumen} (Según Google.)`
         : `${tipo} en ${String(p.shortFormattedAddress ?? 'la isla').split(',').pop()?.trim()}, de los más reseñados de Margarita según Google.`;
       const consejo = g.categoria === 'comer'
-        ? 'En temporada alta y fines de semana conviene reservar por WhatsApp. Preguntá si aceptan pago móvil o dólares antes de sentarte.'
-        : 'Andá y volvé en taxi o app: es lo más seguro de noche. Los precios de entrada cambian según el evento.';
+        ? 'En temporada alta y fines de semana conviene reservar por WhatsApp. Pregunta si aceptan pago móvil o dólares antes de sentarte.'
+        : 'Ve y vuelve en taxi o app: es lo más seguro de noche. Los precios de entrada cambian según el evento.';
       const [fila] = await rows<{ id: string }>(
         `INSERT INTO guia_lugares (slug, nombre, categoria, descripcion, consejo, orden) VALUES ($1,$2,$3,$4,$5, 50)
          ON CONFLICT (slug) DO UPDATE SET descripcion = EXCLUDED.descripcion, updated_at = now() RETURNING id`,
@@ -121,10 +125,13 @@ async function importarDescubiertos() {
 }
 
 (async () => {
-  console.log(`Importando ${LUGARES.length} lugares curados…`);
-  for (const s of LUGARES) { try { await importarLugar(s); } catch (e) { console.log('  ERROR', s.nombre, (e as Error).message); } }
-  console.log('Descubiertos por Google (comer, noche)…');
-  await importarDescubiertos();
+  const lista = SOLO ? LUGARES.filter((l) => SOLO.some((t) => l.nombre.toLowerCase().includes(t))) : LUGARES;
+  console.log(`Importando ${lista.length} lugares curados${SOLO ? ` (--solo=${SOLO.join(',')})` : ''}…`);
+  for (const s of lista) { try { await importarLugar(s); } catch (e) { console.log('  ERROR', s.nombre, (e as Error).message); } }
+  if (!SOLO) {
+    console.log('Descubiertos por Google (comer, noche)…');
+    await importarDescubiertos();
+  }
   for (const [i, c] of CONSEJOS.entries()) {
     await query(`INSERT INTO guia_consejos (tema, titulo, texto, orden) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM guia_consejos WHERE titulo = $2)`, [c.tema, c.titulo, c.texto, i]);
   }

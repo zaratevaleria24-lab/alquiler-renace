@@ -13,7 +13,7 @@
 | | |
 |---|---|
 | Apartamentos publicados | **4**, todos en Pampatar, US$65 / noche |
-| Lugares en la guía de la isla | 103, con 5 aliados con sello «Recomendado» |
+| Lugares en la guía de la isla | **126**, con 5 aliados con sello «Recomendado» |
 | Anuncios de terceros en «En venta» | 22 prospectos de Facebook Marketplace |
 | Inmuebles propios en venta | 0 |
 | Autos | 0 — la sección existe, el inventario no |
@@ -90,6 +90,15 @@ cifra de este sitio hay que descontar primero la IP del servidor.**
   de tráfico añadida el 2026-09-14.
 
 ## Lo último que se hizo (2026-09-16)
+
+**La guía, hacia los servicios de Pampatar.** 18 entradas nuevas (salud, moverse,
+prácticos, agua y gas), 11 de ellas en Pampatar, que es donde duermen los
+huéspedes y donde la guía no tenía casi nada. Sale de lo que dicen los logs: los
+clics de Google aterrizan en `/guia/farmatodo` y en agua y cisternas, no en las
+playas. El importador aceptó un `--solo=` para no reescribir los otros 108
+lugares. Detalle: `/guia` cachea una hora y el importador no invalida, así que lo
+nuevo aparece al vencer la hora o al guardar algo en `/admin/guia`. Ver `GUIA.md`.
+
 
 **SEO/GEO: precio marcado y el negocio con ciudad.** Dos pendientes que estaban
 en `SEO.md` desde agosto y se habían quedado colgados porque su condición ya se

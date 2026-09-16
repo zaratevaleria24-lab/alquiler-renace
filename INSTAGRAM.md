@@ -89,3 +89,26 @@ mezclados, distintos en cada post.
 «¿Cuánto cuestan 5 noches?», la guía con QR y las reseñas. Se regeneran con
 `node scripts/plantillas-historias.cjs` cuando cambian precios o reseñas.
 La página que enlazan los reels de precio es **/reservas**.
+
+## Calendario de publicación (2026-09-16)
+
+Del **17 al 30 de septiembre**, con los textos escritos y listos para pegar:
+5 publicaciones (martes, jueves y sábado) e historias los demás días. Vive como
+página, no como md, porque lo opera la dueña desde el teléfono:
+**https://claude.ai/artifact/Y7mtj7RD1n4QdWar92aA1u**
+
+Tres correcciones al plan de arriba, hechas contra la base el 2026-09-16:
+
+- **La bio decía «Pampatar, Costa Azul y Porlamar».** Los cuatro apartamentos
+  publicados están en **Pampatar**. La bio y la ubicación de cada post dicen
+  solo Pampatar mientras no haya inventario en las otras zonas.
+- **«★5.0 · 27 reseñas» es falso como bloque.** Son 27 reseñas entre los cuatro,
+  pero Agua Mar tiene 4,8 (10 reseñas) y los otros tres 5,0 (5, 3 y 9). El texto
+  del 30/09 lo dice así. Regla de `IDENTIDAD.md`: nada inventado, tampoco
+  redondeado hacia arriba.
+- **`hero_image_alt` en `site_settings` dice «Bahía Mágica · Costa Azul»** y la
+  ficha dice La Caranta, Pampatar. Es un dato público equivocado; se corrige
+  desde `/admin/contenido`.
+
+El ritmo se bajó de 5 publicaciones semanales a 5 en dos semanas: lo sostiene
+una sola persona. Se sube a los 14 días si se aguantó.

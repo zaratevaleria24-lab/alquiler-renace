@@ -144,3 +144,58 @@ hashtags de actividad sí revelan operadores reales (@scubadivingmargarita,
   en React (ya no se manipulan `hidden`/`.paginada` en el DOM). El servidor solo
   pinta 18 tarjetas; los hubs `/guia/<tema>` (lib/guia-hubs.ts) listan cada tema
   con `escucha={false}`. Fichas con FAQ + FAQPage, openingHours y autor.
+
+## Servicios de Pampatar (2026-09-16)
+
+La guía tenía 39 servicios y casi todos estaban en Porlamar, que es donde no
+duerme nadie nuestro. Los cuatro apartamentos publicados están en **Pampatar**,
+así que un huésped con una fiebre a las diez de la noche, o con un caucho abajo,
+no tenía a quién llamar cerca. Se sumaron **18 entradas**, 11 de ellas en
+Pampatar:
+
+- **Salud** (4 → 11): Centro Médico La Fe y Tu Médico Margarita (ambos marcados
+  24 h por Google, en Pampatar), Ambulatorio de Pampatar, Farmahorro Caribe,
+  Farmacia San Jorge/Farmamás, **Bomberos de Porlamar** y **Protección Civil
+  Nueva Esparta** — los dos últimos son números de emergencia, no negocios.
+- **Moverse** (4 → 9): R24 Asistencia Vial y Grúa Luis Mario (24 h), Cauchera
+  Los Robles (24 h, Pampatar), Todo Cauchos Margarita y el taller Multiservicios
+  RGF. Media isla se alquila un carro y nadie tenía dónde reparar un caucho.
+- **Prácticos** (4 → 8): la bomba E/S PDV Maneiro (frente al Sambil), la
+  ferretería Ferremar, Lavandería Bahía y el Banco de Venezuela de Pampatar.
+- **Agua y gas** (9 → 11): Tricada Gas y el Gas Comunal de San Antonio. Antes
+  solo había botellones y cisternas; las bombonas no estaban.
+
+**Por qué esto y no más playas:** los logs de nginx del 3 al 16 de septiembre
+tienen pocos clics de Google, pero los que hay aterrizan en `/guia/farmatodo`,
+`/guia/agua-potable-margarita-cisterna-24-h` y `/guia/v2-aventuras…`, no en las
+playas. La demanda probada está en los servicios. Ojo con la lectura: es tráfico
+de autoridad y de gente de la isla, **no de conversión** (quien busca Farmatodo
+no alquila) — sirve para el dominio y para el huésped que ya está acá.
+
+### Cómo se hizo, y el `--solo`
+
+Los 18 salieron de un volcado de Places con 16 consultas
+(«farmacia en Pampatar», «cauchera Pampatar», «bombona de gas…»), y cada uno se
+verificó contra su `busqueda` antes de escribirlo: los 18 devuelven el mismo
+negocio. El texto es nuestro; el rating, el horario y la dirección son de Google.
+
+El importador ahora acepta **`--solo=texto,texto`**:
+
+```
+export $(grep -h '^POSTGRES_URL=' .env | head -1) && npx tsx scripts/guia-importar.ts --sin-fotos --solo='ferremar,tricada'
+```
+
+Sin ese filtro, el importador reescribe los textos de los 126 lugares con lo que
+diga la semilla, y **pisa lo que la dueña haya editado a mano en el panel**. Con
+`--solo` toca nada más lo que se nombra, y se salta el bloque de «descubiertos».
+
+Dos detalles que quedan anotados:
+
+- **La caché de `/guia` es de una hora** (`unstable_cache`, `TAG_GUIA`). El
+  importador no la invalida: solo lo hacen las acciones del panel. Lo importado
+  a mano aparece en el sitio cuando vence la hora, o antes si se guarda
+  cualquier cosa desde `/admin/guia`.
+- `importarDescubiertos()` apunta a un scratchpad de una sesión vieja que ya no
+  existe, así que no hace nada desde hace tiempo. Sus dos consejos seguían en
+  voseo («Andá y volvé») del pase a español venezolano; quedaron corregidos por
+  si el bloque vuelve a correr.
