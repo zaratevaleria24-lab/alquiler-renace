@@ -247,6 +247,25 @@ Ordenados por impacto.
    propiedades inventadas amplifica el problema en vez de arreglarlo: primero se
    limpia el inventario, después se le pone precio estructurado a lo real.
 
+   **✅ Resuelto el 2026-09-16.** El inventario se limpió el 2026-09-14
+   (migración 026: los 8 inventados sin publicar y sin fotos), así que la
+   condición se cumplió y esta tarea se había quedado colgada. `propertySchema`
+   emite ahora `offers` con `price`, `priceCurrency: USD`, la tarifa marcada
+   **por noche** (`UnitPriceSpecification` con `referenceQuantity` de 1 DAY —
+   sin eso, US$65 se lee como el precio de la estadía entera) y el mínimo de
+   noches real en `eligibleQuantity`. La guarda es `isReal`, no «hay relleno o
+   no»: si algún día se vuelve a publicar un listado inventado, no se le marca
+   precio solo. **No se emite `availability`**: `ical_feeds` está vacía, el
+   sitio no sabe si una fecha está libre, y declarar `InStock` sería inventar
+   disponibilidad.
+
+   Matiz honesto sobre el alcance: para alquiler vacacional, el precio en el
+   resultado enriquecido de Google sale de un feed de Hotel Center, no del
+   JSON-LD (ver las fuentes de más abajo). Esto no pinta un precio en los diez
+   resultados azules de la noche a la mañana. Lo que sí hace es que el precio
+   sea un dato explícito y atribuible para los motores generativos — que es por
+   donde hoy llega la tracción real (ver la sección de tráfico del 2026-09-16).
+
    Nota tranquilizadora: se verificó que **no hay `aggregateRating` ni `review`
    en el JSON-LD**. Los ratings de relleno son solo visuales, no están marcados,
    así que no hay riesgo de acción manual por reseñas falsas — que es el
@@ -268,6 +287,18 @@ Ordenados por impacto.
    lugar de Nueva Esparta", que es lo peor que puede pasarle a un negocio que
    compite en búsqueda local. Es lo de mayor retorno por minuto invertido de
    toda esta lista: llenar un formulario en el panel.
+
+   **✅ Resuelto.** `telephone` entró el 2026-09-12 con el número de la dueña.
+   `addressLocality` seguía faltando un mes después, y no era un dato que
+   faltara: era que **no existía el campo donde ponerlo**. Se añadió la clave
+   `ciudad` a `lib/settings.ts` (editable en `/admin/contenido`, por defecto
+   **Pampatar**, que es donde opera el negocio y donde están los 4 apartamentos)
+   y `organizationSchema` la emite como `addressLocality`. Verificado el
+   2026-09-16: `{ addressLocality: "Pampatar", addressRegion: "Nueva Esparta",
+   addressCountry: "VE" }`.
+
+   Sigue faltando `streetAddress`, que es dato de la dueña y va en el mismo
+   formulario.
 
 3. **Google Business Profile.** Es lo que mete un negocio local en el mapa y en
    el paquete local, y no se puede hacer desde el código. Para un alquiler

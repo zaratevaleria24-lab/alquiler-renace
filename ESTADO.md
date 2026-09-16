@@ -1,6 +1,6 @@
 # ESTADO.md — dónde estamos
 
-> **Corte: 2026-09-14.** Este documento caduca. Los criterios que no caducan
+> **Corte: 2026-09-16.** Este documento caduca. Los criterios que no caducan
 > están en `MARCA.md`, `PRINCIPIOS.md` y `AGENTES.md`. Si algo de acá no cuadra
 > con la base de datos, la base tiene razón: corrige esta página.
 >
@@ -43,6 +43,35 @@ del QR o del enlace de Instagram, y 9 vistas a una página de contrato, que solo
 abre un huésped. Pero el volumen orgánico todavía es mínimo: **al leer cualquier
 cifra de este sitio hay que descontar primero la IP del servidor.**
 
+### Actualización del 2026-09-16: el SEO empezó a mover algo
+
+- **Googlebot pasó de 12-29 hits/día a 192 / 197 / 104 / 81** los días 13 al 16.
+  El salto es exacto con los commits de SEO del 13/09.
+- **Clics reales de Google: de ~5 en once días (02-12) a ~9 en tres y medio.**
+  De 0,45/día a 2,6/día. Poco en absoluto, pero el país cambió: **6 de los
+  últimos 9 son de Venezuela**, uno de ellos desde *Corporación Visual Nueva
+  Esparta* — un proveedor de la isla.
+- **Aterrizan en `/guia/*`, y en servicios del día a día**, no en turismo:
+  Farmatodo, agua a domicilio, cisterna, Al Costo Market, clínicas. Ahí hay una
+  veta de contenido con demanda probada — pero es tráfico de autoridad y
+  audiencia local, **no de conversión**: quien busca Farmatodo no alquila.
+- **El GEO va por delante del SEO.** `ChatGPT-User` (se dispara solo cuando una
+  persona le pregunta a ChatGPT y ChatGPT va a leer la página) aparece 1-3 veces
+  al día desde IPs de Azure. Y el 15/09 alguien llegó desde ChatGPT y vio **15
+  fichas de `/en-venta` en 90 segundos**.
+
+**Tres trampas al medir este sitio** (costaron tiempo, quedan anotadas):
+
+1. Descontar `46.224.138.26` (el propio servidor) y `127.0.0.1`: el 13/09 se
+   hizo 6.784 peticiones a sí mismo con Playwright.
+2. **`2001:4860:7::/48` es la red de Google, no personas.** Llegan con Chrome
+   normal y `Referer: google.com`, así que parecen clics: el 15/09 inflaban 26
+   «clics» que en realidad eran 2.
+3. Buena parte de los hits con UA `ChatGPT-User` / `Claude-User` /
+   `Perplexity-User` son **escáneres falsificando ese user-agent** para buscar
+   `.env` y credenciales. Los picos del 8 y el 12/09 son eso. `block-scanners`
+   les responde 444. Los legítimos son los que dan 200 desde Azure.
+
 ## Qué está vivo
 
 - **Sitio público** — home, fichas, 9 landings de zona, `/guia` (con hub móvil y
@@ -59,6 +88,25 @@ cifra de este sitio hay que descontar primero la IP del servidor.**
   de notificaciones de Airbnb por correo, desplegado y probado.
 - **Métricas propias**, sin Google Analytics ni cookies, con la tabla de fuentes
   de tráfico añadida el 2026-09-14.
+
+## Lo último que se hizo (2026-09-16)
+
+**SEO/GEO: precio marcado y el negocio con ciudad.** Dos pendientes que estaban
+en `SEO.md` desde agosto y se habían quedado colgados porque su condición ya se
+había cumplido sin que nadie volviera:
+
+1. **`offers` en las fichas reales.** Estaba bloqueado hasta limpiar el
+   inventario; el inventario se limpió el 14/09. Ahora `propertySchema` emite
+   precio (US$65), moneda y **tarifa por noche** con el mínimo de noches real,
+   con `isReal` como guarda. Sin `availability`: `ical_feeds` sigue vacía y el
+   sitio no sabe si una fecha está libre.
+2. **`addressLocality`.** No faltaba el dato, faltaba **el campo**: se añadió la
+   clave `ciudad` (por defecto Pampatar) en `/admin/contenido`.
+3. **Los logs de nginx ya guardan el país.** Cloudflare manda `CF-IPCountry` en
+   cada petición y se estaba tirando: para saber de dónde venía un clic había
+   que hacer `whois` a mano. Formato `pais` en `conf.d/01-log-pais.conf`, que es
+   `combined` + `cc=XX` al final, así que lo que ya leía estos logs sigue
+   funcionando.
 
 ## Lo último que se hizo (2026-09-14)
 

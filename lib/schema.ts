@@ -4,10 +4,16 @@
 // REGLA QUE NO SE ROMPE: acá NO se emite `aggregateRating`, `Review` ni
 // `Offer` para los listados de relleno.
 //
-// De los 12 listados del dataset, solo "Los Geranios A" es real (anfitrión
-// "Margarita Renace", foto propia en public/properties/, precio a consultar).
-// Los otros 11 tienen anfitriones inventados, fotos de stock y ratings entre
-// 4.6 y 4.97 que no vienen de ninguna reseña.
+// Estado al 2026-09-16: de los 12 listados, los 4 PUBLICADOS son reales
+// (Los Geranios A, Los Geranios Lujo, Bahía Mágica, Agua Mar — anfitriona real,
+// fotos propias, US$65/noche, enlazados a su anuncio de Airbnb). Los otros 8
+// siguen en la base con `is_real = false`, sin publicar y sin fotos desde la
+// migración 026.
+//
+// Por eso `propertySchema` ya emite `offers` para lo real y la guarda es
+// `isReal`, no «ningún listado». `aggregateRating` y `Review` siguen fuera:
+// dependen de tener reseñas transcritas, y hoy hay 0 (las estrellas visibles
+// salen de Airbnb en vivo, que es otra cosa).
 //
 // Marcar esos ratings como datos estructurados sería markup de reseñas
 // fabricadas: lo prohíben las políticas de datos estructurados de Google, se
@@ -75,6 +81,10 @@ export function organizationSchema(CONTACT: Contacto): Json {
     },
     address: {
       '@type': 'PostalAddress',
+      // La localidad es lo que convierte «en algún lugar de Nueva Esparta» en un
+      // negocio ubicable: sin ella el paquete local de Google no tiene a qué
+      // ciudad anclar la entidad. Se edita en /admin/contenido (clave `ciudad`).
+      ...(CONTACT.locality ? { addressLocality: CONTACT.locality } : {}),
       addressRegion: SITE.region.state,
       addressCountry: SITE.region.country,
       // streetAddress y postalCode se agregan cuando existan los datos reales
@@ -160,14 +170,35 @@ export function zoneItemListSchema(zone: Zone, path: string): Json {
 }
 
 /**
- * Un alojamiento con página propia (/propiedad/<slug>). Misma regla de arriba:
- * sin aggregateRating, Review ni Offer mientras el listado no sea real con
- * reseñas verificables. El precio va como texto visible en la página, no como
- * dato estructurado.
+ * Un alojamiento con página propia (/propiedad/<slug>).
+ *
+ * PRECIO ESTRUCTURADO (2026-09-16): se emite `offers` SOLO para inventario real
+ * con precio conocido. La regla de la cabecera de este módulo lo bloqueaba
+ * mientras hubiera listados de relleno publicados; desde el 2026-09-14 los ocho
+ * inventados están sin publicar y sin fotos, así que la condición se cumplió y
+ * la tarea se había quedado pendiente. `isReal` es la guarda: si algún día
+ * vuelve a publicarse relleno, no se le pone precio marcado solo.
+ *
+ * Sigue SIN emitirse `aggregateRating` ni `Review`: eso espera a tener reseñas
+ * verificables transcritas, no a que el listado sea real.
+ *
+ * POR QUÉ MULTITIPO `['Accommodation', 'Product']`: `offers` no es una
+ * propiedad válida de `Place` —y `Accommodation` es un `Place`—, así que un
+ * `offers` suelto ahí lo descarta el validador. Multitipar cuelga el precio de
+ * la MISMA entidad en vez de inventar un nodo `Product` paralelo que duplicaría
+ * el alojamiento. Cuando no hay precio, el nodo se queda como `Accommodation` a
+ * secas: sin oferta, `Product` no aporta nada y sí exige campos.
+ *
+ * POR QUÉ NO HAY `availability`: `ical_feeds` está vacía, el sitio no sabe si
+ * una fecha está libre. Declarar `InStock` sería inventar disponibilidad, que
+ * es justo lo que AGENTES.md prohíbe. Se agrega cuando el iCal sincronice.
  */
 export function propertySchema(p: Property, path: string): Json {
+  // Precio marcable: inventario real, con tarifa y no «a consultar».
+  const conPrecio = p.isReal && !p.priceOnRequest && p.pricePerNight > 0;
+
   return {
-    '@type': 'Accommodation',
+    '@type': conPrecio ? ['Accommodation', 'Product'] : 'Accommodation',
     '@id': absoluteUrl(`${path}#alojamiento`),
     name: p.name,
     description: p.description,
@@ -194,6 +225,34 @@ export function propertySchema(p: Property, path: string): Json {
       name: `${p.zone}, ${SITE.region.island}`,
       geo: geoDe(p.zoneSlug),
     },
+    ...(conPrecio
+      ? {
+          offers: {
+            '@type': 'Offer',
+            price: p.pricePerNight,
+            priceCurrency: SITE.currency,
+            url: absoluteUrl(path),
+            priceSpecification: {
+              '@type': 'UnitPriceSpecification',
+              price: p.pricePerNight,
+              priceCurrency: SITE.currency,
+              // La tarifa es POR NOCHE: una unidad de referencia de un día. Sin
+              // esto, US$65 se lee como el precio de la estadía entera.
+              referenceQuantity: {
+                '@type': 'QuantitativeValue',
+                value: 1,
+                unitCode: 'DAY',
+              },
+            },
+            // Mínimo de noches real de cada apartamento (hoy 2 o 3).
+            eligibleQuantity: {
+              '@type': 'QuantitativeValue',
+              minValue: p.nightsCount,
+              unitCode: 'DAY',
+            },
+          },
+        }
+      : {}),
     // Apartamento turístico: el subtipo más preciso que schema.org tiene para
     // esto sin afirmar cosas que no sabemos (habitaciones, m²).
     additionalType: 'https://schema.org/Apartment',

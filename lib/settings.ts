@@ -102,6 +102,14 @@ export const CAMPOS = [
     porDefecto: '',
   },
   {
+    key: 'ciudad',
+    label: 'Ciudad o población',
+    tipo: 'texto',
+    ayuda:
+      'Dónde opera el negocio: Pampatar, Porlamar… Sale en los datos estructurados como addressLocality. Sin ella, para Google el negocio está «en algún lugar de Nueva Esparta», que es lo peor para competir en búsqueda local.',
+    porDefecto: 'Pampatar',
+  },
+  {
     key: 'instagram',
     label: 'Instagram',
     tipo: 'texto',
@@ -191,6 +199,9 @@ export interface Contacto {
   whatsapp: string | null;
   email: string | null;
   streetAddress: string | null;
+  /** Localidad del negocio (addressLocality). Tiene valor por defecto, así que
+   *  en la práctica nunca es null; el tipo lo admite por simetría con el resto. */
+  locality: string | null;
   sameAs: string[];
 }
 
@@ -203,6 +214,7 @@ export function contactoDesde(a: Ajustes): Contacto {
     whatsapp: oNull(a.whatsapp.replace(/\D/g, '')),
     email: oNull(a.email),
     streetAddress: oNull(a.direccion),
+    locality: oNull(a.ciudad),
     sameAs: [a.instagram].map((s) => s.trim()).filter(Boolean),
   };
 }
