@@ -25,6 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
+      // El mapa es contenido propio y enlaza las 126 fichas de la guía: entra
+      // al sitemap con prioridad alta, igual que la guía.
+      url: absoluteUrl('/mapa'),
+      lastModified: buildDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
       url: absoluteUrl('/autos'),
       lastModified: buildDate,
       changeFrequency: 'weekly',

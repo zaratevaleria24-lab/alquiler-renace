@@ -199,3 +199,10 @@ Dos detalles que quedan anotados:
   existe, así que no hace nada desde hace tiempo. Sus dos consejos seguían en
   voseo («Andá y volvé») del pase a español venezolano; quedaron corregidos por
   si el bloque vuelve a correr.
+
+## El mapa se mudó a /mapa (2026-09-16)
+
+El mapa de Google que vivía en esta página estaba desconectado desde el 15/09
+(la clave no autoriza el dominio). Se rehizo entero con teselas propias y ahora
+es su propia pestaña: **`MAPA.md`**. `components/MapaGuia.tsx` se borró; en su
+lugar la guía tiene un enlace «Verlo en el mapa».

@@ -5,7 +5,6 @@ import { getContacto } from '@/lib/settings';
 import { breadcrumbSchema, graph } from '@/lib/schema';
 import { CATEGORIAS, POR_PAGINA, enCategoria, getConsejos, getLugares, miniatura, portadaDe, type Categoria } from '@/lib/guia';
 import ListaGuia from '@/components/ListaGuia';
-// import MapaGuia from '@/components/MapaGuia'; // desconectado, ver abajo
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
 import { HUBS } from '@/lib/guia-hubs';
@@ -96,14 +95,12 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               <span id="titulo-guia">{cat ? CATEGORIAS.find((c) => c.key === cat)!.plural : 'Imperdibles primero'}</span>{' '}
               <span id="cuenta-guia" className="mono-data text-ink-muted">{visibles.length}</span>
             </h2>
-            {/* MAPA DESCONECTADO (2026-09-15, pedido del dueño). La clave de
-                Google Maps todavía no tiene autorizado este dominio, así que el
-                botón «Ver en el mapa» abría una caja que solo decía que Google
-                no permite el mapa acá. Un botón que solo sabe disculparse es
-                peor que no tenerlo. El componente y los puntos siguen listos:
-                para volver a enchufarlo basta autorizar el dominio en la clave
-                (ver GUIA.md) y devolver esta línea:
-                <MapaGuia puntos={puntos} clave={claveMaps()} /> */}
+            {/* El mapa vive en /mapa desde el 2026-09-16, con teselas propias
+                (MAPA.md). Acá queda el enlace: la guía es una lista para leer,
+                el mapa es para buscar lo que tienes cerca. */}
+            <Link href="/mapa" className="inline-flex min-h-[40px] items-center gap-2 rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep transition-colors hover:border-brand/40">
+              🗺 Verlo en el mapa
+            </Link>
           </div>
           {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
               oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas

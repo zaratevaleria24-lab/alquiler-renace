@@ -13,7 +13,7 @@
 | | |
 |---|---|
 | Apartamentos publicados | **4**, todos en Pampatar, US$65 / noche |
-| Lugares en la guía de la isla | **126**, con 5 aliados con sello «Recomendado» |
+| Lugares en la guía de la isla | **126** (110 en el mapa), con 5 aliados con sello «Recomendado» |
 | Anuncios de terceros en «En venta» | 22 prospectos de Facebook Marketplace |
 | Inmuebles propios en venta | 0 |
 | Autos | 0 — la sección existe, el inventario no |
@@ -90,6 +90,21 @@ cifra de este sitio hay que descontar primero la IP del servidor.**
   de tráfico añadida el 2026-09-14.
 
 ## Lo último que se hizo (2026-09-16)
+
+**Mapa de la isla, propio y sin Google (`/mapa`).** Pestaña nueva con los 110
+lugares de la guía que tienen coordenadas y los 4 apartamentos, un radio de 1 km
+«a pie desde» cada apartamento, ficha con foto, distancia y «cómo llegar», y la
+misma lista en HTML debajo para Google y para quien no cargue el mapa. Las
+teselas son un archivo PMTiles de 17 MB (OpenStreetMap vía Protomaps) servido
+desde `/uploads/mapa/` por nuestro nginx: sin clave, sin cuota y sin pedirle nada
+a un dominio ajeno, que es la razón por la que el mapa de Google nunca abrió acá.
+Pesa 830 KB en teléfono, dentro del presupuesto. Se borró `MapaGuia.tsx` (el de
+Google, desconectado desde el 15/09) y la guía ahora enlaza al mapa. Migración
+027: `latitud`/`longitud` **aproximadas** en `properties` —la urbanización, no la
+puerta—. Detalle de servidor: el sitio público pasó a
+`snippets/security-headers-geo.conf` para permitir la geolocalización del
+visitante. Todo en `MAPA.md`, con las tres trampas que costaron tiempo.
+
 
 **La guía, hacia los servicios de Pampatar.** 18 entradas nuevas (salud, moverse,
 prácticos, agua y gas), 11 de ellas en Pampatar, que es donde duermen los

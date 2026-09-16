@@ -31,6 +31,7 @@ const ENLACES: readonly Enlace[] = [
   { label: 'Autos', href: '/autos', enHome: '/autos' },
   { label: 'En venta', href: '/en-venta', enHome: '/en-venta' },
   { label: 'Guía turística', href: '/guia', enHome: '/guia' },
+  { label: 'Mapa', href: '/mapa', enHome: '/mapa' },
 ];
 
 export default function NavBar({

@@ -10,7 +10,7 @@ import { slugify } from '@/lib/listings';
 import { aplicarPlaces, buscarEnPlaces, CATEGORIAS, TAG_GUIA, type FotoGuia } from '@/lib/guia';
 
 async function exigirSesion() { if (!(await usuarioActual())) redirect('/admin/login'); }
-function regenerar() { revalidateTag(TAG_GUIA); revalidatePath('/guia', 'layout'); revalidatePath('/sitemap.xml'); }
+function regenerar() { revalidateTag(TAG_GUIA); revalidatePath('/guia', 'layout'); revalidatePath('/mapa'); revalidatePath('/sitemap.xml'); }
 const asBool = (v: FormDataEntryValue | null) => v === 'on' || v === 'true';
 
 export async function alternarPublicadoLugarAction(fd: FormData) {

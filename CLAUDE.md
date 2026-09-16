@@ -43,7 +43,7 @@ Antes de tocar nada:
 5. **`IDENTIDAD.md`** — antes de escribir **cualquier** texto que vea el público.
    Español venezolano, de tú a tú. Nunca voseo argentino.
 
-Por módulo: `SEO.md` · `VENTAS.md` (En venta) · `GUIA.md` (`/guia`) ·
+Por módulo: `SEO.md` · `VENTAS.md` (En venta) · `GUIA.md` (`/guia`) · `MAPA.md` (`/mapa`) ·
 `CALENDARIO.md` y `AIRBNB-CORREO.md` (disponibilidad) · `CONTRATOS.md` ·
 `CRM.md` · `ENLACES.md` · `INSTAGRAM.md` · `SEGURIDAD.md` · `DESPLIEGUE.md`
 (este servidor) · `ESTRATEGIA.md` (el negocio a largo plazo).
