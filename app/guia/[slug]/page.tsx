@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const path = `/guia/${l.slug}`;
   // Corto: la plantilla del sitio antepone «Margarita Renace · ».
   const title = `${l.nombre} · ${categoriaLabel(l.categoria)} en Isla de Margarita`;
-  const description = l.descripcion.replace(/\s+/g, ' ').slice(0, 155);
+  const description = `${l.nombre}: ${l.descripcion.replace(/\s+/g, ' ')}`.slice(0, 158);
   const img = portadaDe(l)?.src;
   const imgAbs = img ? (img.startsWith('/api/') ? absoluteUrl(img) : absoluteUrl(img)) : '/opengraph-image';
   return {

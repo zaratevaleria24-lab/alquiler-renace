@@ -8,8 +8,8 @@ import { pedirCuponAction } from '@/app/acciones/cupon';
 
 // El cupón de bienvenida: 5 % en la primera reserva directa + la guía de la
 // isla, a cambio de nombre y correo. Poca fricción: dos campos, un botón. Se
-// muestra en cada carga (a los 6 s o al bajar un 35 %) hasta que la persona
-// completa el formulario; desde entonces no vuelve (localStorage). Nunca en
+// muestra a los 20 s o al bajar un 35 %, salvo que se cierre en la sesión;
+// cuando la persona completa el formulario, desde entonces no vuelve (localStorage). Nunca en
 // las páginas de trabajo (/contrato, /enlaces, panel). El WhatsApp se pide
 // DESPUÉS de dar el código, opcional: no frena la conversión y suma al CRM.
 const CLAVE = 'mr:cupon';
@@ -26,19 +26,18 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
   const reducido = useReducedMotion();
 
   useEffect(() => {
-    // Solo «ok» (ya tiene su código) lo apaga; un «cerrado» viejo no cuenta.
-    try { if (localStorage.getItem(CLAVE) === 'ok') return; } catch {}
+    // Si ya lo cerró en esta sesión, respetar su decisión al navegar.
+    try { if (localStorage.getItem(CLAVE) === 'ok' || sessionStorage.getItem(CLAVE) === 'cerrado') return; } catch {}
     let mostrado = false;
     const mostrar = () => { if (mostrado) return; mostrado = true; setAbierto(true); window.removeEventListener('scroll', porScroll); };
     const porScroll = () => { if (window.scrollY > document.documentElement.scrollHeight * 0.35) mostrar(); };
-    const t = setTimeout(mostrar, 6000);
+    const t = setTimeout(mostrar, 20000);
     window.addEventListener('scroll', porScroll, { passive: true });
     return () => { clearTimeout(t); window.removeEventListener('scroll', porScroll); };
   }, []);
 
-  // Cerrar sin completar NO lo apaga: vuelve a aparecer en la próxima carga.
-  // Solo desaparece para siempre cuando la persona ya tiene su código.
-  const cerrar = () => { setAbierto(false); if (estado === 'ok') { try { localStorage.setItem(CLAVE, 'ok'); } catch {} } };
+  // El cierre dura la sesión; obtener el código lo descarta de forma persistente.
+  const cerrar = () => { setAbierto(false); try { sessionStorage.setItem(CLAVE, 'cerrado'); } catch {} if (estado === 'ok') { try { localStorage.setItem(CLAVE, 'ok'); } catch {} } };
   const enviar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); setError(null); setEnviando(true);
     const fd = new FormData(e.currentTarget); fd.set('pagina', location.pathname + location.search);

@@ -81,3 +81,21 @@ de la izquierda del campo «Conectar» solo cambia la etiqueta.
   prorrateado a las noches del mes, o noches × tarifa si no se pactó. En
   propiedades con precio a consultar la tarifa es 0: registrar el monto
   pactado es lo que hace útil esa cifra.
+
+## Disponibilidad desconocida — 2026-09-16
+
+`/api/disponibilidad/<slug>` devuelve `hoy`, `ocupado`, `sincronizado` y
+`actualizado`. Solo se considera sincronizado cuando existe al menos un feed
+activo y todos informan sincronización correcta en las últimas dos horas.
+Las fechas sin bloqueos no se presentan como confirmación de reserva. Sin
+feeds, con datos viejos o ante error de red/HTTP se indica disponibilidad por
+confirmar; los bloqueos conocidos se conservan.
+
+El inicio utiliza fechas ISO reales, no días de muestra. Llegada, salida y
+personas viajan a la ficha por query params; se validan antes de usarse. La
+calculadora respeta mínimo de noches y aforo, rechaza fechas pasadas y no abre
+el enlace de reserva con rangos inválidos o noches ocupadas. Las respuestas
+antiguas al cambiar de apartamento se descartan con AbortController.
+
+La capacidad actual de los cuatro apartamentos es 6 personas en total,
+confirmada por el propietario y aplicada mediante migración 032.

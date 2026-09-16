@@ -98,13 +98,13 @@ mínimos. **La dueña rechazó el brutalismo** (sombras negras macizas, bordes d
 Los colores viven en `app/globals.css` como tokens (`--color-brand`,
 `--color-ink`, `--color-coral`…). **Míralos ahí antes de escribir un color**, y
 usa el token, nunca el hexadecimal suelto. Una sola navbar, la flotante:
-`components/NavBar.tsx`. Tipografías Fraunces (serif, titulares) y Jost (sans,
-cuerpo) por `next/font/google`, que las autohospeda al compilar.
+`components/NavBar.tsx`. Tipografías Source Serif 4 (titulares), Inter (cuerpo) y JetBrains Mono
+(cifras), por `next/font/google`, autohospedadas al compilar.
 
 **Cero CDNs externos.** Venezuela los bloquea y las fotos sencillamente no
 cargan para el público al que le hablamos. Fotos, fuentes y scripts salen de
-nuestro dominio; lo de Google va por proxy propio. Las imágenes son `<img>`
-planas con `width`/`height` y `loading="lazy"`; la portada de cada página es el
+nuestro dominio; lo de Google va por proxy propio. Las galerías usan `<img>` con dimensiones y carga diferida; las tarjetas del
+inicio usan `next/image` optimizado en el propio dominio, sin CDN externo; la portada de cada página es el
 elemento LCP y lleva `fetchPriority="high"`. El `alt` menciona zona e isla.
 
 Un alojamiento puede no tener foto: usa `components/SinFoto.tsx`, nunca
@@ -129,3 +129,11 @@ la salida entubada dejó el sitio en 502 unos minutos el 2026-09-13. Compilar co
 Entorno en `.env` (no `.env.local`, y no está en git): `POSTGRES_URL`,
 `POSTGRES_PASSWORD`, `METRICAS_IPS_EXCLUIDAS`. Los secretos de servicios externos
 van en `/etc/margarita-renace/*.env` con permisos 600 y **jamás** en el repo.
+
+## Precisión de caché y capacidad (2026-09-16)
+
+Los cuatro apartamentos admiten hasta **6 personas totales**, confirmado por el
+propietario; no sumar cupos de niños por encima de seis. Ver migración 032.
+`app/layout.tsx` consulta `headers()`, por lo que las páginas HTML actuales son
+dinámicas. La deduplicación con React.cache en propiedades y ajustes es por
+render, no una caché persistente ni una autorización para cachear el panel.

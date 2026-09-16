@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   // pestaña angosta lo que se lee es «Margarita Renace». Las palabras clave
   // siguen en el título para Google.
   title: {
-    default: 'Margarita Renace — Apartamentos, casas y autos en Isla de Margarita',
+    default: 'Margarita Renace — Alquiler de apartamentos en Pampatar, Isla de Margarita',
     template: 'Margarita Renace · %s',
   },
   // Favicon con el emblema. La versión en la URL fuerza a los navegadores y a
@@ -94,20 +94,20 @@ export const metadata: Metadata = {
     locale: SITE.ogLocale,
     url: SITE.url,
     siteName: SITE.name,
-    title: 'Alquiler de Apartamentos y Autos en Isla de Margarita',
+    title: 'Apartamentos en Pampatar, Isla de Margarita',
     description: SITE.description,
     images: [
       {
         url: '/opengraph-image',
         width: 1200,
         height: 630,
-        alt: 'Margarita Renace — alquiler de apartamentos y autos en Isla de Margarita',
+        alt: 'Margarita Renace — apartamentos en Pampatar, Isla de Margarita',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Alquiler de Apartamentos y Autos en Isla de Margarita',
+    title: 'Apartamentos en Pampatar, Isla de Margarita',
     description: SITE.shortDescription,
     images: ['/opengraph-image'],
   },

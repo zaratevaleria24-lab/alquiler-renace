@@ -1,68 +1,63 @@
-// Páginas por intención de búsqueda: lo que la gente escribe en Google antes
-// de reservar. Cada una responde la pregunta con datos nuestros y termina en
-// /reservas. Se sirven desde app/[tema]/page.tsx; URLs cortas y con palabras
-// clave en la raíz del sitio. Sin inventar precios: lo que no sabemos cierto se
-// dice como referencia o «a consultar» (IDENTIDAD.md).
+// Contenido editorial estable: tarifas y capacidad se muestran desde las fichas
+// vivas que acompaña cada página. No duplicar aquí precios ni inventario.
 export interface Seccion { titulo: string; parrafos: string[] }
 export interface PaginaIntencion {
   slug: string; titulo: string; descripcion: string; h1: [string, string]; intro: string;
   secciones: Seccion[]; faq: { q: string; a: string }[]; mostrarApartamentos: boolean; hubs: string[];
 }
-
 export const PAGINAS: PaginaIntencion[] = [
   {
     slug: 'apartamentos-con-piscina-en-margarita',
-    titulo: 'Apartamentos con piscina en Isla de Margarita para 6 personas',
-    descripcion: 'Cuatro apartamentos en conjuntos cerrados con piscina en Pampatar —Los Geranios, La Caranta y Playa El Ángel—: US$65 la noche para hasta 6 personas, reserva directa por WhatsApp.',
-    h1: ['Apartamentos con piscina', 'para toda la familia'],
-    intro: 'En Margarita la piscina no es lujo: es lo que salva la tarde cuando el sol pega a las 2 y los niños ya no quieren arena. Nuestros cuatro apartamentos están en conjuntos cerrados con piscina, vigilancia y estacionamiento, a minutos del Sambil y de las playas del este.',
+    titulo: 'Apartamentos con piscina en Pampatar, Isla de Margarita',
+    descripcion: 'Compara nuestros apartamentos con piscina en Pampatar: Los Geranios, La Caranta y Playa El Ángel. Fotos, capacidad y tarifa por noche; reserva directa por WhatsApp.',
+    h1: ['Apartamentos con piscina', 'para compartir en familia'],
+    intro: 'Una cocina para desayunar sin apuro, espacio para descansar y la piscina del conjunto al volver de la playa. Nuestros apartamentos están en Pampatar, Isla de Margarita. Aquí puedes comparar las opciones y consultar las fechas de tu viaje.',
     secciones: [
-      { titulo: 'Qué incluye cada apartamento', parrafos: ['Dos habitaciones, dos baños, cocina equipada, aire acondicionado, Wi-Fi y capacidad para 6 personas (Bahía Mágica admite hasta 9 con niños). Piscina del conjunto en los cuatro; Agua Mar queda frente a la playa. Sábanas, toallas y una guía de la isla con QR en la puerta.', 'Los cuatro tienen valoración 4.8–5.0 en Airbnb con reseñas reales; puedes reservar allá o directo con nosotros al mismo precio y sin comisión.'] },
-      { titulo: 'Los Geranios, La Caranta o Playa El Ángel: cuál elegir', parrafos: ['Los cuatro están en Pampatar. Los Geranios A y el Depto de lujo, en la urbanización Los Geranios, si viajas con niños pequeños: cancha y parque infantil dentro del conjunto, Sambil a 5 minutos. Bahía Mágica, en La Caranta, si quieres el castillo, el malecón y la bahía calmada caminando. Agua Mar, en Playa El Ángel, si prefieres la playa al frente y Porlamar a 10 minutos.'] },
-      { titulo: 'Cuánto cuesta y cómo se paga', parrafos: ['US$65 la noche en los cuatro, para hasta 6 personas. Se paga en dólares (Zelle, efectivo) al BCV, en bolívares por pago móvil al BCV del día, o en USDT por Binance al equivalente del día. Confirmas con el 50 % y firmas el contrato de hospedaje desde tu teléfono; el saldo, al llegar.'] },
+      { titulo: 'Elige el sector que te conviene', parrafos: ['Los Geranios A y Los Geranios Lujo están en la urbanización Los Geranios. Bahía Mágica está en La Caranta y Agua Mar en Playa El Ángel. Los cuatro están en Pampatar: revisa la ubicación de cada ficha para elegir según tus planes, la playa que quieres visitar y cómo vas a moverte.', 'Viajar en familia también es resolver lo cotidiano. En nuestra guía encuentras supermercados, farmacias, comida a domicilio y servicios de la isla. Puedes consultar el mapa para ubicar lo que necesitas antes de salir.'] },
+      { titulo: 'Qué revisar antes de reservar', parrafos: ['Compara las fotos, la distribución y la capacidad publicada de cada apartamento. Cuéntanos cuántos adultos y niños viajan para confirmar que el espacio se ajusta al grupo. La piscina pertenece al conjunto residencial: pregunta por sus horarios y normas para las fechas de tu estadía.', 'Si necesitas estacionamiento, acceso sin escaleras, una cama específica o alguna facilidad para un niño pequeño, consúltalo antes de confirmar. Te respondemos sobre el apartamento que elegiste, sin dar por hecho que todos ofrecen lo mismo.'] },
+      { titulo: 'Tarifa clara y reserva directa', parrafos: ['Cada ficha muestra su tarifa base por noche. En la calculadora puedes elegir apartamento y fechas para obtener un estimado en dólares, bolívares al BCV y el equivalente en USDT cuando las tasas están disponibles.', 'La consulta llega por WhatsApp con los datos del viaje. Confirmamos disponibilidad, precio final y forma de pago antes de reservar. Un día sin bloqueos en un calendario no sustituye esa confirmación.'] },
     ],
     faq: [
-      { q: '¿La piscina es privada o compartida?', a: 'Es la del conjunto residencial, compartida con los vecinos y con horario (normalmente de 8 de la mañana a 6 de la tarde). Todas son piscinas del conjunto residencial.' },
-      { q: '¿Aceptan niños?', a: 'Sí. Los apartamentos son familiares: dos habitaciones, parque infantil en Los Geranios y piscina con área baja. Los menores deben estar siempre con un adulto en la piscina.' },
-      { q: '¿Cuántas personas caben?', a: 'Hasta 6 en Los Geranios A, Agua Mar y el Depto de lujo; Bahía Mágica hasta 9 contando niños. Todas las personas se declaran en la reserva y presentan cédula o pasaporte al llegar.' },
+      { q: '¿La piscina es privada?', a: 'Es la piscina del conjunto residencial, compartida con los vecinos. Confirma con nosotros las condiciones de uso y los horarios antes de reservar.' },
+      { q: '¿Pueden alojarse familias con niños?', a: 'Sí. Indica cuántos adultos y niños viajan y revisa la capacidad de la ficha. Los niños deben estar acompañados por un adulto en la piscina y las áreas comunes.' },
+      { q: '¿Cómo comparo los apartamentos?', a: 'Abre las fichas de abajo para revisar fotos, ubicación, capacidad y tarifa. Si dudas entre dos, cuéntanos tus planes por WhatsApp y te ayudamos a elegir.' },
     ],
     mostrarApartamentos: true, hubs: ['playas', 'donde-comer'],
   },
   {
     slug: 'alquiler-por-mes-en-margarita',
-    titulo: 'Alquiler de apartamento por mes en Isla de Margarita',
-    descripcion: 'Estadías largas en Pampatar (Los Geranios, La Caranta y Playa El Ángel): apartamentos amoblados con piscina, internet y contrato, para nómadas, familias que vuelven y trabajo remoto. Precio mensual a consultar.',
-    h1: ['Quedarte un mes', 'en la isla'],
-    intro: 'Cada vez más gente viene a Margarita por semanas: venezolanos de afuera que visitan a la familia en diciembre, parejas que trabajan remoto frente al mar, personas que vienen a resolver papeles o una venta. Para eso hace falta más que una habitación: cocina de verdad, internet que aguante videollamadas, lavandería cerca y alguien que responda cuando se va el agua.',
+    titulo: 'Alquiler de apartamento por mes en Pampatar, Isla de Margarita',
+    descripcion: '¿Vienes por semanas o por un mes a Margarita? Consulta apartamentos en Pampatar, condiciones de estadía larga y una cotización para tus fechas.',
+    h1: ['Quedarte un mes', 'en Isla de Margarita'],
+    intro: 'Visitar a la familia, trabajar durante el viaje o pasar unas semanas en la isla requiere algo más que elegir una playa. Te ayudamos a comparar apartamentos en Pampatar y a consultar una estadía larga con las condiciones claras desde el principio.',
     secciones: [
-      { titulo: 'Qué cambia en una estadía larga', parrafos: ['Precio: la tarifa por noche es US$65; para 28 noches o más hacemos un precio mensual cerrado, a consultar según fechas y apartamento (no lo publicamos porque depende de la temporada y preferimos decirte un número real que uno de folleto). Incluye agua, luz e internet; la limpieza semanal se acuerda aparte.', 'Contrato: el mismo contrato de hospedaje con firma electrónica, con la cláusula de duración adaptada. No es arrendamiento de vivienda ni genera derecho de permanencia: es hospedaje temporal, con fecha de salida.', 'Servicios: te dejamos conectados con nuestros aliados —agua en botellón a domicilio, lavandería con delivery, alquiler de carro por semanas, farmacia— y la guía con los supermercados y los sitios donde comer barato entre semana.'] },
-      { titulo: 'Internet y trabajo remoto', parrafos: ['Los apartamentos tienen Wi-Fi de fibra; te decimos la velocidad real del que elijas antes de reservar. Los cortes de luz existen en la isla: te contamos cómo son en cada zona y qué hacer (Porlamar y Pampatar suelen tener mejor servicio que el norte). Para datos móviles, Digitel es la operadora con mejor cobertura; con el pasaporte compras una línea en el Sambil.'] },
-      { titulo: 'Zonas para vivir un mes', parrafos: ['Nuestros cuatro apartamentos están en Pampatar, la zona más cómoda para el día a día (Sambil, clínicas, farmacias, bahía calmada). Los Geranios para familias, La Caranta para vivir frente al castillo y el malecón, Playa El Ángel a mitad de camino de Porlamar. Todos a menos de 25 minutos del aeropuerto.'] },
+      { titulo: 'Pide una cotización para tus fechas', parrafos: ['La tarifa por noche de cada ficha sirve como referencia inicial. Para una estadía por semanas o por mes, escríbenos con llegada, salida y número de huéspedes. Confirmamos el apartamento y la cotización completa para ese período; no prometemos una tarifa mensual sin revisar las fechas.', 'Antes de reservar, dejamos claros los pagos, el uso del apartamento y qué servicios están incluidos. Consulta también la limpieza durante la estadía y cualquier necesidad especial.'] },
+      { titulo: 'Si vienes a trabajar, revisemos lo que necesitas', parrafos: ['Cuéntanos si haces videollamadas, necesitas una mesa de trabajo o dependes de una conexión estable. Te confirmamos las condiciones del apartamento que elijas y la información disponible sobre su internet.', 'En Margarita pueden presentarse interrupciones de agua o electricidad. Pregunta por el abastecimiento y las alternativas del conjunto antes de confirmar. Es mejor planificar con información del alojamiento que asumir que todos tienen el mismo respaldo.'] },
+      { titulo: 'Resolver el día a día en Pampatar', parrafos: ['Nuestros apartamentos están en Los Geranios, La Caranta y Playa El Ángel. Elige el sector según dónde vas a pasar más tiempo y si contarás con carro. La cercanía a un lugar no significa necesariamente que el trayecto sea cómodo a pie.', 'La guía reúne opciones de supermercado, lavandería, agua a domicilio, salud y comida. Te sirve tanto para preparar la llegada como para encontrar un servicio durante la estadía. Confirma horarios y disponibilidad con cada negocio.'] },
     ],
     faq: [
-      { q: '¿Cuánto cuesta un apartamento por mes en Margarita?', a: 'Nuestra tarifa base es US$65 la noche; para un mes hacemos un precio cerrado según temporada y apartamento, siempre menor que 30 noches sueltas. Escríbenos con las fechas y te respondemos con el número exacto en el día.' },
-      { q: '¿Puedo pagar en bolívares mes a mes?', a: 'Sí, por pago móvil al BCV del día de cada pago; también en dólares por Zelle o en USDT por Binance al equivalente del día. El contrato deja por escrito la forma y las fechas de pago.' },
-      { q: '¿Se puede recibir correspondencia o trabajar desde el apartamento?', a: 'Sí a ambas. Cada apartamento tiene mesa de trabajo y Wi-Fi; la correspondencia llega a la conserjería del conjunto.' },
+      { q: '¿Cuánto cuesta alquilar un apartamento por mes?', a: 'La cotización depende del apartamento y de las fechas. Envíanos llegada, salida y número de huéspedes por WhatsApp para confirmar el precio y las condiciones del período completo.' },
+      { q: '¿Puedo pagar en bolívares?', a: 'Sí, puedes consultar pago móvil en bolívares al BCV del día del pago. También coordinamos Zelle, efectivo en dólares o USDT al equivalente acordado. La forma y las fechas de pago se confirman antes de reservar.' },
+      { q: '¿Cómo sé si sirve para trabajo remoto?', a: 'Indícanos qué conexión y espacio necesitas. Revisamos contigo la información del apartamento antes de confirmar; no garantizamos continuidad de servicios que dependen de proveedores externos.' },
     ],
     mostrarApartamentos: true, hubs: ['servicios', 'donde-comer'],
   },
   {
     slug: 'cuanto-cuesta-viajar-a-margarita',
-    titulo: 'Cuánto cuesta viajar a Isla de Margarita: presupuesto real por 5 noches',
-    descripcion: 'Alojamiento, traslado, comida, playas y salidas: cuánto gastan de verdad dos personas o una familia en cinco noches en Margarita, en dólares, bolívares al BCV y su equivalente en USDT.',
-    h1: ['¿Cuánto cuesta', 'ir a Margarita?'],
-    intro: 'La pregunta que más nos hacen por WhatsApp. Aquí va la respuesta con nuestros precios reales y referencias de la isla a septiembre de 2026; lo que varía con la temporada lo decimos como rango. Todo en dólares a tasa BCV, que es nuestra referencia; en bolívares se paga al BCV del día y en USDT al equivalente.',
+    titulo: 'Cuánto cuesta viajar a Isla de Margarita: calcula tu presupuesto',
+    descripcion: 'Organiza tu presupuesto para Margarita: alojamiento, llegada, comida y paseos. Calcula tu estadía en Pampatar y consulta las tarifas que dependen de tus fechas.',
+    h1: ['¿Cuánto cuesta', 'viajar a Margarita?'],
+    intro: 'El presupuesto cambia con las fechas, el número de personas y la forma de llegar. Empieza por el alojamiento y suma los gastos del viaje por separado. Así puedes comparar opciones con el total a la vista y sin confundir una tarifa por noche con el costo de todas las vacaciones.',
     secciones: [
-      { titulo: 'Alojamiento: lo único que sabemos exacto', parrafos: ['Apartamento nuestro con piscina para hasta 6 personas: US$65 la noche → US$325 por 5 noches, sin comisión de plataforma. Dividido entre 4 personas son US$16 por persona y noche, menos que una habitación de hotel. En Airbnb el mismo apartamento cuesta lo mismo más la comisión de la plataforma.'] },
-      { titulo: 'Llegar y moverse', parrafos: ['Traslado aeropuerto–apartamento: precio cerrado por WhatsApp con nosotros; un taxi de la parada del aeropuerto a Pampatar suele pedir US$15–20. Carrito por puesto dentro de la isla: menos de un dólar en bolívares por tramo. Ridery (carros por app) en Porlamar–Pampatar: US$3–6 por viaje. Alquiler de carro por día: desde unos US$35–50 según modelo, útil solo si vas a recorrer el norte y Macanao.'] },
-      { titulo: 'Comer', parrafos: ['Desayuno margariteño de empanadas de cazón y jugo: US$3–5 por persona. Almuerzo de pescado frito en la playa con acompañantes: US$10–15. Cena en restaurante de Porlamar o Costa Azul: US$12–25 por persona. Pizza o comida árabe a domicilio para 4: US$25–35. Mercado en Sigo o Río para cocinar en el apartamento: una compra de US$60–80 rinde varios días para 4 personas. El agua en botellón de 19 litros a domicilio: US$2–3.'] },
-      { titulo: 'Playas y salidas', parrafos: ['Las playas son gratis; toldo y dos sillas se alquilan por US$5–10 el día. Castillos y museos: entrada económica en bolívares. Lancha a Coche o Cubagua: excursión por persona a consultar con el operador (en la guía están sus teléfonos). Clase de kite en El Yaque: por horas, la más cara de las actividades. Senderismo guiado al Matasiete: por persona, según ruta.'] },
-      { titulo: 'El total, para que planifiques', parrafos: ['Pareja, 5 noches, sin carro, comiendo mitad afuera y mitad en el apartamento: alojamiento US$325 + traslados US$40 + comida US$180–250 + playas y salidas US$60–100 ≈ US$625–725 sin vuelos. Familia de 4 en el mismo plan: alojamiento igual (US$325), comida US$350–450, traslados y salidas US$120–180 ≈ US$825–975. Lo que más cambia el total es el vuelo o el ferry, no la isla.'] },
+      { titulo: '1. Calcula el alojamiento por toda la estadía', parrafos: ['Multiplica la tarifa por noche del apartamento por las noches que necesitas. Si el grupo comparte el apartamento, divide ese subtotal entre los huéspedes para comparar el costo por persona. Respeta siempre la capacidad publicada.', 'La calculadora de reservas hace la cuenta con las tarifas vigentes del catálogo y muestra el equivalente en bolívares y USDT cuando tenemos tasas disponibles. Es un estimado: confirmamos disponibilidad y condiciones por WhatsApp antes de reservar.'] },
+      { titulo: '2. Cotiza cómo llegar y cómo moverte', parrafos: ['Pide el precio del vuelo o ferry para tus fechas e incluye equipaje, traslado al alojamiento y regreso. Si viajas con carro en ferry, confirma el costo y los requisitos con el operador. Los horarios y tarifas pueden cambiar.', 'Para un traslado, indica terminal, hora de llegada, personas y equipaje. Si vas a recorrer varias zonas de la isla, compara una cotización de carro con los trayectos que harías en taxi. No hace falta asumir el mismo gasto de transporte para todos los viajes.'] },
+      { titulo: '3. Organiza comidas y compras', parrafos: ['Decide cuántas comidas prepararás en el apartamento y cuántas harás fuera. Cuenta también agua para beber, desayunos y cualquier compra para niños. Cocinar parte de las comidas permite ajustar el presupuesto a tu grupo.', 'En la guía puedes buscar supermercados, restaurantes y comida a domicilio. Consulta el menú y la tarifa actual con cada negocio: un precio encontrado en una publicación antigua puede no ser el que esté vigente al viajar.'] },
+      { titulo: '4. Reserva una parte para playas y paseos', parrafos: ['Además del traslado, pregunta por toldos, sillas, estacionamiento y actividades si piensas usarlos. Para una excursión, confirma qué incluye: transporte, comida, equipos y condiciones de cancelación.', 'Deja un margen para cambios de planes y gastos pequeños. Antes de pagar en cualquier negocio, confirma la moneda, la tasa aplicada y el total. En Margarita Renace te explicamos esas condiciones antes de confirmar la reserva.'] },
     ],
     faq: [
-      { q: '¿Es más barato pagar en bolívares o en dólares?', a: 'Con nosotros da igual: el precio es en dólares al BCV, y en USDT pagas el equivalente del día (algo menos de USDT que dólares). En la calle, pregunta siempre la tasa antes de pagar: hay quien cobra al BCV y quien cobra al «paralelo», y la diferencia es real.' },
-      { q: '¿Cuánto efectivo debo llevar?', a: 'Poco. Casi todo se paga con pago móvil (necesitas cuenta venezolana) o con dólares en efectivo en billetes pequeños. Trae US$100–200 en billetes de 1, 5, 10 y 20 para taxis, playa y propinas; el resto por Zelle o Binance.' },
-      { q: '¿Cuándo es más barato viajar?', a: 'Mayo–julio y septiembre–noviembre: vuelos más baratos, isla tranquila y disponibilidad. Carnaval, Semana Santa, agosto y del 20 de diciembre al 6 de enero es temporada alta: reserva con un mes de anticipación.' },
+      { q: '¿La calculadora incluye vuelos y comidas?', a: 'No. Calcula el alojamiento seleccionado y el descuento de un cupón válido si lo aplicas. Cotiza transporte, comidas y paseos por separado para armar el presupuesto completo.' },
+      { q: '¿Conviene pagar en dólares o bolívares?', a: 'Revisa el total y la tasa antes de decidir. Nuestra referencia es el dólar BCV; la calculadora muestra bolívares y el equivalente en USDT cuando las tasas están disponibles. Los importes se ajustan el día del pago.' },
+      { q: '¿Cuándo conviene pedir disponibilidad?', a: 'Cuando tengas una idea de tus fechas y del grupo. Para vacaciones y feriados, consulta con anticipación. Confirmamos disponibilidad real y condiciones antes de pedirte que reserves.' },
     ],
     mostrarApartamentos: true, hubs: ['playas', 'donde-comer', 'servicios'],
   },

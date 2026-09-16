@@ -106,7 +106,7 @@ export default async function MetricasPage() {
           <Cifra
             valor={m.visitas7d}
             etiqueta="Visitas · 7 días"
-            nota={`${m.visitantes7d} personas distintas`}
+            nota={`${m.visitantes7d} visitantes-día`}
           />
           <Cifra
             valor={m.clicsWhatsApp7d}
@@ -125,7 +125,7 @@ export default async function MetricasPage() {
         id="fuentes"
         titulo="De dónde"
         cursiva="llega la gente"
-        descripcion="Ordenado por personas, 30 días. Cada persona se cuenta en la fuente por la que ENTRÓ: al moverse dentro del sitio la procedencia pasa a ser el propio dominio, y contarla en cada página escondería el origen bajo «directo»."
+        descripcion="Ordenado por visitantes-día, 30 días. Una misma persona puede contarse en varios días. WhatsApp indica clics, no reservas confirmadas. La fuente corresponde a la primera visita de cada día: al moverse dentro del sitio la procedencia pasa a ser el propio dominio, y contarla en cada página escondería el origen bajo «directo»."
       >
         <Tarjeta className="overflow-hidden">
           <div className="overflow-x-auto">
@@ -136,13 +136,13 @@ export default async function MetricasPage() {
                     Fuente
                   </th>
                   <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
-                    Personas
+                    Visitantes-día
                   </th>
                   <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
                     Páginas vistas
                   </th>
                   <th className="px-5 py-3.5 text-meta font-semibold text-ink-muted">
-                    Escribieron por WhatsApp
+                    Clics a WhatsApp
                   </th>
                 </tr>
               </thead>
@@ -254,7 +254,7 @@ export default async function MetricasPage() {
                 etiqueta={p.path}
                 valor={p.visitas}
                 maximo={max(m.porPagina.map((x) => x.visitas))}
-                nota={`· ${p.visitantes} pers.`}
+                nota={`· ${p.visitantes} visitantes-día`}
               />
             ))}
           </ul>
@@ -265,7 +265,7 @@ export default async function MetricasPage() {
         <Seccion
           id="propiedades"
           titulo="Propiedades:"
-          cursiva="visitas y contactos"
+          cursiva="visitas y clics a WhatsApp"
           descripcion="Una ficha con muchas visitas y cero clics de WhatsApp está diciendo que algo falla en su precio o en sus fotos."
         >
           <Tarjeta className="overflow-hidden">

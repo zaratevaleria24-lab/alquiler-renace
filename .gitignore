@@ -12,3 +12,6 @@ coverage/
 # Fotos subidas desde el CMS: son datos, no codigo. Van al backup, no al repo.
 uploads/
 .env
+
+# Build aislado para verificación local
+.next-preview/

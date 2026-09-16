@@ -97,11 +97,7 @@ export default async function PropiedadPage({
     getContacto(),
   ]);
   const vecinas = (zone?.properties ?? []).filter((p) => p.slug !== property.slug);
-  const capacidad =
-    property.guestsAllowed.adults +
-    (property.guestsAllowed.children > 0
-      ? ` adultos y ${property.guestsAllowed.children} niños`
-      : ' adultos');
+  const capacidad = `${property.guestsAllowed.adults + property.guestsAllowed.children} personas`;
 
   const jsonLd = graph(
     breadcrumbSchema([

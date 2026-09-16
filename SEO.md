@@ -600,3 +600,34 @@ propios, enlaces a hubs y CTA a /reservas. En sitemap y en el pie:
 - /alquiler-por-mes-en-margarita (precio mensual «a consultar», sin inventar)
 - /cuanto-cuesta-viajar-a-margarita (presupuesto 5 noches con rangos honestos)
 Para agregar otra: una entrada más en PAGINAS; el sitemap y la ruta salen solos.
+
+## Revisión aplicada — 2026-09-16 (capacidad confirmada por el propietario)
+
+Los cuatro apartamentos admiten 6 personas en total. La FAQ de precio del
+inicio usa `homeFaq(properties)` para que contenido visible y JSON-LD coincidan
+con el inventario real. ItemList apunta a `/propiedad/<slug>#alojamiento`.
+Las descripciones de la guía incorporan el nombre del lugar, evitando los 11
+snippets repetidos detectados. Las páginas de piscina, mensual y presupuesto
+se revisaron para no duplicar precios, ratings o promesas operativas.
+
+El sitemap se genera a demanda: no debe quedar congelado al publicar desde el
+panel. No se emite `lastModified` cuando no se conoce una fecha sustancial de
+contenido; en venta propia se mantiene su `updatedAt`. Las prioridades no son
+una herramienta para subir posiciones en Google.
+
+El layout usa `headers()`: las páginas HTML actuales son dinámicas, aunque
+haya comentarios históricos que dicen estáticas. React.cache deduplica las
+lecturas de propiedades y ajustes por render; no almacena sesiones ni datos
+personales entre peticiones. La separación de layouts para recuperar caché
+estática completa queda como trabajo posterior, no como mejora ya hecha.
+
+Pruebas: tipos, regresiones de fechas/tarifa/disponibilidad, navegador móvil y
+escritorio y rastreo público. No se garantiza ranking ni se conectó Search Console.
+
+Verificación pública del 2026-09-16 tras desplegar: las 154 URLs del sitemap
+responden 200, cada una tiene un H1 y no quedan metadescripciones duplicadas en
+ese conjunto. Las cuatro fichas emiten capacidad 6 en JSON-LD. Las cuatro
+imágenes de tarjeta en un viewport móvil de 390 px y DPR 1 pesan 13.744,
+23.624, 22.142 y 18.561 bytes: todas por debajo del presupuesto de 60 KB.
+La de Los Geranios A bajó de 104.292 a 13.744 bytes en ese tamaño (≈87 %).
+Esto mide imágenes, no promete el mismo porcentaje de mejora en toda la web.

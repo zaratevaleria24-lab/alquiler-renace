@@ -147,7 +147,8 @@ export function zoneItemListSchema(zone: Zone, path: string): Json {
         name: p.name,
         description: p.description,
         image: absoluteUrl(p.image),
-        url: absoluteUrl(path),
+        url: absoluteUrl(`/propiedad/${p.slug}`),
+        '@id': absoluteUrl(`/propiedad/${p.slug}#alojamiento`),
         occupancy: {
           '@type': 'QuantitativeValue',
           value: p.guestsAllowed.adults + p.guestsAllowed.children,

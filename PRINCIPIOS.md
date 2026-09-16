@@ -65,3 +65,10 @@
 - [ ] textos con la voz de IDENTIDAD.md
 - [ ] fuentes/licencias en orden, nada inventado
 - [ ] commit + push · doc del módulo actualizada · memoria del proyecto al día
+
+### Imágenes de tarjetas — ajuste 2026-09-16
+
+Las tarjetas del inicio usan `next/image` con `sizes` y optimización servida
+por el propio dominio, restringida a fotos de `media.margaritarenace.com.ve`
+o archivos locales. No es un CDN externo. La galería conserva su original.
+La foto de hero se omite de la descarga móvil mediante selección de `<picture>`.

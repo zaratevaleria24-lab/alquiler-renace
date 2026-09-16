@@ -11,6 +11,7 @@
 // que necesiten por props desde un Server Component. Ver app/page.tsx.
 
 import { rows, query } from './db';
+import { cache } from 'react';
 
 interface Campo<K extends string = string> {
   key: K;
@@ -172,7 +173,7 @@ const PORDEFECTO = Object.fromEntries(
  * Una sola consulta: se llama en el build de cada página estática y en cada
  * revalidación, así que no conviene una consulta por clave.
  */
-export async function getAjustes(): Promise<Ajustes> {
+export const getAjustes = cache(async (): Promise<Ajustes> => {
   const rs = await rows<{ key: string; value: string }>(
     `SELECT key, value FROM site_settings`,
   );
@@ -186,7 +187,7 @@ export async function getAjustes(): Promise<Ajustes> {
       .map((r) => [r.key, r.value]),
   );
   return { ...PORDEFECTO, ...guardados };
-}
+});
 
 /**
  * Datos de contacto, en la forma que ya esperaban lib/schema.ts y el footer.

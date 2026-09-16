@@ -3,15 +3,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { CalendarDays, MessageCircle, Ticket, Users } from 'lucide-react';
+import { hoyReserva, sumarNoches, nochesEntre, fechasDeBusqueda, leerDisponibilidad, type DisponibilidadPublica } from '@/lib/reserva-fechas';
+import { avisar } from '@/components/Medidor';
 import { validarCuponAction } from '@/app/acciones/cupon';
 import SinFoto from '@/components/SinFoto';
 
-interface Apto { slug: string; nombre: string; zona: string; precio: number; personas: number; portada: string }
-interface Ocupado { desde: string; hasta: string }
+interface Apto { slug: string; nombre: string; zona: string; precio: number; personas: number; portada: string; minNoches: number }
 const bs = (n: number) => `Bs ${n.toLocaleString('es-VE', { maximumFractionDigits: 0 })}`;
 const usd = (n: number) => `US$ ${n.toLocaleString('es-VE')}`;
-const hoy = () => new Date().toISOString().slice(0, 10);
-const mas = (iso: string, d: number) => { const x = new Date(iso + 'T12:00:00'); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
+const hoy = hoyReserva;
+const mas = sumarNoches;
 
 // La calculadora: todo en el navegador con dos llamadas livianas al sitio
 // (/api/tasa y /api/disponibilidad/<slug>). Sin JS igual se ven los precios.
@@ -22,7 +23,9 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   const [personas, setPersonas] = useState(2);
   const [tasa, setTasa] = useState<number | null>(null); // Bs por US$ al BCV
   const [usdt, setUsdt] = useState<number | null>(null); // Bs por USDT (Binance)
-  const [ocupado, setOcupado] = useState<Ocupado[] | null>(null);
+  const [calendario, setCalendario] = useState<{ slug: string; datos: DisponibilidadPublica | null } | null>(null);
+  const datos = calendario?.slug === slug ? calendario.datos : null;
+  const cargando = calendario?.slug !== slug;
   const apto = aptos.find((a) => a.slug === slug) ?? aptos[0];
   const [cupon, setCupon] = useState('');
   const [descuento, setDescuento] = useState<{ pct: number; nombre: string } | null>(null);
@@ -40,16 +43,35 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
     if (v.estado === 'ok') { setDescuento({ pct: v.pct, nombre: v.nombre }); setCupon(v.cupon); setCuponError(null); }
     else { setDescuento(null); setCuponError(v.estado === 'usado' ? 'Ese código ya se usó en una reserva. Si crees que es un error, escríbenos por WhatsApp.' : 'Ese código no existe. Revisa las letras (por ejemplo RENACE10-7K3M) o pide el tuyo en el inicio.'); }
   };
-  useEffect(() => { const q = new URLSearchParams(location.search); const c = q.get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); } const a = q.get('apto'); if (a && aptos.some((x) => x.slug === a)) setSlug(a); }, []);
+  useEffect(() => {
+    const q = new URLSearchParams(location.search);
+    const c = q.get('cupon'); if (c) { setCupon(c.toUpperCase()); aplicarCupon(c); }
+    const elegido = aptos.find((x) => x.slug === q.get('apto')) ?? aptos[0];
+    if (elegido) setSlug(elegido.slug);
+    const f = fechasDeBusqueda(q, elegido?.minNoches ?? 1);
+    if (f) { setEntrada(f.checkIn); setSalida(f.checkOut); }
+    const personas = Number(q.get('personas'));
+    if (Number.isInteger(personas) && personas >= 1 && personas <= (elegido?.personas ?? 0)) setPersonas(personas);
+  }, []);
 
   useEffect(() => { fetch('/api/tasa').then((r) => r.json()).then((d) => { setTasa(d.bcv ?? null); setUsdt(d.usdt ?? null); }).catch(() => {}); }, []);
-  useEffect(() => { if (!slug) return; setOcupado(null); fetch(`/api/disponibilidad/${slug}`).then((r) => r.json()).then((d) => setOcupado(d.ocupado ?? [])).catch(() => setOcupado([])); }, [slug]);
+  useEffect(() => {
+    if (!slug) return;
+    const control = new AbortController();
+    fetch(`/api/disponibilidad/${slug}`, { signal: control.signal })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d: unknown) => { if (!control.signal.aborted) setCalendario({ slug, datos: leerDisponibilidad(d) }); })
+      .catch(() => { if (!control.signal.aborted) setCalendario({ slug, datos: null }); });
+    return () => control.abort();
+  }, [slug]);
 
-  const noches = Math.max(0, Math.round((Date.parse(salida) - Date.parse(entrada)) / 86400000));
+  const noches = nochesEntre(entrada, salida);
   const bruto = noches * (apto?.precio ?? 0);
   const rebaja = descuento ? Math.round(bruto * descuento.pct) / 100 : 0;
   const total = bruto - rebaja;
-  const choque = useMemo(() => (ocupado ?? []).some((o) => entrada < o.hasta && salida > o.desde), [ocupado, entrada, salida]);
+  const choque = useMemo(() => (datos?.ocupado ?? []).some((o) => entrada < o.hasta && salida > o.desde), [datos, entrada, salida]);
+  const minimo = Math.max(1, apto?.minNoches ?? 1);
+  const valido = Boolean(apto && entrada >= hoy() && noches >= minimo && Number.isInteger(personas) && personas >= 1 && personas <= apto.personas);
   // El «objeto de la compra» completo va al WhatsApp: el anfitrión no tiene
   // que preguntar nada y el huésped ve el precio en las tres formas de pago.
   const enUsdt = tasa && usdt ? total * tasa / usdt : null;
@@ -60,7 +82,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
     `Estadía: ${noches} ${noches === 1 ? 'noche' : 'noches'}, ${personas} ${personas === 1 ? 'persona' : 'personas'}`,
     `Precio: ${usd(apto?.precio ?? 0)} por noche (dólar BCV) × ${noches} = ${usd(bruto)}`,
     descuento ? `Cupón ${cupon}: −${descuento.pct} % (−${usd(rebaja)})` : '',
-    `*Total: ${usd(total)}*`,
+    `*Total estimado: ${usd(total)}*`,
     tasa ? `En bolívares: ${bs(total * tasa)} (tasa BCV de hoy: ${bs(tasa)} por dólar)` : '',
     enUsdt ? `Si pagas en USDT: ${enUsdt.toFixed(1)} USDT (referencia, Binance de hoy)` : '',
     `Forma de pago: ${pagoElegido.t} (${pagoElegido.d}).`,
@@ -69,13 +91,15 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
   ].filter(Boolean).join('\n');
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}` : null;
 
+  if (!apto) return <p className="text-body text-ink-soft">Estamos actualizando los apartamentos. <Link href="/" className="underline">Volver al inicio</Link>.</p>;
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
       <section aria-label="Apartamentos">
         <ul className="grid gap-3 sm:grid-cols-2">
           {aptos.map((a) => (
             <li key={a.slug}>
-              <button type="button" onClick={() => setSlug(a.slug)} aria-pressed={a.slug === slug} className={`flex w-full gap-3 rounded-card border bg-white p-3 text-left transition-colors ${a.slug === slug ? 'border-brand-deep shadow-lift' : 'border-line hover:border-brand/40'}`}>
+              <button type="button" onClick={() => { setSlug(a.slug); setPersonas((n) => Math.min(n, a.personas)); }} aria-pressed={a.slug === slug} className={`flex w-full gap-3 rounded-card border bg-white p-3 text-left transition-colors ${a.slug === slug ? 'border-brand-deep shadow-lift' : 'border-line hover:border-brand/40'}`}>
                 {a.portada ? (
                   <img src={a.portada} alt={`${a.nombre}, ${a.zona}`} width={96} height={96} loading="lazy" className="h-24 w-24 shrink-0 rounded-card object-cover" />
                 ) : (
@@ -87,8 +111,8 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           ))}
         </ul>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Entrada</span><input type="date" value={entrada} min={hoy()} onChange={(e) => { setEntrada(e.target.value); if (salida <= e.target.value) setSalida(mas(e.target.value, 1)); }} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
-          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Salida</span><input type="date" value={salida} min={mas(entrada, 1)} onChange={(e) => setSalida(e.target.value)} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
+          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Entrada</span><input type="date" value={entrada} min={hoy()} onChange={(e) => { setEntrada(e.target.value); if (nochesEntre(e.target.value, salida) < minimo) setSalida(mas(e.target.value, minimo)); }} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
+          <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><CalendarDays className="h-3.5 w-3.5" />Salida</span><input type="date" value={salida} min={mas(entrada || hoy(), minimo)} onChange={(e) => setSalida(e.target.value)} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
           <label className="block rounded-card border border-line bg-white p-3"><span className="label-eyebrow flex items-center gap-1.5 text-ink-subtle"><Users className="h-3.5 w-3.5" />Personas</span><input type="number" min={1} max={apto?.personas ?? 6} value={personas} onChange={(e) => setPersonas(Math.max(1, Math.min(apto?.personas ?? 6, Number(e.target.value) || 1)))} className="mt-1.5 w-full bg-transparent text-body text-ink" /></label>
         </div>
       </section>
@@ -100,13 +124,15 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           <div className="flex justify-between py-2"><dt className="text-ink-muted">{noches} {noches === 1 ? 'noche' : 'noches'} × {usd(apto?.precio ?? 0)}</dt><dd className="mono-data">{usd(bruto)}</dd></div>
           {descuento && <div className="flex justify-between py-2 text-brand-deep"><dt>Cupón {cupon} · {descuento.pct} %</dt><dd className="mono-data">− {usd(rebaja)}</dd></div>}
           <div className="flex justify-between py-2"><dt className="text-ink-muted">Personas</dt><dd>{personas}</dd></div>
-          <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total <span className="text-ui font-normal text-ink-muted">· dólar BCV</span></dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
+          <div className="flex items-baseline justify-between py-3"><dt className="text-body font-semibold">Total estimado <span className="text-ui font-normal text-ink-muted">· dólar BCV</span></dt><dd className="mono-data text-[30px] font-semibold leading-none text-brand-deep">{usd(total)}</dd></div>
           {tasa && <div className="flex justify-between py-2"><dt className="text-ink-muted">En bolívares (tasa BCV de hoy {bs(tasa)})</dt><dd className="mono-data">{bs(total * tasa)}</dd></div>}
           {enUsdt != null && <div className="flex justify-between py-2"><dt className="text-ink-muted">USDT · referencia alternativa</dt><dd className="mono-data">≈ {enUsdt.toFixed(1)} USDT</dd></div>}
         </dl>
-        {ocupado === null ? <p className="mt-3 text-ui text-ink-faint">Consultando el calendario…</p>
-          : choque ? <p className="mt-3 rounded-card border border-accent/40 bg-accent/5 px-3 py-2 text-meta text-accent">Esas fechas ya están ocupadas en {apto?.nombre}. Prueba otras o pregúntanos por otro apartamento.</p>
-          : noches > 0 && <p className="mt-3 rounded-card border border-brand/30 bg-brand-tint px-3 py-2 text-meta text-brand-deep">Fechas libres según nuestro calendario (incluye Airbnb).</p>}
+        {!valido && <p role="alert" className="mt-3 text-meta text-accent">Elige fechas desde hoy, al menos {minimo} noches y entre 1 y {apto.personas} huéspedes.</p>}
+        {cargando ? <p className="mt-3 text-ui text-ink-muted">Consultando el calendario…</p>
+          : choque ? <p role="alert" className="mt-3 rounded-card border border-accent/40 px-3 py-2 text-meta text-accent">Esas fechas tienen noches ocupadas en {apto.nombre}. Elige otras fechas o apartamento.</p>
+          : <p className="mt-3 rounded-card border border-line bg-paper px-3 py-2 text-meta text-ink-soft">{datos?.sincronizado ? 'Sin bloqueos en el calendario sincronizado. Confirmamos disponibilidad y tarifa final por WhatsApp.' : 'Disponibilidad por confirmar: no tenemos un calendario sincronizado vigente. Puedes enviarnos estas fechas por WhatsApp.'}</p>}
+
         <fieldset className="mt-3">
           <legend className="text-ui font-semibold uppercase tracking-[0.12em] text-ink-subtle">¿Cómo prefieres pagar?</legend>
           <div className="mt-2 grid grid-cols-2 gap-2">
@@ -124,7 +150,7 @@ export default function Calculadora({ aptos, whatsapp }: { aptos: Apto[]; whatsa
           <button type="submit" className="rounded-control border border-line bg-white px-3 text-ui font-medium text-brand-deep hover:border-brand/40">Aplicar</button>
         </form>
         {cuponError && <p className="mt-1 text-ui text-accent">{cuponError}</p>}
-        {wa && noches > 0 && <a href={wa} rel="noopener" className="btn-solid mt-4 w-full justify-center"><MessageCircle className="h-4 w-4" />Reservar por WhatsApp</a>}
+        {wa && valido && !choque && <a href={wa} onClick={() => avisar({ kind: 'whatsapp' })} rel="noopener" className="btn-solid mt-4 w-full justify-center"><MessageCircle className="h-4 w-4" />Consultar y reservar por WhatsApp</a>}
         <p className="mt-3 text-ui text-ink-muted">Confirmas con el 50 % y firmas el contrato desde tu teléfono. <Link href="/politicas" className="text-brand-deep underline underline-offset-4">Políticas</Link> · <Link href={`/propiedad/${apto?.slug}`} className="text-brand-deep underline underline-offset-4">Ver el apartamento</Link></p>
         <p className="mt-2 text-ui text-ink-faint">Precio en dólares a tasa BCV. Pagas en dólares (efectivo, Zelle), en bolívares al BCV del día (pago móvil) o en USDT al equivalente del día. Bs y USDT se ajustan el día del pago.</p>
       </aside>

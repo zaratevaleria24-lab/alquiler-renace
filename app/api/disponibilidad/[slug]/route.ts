@@ -30,13 +30,13 @@ export async function GET(
     console.error('[disponibilidad] sync falló:', err);
   }
 
-  const ocupado = await getOcupadoPublico(slug);
-  if (ocupado === null) {
+  const disponibilidad = await getOcupadoPublico(slug);
+  if (disponibilidad === null) {
     return NextResponse.json({ error: 'no existe' }, { status: 404 });
   }
 
   return NextResponse.json(
-    { hoy: hoyCaracas(), ocupado },
+    { hoy: hoyCaracas(), ...disponibilidad },
     {
       headers: {
         // Caché corto en el borde: absorbe a los curiosos que recargan sin

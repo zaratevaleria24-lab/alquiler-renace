@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import type { Zone } from '@/lib/types';
-import { HOME_FAQ } from '@/lib/faq';
+import type { Zone, Property } from '@/lib/types';
+import { homeFaq } from '@/lib/faq';
 import { faqSchema, graph } from '@/lib/schema';
 
 // Secciones de contenido del home que existen por SEO y GEO.
@@ -58,17 +58,17 @@ export function ZoneLinksSection({ zones }: { zones: Zone[] }) {
   );
 }
 
-export function FaqSection() {
+export function FaqSection({ properties }: { properties: Property[] }) {
+  const preguntas = homeFaq(properties);
   return (
     <section
       aria-labelledby="preguntas-frecuentes"
       className="section-gap reveal border-t border-line pt-14 md:pt-20"
     >
-      {/* FAQPage schema: habilita el rich result de preguntas en Google y le da
-          a los motores de IA texto ya estructurado en pares pregunta/respuesta. */}
+      {/* El marcado refleja las mismas preguntas y respuestas que se muestran. */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: graph(faqSchema(HOME_FAQ)) }}
+        dangerouslySetInnerHTML={{ __html: graph(faqSchema(preguntas)) }}
       />
 
       <h2
@@ -82,7 +82,7 @@ export function FaqSection() {
           en el HTML aunque no se haya hidratado nada, así que los crawlers lo
           leen completo y no cuesta ni un byte de JS. */}
       <div className="block-gap divide-y divide-line border-y border-line">
-        {HOME_FAQ.map((item) => (
+        {preguntas.map((item) => (
           <details key={item.q} className="group py-6">
             <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-5 text-left font-medium text-ink marker:content-none [&::-webkit-details-marker]:hidden">
               <h3 className="text-body md:text-title-sm">{item.q}</h3>
@@ -165,11 +165,11 @@ export function ManifiestoSection() {
   const principios = [
     {
       t: 'El precio es el precio',
-      d: 'En dólares y en bolívares a la tasa de hoy, mercado y BCV, a la vista. No cambia según quién pregunte ni de dónde venga.',
+      d: 'Tarifa en dólares y equivalente en bolívares al BCV, con la tasa a la vista. No cambia según quién pregunte ni de dónde venga.',
     },
     {
       t: 'Te responde una persona',
-      d: 'Escribís por WhatsApp y del otro lado hay alguien de la isla que conoce el apartamento, la zona y al dueño. Sin robots ni formularios.',
+      d: 'Escribes por WhatsApp y del otro lado hay alguien de la isla que conoce el apartamento, la zona y al dueño. Te ayudamos a elegir y te confirmamos las condiciones antes de reservar.',
     },
     {
       t: 'Gana el huésped, gana el dueño',

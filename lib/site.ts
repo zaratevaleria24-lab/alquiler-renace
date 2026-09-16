@@ -8,9 +8,9 @@ export const SITE = {
   locale: 'es-VE',
   ogLocale: 'es_VE',
   shortDescription:
-    'Alquiler de apartamentos, autos y traslados en Isla de Margarita, Venezuela.',
+    'Apartamentos en Pampatar, Isla de Margarita. Reserva directa y guía local.',
   description:
-    'Apartamentos y autos en Isla de Margarita con traslado desde el aeropuerto. Pampatar, Porlamar, Costa Azul y más, en dólares y con reserva directa por WhatsApp.',
+    'Alquila un apartamento en Pampatar, Isla de Margarita. Consulta fotos, capacidad y tarifa por noche; calcula tu estadía y reserva directo por WhatsApp.',
   currency: 'USD',
   /** Centro de la Isla de Margarita (Nueva Esparta). */
   geo: { lat: 11.0, lng: -63.9167 },

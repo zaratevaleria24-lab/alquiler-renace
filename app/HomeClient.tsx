@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { hoyReserva, sumarNoches, nochesEntre, consultaReserva } from '@/lib/reserva-fechas';
 import NavBar from '@/components/NavBar';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
@@ -115,7 +117,7 @@ function urlReservaWhatsApp(
         `Hola, quiero reservar *${property.name}* (${property.location}).`,
         `Estadía: ${noches}${estadia ? ` (${estadia})` : ''}, ${huespedes}`,
         `Precio: US$${property.pricePerNight} por noche (dólar BCV)`,
-        `*Total: US$${total.toLocaleString('es-VE')}*`,
+        `*Total estimado: US$${total.toLocaleString('es-VE')}*`,
         bcv ? `En bolívares: ${bolivares(total * bcv, 0)} (tasa BCV de hoy: ${bolivares(bcv, 2)} por dólar)` : '',
         bcv && usdt ? `Si pagas en USDT: ${(total * bcv / usdt).toFixed(1)} USDT (referencia, Binance de hoy)` : '',
         `Puedo pagar por: pago móvil (Bs) · Zelle (US$) · efectivo (US$) · USDT por Binance.`,
@@ -199,22 +201,26 @@ export default function HomeClient({
   // reserva de verdad. Ver urlReservaWhatsApp().
   const [bookingNights, setBookingNights] = useState(2);
   // Entrada y salida como en Airbnb; las noches se derivan de las fechas.
-  const hoyIso = new Date().toISOString().slice(0, 10);
-  const sumarDias = (iso: string, d: number) => { const x = new Date(iso + 'T12:00:00'); x.setDate(x.getDate() + d); return x.toISOString().slice(0, 10); };
-  const [fechaIn, setFechaIn] = useState(sumarDias(hoyIso, 7));
-  const [fechaOut, setFechaOut] = useState(sumarDias(hoyIso, 9));
-  useEffect(() => { const n = Math.round((Date.parse(fechaOut) - Date.parse(fechaIn)) / 86400000); if (n > 0) setBookingNights(n); }, [fechaIn, fechaOut]);
+  const hoyIso = hoyReserva();
+  const [fechaIn, setFechaIn] = useState('');
+  const [fechaOut, setFechaOut] = useState('');
+  const [errorBusqueda, setErrorBusqueda] = useState('');
 
-  /** Abre el panel de una propiedad con las noches en SU mínimo de estadía. */
   const abrirPropiedad = (p: Property) => {
-    setBookingNights(Math.max(1, p.nightsCount));
+    const minimo = Math.max(1, p.nightsCount);
+    const llegada = searchCheckIn >= hoyIso ? searchCheckIn : '';
+    const noches = nochesEntre(llegada, searchCheckOut);
+    setFechaIn(llegada);
+    setFechaOut(noches >= minimo ? searchCheckOut : '');
+    setBookingNights(noches >= minimo ? noches : minimo);
+    setBookingGuests(Math.min(p.guestsAllowed.adults + p.guestsAllowed.children, guestCount.adults + guestCount.children + guestCount.infants));
     setSelectedProperty(p);
     setIsDetailOpen(true);
   };
   const [bookingGuests, setBookingGuests] = useState(1);
 
   const waReserva = selectedProperty
-    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp, { bcv: tasaBcv, usdt: tasaUsdt }, { checkIn: fechaIn, checkOut: fechaOut })
+    ? urlReservaWhatsApp(selectedProperty, bookingNights, bookingGuests, whatsapp, { bcv: tasaBcv, usdt: tasaUsdt }, fechaIn && fechaOut ? { checkIn: fechaIn, checkOut: fechaOut } : undefined)
     : null;
 
   // Escape cierra el panel abierto. Faltaba: con el panel de detalles ocupando
@@ -264,17 +270,22 @@ export default function HomeClient({
     }
 
     // Filter by Guest Capability
-    const totalGuestsNeeded = guestCount.adults + guestCount.children;
+    const totalGuestsNeeded = guestCount.adults + guestCount.children + guestCount.infants;
     if (totalGuestsNeeded > 1) {
       result = result.filter(p => (p.guestsAllowed.adults + p.guestsAllowed.children) >= totalGuestsNeeded);
     }
+
+    // Las fechas filtran el mínimo de estadía; la disponibilidad se confirma
+    // en el calendario de cada apartamento, nunca por ausencia de datos.
+    const nochesBuscadas = nochesEntre(searchCheckIn, searchCheckOut);
+    if (nochesBuscadas > 0) result = result.filter((p) => nochesBuscadas >= Math.max(1, p.nightsCount));
 
     // Filter by Sidebar filters (Price & Rating)
     result = result.filter(
       (p) =>
         (p.priceOnRequest || p.pricePerNight <= filterMaxPrice) &&
         // rating null = sin reseñas todavía, no "mal valorada": no se excluye.
-        (p.rating === null || p.rating >= filterMinRating),
+        ((p.airbnbRating ?? p.rating) === null || (p.airbnbRating ?? p.rating ?? 0) >= filterMinRating),
     );
 
     return result;
@@ -290,6 +301,12 @@ export default function HomeClient({
   // Trigger search actions
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if ((searchCheckIn || searchCheckOut) && (searchCheckIn < hoyIso || nochesEntre(searchCheckIn, searchCheckOut) < 1)) {
+      setErrorBusqueda('Elige una llegada desde hoy y una salida posterior. También puedes buscar sin fechas.');
+      setActivePopover('dates');
+      return;
+    }
+    setErrorBusqueda('');
     setActivePopover(null);
     // Lo que la gente ESCRIBE es el dato más valioso del recolector: revela
     // demanda que el inventario no cubre. Solo si escribió algo.
@@ -305,6 +322,7 @@ export default function HomeClient({
 
   // Quick reset all search parameters
   const handleResetSearch = () => {
+    setErrorBusqueda('');
     setSearchWhere('');
     setSearchCheckIn('');
     setSearchCheckOut('');
@@ -323,7 +341,7 @@ export default function HomeClient({
       <main className="max-w-7xl mx-auto px-4 md:px-8 pt-28 md:pt-36">
         
         {/* 2. HERO a pantalla completa, de borde a borde */}
-        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-56 md:mb-24">
+        <div id="hero-frame" className="relative w-screen left-1/2 -translate-x-1/2 -mt-28 md:-mt-36 mb-8 md:mb-24">
           {/* Altura de pantalla completa. Se usa `svh` (small viewport height)
               y no `vh` ni `dvh`: en móvil, `100vh` mide como si la barra del
               navegador no existiera —el hero queda cortado— y `100dvh` provoca
@@ -339,7 +357,7 @@ export default function HomeClient({
               contenido, no por pantalla. */}
           <section
             id="hero-banner"
-            className="relative w-full overflow-hidden bg-luz border-b border-line pt-28 pb-52 md:pt-44 md:pb-32"
+            className="relative w-full overflow-hidden bg-luz border-b border-line pt-28 pb-7 md:pt-36 md:pb-28"
           >
             <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 md:grid-cols-[1.1fr_.9fr] md:px-8">
               <div>
@@ -347,21 +365,30 @@ export default function HomeClient({
                   {contenido.heroKicker}
                 </p>
                 <h1 className="font-serif text-hero text-ink font-normal leading-[1.02] text-balance track-display rise rise-2 mt-4">
-                  Apartamentos y casas en Isla de Margarita,{' '}
+                  Apartamentos en Pampatar, Isla de Margarita,{' '}
                   <em className="headline-italic">con tratos justos</em>
                 </h1>
-                <p className="rise rise-3 mt-6 max-w-[44ch] text-pretty text-body md:text-body-lg text-ink-soft">
+                <p className="rise rise-3 mt-4 max-w-[44ch] text-pretty text-body md:text-body-lg text-ink-soft">
                   {contenido.heroSubtitulo}
                 </p>
                 {/* Tres hechos, no adjetivos: son la misión de IDENTIDAD.md hecha
                     promesa concreta. */}
-                <ul className="rise rise-3 mt-8 flex flex-col gap-2 text-ink sm:flex-row sm:gap-0 sm:divide-x sm:divide-line-strong">
+                <ul className="rise rise-3 mt-5 hidden md:flex flex-col gap-2 text-ink sm:flex-row sm:gap-0 sm:divide-x sm:divide-line-strong">
                   <li className="text-ui-lg font-medium sm:pr-5">El precio es el precio</li>
                   <li className="text-ui-lg font-medium sm:px-5">Te responde una persona</li>
                   <li className="text-ui-lg font-medium sm:pl-5">Sin comisiones ocultas</li>
                 </ul>
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <a href="#listings-container" className="btn-solid">Ver apartamentos</a>
+                  <Link href="/reservas" className="text-meta font-medium text-brand-deep underline underline-offset-4">Calcular mi estadía</Link>
+                </div>
+                {PROPERTIES.some((p) => p.isReal && !p.priceOnRequest && p.pricePerNight > 0) && (
+                  <p className="mono-data mt-3 text-brand-deep">Desde US${Math.min(...PROPERTIES.filter((p) => p.isReal && !p.priceOnRequest && p.pricePerNight > 0).map((p) => p.pricePerNight))} / noche · tarifa base</p>
+                )}
               </div>
               <figure className="rise rise-2 hidden md:block justify-self-center w-[min(100%,440px)] -rotate-[1.5deg] rounded-card border border-line bg-white p-2.5 shadow-lift-lg">
+                <picture>
+                <source media="(max-width: 767px)" srcSet="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
                 <img
                   src={contenido.heroImage}
                   alt={contenido.heroImageAlt}
@@ -372,13 +399,14 @@ export default function HomeClient({
                   className="aspect-[4/3] w-full rounded-control object-cover"
                   referrerPolicy="no-referrer"
                 />
+                </picture>
                 <figcaption className="mono-data px-1 pt-2.5 text-ink-muted">{contenido.heroImageAlt || 'Isla de Margarita'}</figcaption>
               </figure>
             </div>
           </section>
 
           {/* SEARCH BAR Flotante sobre el borde inferior */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-4xl px-4 z-20">
+          <div className="relative mx-auto mt-5 md:mt-0 md:absolute md:bottom-0 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2 w-full max-w-4xl px-4 z-20">
             <div ref={searchBarRef} className="flex flex-col gap-1.5">
               {/* Se quitó el botón suelto "Ver Todo" que iba flotando encima de
                   la barra. Dos razones: en móvil quedaba huérfano sobre la
@@ -421,7 +449,7 @@ export default function HomeClient({
                     activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Check In</label>
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Llegada</label>
                   <span className="text-meta text-ink-muted font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
                     {searchCheckIn || 'Agregar fecha'}
                   </span>
@@ -436,7 +464,7 @@ export default function HomeClient({
                     activePopover === 'dates' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Check Out</label>
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Salida</label>
                   <span className="text-meta text-ink-muted font-medium block overflow-hidden text-ellipsis whitespace-nowrap leading-tight">
                     {searchCheckOut || 'Agregar fecha'}
                   </span>
@@ -451,10 +479,10 @@ export default function HomeClient({
                     activePopover === 'guests' ? 'bg-paper' : 'hover:bg-paper'
                   }`}
                 >
-                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Quién</label>
+                  <label className="block text-micro uppercase font-semibold text-ink tracking-wider mb-0.5">Huéspedes</label>
                   <span className="text-meta text-ink font-semibold block leading-tight">
                     {guestCount.adults + guestCount.children + guestCount.infants > 0
-                      ? `${guestCount.adults + guestCount.children} huéspedes`
+                      ? `${guestCount.adults + guestCount.children + guestCount.infants} ${guestCount.adults + guestCount.children + guestCount.infants === 1 ? 'huésped' : 'huéspedes'}`
                       : 'Agregar huéspedes'}
                   </span>
                 </div>
@@ -525,52 +553,21 @@ export default function HomeClient({
                       <X className="w-4 h-4 cursor-pointer text-gray-400 hover:text-gray-600" onClick={() => setActivePopover(null)} />
                     </div>
                     
-                    {/* Simulated Predefined Dates */}
                     <div className="space-y-4">
-                      <div>
-                        <span className="text-micro text-gray-400 uppercase font-semibold block mb-1">Check-in</span>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {['22 Jul', '24 Jul', '28 Jul', '02 Ago', '10 Ago', 'Omitir'].map((d) => (
-                            <button
-                              key={d}
-                              onClick={() => {
-                                  if (d !== 'Omitir') setSearchCheckIn(d + ' 2026');
-                                  else setSearchCheckIn('');
-                              }}
-                              className={`py-1 px-2 text-meta rounded-lg border text-center font-medium transition-all ${
-                                searchCheckIn.startsWith(d)
-                                  ? 'bg-ink text-white border-black'
-                                  : 'border-line/40 text-gray-600 hover:border-gray-400'
-                              }`}
-                            >
-                              {d}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <span className="text-micro text-gray-400 uppercase font-semibold block mb-1">Check-out</span>
-                        <div className="grid grid-cols-3 gap-1.5">
-                          {['25 Jul', '28 Jul', '02 Ago', '05 Ago', '15 Ago', 'Omitir'].map((d) => (
-                            <button
-                              key={d}
-                              onClick={() => {
-                                if (d !== 'Omitir') setSearchCheckOut(d + ' 2026');
-                                else setSearchCheckOut('');
-                                if (searchCheckIn) setActivePopover('guests'); // auto step
-                              }}
-                              className={`py-1 px-2 text-meta rounded-lg border text-center font-medium transition-all ${
-                                searchCheckOut.startsWith(d)
-                                  ? 'bg-ink text-white border-black'
-                                  : 'border-line/40 text-gray-600 hover:border-gray-400'
-                              }`}
-                            >
-                              {d}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <label className="block text-meta font-medium">Llegada
+                        <input aria-label="Fecha de llegada" type="date" min={hoyIso} value={searchCheckIn}
+                          onChange={(e) => { setSearchCheckIn(e.target.value); if (searchCheckOut <= e.target.value) setSearchCheckOut(''); }}
+                          className="mt-1 block w-full rounded-control border border-line bg-paper p-3" />
+                      </label>
+                      <label className="block text-meta font-medium">Salida
+                        <input aria-label="Fecha de salida" type="date" min={sumarNoches(searchCheckIn || hoyIso, 1)} value={searchCheckOut}
+                          onChange={(e) => setSearchCheckOut(e.target.value)}
+                          className="mt-1 block w-full rounded-control border border-line bg-paper p-3" />
+                      </label>
+                      <p className="text-ui text-ink-muted">Elige las fechas que quieres consultar. Confirmamos disponibilidad antes de reservar.</p>
+                      {errorBusqueda && <p role="alert" className="text-meta text-accent">{errorBusqueda}</p>}
+                      <button type="button" onClick={() => { setSearchCheckIn(''); setSearchCheckOut(''); setErrorBusqueda(''); setActivePopover(null); }} className="text-meta text-brand-deep underline">Buscar sin fechas</button>
+                      <button type="button" onClick={() => handleSearch()} className="btn-solid w-full">Ver apartamentos</button>
                     </div>
                   </motion.div>
                 )}
@@ -780,8 +777,8 @@ export default function HomeClient({
                       </>
                     ) : (
                       <>
-                        Hospedajes{' '}
-                        <em className="headline-italic">en toda la isla</em>
+                        Apartamentos{' '}
+                        <em className="headline-italic">en Pampatar</em>
                       </>
                     )}
                   </h2>
@@ -815,6 +812,7 @@ export default function HomeClient({
                       property={property}
                       tasaBcv={tasaBcv}
                 tasaUsdt={tasaUsdt}
+                      reservaQuery={consultaReserva(searchCheckIn, searchCheckOut, guestCount.adults + guestCount.children + guestCount.infants)}
                       onSelect={() => abrirPropiedad(property)}
                     />
                   ))}
@@ -823,7 +821,7 @@ export default function HomeClient({
                 <div className="py-20 text-center max-w-md mx-auto">
                   <Smile className="w-12 h-12 text-gray-300 mx-auto mb-4 stroke-[1.2]" />
                   <h3 className="font-serif text-title-sm text-brand font-semibold mb-1">Sin resultados exactos</h3>
-                  <p className="text-meta text-ink-muted mb-6">No encontramos hospedajes disponibles con esos filtros. Intenta disminuyendo tus requisitos o buscando otra zona.</p>
+                  <p className="text-meta text-ink-muted mb-6">No hay apartamentos que coincidan con esa capacidad, mínimo de noches y filtros. Puedes ajustar la búsqueda o consultarnos por WhatsApp.</p>
                   <button 
                     onClick={handleResetSearch}
                     className="btn-solid"
@@ -841,7 +839,7 @@ export default function HomeClient({
             FAQPage schema. Ver components/SeoSections.tsx. */}
         <ManifiestoSection />
         <AboutIslandSection />
-        <FaqSection />
+        <FaqSection properties={PROPERTIES} />
 
       </main>
 
@@ -1011,11 +1009,15 @@ export default function HomeClient({
                       variante="amplio"
                       siempre
                       minNoches={Math.max(1, selectedProperty.nightsCount)}
-                      inicial={{ checkIn: fechaIn, checkOut: fechaOut }}
+                      inicial={fechaIn && fechaOut ? { checkIn: fechaIn, checkOut: fechaOut } : null}
                       onCambio={(f) => {
                         if (f) {
                           setFechaIn(f.checkIn);
                           setFechaOut(f.checkOut);
+                          setBookingNights(f.noches);
+                        } else {
+                          setFechaIn(''); setFechaOut('');
+                          setBookingNights(Math.max(1, selectedProperty.nightsCount));
                         }
                       }}
                     />
@@ -1118,7 +1120,7 @@ export default function HomeClient({
                         conversa por WhatsApp antes de confirmar. */}
                     <div className="space-y-2 pt-2 text-body text-ink-muted">
                       <div className="flex justify-between">
-                        <span>{bookingNights} {bookingNights === 1 ? 'noche' : 'noches'} · {fechaIn.slice(8)}/{fechaIn.slice(5, 7)} → {fechaOut.slice(8)}/{fechaOut.slice(5, 7)}</span>
+                        <span>{bookingNights} {bookingNights === 1 ? 'noche' : 'noches'}{fechaIn && fechaOut ? ` · ${fechaIn.slice(8)}/${fechaIn.slice(5, 7)} → ${fechaOut.slice(8)}/${fechaOut.slice(5, 7)}` : ' · elige fechas o consulta por WhatsApp'}</span>
                       </div>
 
                       {/* El BOLÍVAR es el total a pagar: es la moneda de curso
@@ -1417,9 +1419,10 @@ interface PropertyCardProps {
   /** Bolívares por USDT (Binance), para la referencia en USDT. */
   tasaUsdt?: number | null;
   onSelect: () => void;
+  reservaQuery?: string;
 }
 
-function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardProps) {
+function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect, reservaQuery = '' }: PropertyCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const capacidad = property.guestsAllowed.adults + property.guestsAllowed.children;
 
@@ -1448,11 +1451,12 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
             estas fotos en Google Imágenes, que en viajes es tráfico real.
             Dimensiones explícitas para no provocar salto de layout. */}
         {property.image ? (
-        <img
+        <Image
           src={property.image}
           alt={`${property.name} — alquiler en ${property.zone}, Isla de Margarita`}
-          width={1200}
-          height={800}
+          width={600}
+          height={400}
+          sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 45vw, 30vw"
           loading="lazy"
           decoding="async"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
@@ -1505,7 +1509,7 @@ function PropertyCard({ property, tasaBcv, tasaUsdt, onSelect }: PropertyCardPro
               canónica, que es lo que queremos que se indexe y se comparta. */}
           <h4 className="font-serif text-title-sm font-semibold text-brand track-title">
             <Link
-              href={`/propiedad/${property.slug}`}
+              href={`/propiedad/${property.slug}${reservaQuery}`}
               onClick={(e) => e.stopPropagation()}
               className="hover:underline underline-offset-4"
             >

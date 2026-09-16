@@ -10,6 +10,7 @@
 // vistas no saben —ni les importa— si los datos vienen de la base o de un array.
 
 import { rows } from './db';
+import { cache } from 'react';
 import type { Property, Vehicle, Zone } from './types';
 
 // ── Propiedades ─────────────────────────────────────────────────────────────
@@ -102,9 +103,11 @@ function toProperty(r: PropertyRow): Property {
   };
 }
 
-export async function getProperties(): Promise<Property[]> {
+// Se comparte dentro del render (layout, página y metadatos), no entre usuarios
+// ni entre peticiones. Los cambios del panel se leen en la siguiente visita.
+export const getProperties = cache(async (): Promise<Property[]> => {
   return (await rows<PropertyRow>(PROPERTY_SELECT)).map(toProperty);
-}
+});
 
 /** Una propiedad por su slug, para /propiedad/<slug>. Mismo patrón que
  *  getZone(): filtra en memoria porque solo corre en build/revalidación y el

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { MessageCircle } from 'lucide-react';
+import { fechasDeBusqueda } from '@/lib/reserva-fechas';
 import { avisar } from './Medidor';
 import CalendarioDisponibilidad, {
   type FechasElegidas,
@@ -99,6 +100,14 @@ export default function ReservaPanel({
   // Fechas del calendario. Si hay, mandan sobre el selector de noches; si el
   // visitante no toca el calendario, todo funciona como antes.
   const [fechas, setFechas] = useState<FechasElegidas | null>(null);
+  const [inicial, setInicial] = useState<FechasElegidas | null>(null);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const seleccion = fechasDeBusqueda(q, minimo);
+    setInicial(seleccion); setFechas(seleccion);
+    const personas = Number(q.get('personas'));
+    if (Number.isInteger(personas) && personas >= 1 && personas <= maxHuespedes) setHuespedes(personas);
+  }, [slug, minimo, maxHuespedes]);
 
   // La tasa se pide al navegador, no viaja en el HTML: esta página es estática
   // y una tasa horneada quedaría vieja hasta el siguiente despliegue. Si falla,
@@ -134,7 +143,7 @@ export default function ReservaPanel({
         `Hola, quiero reservar *${nombre}* (${ubicacion}).`,
         `Estadía: ${textoNoches}${conFechas}, ${textoHuespedes}`,
         `Precio: US$${precioPorNoche} por noche (dólar BCV)`,
-        `*Total: US$${total.toLocaleString('es-VE')}*`,
+        `*Total estimado: US$${total.toLocaleString('es-VE')}*`,
         tasa?.bcv ? `En bolívares: ${bolivares(total * tasa.bcv)} (tasa BCV de hoy: ${bolivares(tasa.bcv)} por dólar)` : '',
         tasa?.bcv && tasa.usdt ? `Si pagas en USDT: ${(total * tasa.bcv / tasa.usdt).toFixed(1)} USDT (referencia, Binance de hoy)` : '',
         'Puedo pagar por: pago móvil (Bs) · Zelle (US$) · efectivo (US$) · USDT por Binance.',
@@ -146,7 +155,7 @@ export default function ReservaPanel({
     : null;
 
   return (
-    <aside className="h-fit rounded-card border border-line bg-white p-6 md:sticky md:top-6">
+    <aside className="h-fit rounded-card border border-line bg-white p-6 md:sticky md:top-28">
       <p className="mono-data text-title-sm text-brand-deep">{precioTexto}</p>
       {!precioAConsultar && tasa?.bcv && (
         <p className="mt-1 text-meta text-ink-muted">
@@ -164,7 +173,7 @@ export default function ReservaPanel({
 
       {/* El calendario decide sus propias condiciones: si la API de
           disponibilidad no responde, no aparece y no estorba. */}
-      <CalendarioDisponibilidad slug={slug} onCambio={setFechas} />
+      <CalendarioDisponibilidad key={`${slug}-${inicial?.checkIn ?? ""}-${inicial?.checkOut ?? ""}`} slug={slug} onCambio={setFechas} inicial={inicial} minNoches={minimo} siempre />
 
       {!precioAConsultar && (
         <>

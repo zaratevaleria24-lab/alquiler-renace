@@ -176,7 +176,7 @@ async function importarFeed(feed: { id: string; property_id: string; url: string
 export async function sincronizarFeeds(soloVencidos = true): Promise<void> {
   const reclamados = await rows<{ id: string; property_id: string; url: string }>(
     `UPDATE ical_feeds
-     SET sync_at = now()
+     SET sync_at = now(), sync_ok = NULL
      WHERE activo
        AND ($1 = false OR sync_at IS NULL OR sync_at < now() - make_interval(mins => $2))
      RETURNING id, property_id, url`,
@@ -312,7 +312,7 @@ export async function getResumenMes(
  */
 export async function getOcupadoPublico(
   slug: string,
-): Promise<{ desde: string; hasta: string }[] | null> {
+): Promise<{ ocupado: { desde: string; hasta: string }[]; sincronizado: boolean; actualizado: string | null } | null> {
   const [prop] = await rows<{ id: string }>(
     `SELECT id FROM properties WHERE slug = $1 AND is_published`,
     [slug],
@@ -337,7 +337,15 @@ export async function getOcupadoPublico(
       fusionados.push({ desde: r.check_in, hasta: r.check_out });
     }
   }
-  return fusionados;
+  // Sin feeds, con errores o con una fuente vieja no se declara disponibilidad.
+  // MIN muestra la fuente menos reciente, no oculta un canal desactualizado.
+  const [estado] = await rows<{ sincronizado: boolean; actualizado: Date | null }>(
+    `SELECT count(*) > 0 AND bool_and(coalesce(sync_ok, false) AND sync_at > now() - interval '2 hours') AS sincronizado,
+            min(sync_at) FILTER (WHERE sync_ok) AS actualizado
+     FROM ical_feeds WHERE property_id = $1 AND activo`,
+    [prop.id],
+  );
+  return { ocupado: fusionados, sincronizado: estado?.sincronizado === true, actualizado: estado?.actualizado?.toISOString() ?? null };
 }
 
 /** Reservas manuales a exportar hacia Airbnb, por token de propiedad. */

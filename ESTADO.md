@@ -8,11 +8,41 @@
 > el estado real y se ve en `/admin/pendientes`. Esto es el panorama, no el
 > pendiente del día.
 
+## Mejora de reservas y textos — 2026-09-16
+
+El propietario confirmó **6 personas en total en los cuatro apartamentos**.
+Migración 032 aplicada con respaldo: se normalizaron los cupos aditivos a 6+0;
+la web habla de personas, sin reservar plazas adicionales por edad. Los niños
+forman parte del total. El panel permite seguir editando la capacidad.
+
+- Inicio centrado en Pampatar: texto corto, precio base del catálogo y accesos
+  a apartamentos/calculadora visibles en móvil. Pie de Bahía Mágica corregido.
+- Fechas reales en el buscador; se conservan en ficha y WhatsApp. Validación de
+  fechas, mínimos y aforo en la calculadora; API fallida no significa libre.
+- Calendario público informa si tiene sincronización vigente; sin feeds se
+  ofrece consulta por WhatsApp sin asegurar disponibilidad.
+- FAQ del inicio deriva su precio de las propiedades reales publicadas. Textos
+  de piscina, estadía mensual y presupuesto revisados sin tarifas externas ni
+  promesas de conectividad sin comprobar.
+- Sitemap refleja el catálogo actual, sin fechas de build presentadas como
+  actualización de contenido. ItemList enlaza cada ficha; metadescripciones
+  de guía incluyen el nombre del lugar.
+- Imágenes de tarjetas adaptadas al tamaño con optimización en el propio
+  dominio; la foto de hero no se descarga en móvil. Lecturas de propiedades y
+  ajustes se deduplican dentro del render con React.cache (no caché global).
+- Métricas distinguen visitantes-día y clics de WhatsApp. Cerrar el cupón se
+  respeta durante la sesión, sin exigir completar el formulario.
+
+Pruebas de regresión: `node scripts/verificar-reservas.cjs`. Evidencia de
+navegador y rastreo en `/root/auditorias/margarita-2026-09-16/`.
+Quedan pendientes fotos propias adicionales y conectar calendarios reales.
+No se modificaron las amenidades cuya verificación requiere al anfitrión.
+
 ## El negocio, en números reales
 
 | | |
 |---|---|
-| Apartamentos publicados | **4**, todos en Pampatar, US$65 / noche |
+| Apartamentos publicados | **4**, todos en Pampatar, hasta 6 personas cada uno, US$65 / noche |
 | Lugares en la guía de la isla | **126** (110 en el mapa), con 5 aliados con sello «Recomendado» |
 | Anuncios de terceros en «En venta» | 22 prospectos de Facebook Marketplace |
 | Inmuebles propios en venta | 0 |
@@ -23,7 +53,7 @@
 
 Los cuatro apartamentos son reales y están enlazados a sus anuncios de Airbnb.
 Quedan **8 alojamientos inventados** en la base, sin publicar y ya sin fotos:
-son el resto del andamio inicial y el mayor lastre pendiente de SEO.
+son restos del andamio inicial. Al no publicarse, no constituyen por sí mismos un problema de indexación; no deben volver al catálogo público.
 
 ## Tráfico real
 
@@ -225,3 +255,10 @@ delante en modo SSL «Full», no «Full (strict)». Fotos subidas en
 `/var/www/margarita-uploads`. Respaldo diario a las 03:45 —base y fotos— con
 retención de 7 días; es la única vuelta atrás que existe para una foto subida.
 Detalles y trampas del servidor en `DESPLIEGUE.md`.
+
+### Cierre de verificación de las mejoras del 2026-09-16
+
+Despliegue terminado, PM2 online e IndexNow HTTP 200. Rastreo público de 154
+URLs correcto; pruebas de navegador de fechas, aforo, error 503 y noches
+ocupadas correctas. Tipos limpios y 18 comprobaciones de regresión locales.
+Tarjetas móviles optimizadas: 14–24 KB por foto en 390 px/DPR 1.

@@ -38,7 +38,7 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: '¿Cuánto cuesta alquilar un apartamento en la Isla de Margarita?',
-    a: 'Varía según zona, temporada y capacidad. En el catálogo de Margarita Renace hay opciones desde cerca de US$32 por noche en zonas céntricas hasta villas frente al mar por encima de US$150 por noche. Las zonas urbanas como Porlamar tienden a ser las más económicas; las propiedades frente al mar y con piscina privada, las más altas.',
+    a: 'Consulta la tarifa base publicada en cada apartamento. Antes de confirmar, acordamos por WhatsApp la disponibilidad, el total de tu estadía y la forma de pago.',
   },
   {
     q: '¿Qué playas de Margarita conviene visitar?',
@@ -50,11 +50,11 @@ export const HOME_FAQ: FaqItem[] = [
   },
   {
     q: '¿Cómo se reserva un apartamento en Margarita Renace?',
-    a: 'Directo con el anfitrión, por WhatsApp y sin comisiones de plataforma. En la página de cada apartamento elegís fechas y cantidad de huéspedes y el botón de reservar abre un mensaje ya escrito con esos datos; el anfitrión confirma disponibilidad, tarifa y forma de pago por el mismo chat. Cada apartamento tiene su calendario de disponibilidad publicado, así que antes de escribir ya sabes si las fechas están libres.',
+    a: 'Elige apartamento, fechas y número de huéspedes. El botón de WhatsApp abre un mensaje con tu consulta y el estimado de la estadía. Te confirmamos disponibilidad, precio final y forma de pago antes de reservar. Si el calendario no tiene información actualizada, las fechas quedan pendientes de confirmación.',
   },
   {
     q: '¿Margarita Renace también alquila autos?',
-    a: 'Sí, el proyecto cubre alquiler de apartamentos y de autos en la Isla de Margarita. El catálogo de vehículos se está incorporando al sitio; para consultar disponibilidad de autos conviene escribir directamente.',
+    a: 'Puedes consultar por WhatsApp las opciones de carro y traslado para tu viaje. Te confirmamos el vehículo, la tarifa y las condiciones antes de acordar el servicio.',
   },
   {
     q: '¿Ofrecen traslado desde el aeropuerto de Margarita?',
@@ -81,3 +81,11 @@ export const FAQ_VENTA: FaqItem[] = [
     a: 'Depende de la zona, el estado y si es frente al mar. En 2026 los apartamentos de dos habitaciones en Porlamar y Costa Azul se anuncian mayormente entre US$ 35.000 y US$ 90.000; en conjuntos frente al mar de Pampatar y Costa Azul, entre US$ 90.000 y US$ 200.000; y las casas en urbanizaciones cerradas de Maneiro y Mariño, desde unos US$ 45.000. Son rangos de anuncios publicados, no tasaciones.',
   },
 ];
+
+/** Una misma respuesta en el texto visible y en JSON-LD, derivada del catálogo. */
+export function homeFaq(properties: { isReal: boolean; priceOnRequest: boolean; pricePerNight: number }[]): FaqItem[] {
+  const precios = properties.filter((p) => p.isReal && !p.priceOnRequest && p.pricePerNight > 0).map((p) => p.pricePerNight);
+  return HOME_FAQ.map((f) => f.q === '¿Cuánto cuesta alquilar un apartamento en la Isla de Margarita?' && precios.length
+    ? { ...f, a: `La tarifa base de nuestros apartamentos publicados parte de US$${Math.min(...precios).toLocaleString('es-VE')} por noche. El total depende de las noches y las condiciones de la estadía. Te confirmamos disponibilidad y precio final por WhatsApp antes de reservar; puedes consultar el estimado en la calculadora.` }
+    : f);
+}

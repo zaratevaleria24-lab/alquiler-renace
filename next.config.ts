@@ -2,6 +2,8 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Permite verificar en un proceso local sin escribir sobre el build en uso.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -21,12 +23,12 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Allow access to remote image placeholder.
+  // Las fotos se optimizan en nuestro servidor; solo se admite nuestro medio.
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
+        hostname: 'media.margaritarenace.com.ve',
         port: '',
         pathname: '/**', // This allows any path under the hostname
       },

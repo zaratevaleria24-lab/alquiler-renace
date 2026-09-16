@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { hoyReserva, leerDisponibilidad, type DisponibilidadPublica } from '@/lib/reserva-fechas';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Calendario de disponibilidad de la página de propiedad.
@@ -22,11 +23,6 @@ export interface FechasElegidas {
   checkIn: string;
   checkOut: string;
   noches: number;
-}
-
-interface Rango {
-  desde: string;
-  hasta: string;
 }
 
 const DIAS_SEMANA = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -69,7 +65,7 @@ export default function CalendarioDisponibilidad({
   /** 'amplio' quita el borde superior y agranda las celdas para el modal. */
   variante?: 'panel' | 'amplio';
 }) {
-  const [datos, setDatos] = useState<{ hoy: string; ocupado: Rango[] } | null>(null);
+  const [datos, setDatos] = useState<DisponibilidadPublica | null>(null);
   const [mesVista, setMesVista] = useState('');
   const [llegada, setLlegada] = useState<string | null>(inicial?.checkIn ?? null);
   const [salida, setSalida] = useState<string | null>(inicial?.checkOut ?? null);
@@ -78,13 +74,17 @@ export default function CalendarioDisponibilidad({
     let vivo = true;
     fetch(`/api/disponibilidad/${slug}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { hoy: string; ocupado: Rango[] } | null) => {
+      .then((valor: unknown) => {
+        const d = leerDisponibilidad(valor);
         if (vivo && d?.hoy) {
           setDatos(d);
+          if (inicial && (inicial.checkIn < d.hoy || d.ocupado.some((r) => inicial.checkIn < r.hasta && inicial.checkOut > r.desde))) {
+            setLlegada(null); setSalida(null); onCambio(null);
+          }
           setMesVista((inicial?.checkIn ?? d.hoy).slice(0, 7));
         } else if (vivo && siempre) {
-          const hoy = new Date().toISOString().slice(0, 10);
-          setDatos({ hoy, ocupado: [] });
+          const hoy = hoyReserva();
+          setDatos({ hoy, ocupado: [], sincronizado: false, actualizado: null });
           setMesVista((inicial?.checkIn ?? hoy).slice(0, 7));
         }
       })
@@ -93,8 +93,8 @@ export default function CalendarioDisponibilidad({
         // Salvo que el padre pida verlo «siempre»: entonces se dibuja sin
         // días ocupados, con la fecha local como hoy.
         if (vivo && siempre) {
-          const hoy = new Date().toISOString().slice(0, 10);
-          setDatos({ hoy, ocupado: [] });
+          const hoy = hoyReserva();
+          setDatos({ hoy, ocupado: [], sincronizado: false, actualizado: null });
           setMesVista((inicial?.checkIn ?? hoy).slice(0, 7));
         }
       });
@@ -108,7 +108,7 @@ export default function CalendarioDisponibilidad({
     return (d: string) => rangos.some((r) => r.desde <= d && d < r.hasta);
   }, [datos]);
 
-  if (!datos || !mesVista) return null;
+  if (!datos || !mesVista) return <p className="mt-4 text-ui text-ink-muted">Puedes consultar tus fechas por WhatsApp. La disponibilidad se confirma antes de reservar.</p>;
   const { hoy } = datos;
 
   const elegir = (d: string) => {
@@ -224,12 +224,12 @@ export default function CalendarioDisponibilidad({
             <p className="text-ui text-ink-muted">
               {llegada && salida
                 ? `Del ${Number(llegada.slice(8))} de ${MESES[Number(llegada.slice(5, 7)) - 1]} al ${Number(salida.slice(8))} de ${MESES[Number(salida.slice(5, 7)) - 1]}`
-                : `Mínimo ${minNoches} ${minNoches === 1 ? 'noche' : 'noches'} · los días tachados ya están tomados`}
+                : `Mínimo ${minNoches} ${minNoches === 1 ? 'noche' : 'noches'}`}
             </p>
           </div>
         ) : (
           <p className="text-micro uppercase font-semibold text-ink-subtle">
-            Disponibilidad
+            Fechas de tu estadía
           </p>
         )}
         <div className="flex items-center gap-1">
@@ -265,10 +265,10 @@ export default function CalendarioDisponibilidad({
 
       <div className="mt-2.5 flex items-center justify-between gap-3">
         <p className="text-[12px] leading-relaxed text-ink-subtle">
-          {amplio ? '' : 'Los días tachados ya están tomados.'}
+          {datos.sincronizado ? 'Los días tachados están ocupados. Confirmamos disponibilidad antes de reservar.' : 'Disponibilidad por confirmar: el calendario no tiene una sincronización vigente. Elige las fechas que quieres consultar.'}
           {llegada && !salida && ' Ahora toca el día de salida.'}
         </p>
-        {amplio && llegada && (
+        {llegada && (
           <button
             type="button"
             onClick={() => {
