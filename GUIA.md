@@ -206,3 +206,42 @@ El mapa de Google que vivía en esta página estaba desconectado desde el 15/09
 (la clave no autoriza el dominio). Se rehizo entero con teselas propias y ahora
 es su propia pestaña: **`MAPA.md`**. `components/MapaGuia.tsx` se borró; en su
 lugar la guía tiene un enlace «Verlo en el mapa».
+
+## Logos de Instagram en tres fichas (2026-09-16)
+
+Rafa's Casual Food, Aurelio's Pizza y nuestro propio «Traslados y autos» eran
+las tres fichas sin ninguna foto: Google no les dio ninguna y en Commons no hay
+nada de un local de la isla. Ahora las tres tienen portada.
+
+- **Rafa's y Aurelio's**: la **foto de perfil** (el logo) de su Instagram, traída
+  con Apify (`apify/instagram-profile-scraper`, US$0,006 las dos) y **copiada a
+  nuestro almacenamiento**. Acreditadas como «Logo: @cuenta · Instagram».
+- **Traslados y autos de Margarita Renace**: somos nosotros, así que lleva el
+  emblema del sitio sobre el papel de la marca, generado con sharp desde
+  `public/logo-mark-teal.svg` (el `logo.png` no sirve: trae fondo blanco y
+  quedaba un recuadro dentro de la tarjeta).
+
+**Esto es una excepción acotada a la regla de más arriba** («no se republican
+fotos de Instagram»). El logo no es contenido del feed: identifica al negocio,
+es lo que el negocio usa para que lo reconozcan, y acá no se enlaza el CDN de
+Meta —que caduca en horas— sino una copia nuestra. Se hace **solo con aliados**
+y conviene tener el sí por WhatsApp. Una foto de un plato o de un cliente, no.
+
+Se repite con:
+
+```
+export $(grep -h '^POSTGRES_URL=' .env | head -1) && npx tsx scripts/guia-foto-instagram.ts <slug> [<slug>…]
+```
+
+### Dos cosas que hicieron perder media hora
+
+1. **La caché de datos de Next sobrevive al `npm run build`.** `unstable_cache`
+   guarda en `.next/cache/fetch-cache`, que el build NO borra: se cambió la foto
+   en la base, se reconstruyó, se reinició… y el sitio seguía sirviendo la ficha
+   vieja. Lo que funciona de verdad es
+   `rm -rf .next/cache/fetch-cache && pm2 restart margarita-renace`, o guardar
+   cualquier cosa en `/admin/guia` (eso sí invalida la etiqueta).
+2. **Reemplazar una foto en la MISMA ruta no se ve**: Cloudflare ya tiene
+   cacheado el `0.webp` y todavía no hay token de purga (`ESTADO.md`). La
+   segunda versión del emblema se publicó como `1.webp`. Mientras no exista la
+   purga, **una foto corregida va con nombre nuevo**.
