@@ -631,3 +631,54 @@ imágenes de tarjeta en un viewport móvil de 390 px y DPR 1 pesan 13.744,
 23.624, 22.142 y 18.561 bytes: todas por debajo del presupuesto de 60 KB.
 La de Los Geranios A bajó de 104.292 a 13.744 bytes en ese tamaño (≈87 %).
 Esto mide imágenes, no promete el mismo porcentaje de mejora en toda la web.
+
+## Guía turística y auditoría reproducible — 2026-09-18
+
+Prioridad indicada por el dueño: adquisición orgánica y guía de referencia de
+Margarita; reservas no son el indicador principal de esta intervención.
+
+Se corrigen enlaces de fichas tras paginación con un índice HTML visible y
+expandible, permisos de fotos /api/guia/foto/ en robots, títulos y descripciones,
+H1 de guía/mapa, metadatos sociales de hubs y marcado de datos incoherentes.
+/guia/que-hacer desarrolla planificación; /guia/criterios identifica fuentes,
+fechas y naturaleza privada del proyecto. Ambas tienen canonical y sitemap.
+No se atribuye carácter oficial ni se prometen posiciones.
+
+Las fechas de Places se muestran como sincronización, no revisión editorial;
+sin dato no se muestra la fecha de hoy. Coche, Cubagua y Los Frailes requieren
+cruce marítimo: tarjetas/fichas no ofrecen conducción ni confunden apertura del
+destino con salida de excursiones. El horario del día usa America/Caracas.
+
+La guía prioriza descubrimiento, no proveedores; evita bienvenida salvo QR y
+cupón de reservas en /guia/* y /mapa. La galería solicita originales adicionales
+al abrir el visor; las miniaturas de guía usan la variante de 480 px.
+
+Comprobación reproducible (solo lecturas):
+
+```bash
+python3 scripts/auditar-seo.py https://margaritarenace.com.ve /tmp/margarita-seo
+```
+
+Escribe rastreo.json, resumen.json, robots.txt y sitemap.xml; falla ante errores
+HTTP, canonical, noindex accidental, páginas no alcanzables por HTML, imágenes
+bloqueadas y metadatos ausentes/duplicados. La alerta de título largo es editorial,
+no un límite de Google. Excluye infraestructura /cdn-cgi/ del grafo de contenido.
+No certifica indexación real, rich results, Core Web Vitals ni ranking.
+
+Investigación y evidencias fechadas:
+`/root/auditorias/margarita-2026-09-18/INVESTIGACION-SEO-GUIA.md`.
+Pendiente externo: Search Console (clics/impresiones por consulta turística,
+canonical elegido e indexación). Comparar periodos completos de 28 días y
+separar marca, turismo y servicios. No confundir robots con personas ni
+visitantes-día con personas únicas mensuales.
+
+Verificación pública del 18/09/2026 tras despliegue: 175 rutas examinadas,
+156 URLs de sitemap con 200, canonical coherente y alcanzables desde inicio;
+cero errores en controles definidos. Dos avisos editoriales de título largo
+fuera de guía (/reservas y /propiedad/los-geranios-lujo), no fallos de indexación.
+IndexNow aceptó las 2 URLs nuevas con HTTP 200; no significa indexación ni
+notificación a Google. Evidencia: seo-publicado/resumen.json en la auditoría.
+
+Chrome público: 8 páginas × 2 tamaños (390 y 1440 px), sin desbordamiento ni
+imágenes rotas visibles en esas muestras. Filtros, índice y abrir/cerrar galería
+verificados. Sin cupón en guía tras más de 20 s. No son datos de CWV de campo.

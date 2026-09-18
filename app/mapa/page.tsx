@@ -20,8 +20,8 @@ import MapaIsla from '@/components/MapaIsla';
 
 export const revalidate = 3600;
 const PATH = '/mapa';
-const TITULO = 'Mapa de la Isla de Margarita: playas, servicios y dónde dormir';
-const DESCRIPCION = 'Mapa interactivo de la Isla de Margarita con playas, restaurantes, farmacias, agua, talleres y nuestros apartamentos en Pampatar. Mira qué tienes a un kilómetro a pie.';
+const TITULO = 'Mapa turístico de Isla de Margarita';
+const DESCRIPCION = 'Mapa interactivo de la Isla de Margarita con playas, restaurantes, farmacias, agua, talleres y nuestros apartamentos en Pampatar. Localiza los lugares y organiza tus recorridos.';
 
 export const metadata: Metadata = {
   title: TITULO,
@@ -39,7 +39,7 @@ export default async function MapaPage() {
     '@type': 'ItemList',
     name: TITULO,
     numberOfItems: lugares.length,
-    itemListElement: lugares.slice(0, 30).map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })),
+    itemListElement: lugares.map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })),
   });
 
   return (
@@ -50,13 +50,13 @@ export default async function MapaPage() {
           <div className="mx-auto max-w-6xl px-5 pb-3 pt-[80px] md:px-8 md:pb-4 md:pt-24">
             <p className="label-eyebrow text-brand-deep">Mapa · {SITE.region.island}</p>
             <h1 className="mt-1.5 font-serif font-normal leading-[1.05] track-headline text-ink">
-              <span className="text-[28px] md:hidden">La isla <em className="headline-italic">completa</em></span>
-              <span className="hidden text-headline md:inline">La isla entera, <em className="headline-italic">y lo que tienes al lado</em></span>
+              <span className="text-[28px] md:text-headline">Mapa turístico de <em className="headline-italic">Isla de Margarita</em></span>
             </h1>
             <p className="mt-2 max-w-2xl text-meta text-ink-soft">
               {lugares.length} lugares de la guía y nuestros {casas.length} apartamentos. Toca «A pie desde» uno y verás
-              qué te queda a un kilómetro caminando.
+              los puntos dentro de un radio de un kilómetro. La distancia es en línea recta; confirma el acceso y la ruta antes de ir.
             </p>
+            <p className="mt-3 text-meta text-brand-deep"><Link href="/guia/que-hacer" className="underline">Qué hacer en Margarita</Link> · <Link href="/guia" className="underline">Explorar la guía turística</Link></p>
           </div>
         </header>
 

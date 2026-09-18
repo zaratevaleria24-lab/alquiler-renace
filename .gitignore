@@ -15,3 +15,6 @@ uploads/
 
 # Build aislado para verificación local
 .next-preview/
+
+.next-seo/
+__pycache__/

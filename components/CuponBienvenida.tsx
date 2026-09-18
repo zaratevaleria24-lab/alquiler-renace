@@ -1,5 +1,7 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -17,6 +19,8 @@ const CLAVE = 'mr:cupon';
 export interface AptoCupon { slug: string; nombre: string; sector: string }
 
 export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] }) {
+  const ruta = usePathname();
+  const esGuia = ruta === '/mapa' || ruta === '/guia' || ruta.startsWith('/guia/');
   const [copiado, setCopiado] = useState(false);
   const copiar = async () => { try { await navigator.clipboard.writeText(cupon); setCopiado(true); setTimeout(() => setCopiado(false), 1600); } catch {} };
   const [abierto, setAbierto] = useState(false);
@@ -26,6 +30,7 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
   const reducido = useReducedMotion();
 
   useEffect(() => {
+    if (esGuia) { setAbierto(false); return; }
     // Si ya lo cerró en esta sesión, respetar su decisión al navegar.
     try { if (localStorage.getItem(CLAVE) === 'ok' || sessionStorage.getItem(CLAVE) === 'cerrado') return; } catch {}
     let mostrado = false;
@@ -34,7 +39,7 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
     const t = setTimeout(mostrar, 20000);
     window.addEventListener('scroll', porScroll, { passive: true });
     return () => { clearTimeout(t); window.removeEventListener('scroll', porScroll); };
-  }, []);
+  }, [esGuia]);
 
   // El cierre dura la sesión; obtener el código lo descarta de forma persistente.
   const cerrar = () => { setAbierto(false); try { sessionStorage.setItem(CLAVE, 'cerrado'); } catch {} if (estado === 'ok') { try { localStorage.setItem(CLAVE, 'ok'); } catch {} } };
@@ -49,7 +54,7 @@ export default function CuponBienvenida({ aptos = [] }: { aptos?: AptoCupon[] })
 
   return (
     <AnimatePresence>
-      {abierto && (
+      {abierto && !esGuia && (
         <motion.div key="cupon" role="dialog" aria-modal="true" aria-label="Cupón de bienvenida" className="fixed inset-0 z-[95] flex items-end justify-center bg-ink/30 p-3 backdrop-blur-[2px] md:items-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={cerrar}>
           <motion.div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-md overflow-hidden rounded-panel border border-line bg-white shadow-lift-lg"

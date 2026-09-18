@@ -89,8 +89,8 @@ export default function HubGuia({ baldosas, whatsapp, inicial }: { baldosas: Bal
           pasar unos días y necesita agua, una farmacia, mercado y un taxi. La
           clave interna del grupo sigue siendo 'resolver' — cambiarla tocaría
           categorías, filtros y enlaces compartidos por nada. */}
-      {panel('resolver', 'Día a día', 'Agua, farmacia, mercado, taxi', 0)}
-      {panel('descubrir', 'Descubrir', 'Salir a la isla', 6)}
+      {panel('descubrir', 'Descubrir', 'Salir a la isla', 0)}
+      {panel('resolver', 'Día a día', 'Agua, farmacia, mercado, taxi', 6)}
     </div>
   );
 }

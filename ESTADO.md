@@ -1,12 +1,27 @@
 # ESTADO.md — dónde estamos
 
-> **Corte: 2026-09-16.** Este documento caduca. Los criterios que no caducan
+> **Corte técnico: 2026-09-18.** Los apartados históricos conservan su fecha. Este documento caduca. Los criterios que no caducan
 > están en `MARCA.md`, `PRINCIPIOS.md` y `AGENTES.md`. Si algo de acá no cuadra
 > con la base de datos, la base tiene razón: corrige esta página.
 >
 > La lista viva de tareas **no está acá**: la calcula `lib/pendientes.ts` desde
 > el estado real y se ve en `/admin/pendientes`. Esto es el panorama, no el
 > pendiente del día.
+
+
+## Guía turística y SEO — 2026-09-18
+
+Prioridad del dueño: visitas orgánicas y posicionar la guía de la isla, no
+reservas. Parche de rastreabilidad, metadatos, precisión de fechas/acceso,
+entrada móvil y fotografías. Nuevas /guia/que-hacer y /guia/criterios.
+
+La auditoría previa encontró 5 fichas no alcanzables por enlaces HTML y fotos
+bloqueadas por /api/ en robots. El build aislado corregido tiene 156 URLs en
+sitemap, todas alcanzables, y cero errores en el control HTTP/HTML definido.
+Publicado y verificado: 175 rutas examinadas, 156/156 URLs de sitemap
+alcanzables y cero errores en los controles definidos. La evidencia está en SEO.md y en
+/root/auditorias/margarita-2026-09-18/. No se ha verificado Search Console ni
+se certifican indexación, ranking o Core Web Vitals de usuarios reales.
 
 ## Mejora de reservas y textos — 2026-09-16
 

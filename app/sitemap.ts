@@ -53,6 +53,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     { url: absoluteUrl('/en-venta'), changeFrequency: 'weekly' as const, priority: 0.8 },
     { url: absoluteUrl('/guia'), changeFrequency: 'weekly' as const, priority: 0.9 },
+    { url: absoluteUrl('/guia/que-hacer'), changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: absoluteUrl('/guia/criterios'), changeFrequency: 'monthly' as const, priority: 0.5 },
     ...HUBS.map((h) => ({ url: absoluteUrl(`/guia/${h.slug}`), changeFrequency: 'weekly' as const, priority: 0.8 })),
     ...PAGINAS.map((p) => ({ url: absoluteUrl(`/${p.slug}`), changeFrequency: 'monthly' as const, priority: 0.7 })),
     { url: absoluteUrl('/reservas'), changeFrequency: 'monthly' as const, priority: 0.8 },

@@ -8,6 +8,7 @@ import ListaGuia from '@/components/ListaGuia';
 import FiltroGuia from '@/components/FiltroGuia';
 import HubGuia from '@/components/HubGuia';
 import { HUBS } from '@/lib/guia-hubs';
+import IndiceGuia from '@/components/IndiceGuia';
 import Bienvenida from '@/components/Bienvenida';
 
 // GUÍA TURÍSTICA — /guia
@@ -22,8 +23,8 @@ import Bienvenida from '@/components/Bienvenida';
 
 export const revalidate = 3600;
 const PATH = '/guia';
-const TITULO = 'Guía de Isla de Margarita: playas, comida y servicios';
-const DESCRIPCION = 'Playas, castillos, dónde comer, aventura y servicios a domicilio en la Isla de Margarita, con horarios, cómo llegar y consejos de gente de la isla.';
+const TITULO = 'Guía turística de Isla de Margarita';
+const DESCRIPCION = 'Explora Isla de Margarita: qué hacer, playas, dónde comer y mapa de lugares. Una guía local con consejos, excursiones y servicios para organizar tu visita.';
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ c?: string }> }): Promise<Metadata> {
   const { c } = await searchParams;
@@ -40,6 +41,8 @@ const metadata: Metadata = {
 export default async function GuiaPage({ searchParams }: { searchParams: Promise<{ c?: string; desde?: string }> }) {
   const [sp, lugares, consejos, contacto] = await Promise.all([searchParams, getLugares(), getConsejos(), getContacto()]);
   const cat = CATEGORIAS.find((c) => c.key === sp.c)?.key as Categoria | undefined;
+  // La entrada turística presenta lugares para descubrir antes que proveedores.
+  const ordenados = [...lugares].sort((a, b) => Number(CATEGORIAS.find((c) => c.key === a.categoria)?.grupo === 'resolver') - Number(CATEGORIAS.find((c) => c.key === b.categoria)?.grupo === 'resolver'));
   const visibles = cat ? lugares.filter((l) => enCategoria(l, cat)) : lugares;
   const cuenta = (k: Categoria) => lugares.filter((l) => enCategoria(l, k)).length;
   // Los puntos del mapa se calculaban acá (filtrar + mapear 103 lugares en
@@ -48,7 +51,7 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent('Hola, estoy viendo la guía turística de Margarita Renace y tengo una pregunta: ')}` : null;
   const jsonLd = graph(breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: PATH }]), {
     '@type': 'ItemList', name: TITULO, numberOfItems: lugares.length,
-    itemListElement: lugares.slice(0, 30).map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })),
+    itemListElement: ordenados.map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })),
   });
 
   return (
@@ -61,16 +64,19 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
             <div className="flex items-end justify-between gap-6">
               <div>
                 <p className="label-eyebrow text-brand-deep">Guía turística · {SITE.region.island}</p>
-                {/* En teléfono la cabecera es de app: una pregunta y a los botones.
-                    En escritorio queda el titular editorial de siempre. */}
-                <h1 className="mt-1.5 font-serif font-normal leading-[1.05] track-headline text-ink">
-                  <span className="text-[28px] md:hidden">¿Qué necesitas <em className="headline-italic">hoy</em>?</span>
-                  <span className="hidden text-headline md:inline">Lo mejor de la isla, <em className="headline-italic">contado por gente de acá</em></span>
+                <h1 className="mt-2 font-serif text-[30px] md:text-headline font-normal leading-[1.08] track-headline text-ink">
+                  Guía turística de <em className="headline-italic">Isla de Margarita</em>
                 </h1>
-                <p className="mt-2 text-[13px] text-ink-muted md:hidden">{lugares.length} lugares y servicios · contado por gente de acá</p>
-                <p className="mt-3 hidden max-w-xl text-meta text-ink-soft md:block md:text-body">
-                  {lugares.length} lugares, planes y servicios con datos reales: horario, valoración, cómo llegar y el consejo que te daría un amigo margariteño.
+                <p className="mt-3 max-w-2xl text-meta text-ink-soft md:text-body">
+                  Playas, pueblos, paseos y sabores de Nueva Esparta. Explora {lugares.length} lugares y servicios,
+                  consulta el mapa y elige tu próximo plan con una guía hecha desde Pampatar.
                 </p>
+                <nav aria-label="Organiza tu visita" className="mt-4 flex flex-wrap gap-2">
+                  {[['/guia/que-hacer', 'Qué hacer'], ['/guia/playas', 'Playas'], ['/guia/donde-comer', 'Dónde comer'], ['/mapa', 'Mapa turístico'], ['/guia/servicios', 'Servicios']].map(([href, label]) => (
+                    <Link key={href} href={href} className="inline-flex min-h-[44px] items-center rounded-chip border border-line bg-white px-3.5 text-ui font-medium text-brand-deep hover:border-brand/40">{label}</Link>
+                  ))}
+                </nav>
+                <p className="mt-3 text-ui text-ink-muted">Por Margarita Renace · <Link href="/guia/criterios" className="underline underline-offset-4">Cómo elaboramos esta guía</Link></p>
               </div>
               <img src="/logo-mark-teal.svg" alt="" width={72} height={72} className="hidden h-[72px] w-[72px] shrink-0 opacity-80 sm:block" />
             </div>
@@ -102,12 +108,11 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               🗺 Verlo en el mapa
             </Link>
           </div>
-          {/* Todas las tarjetas van en el HTML; el filtro solo las muestra u
-              oculta (FiltroGuia). Las que no coinciden con ?c= salen ocultas
-              desde el servidor, así el enlace compartido abre bien sin JS. */}
+          {/* Tarjetas paginadas en cliente; el índice mantiene todas las fichas
+              enlazadas en HTML sin descargar todas sus imágenes. */}
           {/* Solo lo que la tarjeta necesita: descripción y consejo recortados,
               una foto, sin horario completo ni resumen de Google. */}
-          <ListaGuia cat={cat ?? ''} lugares={lugares.map((l) => ({
+          <ListaGuia cat={cat ?? ''} lugares={ordenados.map((l) => ({
             ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, direccion: (l.direccion ?? '').slice(0, 90),
             fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })), horario: l.horario,
           }))} />
@@ -122,6 +127,8 @@ export default async function GuiaPage({ searchParams }: { searchParams: Promise
               </Link>
             ))}
           </nav>
+
+          <IndiceGuia lugares={lugares} />
 
           <section aria-labelledby="consejos" className="section-gap">
             <p className="label-eyebrow text-brand-deep">Antes de salir</p>

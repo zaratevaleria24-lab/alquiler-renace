@@ -9,8 +9,7 @@ import { CATEGORIAS, POR_PAGINA, enCategoria, type Lugar } from '@/lib/guia-comu
 // POR QUÉ ASÍ: el servidor pinta SOLO la primera tanda (18 tarjetas) en el
 // HTML —la guía pasó de 1,25 MB a menos de 300 KB— y manda los 100 lugares
 // como datos compactos; el navegador pinta el resto al filtrar o al bajar.
-// Las fichas siguen enlazadas para Google desde el sitemap, los hubs
-// (/guia/playas…), las zonas y cada propiedad. Los chips (FiltroGuia) y el hub
+// IndiceGuia enlaza todas las fichas en HTML sin duplicar sus fotos. Los chips (FiltroGuia) y el hub
 // de teléfono (HubGuia) solo avisan «guia:elegir»; esta lista responde con
 // «guia:categoria» para el mapa, el hub y los chips.
 export default function ListaGuia({ lugares, cat: inicial, escucha = true }: { lugares: Lugar[]; cat: string; escucha?: boolean }) {

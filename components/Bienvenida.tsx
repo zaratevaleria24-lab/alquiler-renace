@@ -26,9 +26,9 @@ export default function Bienvenida({ forzar = false }: { forzar?: boolean }) {
     try { const a = new URLSearchParams(location.search).get('apto'); if (a) sessionStorage.setItem('mr:apto', a); } catch {}
     let vista = false;
     try { vista = sessionStorage.getItem('guia:bienvenida') === '1'; } catch {}
-    // Solo en teléfono (donde llega el QR) y una vez por sesión; en escritorio
-    // la guía sigue como siempre. Si se pide menos movimiento, no hay bienvenida.
-    if (reducido || vista || (!forzar && window.innerWidth >= 768)) { setVisible(false); return; }
+    // Solo al abrir un QR explícito y una vez por sesión. Una entrada desde
+    // buscadores debe mostrar la guía de inmediato, sin una pantalla intermedia.
+    if (!forzar || reducido || vista) { setVisible(false); return; }
     setVisible(true);
     try { sessionStorage.setItem('guia:bienvenida', '1'); } catch {}
     const inicio = performance.now();

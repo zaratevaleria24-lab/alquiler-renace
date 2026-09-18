@@ -11,9 +11,10 @@ import GaleriaInmueble from '@/components/GaleriaInmueble';
 import TarjetaGuia from '@/components/TarjetaGuia';
 import ListaGuia from '@/components/ListaGuia';
 import { HUBS, hubDe, hubsDeCategoria } from '@/lib/guia-hubs';
-import { getAjustes } from '@/lib/settings';
 import IconoCategoria from '@/components/IconosGuia';
 import IconoWhatsApp from '@/components/IconoWhatsApp';
+import IndiceGuia from '@/components/IndiceGuia';
+import { descripcionGuia, fechaDatosGuia, requiereCruceMaritimo } from '@/lib/guia-seo';
 import VolverGuia from '@/components/VolverGuia';
 
 // Ficha de un lugar de la guía. Orden pensado para el teléfono: fotos, los
@@ -27,15 +28,15 @@ export async function generateStaticParams() { return [...HUBS.map((h) => ({ slu
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const hub = hubDe(slug);
-  if (hub) return { title: hub.titulo, description: hub.descripcion, alternates: { canonical: `/guia/${hub.slug}` }, openGraph: { type: 'website', url: absoluteUrl(`/guia/${hub.slug}`), siteName: SITE.name, title: hub.titulo, description: hub.descripcion, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: hub.titulo }] } };
+  if (hub) return { title: hub.titulo, description: hub.descripcion, alternates: { canonical: `/guia/${hub.slug}` }, openGraph: { type: 'website', url: absoluteUrl(`/guia/${hub.slug}`), siteName: SITE.name, title: hub.titulo, description: hub.descripcion, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: hub.titulo }] }, twitter: { card: 'summary_large_image', title: hub.titulo, description: hub.descripcion, images: ['/opengraph-image'] } };
   const l = await getLugar(slug);
   if (!l) return { title: 'Lugar no disponible' };
   const path = `/guia/${l.slug}`;
   // Corto: la plantilla del sitio antepone «Margarita Renace · ».
-  const title = `${l.nombre} · ${categoriaLabel(l.categoria)} en Isla de Margarita`;
-  const description = `${l.nombre}: ${l.descripcion.replace(/\s+/g, ' ')}`.slice(0, 158);
+  const title = /margarita/i.test(l.nombre) ? l.nombre : `${l.nombre}: guía de Margarita`;
+  const description = descripcionGuia(l.nombre, l.descripcion);
   const img = portadaDe(l)?.src;
-  const imgAbs = img ? (img.startsWith('/api/') ? absoluteUrl(img) : absoluteUrl(img)) : '/opengraph-image';
+  const imgAbs = absoluteUrl(img || '/opengraph-image');
   return {
     title, description, alternates: { canonical: path },
     openGraph: { type: 'article', url: absoluteUrl(path), siteName: SITE.name, title, description, images: [{ url: imgAbs, alt: l.nombre }] },
@@ -46,14 +47,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function LugarPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (hubDe(slug)) return <PaginaHub slug={slug} />;
-  const [l, todos, contacto, zonas, ajustes] = await Promise.all([getLugar(slug), getLugares(), getContacto(), getZones(), getAjustes()]);
+  const [l, todos, contacto, zonas] = await Promise.all([getLugar(slug), getLugares(), getContacto(), getZones()]);
   if (!l) notFound();
-  const autora = (ajustes as unknown as Record<string, string>).representante || 'el equipo de Margarita Renace';
 
   const path = `/guia/${l.slug}`;
   const fotos = galeriaDe(l);
-  const hoy = horarioHoy(l);
-  const irA = l.latitud != null && l.longitud != null
+  const maritimo = requiereCruceMaritimo(l.slug);
+  const fechaDatos = fechaDatosGuia(l.datosActualizados);
+  const hoy = maritimo ? null : horarioHoy(l);
+  const categoriaHub = hubsDeCategoria(l.categoria)[0];
+  const categoriaHref = categoriaHub ? `/guia/${categoriaHub.slug}` : '/guia';
+  const irA = maritimo
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.nombre + ' Nueva Esparta')}`
+    : l.latitud != null && l.longitud != null
     ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}&travelmode=driving`
     : l.mapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.nombre + ' Isla de Margarita')}`;
   // Instagram SOLO si el lugar tiene el suyo. Antes, cuando no lo tenía, el
@@ -79,8 +85,10 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
   const relacionados = todos.filter((x) => x.categoria === l.categoria && x.slug !== l.slug).slice(0, 3);
   // Preguntas frecuentes reales, armadas con los datos de la ficha.
   const faq: { q: string; a: string }[] = [
-    l.horario?.length ? { q: `¿Cuál es el horario de ${l.nombre}?`, a: `${hoy ? `Hoy: ${hoy}. ` : ''}Horario según Google: ${l.horario.join('; ')}.` } : null,
-    { q: `¿Cómo llegar a ${l.nombre}?`, a: `${l.direccion ? `Queda en ${l.direccion.replace(/^[A-Z0-9]{4,}\+[A-Z0-9]{2,3},?\s*/, '')}${l.municipio ? `, municipio ${l.municipio}` : ''}. ` : ''}${zonaCercana ? `Desde nuestros apartamentos en ${zonaCercana.name} ` : 'Desde Pampatar o Porlamar '}se llega en carro o taxi; el botón «Cómo llegar» abre la ruta en Google Maps.` },
+    !maritimo && l.horario?.length ? { q: `¿Cuál es el horario de ${l.nombre}?`, a: `${hoy ? `Hoy: ${hoy}. ` : ''}Horario según Google: ${l.horario.join('; ')}.` } : null,
+    { q: `¿Cómo llegar a ${l.nombre}?`, a: maritimo
+      ? 'Este lugar requiere un traslado marítimo desde Margarita. Confirma con el operador el puerto de salida, el regreso y las condiciones del mar. El mapa muestra el destino, no una ruta para conducir hasta él.'
+      : `${sinPlusCode(l.direccion) ? `Ubicación: ${sinPlusCode(l.direccion)}. ` : ''}Consulta el punto en el mapa y confirma el acceso antes de salir. La ruta por carretera puede terminar antes del recorrido a pie o en embarcación.` },
     l.costo ? { q: `¿Cuánto cuesta ${l.nombre}?`, a: l.costo } : null,
     l.mejorMomento ? { q: `¿Cuál es el mejor momento para ir a ${l.nombre}?`, a: `${l.mejorMomento}.${l.duracion ? ` Calcula ${l.duracion.toLowerCase()}.` : ''}` } : null,
     l.telefono || l.instagram ? { q: `¿Cómo contacto a ${l.nombre}?`, a: `${l.telefono ? `Teléfono ${l.telefono}. ` : ''}${l.instagram ? `Instagram @${l.instagram.replace(/^@/, '')}. ` : ''}${l.web ? `Web: ${l.web}.` : ''}`.trim() } : null,
@@ -98,13 +106,14 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
     {
       '@type': tipoSchema, name: l.nombre, description: l.descripcion, url: absoluteUrl(path),
       image: fotos.map((f) => absoluteUrl(f.src)),
-      ...(l.latitud != null ? { geo: { '@type': 'GeoCoordinates', latitude: l.latitud, longitude: l.longitud } } : {}),
+      ...(l.latitud != null && l.longitud != null ? { geo: { '@type': 'GeoCoordinates', latitude: l.latitud, longitude: l.longitud } } : {}),
       address: { '@type': 'PostalAddress', addressLocality: l.municipio || l.zone || 'Isla de Margarita', addressRegion: SITE.region.state, addressCountry: SITE.region.country },
       ...(l.telefono ? { telephone: l.telefono } : {}), ...(l.web ? { sameAs: [l.web] } : {}),
-      isAccessibleForFree: /gratis/i.test(l.costo),
+      ...(/^(gratis|gratuito|entrada libre)\b/i.test(l.costo.trim()) ? { isAccessibleForFree: true } : {}),
       touristType: ['Familias', 'Parejas', 'Viajeros de Venezuela y la diáspora'],
-      ...(l.horario?.length ? { openingHours: l.horario } : {}),
-      ...(l.rating != null && l.resenas ? {} : {}),
+      // El horario de Places está en lenguaje natural, no en formato schema.org.
+      // Se conserva visible; no se emite como openingHours inválido.
+
     },
     ...(faq.length ? [{ '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) }] : []),
   );
@@ -117,12 +126,12 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
           {/* Volver primero y grande; la miga de pan debajo y solo en pantalla
               ancha. En el teléfono, dos enlaces en gris de 13 px separados por
               una barra no son una forma de navegar: son adorno. Ver VolverGuia. */}
-          <VolverGuia href={`/guia?c=${l.categoria}`} texto={(CATEGORIAS.find((c) => c.key === l.categoria)?.plural ?? 'la guía').toLowerCase()} />
+          <VolverGuia href={categoriaHref} texto={(CATEGORIAS.find((c) => c.key === l.categoria)?.plural ?? 'la guía').toLowerCase()} />
           <nav aria-label="Ruta de navegación" className="mt-1 hidden text-ui md:block">
             <ol className="flex flex-wrap items-center gap-2 text-ink-muted">
               <li><Link href="/guia" className="hover:text-brand hover:underline underline-offset-4">Guía</Link></li>
               <li aria-hidden="true">/</li>
-              <li><Link href={`/guia?c=${l.categoria}`} className="hover:text-brand hover:underline underline-offset-4">{CATEGORIAS.find((c) => c.key === l.categoria)?.plural}</Link></li>
+              <li><Link href={categoriaHref} className="hover:text-brand hover:underline underline-offset-4">{CATEGORIAS.find((c) => c.key === l.categoria)?.plural}</Link></li>
             </ol>
           </nav>
           <p className="label-eyebrow mt-5 flex items-center gap-1.5 text-brand-deep"><IconoCategoria cat={l.categoria} className="h-4 w-4" />{categoriaLabel(l.categoria)}{l.municipio ? ` · ${l.municipio}` : ''}{l.destacado ? ' · Imperdible' : ''}</p>
@@ -134,7 +143,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
         </header>
 
         <main className="max-w-5xl mx-auto px-5 py-7 md:px-8 md:py-10">
-          <GaleriaInmueble fotos={fotos} titulo={l.nombre} />
+          <GaleriaInmueble fotos={fotos} titulo={l.nombre} guia />
           {fotos[0]?.credito && <p className="mt-2 text-ui text-ink-faint">{fotos[0].credito}</p>}
 
           <div className="mt-10 grid gap-10 md:grid-cols-[1fr_20rem] lg:gap-14">
@@ -165,7 +174,8 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
                 </aside>
               )}
 
-              <p className="mt-6 text-ui text-ink-muted">Escrito por {autora}, anfitriona en Pampatar · datos de horario y valoración de Google · actualizado {new Date(l.datosActualizados ?? Date.now()).toLocaleDateString('es-VE', { month: 'long', year: 'numeric' })}.</p>
+              <p className="mt-6 text-ui text-ink-muted">Guía de {SITE.name}, desde Pampatar. {fechaDatos ? `Datos de Google sincronizados el ${fechaDatos}.` : 'Fecha de actualización de datos pendiente.'} Esta fecha no acredita una visita al lugar. <Link href="/guia/criterios" className="underline underline-offset-4">Fuentes y criterios editoriales</Link>.</p>
+              {maritimo && <p className="mt-3 text-meta text-ink-soft">El traslado es por mar. Los horarios de salida y regreso dependen del operador y del estado del mar; no equivalen al horario de apertura del destino.</p>}
 
               {faq.length > 0 && (
                 <section aria-labelledby="faq" className="mt-8">
@@ -180,7 +190,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
                 <p className="mt-6 text-meta text-ink-soft">Más en la guía: {hubsDeCategoria(l.categoria).map((h, i) => <span key={h.slug}>{i > 0 ? ' · ' : ''}<Link href={`/guia/${h.slug}`} className="text-brand-deep underline underline-offset-4">{h.h1.join(' ')}</Link></span>)}.</p>
               )}
 
-              {l.horario && l.horario.length > 0 && (
+              {!maritimo && l.horario && l.horario.length > 0 && (
                 <details className="mt-8 rounded-card border border-line bg-white">
                   <summary className="cursor-pointer px-5 py-4 text-body font-semibold text-brand-deep [&::-webkit-details-marker]:hidden">Horario de la semana</summary>
                   <ul className="grid gap-1 px-5 pb-5 text-meta text-ink-soft sm:grid-cols-2">
@@ -191,7 +201,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
             </div>
 
             <aside className="h-fit space-y-3 md:sticky md:top-28">
-              <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid w-full justify-center"><Navigation className="h-4 w-4" aria-hidden="true" />Cómo llegar</a>
+              <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid w-full justify-center"><Navigation className="h-4 w-4" aria-hidden="true" />{maritimo ? 'Ver destino en el mapa' : 'Cómo llegar'}</a>
               {waLugar && (
                 <a href={waLugar} target="_blank" rel="noopener noreferrer" className="flex min-h-[46px] w-full items-center justify-center gap-2 rounded-control border border-line bg-white px-4 text-center text-meta font-medium text-brand-deep transition-colors hover:border-brand/40">
                   <IconoWhatsApp className="h-4 w-4 shrink-0" /><span className="truncate">Escribir a {l.nombre.split(/[—·]/)[0].trim()}</span>
@@ -242,7 +252,7 @@ export default async function LugarPage({ params }: { params: Promise<{ slug: st
             ) : (
               <>
                 {waLugar && <a href={waLugar} target="_blank" rel="noopener noreferrer" aria-label={`Escribir a ${l.nombre} por WhatsApp`} title="WhatsApp" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control border border-line text-brand-deep"><IconoWhatsApp className="h-4 w-4" /></a>}
-                <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><Navigation className="h-4 w-4" aria-hidden="true" />Ir</a>
+                <a href={irA} target="_blank" rel="noopener noreferrer" className="btn-solid shrink-0"><Navigation className="h-4 w-4" aria-hidden="true" />{maritimo ? 'Ver mapa' : 'Ir'}</a>
               </>
             )}
           </div>
@@ -262,7 +272,7 @@ async function PaginaHub({ slug }: { slug: string }) {
   const wa = contacto.whatsapp ? `https://wa.me/${contacto.whatsapp}?text=${encodeURIComponent(`Hola, estoy viendo la guía de ${hub.h1.join(' ').toLowerCase()} y quiero reservar un apartamento.`)}` : null;
   const jsonLd = graph(
     breadcrumbSchema([{ name: 'Inicio', path: '/' }, { name: 'Guía turística', path: '/guia' }, { name: hub.h1.join(' '), path }]),
-    { '@type': 'ItemList', name: hub.titulo, numberOfItems: propios.length, itemListElement: propios.slice(0, 40).map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })) },
+    { '@type': 'ItemList', name: hub.titulo, numberOfItems: propios.length, itemListElement: propios.map((l, i) => ({ '@type': 'ListItem', position: i + 1, url: absoluteUrl(`/guia/${l.slug}`), name: l.nombre })) },
   );
   return (
     <>
@@ -273,14 +283,16 @@ async function PaginaHub({ slug }: { slug: string }) {
             <nav aria-label="Ruta de navegación" className="text-ui"><ol className="flex flex-wrap items-center gap-2 text-ink-muted"><li><Link href="/guia" className="hover:text-brand">Guía</Link></li><li aria-hidden="true">/</li><li className="text-ink">{hub.h1.join(' ')}</li></ol></nav>
             <h1 className="mt-4 font-serif text-headline font-normal leading-[1.05] track-headline text-ink">{hub.h1[0]} <em className="headline-italic">{hub.h1[1]}</em></h1>
             <div className="mt-5 max-w-2xl space-y-3 text-body leading-relaxed text-ink-soft">{hub.intro.map((p) => <p key={p.slice(0, 20)}>{p}</p>)}</div>
+            <p className="mt-4 text-meta text-ink-muted"><Link href="/guia/que-hacer" className="text-brand-deep underline underline-offset-4">Qué hacer y cómo organizar tus días</Link> · <Link href="/guia/criterios" className="underline underline-offset-4">Fuentes y criterios</Link></p>
             <p className="mt-4 text-meta text-ink-muted">{propios.length} lugares · {HUBS.filter((h) => h.slug !== hub.slug).map((h, i) => <span key={h.slug}>{i > 0 ? ' · ' : 'También: '}<Link href={`/guia/${h.slug}`} className="text-brand-deep underline underline-offset-4">{h.h1.join(' ')}</Link></span>)}</p>
           </div>
         </header>
         <main className="max-w-6xl mx-auto px-5 py-8 md:px-8 md:py-10">
           <ListaGuia cat="" escucha={false} lugares={propios.map((l) => ({ ...l, descripcion: l.descripcion.slice(0, 180), consejo: l.consejo.slice(0, 180), resumenGoogle: null, fotos: l.fotos.slice(0, 1), fotosGoogle: l.fotosGoogle.slice(0, 1).map((f) => ({ name: '', autor: f.autor })) }))} />
+          <IndiceGuia lugares={propios} />
           <section className="section-gap rounded-panel bg-luz border border-line p-7 md:p-10">
             <h2 className="font-serif text-headline font-normal track-headline text-ink">¿Te quedas en la isla?</h2>
-            <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar (Los Geranios, La Caranta y Playa El Ángel) desde US$65 la noche, con precio claro y trato directo. Todo lo de esta guía queda cerca.</p>
+            <p className="mt-3 max-w-2xl text-body text-ink-soft">Apartamentos en Pampatar (Los Geranios, La Caranta y Playa El Ángel) desde US$65 la noche, con precio claro y trato directo. Consulta el mapa para planificar los traslados desde Pampatar.</p>
             <div className="mt-6 flex flex-wrap gap-3"><Link href="/" className="btn-solid">Ver hospedajes</Link>{wa && <a href={wa} rel="noopener" className="inline-flex min-h-[46px] items-center rounded-control border border-line bg-white px-5 text-meta font-medium text-brand-deep hover:border-brand/40">Reservar por WhatsApp</a>}</div>
           </section>
         </main>

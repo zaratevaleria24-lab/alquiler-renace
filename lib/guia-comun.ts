@@ -147,8 +147,7 @@ export function galeriaDe(l: Lugar): { src: string; alt: string; credito: string
 /** Horario de hoy, si Places lo trajo. */
 export function horarioHoy(l: Lugar): string | null {
   if (!l.horario?.length) return null;
-  const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  const hoy = dias[new Date().getDay()];
+  const hoy = new Intl.DateTimeFormat('es-VE', { weekday: 'long', timeZone: 'America/Caracas' }).format(new Date());
   const linea = l.horario.find((h) => h.toLowerCase().startsWith(hoy));
   return linea ? linea.replace(/^[^:]+:\s*/, '') : null;
 }

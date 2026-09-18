@@ -245,3 +245,24 @@ export $(grep -h '^POSTGRES_URL=' .env | head -1) && npx tsx scripts/guia-foto-i
    cacheado el `0.webp` y todavía no hay token de purga (`ESTADO.md`). La
    segunda versión del emblema se publicó como `1.webp`. Mientras no exista la
    purga, **una foto corregida va con nombre nuevo**.
+
+## Entrada turística y confianza editorial — 2026-09-18
+
+La guía ahora se presenta por destino e intención: /guia, /guia/que-hacer,
+playas, comida, aventura y mapa. /guia/criterios explica procedencia de datos y
+correcciones. `IndiceGuia` mantiene enlaces HTML a todas las fichas publicadas,
+sin cargar todas sus fotos ni depender de «Ver más» para descubrirlas.
+
+La bienvenida se reserva para ?desde=qr. El cupón de alquiler no interrumpe
+la guía ni el mapa. La clasificación inicial pone descubrir antes de servicios;
+los filtros, proveedores y acceso por QR permanecen disponibles.
+
+`lib/guia-seo.ts` centraliza descripción sin palabra cortada, presentación de
+fecha real y destinos con cruce marítimo. Una sincronización de Google no
+acredita revisión editorial ni visita del equipo. El mapa no garantiza una ruta
+por carretera o a pie. Coche, Cubagua y Los Frailes se distinguen en fichas y
+tarjetas; el catálogo todavía requiere revisión humana de vigencia y acceso.
+
+Galería de guía: variantes pequeñas y originales al abrir el visor. No añadir
+fechas artificiales, certificados de operadores ni precios deducidos para
+rellenar datos faltantes. Ver SEO.md para el control automático y el informe.

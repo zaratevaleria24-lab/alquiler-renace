@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Instagram, MapPin, Navigation, Phone, Star } from 'lucide-react';
 import { CATEGORIAS, categoriaLabel, categoriasDe, distanciaAPampatar, esEnlaceWa, esServicio, horarioHoy, miniatura, portadaDe, sinPlusCode, waDeTelefono, type Lugar } from '@/lib/guia-comun';
+import { requiereCruceMaritimo } from '@/lib/guia-seo';
 import IconoCategoria from '@/components/IconosGuia';
 import IconoWhatsApp from '@/components/IconoWhatsApp';
 
@@ -21,20 +22,21 @@ import IconoWhatsApp from '@/components/IconoWhatsApp';
 export default function TarjetaGuia({ l, prioridad = false, oculta = false, paginada = false }: { l: Lugar; prioridad?: boolean; oculta?: boolean; paginada?: boolean }) {
   const foto = portadaDe(l);
   const cat = CATEGORIAS.find((c) => c.key === l.categoria);
-  const hoy = horarioHoy(l);
+  const maritimo = requiereCruceMaritimo(l.slug);
+  const hoy = maritimo ? null : horarioHoy(l);
   const servicio = esServicio(l.categoria);
   const numeroWa = waDeTelefono(l.telefono);
   const wa = numeroWa ? `https://wa.me/${numeroWa}` : esEnlaceWa(l.web) ? l.web : null;
   const web = l.web && !esEnlaceWa(l.web) ? l.web : null;
   const ig = l.instagram ? `https://www.instagram.com/${l.instagram}/` : null;
-  const ir = l.latitud != null ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}` : l.mapsUrl;
+  const ir = maritimo ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.nombre + ' Nueva Esparta')}` : l.latitud != null && l.longitud != null ? `https://www.google.com/maps/dir/?api=1&destination=${l.latitud},${l.longitud}` : l.mapsUrl;
   const donde = [sinPlusCode(l.direccion), l.municipio && !l.direccion?.includes(l.municipio) ? l.municipio : ''].filter(Boolean).join(' · ');
   const acciones = [
     wa && { href: wa.includes('wa.me/') && !wa.includes('text=') ? `${wa}?text=${encodeURIComponent(`Hola, vengo de la guía de Margarita Renace y quisiera información sobre ${l.nombre}.`)}` : wa, I: IconoWhatsApp, t: 'WhatsApp', ext: true, aliado: true },
     l.telefono && { href: `tel:${l.telefono.replace(/[^\d+]/g, '')}`, I: Phone, t: 'Llamar', ext: false },
     ig && { href: ig, I: Instagram, t: 'Instagram', ext: true },
     web && !ig && { href: web, I: null, t: 'Web', ext: true },
-    ir && { href: ir, I: Navigation, t: 'Ir', ext: true },
+    ir && { href: ir, I: Navigation, t: maritimo ? 'Mapa' : 'Ir', ext: true },
   ].filter(Boolean).slice(0, 4) as { href: string; I: typeof Star | null; t: string; ext: boolean; aliado?: boolean }[];
   // Si la persona llegó por el QR de un apartamento (?apto=), el mensaje al
   // aliado dice dónde está hospedada: así el aliado sabe que viene por canal
@@ -60,7 +62,7 @@ export default function TarjetaGuia({ l, prioridad = false, oculta = false, pagi
         <Link href={href} className="relative block h-[88px] w-[88px] shrink-0 overflow-hidden rounded-card bg-luz sm:h-24 sm:w-24 md:aspect-[16/10] md:h-auto md:w-full md:rounded-none">
           {foto ? (
             <picture>
-              <source media="(min-width: 768px)" srcSet={foto.src} />
+              <source media="(min-width: 768px)" srcSet={miniatura(foto.src)} />
               <img src={miniatura(foto.src)} alt={`${l.nombre}, Isla de Margarita`} width={96} height={96} loading={prioridad ? 'eager' : 'lazy'} fetchPriority={prioridad ? 'high' : undefined} decoding="async" className="h-full w-full object-cover" />
             </picture>
           ) : (

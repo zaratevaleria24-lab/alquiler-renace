@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { miniatura } from '@/lib/guia-comun';
 import { ChevronLeft, ChevronRight, Images, X } from 'lucide-react';
 
 // Galería de una ficha: mosaico (1 grande + 4 chicas, el patrón que Airbnb
@@ -12,17 +13,19 @@ import { ChevronLeft, ChevronRight, Images, X } from 'lucide-react';
 
 export interface FotoGaleria { src: string; alt: string }
 
-export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[]; titulo: string }) {
+export default function GaleriaInmueble({ fotos, titulo, guia = false }: { fotos: FotoGaleria[]; titulo: string; guia?: boolean }) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [i, setI] = useState(0);
+  const [abierto, setAbierto] = useState(false);
   const toque = useRef<number | null>(null);
   const n = fotos.length;
 
   const abrir = useCallback((idx: number) => {
     setI(idx);
+    setAbierto(true);
     dialogo.current?.showModal();
   }, []);
-  const cerrar = useCallback(() => dialogo.current?.close(), []);
+  const cerrar = useCallback(() => { dialogo.current?.close(); setAbierto(false); }, []);
   const ir = useCallback((d: number) => setI((v) => (v + d + n) % n), [n]);
 
   useEffect(() => {
@@ -39,9 +42,9 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
 
   // Precarga la siguiente y la anterior mientras se mira la actual.
   useEffect(() => {
-    if (n < 2) return;
+    if (!abierto || n < 2) return;
     for (const k of [(i + 1) % n, (i - 1 + n) % n]) { const img = new Image(); img.src = fotos[k].src; }
-  }, [i, n, fotos]);
+  }, [i, n, fotos, abierto]);
 
   if (n === 0) {
     return (
@@ -65,13 +68,14 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
             aria-label="Ver foto 1 en grande"
           >
             <img
-              src={fotos[0].src}
+              src={guia ? miniatura(fotos[0].src) : fotos[0].src}
+              srcSet={guia ? `${miniatura(fotos[0].src)} 480w, ${fotos[0].src} 1200w` : undefined}
               alt={fotos[0].alt}
               width={1200}
               height={900}
               fetchPriority="high"
               decoding="async"
-              sizes="(min-width: 768px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               className="aspect-[4/3] h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
             />
             <span className="pointer-events-none absolute inset-0 bg-ink/0 transition-colors group-hover:bg-ink/10" />
@@ -101,7 +105,7 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
             {fotos.map((f, k) => (
               <li key={f.src} className="shrink-0">
                 <button type="button" onClick={() => abrir(k)} className="block overflow-hidden rounded-control border border-line" aria-label={`Ver foto ${k + 1}`}>
-                  <img src={f.src} alt="" width={112} height={84} loading="lazy" decoding="async" className="h-[68px] w-[92px] object-cover" />
+                  <img src={guia ? miniatura(f.src) : f.src} alt="" width={112} height={84} loading="lazy" decoding="async" className="h-[68px] w-[92px] object-cover" />
                 </button>
               </li>
             ))}
@@ -122,6 +126,7 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
       {/* Visor */}
       <dialog
         ref={dialogo}
+        onClose={() => setAbierto(false)}
         className="m-0 h-dvh max-h-none w-screen max-w-none bg-ink/95 p-0 text-white backdrop:bg-ink/90 open:flex open:flex-col"
         onClick={(e) => { if (e.target === dialogo.current) cerrar(); }}
         onTouchStart={(e) => { toque.current = e.touches[0].clientX; }}
@@ -142,7 +147,7 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
         </div>
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 md:px-16">
-          <img key={fotos[i].src} src={fotos[i].src} alt={fotos[i].alt} className="max-h-full max-w-full rounded-control object-contain" decoding="async" />
+          {abierto && <img key={fotos[i].src} src={fotos[i].src} alt={fotos[i].alt} className="max-h-full max-w-full rounded-control object-contain" decoding="async" />}
           {n > 1 && (
             <>
               <button type="button" onClick={() => ir(-1)} className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/25 md:left-4 md:h-12 md:w-12" aria-label="Foto anterior">
@@ -160,7 +165,7 @@ export default function GaleriaInmueble({ fotos, titulo }: { fotos: FotoGaleria[
             {fotos.map((f, k) => (
               <li key={f.src} className="shrink-0">
                 <button type="button" onClick={() => setI(k)} className={`block overflow-hidden rounded-control border-2 transition-all ${k === i ? 'border-white opacity-100' : 'border-transparent opacity-50 hover:opacity-90'}`} aria-label={`Ir a la foto ${k + 1}`} aria-current={k === i}>
-                  <img src={f.src} alt="" width={96} height={72} loading="lazy" decoding="async" className="h-14 w-[76px] object-cover" />
+                  <img src={guia ? miniatura(f.src) : f.src} alt="" width={96} height={72} loading="lazy" decoding="async" className="h-14 w-[76px] object-cover" />
                 </button>
               </li>
             ))}
